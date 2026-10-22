@@ -95,7 +95,7 @@ jobs:
               if manifest['snapshot_id'] != row['snapshot_id'] or manifest['source_id'] != row['source_id'] or manifest['mode'] != row['mode']:
                   raise SystemExit('Restored snapshot disagrees with catalog')
               manifests.append(str(path))
-          Path('build-inputs.txt').write_text('\n'.join(manifests) + '\n')
+          Path('data/build-inputs.txt').write_text('\n'.join(manifests) + '\n')
           PY
       - name: Build canonical YAML and package SQLite offline
         run: |
@@ -104,7 +104,7 @@ jobs:
           from pathlib import Path
 
           command = ['uv', 'run', '--locked', 'sentence-db', 'build', '--output', 'build/corpus']
-          for manifest in Path('build-inputs.txt').read_text().splitlines():
+          for manifest in Path('data/build-inputs.txt').read_text().splitlines():
               command += ['--snapshot', manifest]
           subprocess.run(command, check=True)
           subprocess.run(['uv', 'run', '--locked', 'sentence-db', 'package', '--build', 'build/corpus', '--output', 'dist/corpus'], check=True)
