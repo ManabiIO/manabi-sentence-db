@@ -1,0 +1,59 @@
+[tools]
+python = "3.12.14"
+uv = "0.12.23"
+
+[tasks.setup]
+description = "Install the locked Python environment"
+run = "uv sync --locked"
+
+[tasks.check]
+description = "Validate sources, lint Python, and run offline regressions"
+run = [
+  "uv run --locked ruff check .",
+  "uv run --locked sentence-db validate-config",
+  "uv run --locked pytest -q",
+]
+
+[tasks.demo]
+description = "Complete offline demo with synthetic sentences"
+run = "uv run --locked sentence-db demo"
+
+[tasks.sources]
+description = "List reviewed sources without network access"
+run = "uv run --locked sentence-db sources"
+
+[tasks.snapshot]
+description = "Explicit upstream acquisition; pass --source, --output and optional --mode/--date"
+run = "uv run --locked sentence-db snapshot"
+
+[tasks.verify-snapshot]
+description = "Verify an existing raw snapshot offline"
+run = "uv run --locked sentence-db verify-snapshot"
+
+[tasks.snapshot-pack]
+description = "Split raw snapshots into immutable transport parts offline"
+run = "uv run --locked sentence-db snapshot-pack"
+
+[tasks.snapshot-unpack]
+description = "Restore already downloaded transport parts offline"
+run = "uv run --locked sentence-db snapshot-unpack"
+
+[tasks.build]
+description = "Build canonical YAML from existing snapshots; never downloads source data"
+run = "uv run --locked sentence-db build"
+
+[tasks.build-db]
+description = "Compile canonical YAML to SQLite offline"
+run = "uv run --locked sentence-db build-db"
+
+[tasks.package]
+description = "Build per-source SQLite and package public YAML ZIP + SQLite Zstandard assets"
+run = "uv run --locked sentence-db package"
+
+[tasks.verify-build]
+description = "Verify a corpus build offline"
+run = "uv run --locked sentence-db verify-build"
+
+[tasks.build-normalized-db]
+description = "Compile normalized JSONL ZIP into deduplicated relational SQLite"
+run = "uv run --locked sentence-db build-normalized-db"

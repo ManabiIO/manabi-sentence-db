@@ -1,0 +1,36 @@
+schema_version: 1
+id: tatoeba-ja
+title: Tatoeba Japanese sentences
+language: ja
+adapter: tatoeba
+status: active
+homepage: https://tatoeba.org/
+license:
+  id: CC-BY-2.0-FR
+  url: https://creativecommons.org/licenses/by/2.0/fr/
+attribution:
+  text: Tatoeba contributors; individual sentence ownership and history are linked in each record.
+  url: https://tatoeba.org/
+license_evidence:
+  - https://en.wiki.tatoeba.org/articles/show/using-the-tatoeba-corpus
+  - https://en.wiki.tatoeba.org/articles/show/faq
+acquisition:
+  type: tatoeba-exports
+  source_language: jpn
+  export_index: https://downloads.tatoeba.org/exports/per_language/jpn/
+  files:
+    - role: sentences-jpn
+      url: https://downloads.tatoeba.org/exports/per_language/jpn/jpn_sentences_detailed.tsv.bz2
+    - role: tags
+      url: https://downloads.tatoeba.org/exports/per_language/jpn/jpn_tags.tsv.bz2
+    - role: sentences-eng
+      optional: true
+      url: https://downloads.tatoeba.org/exports/per_language/eng/eng_sentences_detailed.tsv.bz2
+    - role: links
+      optional: true
+      url: https://downloads.tatoeba.org/exports/per_language/jpn/jpn-eng_links.tsv.bz2
+notes:
+  - Sentence text uses CC BY 2.0 France. Audio licenses are separate and audio is not imported.
+  - Exported usernames identify current owners, not necessarily sole authors; sentence pages retain contributor histories.
+  - Translation links are direct only and do not prove translation direction or human/machine generation.
+  - Weekly export URLs are mutable; explicit snapshots pin downloaded bytes and preserve retrieval metadata.

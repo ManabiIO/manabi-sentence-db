@@ -1,0 +1,38 @@
+[project]
+name = "manabi-sentence-db"
+version = "0.1.0"
+description = "Reproducible, attributed multilingual example-sentence corpus builds"
+readme = "README.md"
+requires-python = ">=3.12"
+license = "MIT"
+dependencies = [
+  "PyYAML>=6.0.2,<7",
+  "jsonschema>=4.23,<5",
+  "mwparserfromhell>=0.7,<0.8",
+  "defusedxml>=0.7.1,<0.8",
+  "zstandard>=0.23,<1",
+]
+
+[project.scripts]
+sentence-db = "manabi_sentence_db.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=8.3,<10", "ruff>=0.12,<1"]
+
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/manabi_sentence_db"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]
