@@ -12,7 +12,14 @@ import pytest
 import yaml
 import zstandard
 
-from manabi_sentence_db.build import build_corpus, canonical_document, iter_records, verify_build
+from manabi_sentence_db import build as build_module
+from manabi_sentence_db.build import (
+    ShardWriter,
+    build_corpus,
+    canonical_document,
+    iter_records,
+    verify_build,
+)
 from manabi_sentence_db.cli import main
 from manabi_sentence_db.database import build_database
 from manabi_sentence_db.demo import create_demo_snapshot
@@ -98,6 +105,45 @@ def test_existing_artifacts_are_not_replaced(tmp_path):
     with pytest.raises(DataError, match="already exists"):
         build_database(output, database)
     assert database.read_bytes() == b"preserve this file"
+
+
+@pytest.mark.parametrize("damage_pending_bytes", [False, True])
+def test_shards_publish_only_complete_expected_bytes(tmp_path, damage_pending_bytes):
+    seed = make_build(tmp_path / "seed")
+    record = next(iter_records(seed, verify_build(seed)))
+    root = tmp_path / "writing"
+    writer = ShardWriter(root, "demo-ja", "ja", 4 * 1024 * 1024, 500)
+    name, _ = writer.append(record)
+    assert not (root / name).exists()
+    if damage_pending_bytes:
+        writer.handle.flush()
+        writer.temporary.write_bytes(b"---\n")
+        with pytest.raises(DataError, match="Shard bytes changed while writing"):
+            writer.close()
+        assert not (root / name).exists()
+        assert not writer.entries
+    else:
+        writer.close()
+        assert (root / name).is_file()
+        assert sha256_file(root / name) == writer.entries[0]["sha256"]
+    writer.abort()
+    writer.abort()
+    assert not list(root.rglob("*.part"))
+
+
+def test_later_shard_damage_prevents_build_publication(tmp_path, monkeypatch):
+    original = build_module.write_json
+
+    def damage_completed_shard(path, value):
+        original(path, value)
+        if path.name == "catalog.json":
+            (path.parent / value["shards"][0]["path"]).write_bytes(b"---\n")
+
+    monkeypatch.setattr(build_module, "write_json", damage_completed_shard)
+    with pytest.raises(DataError, match="Missing or corrupt build artifact"):
+        make_build(tmp_path)
+    assert not (tmp_path / "corpus").exists()
+    assert not list(tmp_path.glob(".corpus-*"))
 
 
 def raw_document():

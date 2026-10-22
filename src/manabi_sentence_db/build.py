@@ -208,6 +208,8 @@ class ShardWriter:
         self.max_documents = max_documents
         self.entries: list[dict] = []
         self.handle = None
+        self.temporary: Path | None = None
+        self.digest = hashlib.sha256()
         self.count = 0
         self.size = 0
         self.sentences = 0
@@ -227,9 +229,11 @@ class ShardWriter:
             self.filename = f"yaml/{self.language}/{self.source_id}/{len(self.entries):06d}.yaml"
             target = safe_relative(self.root, self.filename)
             target.parent.mkdir(parents=True, exist_ok=True)
-            self.handle = target.open("wb")
+            self.temporary = target.with_name(f".{target.name}.part")
+            self.handle = self.temporary.open("xb")
         index = self.count
         self.handle.write(data)
+        self.digest.update(data)
         self.count += 1
         self.sentences += len(record.get("sentences", []))
         self.size += len(data)
@@ -238,7 +242,19 @@ class ShardWriter:
     def close(self):
         if self.handle is None:
             return
-        self.handle.close()
+        try:
+            self.handle.close()
+        finally:
+            self.handle = None
+        assert self.temporary is not None
+        expected_hash = self.digest.hexdigest()
+        if (
+            self.temporary.stat().st_size != self.size
+            or sha256_file(self.temporary) != expected_hash
+        ):
+            raise DataError(f"Shard bytes changed while writing: {self.filename}")
+        os.replace(self.temporary, self.root / self.filename)
+        self.temporary = None
         self.entries.append(
             {
                 "path": self.filename,
@@ -247,11 +263,22 @@ class ShardWriter:
                 "documents": self.count,
                 "sentences": self.sentences,
                 "size": self.size,
-                "sha256": sha256_file(self.root / self.filename),
+                "sha256": expected_hash,
             }
         )
-        self.handle = None
         self.count = self.size = self.sentences = 0
+        self.digest = hashlib.sha256()
+
+    def abort(self):
+        """Discard an unfinished shard without publishing it during error cleanup."""
+        try:
+            if self.handle is not None:
+                self.handle.close()
+        finally:
+            self.handle = None
+            if self.temporary is not None:
+                self.temporary.unlink(missing_ok=True)
+                self.temporary = None
 
 
 def build_corpus(
@@ -292,7 +319,9 @@ def build_corpus(
         entries = []
         sources = []
         snapshots = []
-        with (staging / "documents.jsonl").open("w", encoding="utf-8") as index:
+        index_temporary = staging / ".documents.jsonl.part"
+        index_digest = hashlib.sha256()
+        with index_temporary.open("wb") as index:
             import json
 
             for manifest_path, manifest in inputs:
@@ -351,7 +380,7 @@ def build_corpus(
                             f"Duplicate upstream identity in snapshot: {record['id']}"
                         ) from exc
                     shard, position = writer.append(record)
-                    index.write(
+                    index_line = (
                         json.dumps(
                             {
                                 "id": record["id"],
@@ -365,7 +394,9 @@ def build_corpus(
                             separators=(",", ":"),
                         )
                         + "\n"
-                    )
+                    ).encode("utf-8")
+                    index.write(index_line)
+                    index_digest.update(index_line)
                     source_stats["documents"] += 1
                 writer.close()
                 entries.extend(writer.entries)
@@ -383,6 +414,9 @@ def build_corpus(
                         "manifest_sha256": sha256_file(manifest_path),
                     }
                 )
+        if sha256_file(index_temporary) != index_digest.hexdigest():
+            raise DataError("Document index bytes changed while writing")
+        os.replace(index_temporary, staging / "documents.jsonl")
         ledger.commit()
         ledger.close()
         ledger = None
@@ -445,13 +479,17 @@ def build_corpus(
             "licenses": {"path": "licenses.json", "sha256": sha256_file(staging / "licenses.json")},
         }
         write_json(staging / "catalog.json", catalog)
+        # Compare every completed artifact with its intended bytes again before
+        # making the build visible. A later truncated/corrupted shard must never
+        # become a successful build merely because it was valid when first closed.
+        verify_build(staging)
         os.replace(staging, output)
         return output / "catalog.json"
     finally:
         if ledger is not None:
             ledger.close()
         for writer in writers:
-            writer.close()
+            writer.abort()
         if staging.exists():
             shutil.rmtree(staging)
 

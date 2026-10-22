@@ -209,6 +209,11 @@ The catalog hashes every shard, document index, license inventory, and preserved
 snapshot manifest. Canonical validation checks counts, unique identities,
 source/snapshot/license bindings, and the ordered document index. The pipeline
 uses disk-backed uniqueness tracking to avoid retaining the whole corpus in RAM.
+While writing shards and the document index, the builder separately hashes the
+intended serialized bytes. It verifies closed temporary files against those
+expectations, publishes them atomically, and verifies the complete artifact
+catalog before publishing the build directory. Packaging validates the canonical
+records and their ordered index again before producing release assets.
 
 ZIP dates, permissions, and member order are fixed. SQLite binary identity is
 qualified by runtime version; canonical YAML/text hashes are the primary content
