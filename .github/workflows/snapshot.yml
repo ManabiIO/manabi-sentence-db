@@ -6,7 +6,7 @@ on:
       source:
         description: Source to acquire; all processes sources serially
         type: choice
-        options: [wikivoyage-ja, wikipedia-ja, wikinews-ja, tatoeba-ja, all]
+        options: [wikivoyage-ja, wikipedia-ja, wikinews-ja, tatoeba-ja, realpersonachat-ja, all]
         default: wikivoyage-ja
       mode:
         description: Sample fetches only selected Wikimedia pages; full downloads exports

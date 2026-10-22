@@ -1,0 +1,19 @@
+schema_version: 1
+id: realpersonachat-ja
+title: RealPersonaChat
+language: ja
+adapter: realpersonachat
+homepage: https://github.com/nu-dialogue/real-persona-chat
+license:
+  id: CC-BY-SA-4.0
+  url: https://creativecommons.org/licenses/by-sa/4.0/
+attribution:
+  text: Sanae Yamashita, Koji Inoue, Ao Guo, Shota Mochizuki, Tatsuya Kawahara, and Ryuichiro Higashinaka. RealPersonaChat (2023).
+  url: https://github.com/nu-dialogue/real-persona-chat
+license_evidence:
+  - https://github.com/nu-dialogue/real-persona-chat#ライセンス
+notes:
+  - Human Japanese conversations only. Excludes profiles, evaluations, model dialogues, and masked utterances.
+acquisition:
+  revision: 28d0b6b3865b29cabc26c230a2db37cdf315e937
+  url: https://codeload.github.com/nu-dialogue/real-persona-chat/zip/28d0b6b3865b29cabc26c230a2db37cdf315e937

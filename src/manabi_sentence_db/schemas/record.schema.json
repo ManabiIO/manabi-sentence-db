@@ -350,6 +350,31 @@
                   ],
                   "additionalProperties": false
                 }
+              },
+              "source_range": {
+                "type": "object",
+                "properties": {
+                  "unit": {
+                    "enum": [
+                      "character",
+                      "utterance"
+                    ]
+                  },
+                  "start": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "end": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "unit",
+                  "start",
+                  "end"
+                ],
+                "additionalProperties": false
               }
             },
             "required": [
@@ -364,6 +389,31 @@
             ],
             "additionalProperties": false
           }
+        },
+        "authorship": {
+          "enum": [
+            "human",
+            "unknown"
+          ]
+        },
+        "language_origin": {
+          "enum": [
+            "original_japanese",
+            "human_translation",
+            "unknown"
+          ]
+        },
+        "published_at": {
+          "type": "string",
+          "minLength": 1
+        },
+        "content_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_text_hash": {
+          "type": "string",
+          "minLength": 1
         }
       },
       "required": [

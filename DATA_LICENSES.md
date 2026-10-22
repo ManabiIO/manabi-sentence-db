@@ -47,3 +47,15 @@ initial transformation/translation pipeline. Adding a new license requires a
 source review, an explicit allowlist entry, and tests; a dataset card or an
 open-source scraping script alone is insufficient evidence. See the
 [source review](docs/sources.md) for decisions and deferred sources.
+
+## RealPersonaChat
+
+The pinned human dialogue corpus is CC BY-SA 4.0. Credit Sanae Yamashita,
+Koji Inoue, Ao Guo, Shota Mochizuki, Tatsuya Kawahara, and Ryuichiro Higashinaka,
+*RealPersonaChat* (2023), with the [publisher link](https://github.com/nu-dialogue/real-persona-chat)
+and [license](https://creativecommons.org/licenses/by-sa/4.0/).
+Each work retains its immutable dialogue URL and source text hash. Extraction,
+normalization, and filtering are recorded as transformations. Participant profiles,
+evaluations, masked personal information, and separately published model conversations
+are excluded. Japanese text remains under its original content license; MIT covers
+this repository's software only.

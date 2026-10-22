@@ -532,6 +532,11 @@ def create_snapshot(
                 raise SnapshotError("Unknown Wikimedia export kind")
         elif adapter == "tatoeba":
             files = _tatoeba(source, staging, requested_translations, agent)
+        elif adapter == "realpersonachat":
+            if mode != "full" or date or max_files or titles:
+                raise SnapshotError("RealPersonaChat uses a pinned full archive; sample with build --max-documents")
+            files = [_download(staging, "realpersonachat.zip", "realpersonachat-zip",
+                               source["acquisition"]["url"], agent)]
         else:
             raise SnapshotError(f"Unsupported source adapter: {adapter}")
         manifest = {

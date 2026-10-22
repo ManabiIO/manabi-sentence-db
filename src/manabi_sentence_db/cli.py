@@ -59,10 +59,11 @@ def parser() -> argparse.ArgumentParser:
     unpack.add_argument("--bundle", type=Path, required=True)
     unpack.add_argument("--output", type=Path, required=True)
     build = commands.add_parser(
-        "build", help="Compile verified snapshots into canonical YAML offline"
+        "build", help="Compile verified snapshots into canonical JSONL/YAML offline"
     )
     build.add_argument("--snapshot", type=Path, action="append", required=True)
     build.add_argument("--output", type=Path, required=True)
+    build.add_argument("--format", choices=["jsonl", "yaml"], default="jsonl")
     build.add_argument("--shard-bytes", type=int, default=4 * 1024**2)
     build.add_argument("--shard-documents", type=int, default=500)
     build.add_argument(
@@ -78,6 +79,11 @@ def parser() -> argparse.ArgumentParser:
     database.add_argument("--build", type=Path, required=True)
     database.add_argument("--output", type=Path, required=True)
     database.add_argument("--source", help="Optional source partition")
+    normalized_db = commands.add_parser(
+        "build-normalized-db", help="Compile v2 normalized JSONL ZIP to relational SQLite"
+    )
+    normalized_db.add_argument("--archive", type=Path, required=True)
+    normalized_db.add_argument("--output", type=Path, required=True)
     package = commands.add_parser(
         "package", help="Package YAML ZIPs and per-source SQLite.zst files offline"
     )
@@ -141,7 +147,7 @@ def main(argv: list[str] | None = None) -> int:
                         and source["adapter"] != "wikimedia"
                     ):
                         print(
-                            f"Skipping {source['id']}: samples use Wikimedia's page API; Tatoeba needs --mode full",
+                            f"Skipping {source['id']}: samples use Wikimedia's page API; bulk datasets need --mode full",
                             file=sys.stderr,
                         )
                         continue
@@ -192,8 +198,13 @@ def main(argv: list[str] | None = None) -> int:
                         shard_documents=args.shard_documents,
                         excluded_flags=excluded,
                         max_documents=args.max_documents,
+                        record_format=args.format,
                     )
                 )
+            case "build-normalized-db":
+                from .normalized_database import build_normalized_database
+
+                print(build_normalized_database(args.archive, args.output))
             case "build-db":
                 print(build_database(args.build, args.output, source_id=args.source))
             case "package":

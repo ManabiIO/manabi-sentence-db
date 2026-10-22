@@ -53,3 +53,7 @@ run = "uv run --locked sentence-db package"
 [tasks.verify-build]
 description = "Verify a corpus build offline"
 run = "uv run --locked sentence-db verify-build"
+
+[tasks.build-normalized-db]
+description = "Compile normalized JSONL ZIP into deduplicated relational SQLite"
+run = "uv run --locked sentence-db build-normalized-db"

@@ -82,7 +82,7 @@ def write_json(path: Path, value: Any) -> None:
         )
 
 
-def read_json(path: Path) -> Any:
+def parse_json(value: str | bytes) -> Any:
     def unique_pairs(pairs):
         result = {}
         for key, value in pairs:
@@ -91,12 +91,15 @@ def read_json(path: Path) -> Any:
             result[key] = value
         return result
 
-    with path.open(encoding="utf-8") as handle:
-        return json.load(
-            handle,
-            object_pairs_hook=unique_pairs,
-            parse_constant=lambda s: (_ for _ in ()).throw(DataError(s)),
-        )
+    return json.loads(
+        value,
+        object_pairs_hook=unique_pairs,
+        parse_constant=lambda s: (_ for _ in ()).throw(DataError(s)),
+    )
+
+
+def read_json(path: Path) -> Any:
+    return parse_json(path.read_bytes())
 
 
 def safe_relative(root: Path, name: str) -> Path:

@@ -21,7 +21,9 @@ from . import PROCESSOR_VERSION, SCHEMA_VERSION
 from .serialization import (
     DataError,
     StrictLoader,
+    canonical_json,
     digest_json,
+    parse_json,
     read_json,
     require_new_directory,
     safe_relative,
@@ -73,6 +75,15 @@ def canonical_document(
     }
     if raw.get("revision"):
         record["revision"] = raw["revision"]
+    for field in (
+        "published_at",
+        "language_origin",
+        "authorship",
+        "content_type",
+        "source_text_hash",
+    ):
+        if raw.get(field) is not None:
+            record[field] = raw[field]
     occurrences: Counter = Counter()
     for ordinal, item in enumerate(raw["sentences"]):
         text = _normalized_text(item["text"])
@@ -90,6 +101,10 @@ def canonical_document(
                 flags.append("profanity")
             if "sexual" in upstream_tags:
                 flags.append("sexual-content")
+        if item.get("generation", {}).get("kind") == "machine":
+            accepted, reason = False, "machine-generated"
+        if "＊＊" in text:
+            accepted, reason = False, "masked-personal-information"
         if not accepted:
             stats[f"rejected:{reason or 'quality'}"] += 1
             continue
@@ -116,6 +131,8 @@ def canonical_document(
             "review_state": "unreviewed",
             "translations": [],
         }
+        if item.get("source_range"):
+            sentence["source_range"] = item["source_range"]
         if item.get("native_id") is not None:
             sentence["native_id"] = str(item["native_id"])
         if item.get("generation"):
@@ -199,8 +216,15 @@ def _git_dirty() -> bool | None:
 
 class ShardWriter:
     def __init__(
-        self, root: Path, source_id: str, language: str, max_bytes: int, max_documents: int
+        self,
+        root: Path,
+        source_id: str,
+        language: str,
+        max_bytes: int,
+        max_documents: int,
+        record_format="yaml",
     ):
+        self.record_format = record_format
         self.root = root
         self.source_id = source_id
         self.language = language
@@ -216,9 +240,13 @@ class ShardWriter:
         self.filename = ""
 
     def append(self, record: dict) -> tuple[str, int]:
-        data = yaml.safe_dump(
-            record, allow_unicode=True, sort_keys=False, explicit_start=True, width=120
-        ).encode("utf-8")
+        data = (
+            yaml.safe_dump(
+                record, allow_unicode=True, sort_keys=False, explicit_start=True, width=120
+            ).encode("utf-8")
+            if self.record_format == "yaml"
+            else canonical_json(record) + b"\n"
+        )
         if len(data) > 32 * 1024 * 1024:
             raise DataError(f"Document exceeds the 32 MiB canonical-record bound: {record['id']}")
         if self.handle and (
@@ -226,7 +254,7 @@ class ShardWriter:
         ):
             self.close()
         if not self.handle:
-            self.filename = f"yaml/{self.language}/{self.source_id}/{len(self.entries):06d}.yaml"
+            self.filename = f"{self.record_format}/{self.language}/{self.source_id}/{len(self.entries):06d}.{self.record_format}"
             target = safe_relative(self.root, self.filename)
             target.parent.mkdir(parents=True, exist_ok=True)
             self.temporary = target.with_name(f".{target.name}.part")
@@ -289,10 +317,13 @@ def build_corpus(
     shard_documents=500,
     excluded_flags: set[str] | None = None,
     max_documents: int | None = None,
+    record_format: str = "yaml",
 ) -> Path:
     from .snapshot import verify_snapshot
 
     require_new_directory(output)
+    if record_format not in {"yaml", "jsonl"}:
+        raise DataError("Unsupported record format")
     if not snapshot_paths or shard_bytes < 1024 or shard_documents < 1:
         raise DataError("Provide snapshots and positive shard limits (at least 1024 bytes)")
     if max_documents is not None and max_documents < 1:
@@ -335,10 +366,17 @@ def build_corpus(
                     from .wikimedia import iter_documents
                 elif source["adapter"] == "tatoeba":
                     from .tatoeba import iter_documents
+                elif source["adapter"] == "realpersonachat":
+                    from .realpersonachat import iter_documents
                 else:
                     raise DataError(f"Unsupported adapter: {source['adapter']}")
                 writer = ShardWriter(
-                    staging, source_id, source["language"], shard_bytes, shard_documents
+                    staging,
+                    source_id,
+                    source["language"],
+                    shard_bytes,
+                    shard_documents,
+                    record_format,
                 )
                 writers.append(writer)
                 source_stats: Counter = Counter()
@@ -426,6 +464,7 @@ def build_corpus(
                 "No usable sentences were extracted; inspect source selection and extraction policy"
             )
         options = {
+            "record_format": record_format,
             "shard_bytes": shard_bytes,
             "shard_documents": shard_documents,
             "excluded_flags": sorted(excluded_flags),
@@ -734,7 +773,11 @@ def iter_records(build: Path, catalog: dict, source_id: str | None = None):
                         continue
                     count = sentence_count = 0
                     with safe_relative(build, entry["path"]).open(encoding="utf-8") as handle:
-                        for record in yaml.load_all(handle, Loader=StrictLoader):
+                        for record in (
+                            map(parse_json, handle)
+                            if entry["path"].endswith(".jsonl")
+                            else yaml.load_all(handle, Loader=StrictLoader)
+                        ):
                             validate_record(record)
                             if (
                                 record["source_id"] != entry["source_id"]

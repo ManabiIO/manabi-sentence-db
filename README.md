@@ -1,5 +1,11 @@
 # Manabi Sentence DB
 
+**Current format:** bulk CLI builds default to JSONL. Release SQLite uses normalized
+v2 tables with unique sentences and independent occurrences; normalized JSONL ZIPs
+are also included. YAML and the legacy `build-db` command remain supported.
+See [v2 interchange and compatibility](docs/normalized-format.md).
+
+
 An open, attributed example-sentence corpus, beginning with contemporary Japanese.
 The repository contains source configurations, schemas, a Python pipeline, and
 small original test fixtures. Downloaded source text and generated corpora are
@@ -237,3 +243,17 @@ Software is [MIT licensed](LICENSE). Imported text retains its own source licens
 and notices; the MIT license does not apply to those sentences. Commercial use
 can still require attribution and ShareAlike compliance. See
 [data licensing](DATA_LICENSES.md) and [contribution guidance](CONTRIBUTING.md).
+
+## Current consumer format
+
+New bulk builds default to JSONL (`build --format jsonl`); YAML remains available
+with `--format yaml`. Releases include a normalized v2 JSONL ZIP in addition to the
+original document-oriented exports. New consumers should use v2 to separate unique
+sentences from their independently licensed occurrences. See
+[the normalized format](docs/normalized-format.md).
+
+RealPersonaChat is now an enabled fifth source. Its pinned archive contains 13,583
+human dialogues; profiles and model conversations are excluded. Acquire once with
+`mise run snapshot -- --source realpersonachat-ja --mode full --output data/snapshots/realpersonachat`,
+then build offline. Use `build --max-documents 10` for a small development corpus.
+The latest source priorities and exclusions are in [the updated shortlist](docs/source-priorities.md).

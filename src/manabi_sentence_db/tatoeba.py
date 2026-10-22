@@ -78,9 +78,11 @@ def _timestamp(value: str, path: Path, line: int) -> str | None:
     return stamp.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
-def _sentences(path: Path, language: str) -> Iterator[tuple[int, str, str | None, str | None]]:
+def _sentences(
+    path: Path, language: str
+) -> Iterator[tuple[int, str, str | None, str | None, str | None]]:
     for line, fields in _rows(path, 6):
-        native_id, actual_language, text, owner, _added, modified = fields
+        native_id, actual_language, text, owner, added, modified = fields
         identifier = _sentence_id(native_id, path, line)
         if actual_language != language:
             raise ValueError(
@@ -93,6 +95,7 @@ def _sentences(path: Path, language: str) -> Iterator[tuple[int, str, str | None
             text,
             None if owner in _NULL_VALUES else owner,
             _timestamp(modified, path, line),
+            _timestamp(added, path, line),
         )
 
 
@@ -118,7 +121,7 @@ def _prepare_database(connection: sqlite3.Connection) -> None:
         PRAGMA temp_store=FILE;
         PRAGMA cache_size=-8192;
         CREATE TABLE sentences (
-            id INTEGER PRIMARY KEY, text TEXT NOT NULL, owner TEXT, modified TEXT
+            id INTEGER PRIMARY KEY, text TEXT NOT NULL, owner TEXT, modified TEXT, added TEXT
         );
         CREATE TABLE links (
             sentence_id INTEGER NOT NULL, target_id INTEGER NOT NULL,
@@ -168,7 +171,7 @@ def iter_documents(manifest: dict, snapshot_dir: Path) -> Iterator[dict]:
             for path in files[primary_role]:
                 try:
                     connection.executemany(
-                        "INSERT INTO sentences VALUES (?, ?, ?, ?)",
+                        "INSERT INTO sentences VALUES (?, ?, ?, ?, ?)",
                         _sentences(path, primary_language),
                     )
                 except sqlite3.IntegrityError as exc:
@@ -201,7 +204,7 @@ def iter_documents(manifest: dict, snapshot_dir: Path) -> Iterator[dict]:
                 for path in files[role]:
                     rows = (
                         (identifier, _LANGUAGES.get(language, language), text, owner)
-                        for identifier, text, owner, _modified in _sentences(path, language)
+                        for identifier, text, owner, _modified, _added in _sentences(path, language)
                     )
                     try:
                         connection.executemany(
@@ -233,8 +236,8 @@ def iter_documents(manifest: dict, snapshot_dir: Path) -> Iterator[dict]:
                     )
             connection.commit()
 
-            for identifier, text, owner, modified in connection.execute(
-                "SELECT id, text, owner, modified FROM sentences ORDER BY id"
+            for identifier, text, owner, modified, added in connection.execute(
+                "SELECT id, text, owner, modified, added FROM sentences ORDER BY id"
             ):
                 tags = [
                     row[0]
@@ -273,6 +276,7 @@ def iter_documents(manifest: dict, snapshot_dir: Path) -> Iterator[dict]:
                     "license": dict(license_info),
                     "attribution": _attribution(identifier, owner),
                     "revision": revision,
+                    **({"published_at": added} if added else {}),
                     "tags": [],
                     "sentences": [
                         {

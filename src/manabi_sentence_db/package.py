@@ -120,7 +120,7 @@ def verify_package(output: Path, *, catalog: dict | None = None) -> dict:
         snapshots = {snapshot["source_id"]: snapshot for snapshot in catalog["snapshots"]}
         seen = set()
         for asset in release["assets"]:
-            if asset["kind"] != "yaml-zip":
+            if asset["kind"] not in {"yaml-zip", "jsonl-zip"}:
                 continue
             expected = {}
             for name in asset["members"]:
@@ -141,8 +141,7 @@ def verify_package(output: Path, *, catalog: dict | None = None) -> dict:
         if seen != set(shards):
             raise DataError("Package is missing canonical YAML shards")
         provenance = {
-            item["manifest"]: {"sha256": item["manifest_sha256"]}
-            for item in catalog["snapshots"]
+            item["manifest"]: {"sha256": item["manifest_sha256"]} for item in catalog["snapshots"]
         }
         provenance.update(
             {
@@ -188,7 +187,14 @@ def verify_package(output: Path, *, catalog: dict | None = None) -> dict:
             name for name, asset in assets.items() if asset["kind"] == "sqlite-zstd-part"
         }:
             raise DataError("Package has unassigned database parts")
-    except (OSError, KeyError, TypeError, ValueError, zipfile.BadZipFile, zstandard.ZstdError) as exc:
+    except (
+        OSError,
+        KeyError,
+        TypeError,
+        ValueError,
+        zipfile.BadZipFile,
+        zstandard.ZstdError,
+    ) as exc:
         raise DataError(f"Package read-back validation failed: {exc}") from exc
     return release
 
@@ -284,6 +290,20 @@ def package_build(
         for shard in catalog["shards"]:
             partitions[(shard["source_id"], shard["language"])].append(shard)
         for (source_id, language), shards in sorted(partitions.items()):
+            record_format = catalog["options"].get("record_format", "yaml")
+            from .normalized import export_normalized
+
+            normalized = staging / f"{source_id}.{language}.normalized.zip"
+            export_normalized(build, normalized, source_id=source_id, catalog=catalog)
+            assets.append(
+                _entry(
+                    staging,
+                    normalized,
+                    kind="normalized-jsonl-zip",
+                    source_id=source_id,
+                    language=language,
+                )
+            )
             groups: list[list[dict]] = []
             group: list[dict] = []
             size = 0
@@ -296,7 +316,9 @@ def package_build(
             if group:
                 groups.append(group)
             for number, group in enumerate(groups):
-                archive_path = safe_relative(staging, f"{source_id}.{language}.yaml-{number:04d}.zip")
+                archive_path = safe_relative(
+                    staging, f"{source_id}.{language}.{record_format}-{number:04d}.zip"
+                )
                 with zipfile.ZipFile(
                     archive_path,
                     "w",
@@ -315,7 +337,7 @@ def package_build(
                     _entry(
                         staging,
                         archive_path,
-                        kind="yaml-zip",
+                        kind=f"{record_format}-zip",
                         source_id=source_id,
                         language=language,
                         members=[shard["path"] for shard in group],
@@ -323,7 +345,12 @@ def package_build(
                 )
             if include_sqlite:
                 db_path = safe_relative(staging, f"{source_id}.{language}.sqlite3")
-                build_database(build, db_path, source_id=source_id, catalog=catalog)
+                if record_format == "jsonl":
+                    from .normalized_database import build_normalized_database
+
+                    build_normalized_database(normalized, db_path)
+                else:
+                    build_database(build, db_path, source_id=source_id, catalog=catalog)
                 db_hash, db_size = sha256_file(db_path), db_path.stat().st_size
                 writer = _PartsWriter(staging, db_path.name + ".zst", part_bytes)
                 try:
@@ -351,6 +378,7 @@ def package_build(
                     {
                         "source_id": source_id,
                         "language": language,
+                        "schema_version": 2 if record_format == "jsonl" else 1,
                         "uncompressed_path": db_path.name,
                         "uncompressed_size": db_size,
                         "uncompressed_sha256": db_hash,

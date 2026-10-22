@@ -20,7 +20,8 @@
     "adapter": {
       "enum": [
         "wikimedia",
-        "tatoeba"
+        "tatoeba",
+        "realpersonachat"
       ]
     },
     "license": {

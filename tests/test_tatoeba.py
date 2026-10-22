@@ -73,6 +73,8 @@ class TatoebaTests(unittest.TestCase):
         )
         documents = list(iter_documents(self.manifest, self.root))
         self.assertEqual([doc["native_id"] for doc in documents], ["1", "2"])
+        self.assertEqual(documents[0]["published_at"], "2020-01-01T00:00:00Z")
+        self.assertEqual(documents[0]["revision"]["timestamp"], "2021-02-03T04:05:06Z")
         sentence = documents[0]["sentences"][0]
         self.assertEqual(sentence["text"], "例文です。")
         self.assertEqual(sentence["tags"], ["@change", "archaic"])
