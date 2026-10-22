@@ -1,0 +1,27 @@
+schema_version: 1
+id: wikipedia-ja
+title: Japanese Wikipedia
+language: ja
+adapter: wikimedia
+status: active
+homepage: https://ja.wikipedia.org/
+license:
+  id: CC-BY-SA-4.0
+  url: https://creativecommons.org/licenses/by-sa/4.0/
+attribution:
+  text: Japanese Wikipedia contributors; each document includes its revision and contributor
+    history URL.
+  url: https://ja.wikipedia.org/
+license_evidence:
+- https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use
+- https://creativecommons.org/licenses/by-sa/4.0/
+acquisition:
+  wiki_id: jawiki
+  api_url: https://ja.wikipedia.org/w/api.php
+  sample_titles:
+  - 日本語
+  export_kind: content-current
+notes:
+- Text only. Media, unexpanded templates, tables and quotations are excluded by the
+  conservative extractor.
+- Per-document and translation attribution must travel with redistributed text.

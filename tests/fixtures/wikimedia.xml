@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mediawiki xmlns="http://www.mediawiki.org/xml/export-0.11/" version="0.11" xml:lang="ja">
+  <siteinfo><sitename>Synthetic test wiki</sitename></siteinfo>
+  <page>
+    <title>架空の公園</title><ns>0</ns><id>12</id>
+    <revision><id>30</id><timestamp>2026-01-02T03:04:05Z</timestamp><model>wikitext</model><text xml:space="preserve">{{Infobox|name=架空の公園}}
+架空の公園には大きな池がある。&lt;ref&gt;引用元の説明。&lt;/ref&gt;毎年多くの人が訪れる。
+
+公園は[[架空市|架空の町]]にある。
+* この箇条書きは本文ではない。
+
+== 外部リンク ==
+この文章は外部リンク節にある。
+[[カテゴリ:架空の場所]]</text></revision>
+  </page>
+  <page><title>別名</title><ns>0</ns><id>13</id><redirect title="架空の公園"/><revision><id>31</id><text>#REDIRECT [[架空の公園]]</text></revision></page>
+  <page><title>ノート:架空の公園</title><ns>1</ns><id>14</id><revision><id>32</id><text>このノートは本文ではない。</text></revision></page>
+  <page><title>非公開</title><ns>0</ns><id>15</id><revision><id>33</id><text deleted="deleted"/></revision></page>
+  <page><title>JSONデータ</title><ns>0</ns><id>16</id><revision><id>34</id><model>json</model><text>{"text":"本文ではない。"}</text></revision></page>
+</mediawiki>

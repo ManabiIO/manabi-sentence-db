@@ -1,0 +1,194 @@
+name: Snapshot sources (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      source:
+        description: Source to acquire; all processes sources serially
+        type: choice
+        options: [wikivoyage-ja, wikipedia-ja, wikinews-ja, tatoeba-ja, all]
+        default: wikivoyage-ja
+      mode:
+        description: Sample fetches only selected Wikimedia pages; full downloads exports
+        type: choice
+        options: [sample, full]
+        default: sample
+      date:
+        description: Exact Wikimedia export date YYYY-MM-DD (required for full Wikimedia)
+        type: string
+      max_files:
+        description: Optional positive chunk limit; marks the snapshot as partial
+        type: string
+      english_translations:
+        description: Include Tatoeba English sentences and direct translation links
+        type: boolean
+        default: false
+      runner:
+        description: Full Wikipedia requires a provisioned self-hosted Linux sentence-db runner
+        type: choice
+        options: [ubuntu-24.04, self-hosted]
+        default: ubuntu-24.04
+      create_draft_release:
+        description: Preserve the raw snapshot as a draft prerelease (otherwise a seven-day artifact)
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sentence-db-upstream-snapshot
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    runs-on: ${{ inputs.runner == 'self-hosted' && fromJSON('["self-hosted", "linux", "sentence-db"]') || 'ubuntu-24.04' }}
+    timeout-minutes: ${{ inputs.runner == 'self-hosted' && 1380 || 350 }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: jdx/mise-action@8418fedb1110381a0d3ba51a7a415d7c1b884550 # v5
+      - name: Acquire an explicitly requested snapshot
+        id: acquire
+        env:
+          SOURCE: ${{ inputs.source }}
+          MODE: ${{ inputs.mode }}
+          SNAPSHOT_DATE: ${{ inputs.date }}
+          MAX_FILES: ${{ inputs.max_files }}
+          ENGLISH: ${{ inputs.english_translations }}
+          RUNNER_KIND: ${{ inputs.runner }}
+          SOURCE_USER_AGENT: ${{ vars.SENTENCE_DB_USER_AGENT }}
+        run: |
+          python - <<'PY'
+          import os
+          import subprocess
+          from pathlib import Path
+
+          source, mode = os.environ['SOURCE'], os.environ['MODE']
+          max_files = os.environ['MAX_FILES'].strip()
+          if source in {'all', 'wikipedia-ja'} and mode == 'full' and os.environ['RUNNER_KIND'] != 'self-hosted':
+              raise SystemExit('Wikipedia bulk acquisition, including a single chunk, needs a self-hosted sentence-db runner or a local snapshot; use sample mode for hosted development.')
+          args = ['uv', 'run', '--locked', 'sentence-db', 'snapshot', '--source', source,
+                  '--mode', mode, '--output', 'data/snapshots/manual']
+          date = os.environ['SNAPSHOT_DATE'].strip()
+          if date:
+              args += ['--date', date]
+          if max_files:
+              if not max_files.isdecimal() or int(max_files) < 1:
+                  raise SystemExit('max_files must be a positive integer')
+              args += ['--max-files', max_files]
+          if os.environ['ENGLISH'] == 'true':
+              args += ['--translations', 'en']
+          if os.environ['SOURCE_USER_AGENT'].strip():
+              args += ['--user-agent', os.environ['SOURCE_USER_AGENT']]
+          with Path('snapshot-manifests.txt').open('w') as stdout:
+              result = subprocess.run(args, stdout=stdout, check=False)
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write(f'exit_code={result.returncode}\n')
+          if result.returncode:
+              with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
+                  summary.write('## Incomplete source acquisition\n\nA requested source failed. Completed snapshots will be preserved in the workflow artifact; no release draft will be created. Consult the acquisition log before retrying.\n')
+          PY
+      - name: Package immutable raw transport pieces
+        if: ${{ !cancelled() && hashFiles('snapshot-manifests.txt') != '' }}
+        env:
+          ACQUISITION_STATUS: ${{ steps.acquire.outputs.exit_code }}
+          REQUESTED_SOURCE: ${{ inputs.source }}
+        run: |
+          uv run --locked python - <<'PY'
+          import hashlib
+          import json
+          import os
+          import shutil
+          from pathlib import Path
+          from manabi_sentence_db.snapshot import safe_filename, verify_snapshot
+          from manabi_sentence_db.transport import snapshot_pack
+
+          release = Path('snapshot-release')
+          release.mkdir()
+          snapshots = []
+          for value in Path('snapshot-manifests.txt').read_text().splitlines():
+              manifest_path = Path(value)
+              snapshot = verify_snapshot(manifest_path)
+              source_id = safe_filename(snapshot['source_id'])
+              bundle_path = snapshot_pack(manifest_path, Path('data/transport') / source_id)
+              bundle_name = f'{source_id}.bundle.json'
+              shutil.copyfile(bundle_path, release / bundle_name)
+              for part in bundle_path.parent.glob('*.part'):
+                  destination = release / part.name
+                  if not destination.exists():
+                      os.link(part, destination)
+              snapshots.append({'source_id': source_id, 'mode': snapshot['mode'],
+                                'snapshot_id': snapshot['snapshot_id'], 'path': bundle_name,
+                                'sha256': hashlib.sha256(bundle_path.read_bytes()).hexdigest()})
+          if not snapshots:
+              raise SystemExit('No snapshots were produced')
+          catalog = {'schema_version': 1, 'kind': 'snapshot-catalog',
+                     'code_revision': os.environ['GITHUB_SHA'],
+                     'requested_source': os.environ['REQUESTED_SOURCE'],
+                     'complete_selection': os.environ['ACQUISITION_STATUS'] == '0',
+                     'snapshots': snapshots}
+          catalog_path = release / 'snapshot-catalog.json'
+          catalog_path.write_text(json.dumps(catalog, ensure_ascii=False, sort_keys=True, indent=2) + '\n')
+          files = list(release.iterdir())
+          if len(files) > 1000 or any(path.stat().st_size >= 2 * 1024**3 for path in files):
+              raise SystemExit('Snapshot exceeds GitHub release asset constraints; use object storage')
+          digest = hashlib.sha256(catalog_path.read_bytes()).hexdigest()
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
+              summary.write(f'## Snapshot catalog\n\nSHA-256: `{digest}`\n\n')
+              summary.write('Keep this digest for the offline build workflow. Raw snapshots are not processed corpus releases.\n')
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: ${{ !cancelled() && hashFiles('snapshot-release/snapshot-catalog.json') != '' }}
+        with:
+          name: raw-snapshot
+          path: snapshot-release/
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+      - name: Report an incomplete acquisition after preserving completed sources
+        if: steps.acquire.outputs.exit_code != '' && steps.acquire.outputs.exit_code != '0'
+        run: |
+          echo 'A source failed. Completed source snapshots are in the raw-snapshot artifact. See the acquisition log.'
+          exit 1
+
+  draft-release:
+    if: inputs.create_draft_release
+    needs: snapshot
+    runs-on: ${{ inputs.runner == 'self-hosted' && fromJSON('["self-hosted", "linux", "sentence-db"]') || 'ubuntu-24.04' }}
+    timeout-minutes: 120
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        with:
+          name: raw-snapshot
+          path: snapshot-release
+      - name: Create a new draft snapshot release without replacing assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: snapshot-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          python3 - <<'PY'
+          import hashlib
+          import os
+          import subprocess
+          from pathlib import Path
+
+          root = Path('snapshot-release')
+          files = sorted(path for path in root.iterdir() if path.is_file())
+          if not files or len(files) > 1000 or any(path.stat().st_size >= 2 * 1024**3 for path in files):
+              raise SystemExit('Invalid release asset inventory')
+          digest = hashlib.sha256((root / 'snapshot-catalog.json').read_bytes()).hexdigest()
+          notes = Path('snapshot-notes.md')
+          notes.write_text(f'Raw acquisition snapshot; not a processed sentence corpus.\n\nCatalog SHA-256: `{digest}`\n\nCode revision: `{os.environ["GITHUB_SHA"]}`\n')
+          tag = os.environ['RELEASE_TAG']
+          subprocess.run(['gh', 'release', 'create', tag, '--target', os.environ['GITHUB_SHA'],
+                          '--title', tag, '--notes-file', str(notes), '--draft', '--prerelease',
+                          '--latest=false'], check=True)
+          subprocess.run(['gh', 'release', 'upload', tag, *map(str, files)], check=True)
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
+              summary.write(f'## Durable snapshot draft\n\nTag: `{tag}`\n\nCatalog SHA-256: `{digest}`\n')
+          PY

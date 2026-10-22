@@ -1,0 +1,33 @@
+schema_version: 1
+id: wikinews-ja
+title: Japanese Wikinews (archive)
+language: ja
+adapter: wikimedia
+status: archival
+homepage: https://ja.wikinews.org/
+license:
+  id: LicenseRef-Wikinews-JA
+  url: https://ja.wikinews.org/wiki/ウィキニュース:ウィキニュースについて
+  notice: Japanese Wikinews current terms offer post-2005-09-25 text under CC BY 4.0;
+    the historical policy says CC BY 2.5 or later. Contributions before 2005-09-24
+    22:15 UTC were CC BY 2.1 Japan. This archive conservatively retains all three
+    license notices and attribution requirements; a latest revision timestamp does
+    not establish a contribution's original license. See https://creativecommons.org/licenses/by/4.0/,
+    https://creativecommons.org/licenses/by/2.5/, and https://creativecommons.org/licenses/by/2.1/jp/.
+attribution:
+  text: Japanese Wikinews (archive) contributors; each document includes its revision
+    and contributor history URL.
+  url: https://ja.wikinews.org/
+license_evidence:
+- https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use
+- https://ja.wikinews.org/wiki/ウィキニュース:ウィキニュースについて
+acquisition:
+  wiki_id: jawikinews
+  api_url: https://ja.wikinews.org/w/api.php
+  sample_titles:
+  - ウィキニュース、21年の歴史に幕を閉じる
+  export_kind: legacy-articles
+notes:
+- Text only. Media, unexpanded templates, tables and quotations are excluded by the
+  conservative extractor.
+- Per-document and translation attribution must travel with redistributed text.

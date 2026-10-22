@@ -1,0 +1,27 @@
+schema_version: 1
+id: wikivoyage-ja
+title: Japanese Wikivoyage
+language: ja
+adapter: wikimedia
+status: active
+homepage: https://ja.wikivoyage.org/
+license:
+  id: CC-BY-SA-4.0
+  url: https://creativecommons.org/licenses/by-sa/4.0/
+attribution:
+  text: Japanese Wikivoyage contributors; each document includes its revision and
+    contributor history URL.
+  url: https://ja.wikivoyage.org/
+license_evidence:
+- https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use
+- https://creativecommons.org/licenses/by-sa/4.0/
+acquisition:
+  wiki_id: jawikivoyage
+  api_url: https://ja.wikivoyage.org/w/api.php
+  sample_titles:
+  - 東京
+  export_kind: content-current
+notes:
+- Text only. Media, unexpanded templates, tables and quotations are excluded by the
+  conservative extractor.
+- Per-document and translation attribution must travel with redistributed text.

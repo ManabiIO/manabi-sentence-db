@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]+$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "language": {
+      "type": "string",
+      "pattern": "^[a-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$"
+    },
+    "adapter": {
+      "enum": [
+        "wikimedia",
+        "tatoeba"
+      ]
+    },
+    "license": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "url": {
+          "type": "string",
+          "pattern": "^https?://[^\\s]+$"
+        },
+        "notice": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "id",
+        "url"
+      ],
+      "additionalProperties": false
+    },
+    "homepage": {
+      "type": "string",
+      "pattern": "^https?://[^\\s]+$"
+    },
+    "attribution": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "url": {
+          "type": "string",
+          "pattern": "^https?://[^\\s]+$"
+        }
+      },
+      "required": [
+        "text",
+        "url"
+      ],
+      "additionalProperties": false
+    },
+    "license_evidence": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^https?://[^\\s]+$"
+      },
+      "minItems": 1
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "acquisition": {
+      "type": "object"
+    },
+    "status": {
+      "enum": [
+        "active",
+        "archival"
+      ]
+    }
+  },
+  "required": [
+    "id",
+    "title",
+    "language",
+    "adapter",
+    "license",
+    "homepage",
+    "attribution",
+    "license_evidence",
+    "acquisition"
+  ],
+  "additionalProperties": false
+}
