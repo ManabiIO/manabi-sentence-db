@@ -36,6 +36,9 @@ are the authoritative native IDs. We omit profiles, speaker attributes, evaluati
 LLM conversations, and utterances containing masked personal data. Utterance offsets
 refer to the original dialogue turn numbers. Neighbor pointers refer to admitted
 units, which can skip excluded turns; they are not proof of original adjacency.
+For Wikimedia, extraction also omits material before canonical ordinals are
+assigned, so even consecutive ordinals do not establish adjacency in the source.
+Consumers must not present these pointers alone as uninterrupted original context.
 
 Default JSONL release builds compile normalized **v2 SQLite** with `sentences`,
 `works`, `occurrences`, `translations`, and `external_references`. `metadata_json`

@@ -44,7 +44,7 @@ def _normalized_text(text: str) -> str:
 def canonical_document(
     raw: dict, manifest: dict, stats: Counter, excluded_flags: set[str]
 ) -> dict | None:
-    from .text import assess_sentence
+    from .text import assess_sentence, style_tags
 
     source_id = manifest["source_id"]
     native_id = str(raw["native_id"])
@@ -126,7 +126,7 @@ def canonical_document(
             "ordinal": ordinal,
             "text": text,
             "text_sha256": text_hash,
-            "tags": sorted(set(item.get("tags", []))),
+            "tags": sorted(set(item.get("tags", [])) | set(style_tags(text, raw["language"]))),
             "content_flags": flags,
             "review_state": "unreviewed",
             "translations": [],

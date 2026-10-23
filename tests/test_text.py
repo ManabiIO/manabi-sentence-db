@@ -1,3 +1,5 @@
+import pytest
+
 from manabi_sentence_db.text import assess_sentence, is_complete_sentence, split_sentences
 
 
@@ -40,6 +42,33 @@ def test_quality_rejects_unknown_templates_and_archaic_language():
     assert assess_sentence("This is only English.")[2] == "non-japanese"
 
 
+@pytest.mark.parametrize("text", [
+    "この地域は温暖な気候。",
+    "回復の兆候。",
+    "その家で暮らす居候。",
+    "空を見てふと思い出した。",
+    "走ってふらついてしまった。",
+    "パンは焼けふくらんだ。",
+    "ゐろはさんと公園を歩いた。",
+    "店名はヱビスです。",
+    "看板にはゑんやと書かれている。",
+    "ヰノウエさんに手紙を書いた。",
+])
+def test_modern_words_and_names_are_not_rejected_as_archaic(text):
+    assert assess_sentence(text) == (True, [], None)
+
+
+@pytest.mark.parametrize("text", [
+    "昔のことを思ひ出した。",
+    "その人はかく言ふ。",
+    "山の上になりけり。",
+    "書状を受け取り候。",
+    "「承知いたし候。」",
+])
+def test_specific_historical_constructions_remain_excluded(text):
+    assert assess_sentence(text)[2] == "archaic-language"
+
+
 def test_flags_are_annotations_instead_of_blanket_rejection():
     accepted, flags, reason = assess_sentence("新聞には殺人事件についての記事が載っていた。")
     assert accepted and flags == ["violence"] and reason is None
@@ -52,3 +81,13 @@ def test_sentence_sources_can_have_unpunctuated_utterances():
     assert assess_sentence("あ。")[2] == "too-short"
     assert assess_sentence("あ" * 501)[2] == "too-long"
     assert assess_sentence("正常\x00ではない。")[2] == "control-character"
+
+
+def test_classical_construction_in_modern_warning_is_style_evidence():
+    from manabi_sentence_db.text import style_tags
+
+    text = "芝生に入るべからず。"
+    assert assess_sentence(text) == (True, [], None)
+    assert style_tags(text) == ["style:classical-construction"]
+    assert style_tags("普通の現代日本語です。") == []
+    assert style_tags(text, "en") == []

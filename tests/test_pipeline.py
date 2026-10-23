@@ -225,6 +225,25 @@ def test_tatoeba_editorial_tags_exclude_known_bad_units(tag, reason):
     assert stats[f"rejected:{reason}"] == 1
 
 
+def test_era_filter_preserves_modern_candidates_without_claiming_review():
+    raw = raw_document()
+    modern = ["この地域は温暖な気候。", "空を見てふと思い出した。", "ゐろはさんと歩いた。"]
+    raw["sentences"] = [{"text": text} for text in modern] + [
+        {"text": "昔のことを思ひ出した。"},
+        {"text": "けふも空は晴れている。", "tags": ["archaic"]},
+    ]
+    stats = Counter()
+    manifest = {
+        "source_id": "tatoeba-ja",
+        "snapshot_id": "snapshot",
+        "source": {"adapter": "tatoeba"},
+    }
+    record = canonical_document(raw, manifest, stats, set())
+    assert [item["text"] for item in record["sentences"]] == modern
+    assert all(item["review_state"] == "unreviewed" for item in record["sentences"])
+    assert stats["rejected:archaic-language"] == 2
+
+
 def test_reference_schema_forbids_redistributed_sentence_text(tmp_path):
     build = make_build(tmp_path)
     record = next(iter_records(build, verify_build(build)))
@@ -277,3 +296,21 @@ def test_no_nc_or_nd_license_is_admitted():
     for identifier in ["CC-BY-NC-4.0", "CC-BY-ND-4.0", "CC-BY-NC-SA-4.0", "unknown"]:
         with pytest.raises(DataError, match="Unreviewed"):
             validate_license({"id": identifier, "url": "https://example.org/license"})
+
+
+def test_weak_style_tag_is_preserved_without_overriding_upstream_era():
+    raw = raw_document()
+    raw["sentences"] = [
+        {"text": "芝生に入るべからず。", "tags": ["warning"]},
+        {"text": "門に入るべからず。", "tags": ["archaic"]},
+    ]
+    stats = Counter()
+    manifest = {"source_id": "tatoeba-ja", "snapshot_id": "snapshot",
+                "source": {"adapter": "tatoeba"}}
+    record = canonical_document(raw, manifest, stats, set())
+    assert len(record["sentences"]) == 1
+    item = record["sentences"][0]
+    assert item["tags"] == ["style:classical-construction", "warning"]
+    assert item["review_state"] == "unreviewed"
+    assert item["content_flags"] == []
+    assert stats["rejected:archaic-language"] == 1
