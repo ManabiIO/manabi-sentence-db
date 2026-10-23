@@ -11,7 +11,7 @@ from __future__ import annotations
 import re
 import unicodedata
 
-TEXT_PROCESSOR_VERSION = "ja-conservative-v3"
+TEXT_PROCESSOR_VERSION = "ja-conservative-v4"
 OMITTED_MARKUP = "\ufffc"
 
 _PAIRS = {
@@ -24,12 +24,15 @@ _CLOSERS = "".join(_PAIRS.values()) + "’\"'"
 _JAPANESE = re.compile(r"[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff]")
 # Historical kana can occur in modern names, and short spellings such as てふ
 # can cross modern word boundaries (見て + ふと). Neither is sufficient evidence
-# to discard a sentence. Keep the more specific constructions, and require a
-# hiragana ending before sentence-final 候 so nouns such as 気候, 兆候 and 居候
-# are not mistaken for the historical auxiliary. This remains a heuristic, not
-# a complete era detector; explicit source-era tags are handled by the builder.
+# to discard a sentence. Historical verb stems need a standalone/auxiliary
+# boundary so 時給 + へ, 意思 + ひとつ and 格言 + ふう remain modern candidates.
+# This deliberately misses some compound spellings such as 物思ひ. Require a
+# hiragana ending before sentence-final 候 so 気候, 兆候 and 居候 are not mistaken
+# for that auxiliary either. This is not a complete era detector; explicit
+# source-era tags are handled by the builder.
 _ARCHAIC = re.compile(
-    r"(?:なりけり|ありけり|ざりけり|給ふ|給へ|思ひ|言ふ)"
+    r"(?:なりけり|ありけり|ざりけり)"
+    rf"|(?:^|(?<=[ぁ-ゖ\s{re.escape(''.join(_PAIRS))}]))(?:給[ふへ]|思ひ|言ふ)"
     r"|(?<=[ぁ-ゖ])候(?=[。！？!?」』）]|$)"
 )
 _MARKUP = re.compile(r"\ufffc|\{\{|\}\}|\[\[|\]\]|<[^>]+>|https?://|ISBN\s*[0-9]")

@@ -227,10 +227,19 @@ def test_tatoeba_editorial_tags_exclude_known_bad_units(tag, reason):
 
 def test_era_filter_preserves_modern_candidates_without_claiming_review():
     raw = raw_document()
-    modern = ["この地域は温暖な気候。", "空を見てふと思い出した。", "ゐろはさんと歩いた。"]
+    modern = [
+        "この地域は温暖な気候。",
+        "空を見てふと思い出した。",
+        "ゐろはさんと歩いた。",
+        "安定供給への備えが必要です。",
+        "本人の意思ひとつで決められる。",
+        "教訓を格言ふうに書いてみた。",
+    ]
     raw["sentences"] = [{"text": text} for text in modern] + [
         {"text": "昔のことを思ひ出した。"},
         {"text": "けふも空は晴れている。", "tags": ["archaic"]},
+        {"text": "これを読み給へ。"},
+        {"text": "物思ひに沈んだ。", "tags": ["old-fashioned"]},
     ]
     stats = Counter()
     manifest = {
@@ -241,7 +250,7 @@ def test_era_filter_preserves_modern_candidates_without_claiming_review():
     record = canonical_document(raw, manifest, stats, set())
     assert [item["text"] for item in record["sentences"]] == modern
     assert all(item["review_state"] == "unreviewed" for item in record["sentences"])
-    assert stats["rejected:archaic-language"] == 2
+    assert stats["rejected:archaic-language"] == 4
 
 
 def test_reference_schema_forbids_redistributed_sentence_text(tmp_path):

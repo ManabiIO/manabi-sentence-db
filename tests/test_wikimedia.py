@@ -1,10 +1,12 @@
 import bz2
 import json
+from collections import Counter
 from pathlib import Path
 
 import pytest
 from defusedxml.common import DTDForbidden
 
+from manabi_sentence_db.build import canonical_document
 from manabi_sentence_db.text import assess_sentence
 from manabi_sentence_db.wikimedia import extract_prose, iter_documents
 
@@ -44,6 +46,50 @@ def test_templates_do_not_splice_missing_words():
     sentences, _ = extract_prose("今日は{{lang|en|Tokyo}}に行く。明日は家にいる。")
     accepted = [text for text in sentences if assess_sentence(text)[0]]
     assert accepted == ["明日は家にいる。"]
+
+
+@pytest.mark.parametrize("link", [
+    "[https://example.invalid]",
+    "[https://example.invalid ]",
+    "[https://example.invalid <!-- no visible label -->]",
+])
+def test_unlabelled_external_links_do_not_splice_words(link):
+    sentences, _ = extract_prose(
+        f"最初の文章です。今日は{link}に行った。最後の文章です。"
+    )
+    assert [text for text in sentences if assess_sentence(text)[0]] == [
+        "最初の文章です。", "最後の文章です。",
+    ]
+    # A detached link does not corrupt a complete preceding sentence or the
+    # next paragraph. No surrounding words are silently concatenated.
+    sentences, _ = extract_prose(f"最初の文章です。{link}\n最後の文章です。")
+    assert sentences == ["最初の文章です。", "最後の文章です。"]
+
+
+def test_external_link_labels_survive_source_and_canonical_normalization(tmp_path):
+    text = (
+        "今日は[https://example.invalid]に行った。"
+        "今日は[https://example.invalid カ\u3099イドの店]に行った。"
+    )
+    payload = {"query": {"pages": [{
+        "pageid": 12, "ns": 0, "title": "架空", "revisions": [{
+            "revid": 35, "timestamp": "2026-01-02T03:04:05Z",
+            "slots": {"main": {"contentmodel": "wikitext", "content": text}},
+        }],
+    }]}}
+    (tmp_path / "sample.json").write_text(json.dumps(payload), encoding="utf-8")
+    snapshot = {
+        **manifest("sample.json", "mediawiki-api", source={**SOURCE, "adapter": "wikimedia"}),
+        "source_id": "wikipedia-ja", "snapshot_id": "synthetic",
+    }
+    raw = next(iter_documents(snapshot, tmp_path))
+    stats = Counter()
+    record = canonical_document(raw, snapshot, stats, set())
+    assert [item["text"] for item in record["sentences"]] == [
+        "今日はガイドの店に行った。",
+    ]
+    assert record["sentences"][0]["review_state"] == "unreviewed"
+    assert stats["rejected:unresolved-markup"] == 1
 
 
 def test_removed_blocks_tables_quotes_lists_and_captions():
