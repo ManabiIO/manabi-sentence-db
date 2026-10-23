@@ -25,7 +25,7 @@ from mwparserfromhell import nodes
 
 from .text import OMITTED_MARKUP, is_complete_sentence, split_sentences
 
-WIKIMEDIA_PROCESSOR_VERSION = "wikimedia-prose-v1"
+WIKIMEDIA_PROCESSOR_VERSION = "wikimedia-prose-v2"
 
 _EXCLUDED_SECTIONS = {
     "脚注", "注釈", "出典", "参考文献", "関連項目", "外部リンク", "脚注と出典",
@@ -203,7 +203,13 @@ def _render(code) -> str:
                 continue
             parts.append(_render(node.text) if node.text is not None else target)
         elif isinstance(node, nodes.ExternalLink):
-            parts.append(_render(node.title) if node.title is not None else "")
+            # An unlabelled link renders a number/URL, not an empty string.
+            # Never splice surrounding text into a newly invented sentence.
+            # Unlike an explicit <ref>, this node does not establish that its
+            # display is only a footnote. Empty/comment-only labels are unknown
+            # too; a real visible label can still be retained.
+            label = _render(node.title) if node.title is not None else ""
+            parts.append(label if label.strip() else OMITTED_MARKUP)
         elif isinstance(node, nodes.Tag):
             tag = str(node.tag).strip().lower()
             if tag in {"ref", "references", "rt", "rp"}:

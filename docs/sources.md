@@ -32,11 +32,11 @@ instructions, exceptions, and review date. Each snapshot then records the actual
 input URLs, upstream version, retrieval time, byte counts, and SHA-256 hashes.
 Each derived build identifies those snapshots and the extraction/filter versions.
 
-## Initial source catalog
+## Enabled source catalog
 
-The first implementation provides Wikimedia and Tatoeba adapters for the four
-sources below. Later candidates in this document are researched options, not
-currently enabled ingestion jobs.
+The implementation provides Wikimedia, Tatoeba, and RealPersonaChat adapters for
+the five sources below. The high-priority additions farther down are researched
+options, not currently enabled ingestion jobs.
 
 | Source | Intended use | Rights and acquisition |
 | --- | --- | --- |
@@ -44,6 +44,7 @@ currently enabled ingestion jobs.
 | Japanese Wikivoyage | Travel and practical prose; small enough for a complete development build | CC BY-SA 4.0 for covered text; same export machinery. |
 | Japanese Wikinews | Archived journalistic prose | Current Japanese footer offers CC BY 4.0 for post-2005-09-25 text; historical versions and pre-cutoff text require the separate treatment below. The project is closed. |
 | Tatoeba Japanese | Sentence-first material with optional direct translation links | CC BY 2.0 **France** by default; some CC0 sentences. Weekly detailed TSV exports preserve sentence IDs and current-owner usernames. Audio is a separate rights decision. |
+| [RealPersonaChat](https://github.com/nu-dialogue/real-persona-chat) | Contemporary conversation; upstream release has 13,583 human dialogues and 408,619 utterances before filtering | CC BY-SA 4.0; commit-pinned JSON, dialogue text only. Profiles, model conversations, and masked utterances are excluded. |
 
 ### Wikipedia and Wikivoyage
 
@@ -170,7 +171,6 @@ conversation and well-attributed parallel data over another copy of Wikipedia.
 
 | Candidate | Upstream scale and character | License / implementation decision |
 | --- | --- | --- |
-| [RealPersonaChat](https://github.com/nu-dialogue/real-persona-chat) | Public release: 13,583 human chat dialogues, 408,619 utterances | CC BY-SA 4.0; commit-pinned JSON, dialogue text only. Strong conversational complement. |
 | [NICT Kyoto Wikipedia corpus](https://alaginrc.nict.go.jp/WikiCorpus/index_E.html) | Approximately 500,000 Japanese–English pairs in 14,111 article XML files | CC BY-SA 3.0; human translations with stages and required NICT attribution. Prefer original XML over flattened KFTT copies. |
 | [NICT ALT Parallel Corpus](https://www2.nict.go.jp/astrec-att/member/mutiyama/ALT/) | 20,106 aligned sentences from 1,893 English Wikinews articles, 13 languages including Japanese | CC BY 4.0 parallel ZIP only. Same page's treebank/annotation downloads are NC and excluded. |
 | [JMultiWOZ](https://github.com/nu-dialogue/jmultiwoz) | 4,246 human role-play travel dialogues spanning six domains | CC BY-SA 4.0; versioned ZIP and JSON; retain dialogue/turn IDs. |
@@ -182,11 +182,12 @@ conversation and well-attributed parallel data over another copy of Wikipedia.
 
 ### Conversational corpora
 
-RealPersonaChat provides one JSON file per dialogue at
-`real_persona_chat/dialogues/*.json`; `utterances` contains stable local IDs and
-text. Its public release masks personal information and omits problematic
-dialogues. Preserve those masks; omit rows that are unusable as standalone
-examples. The separate interlocutor profiles, personality measurements, and
+The enabled [RealPersonaChat configuration](../sources/realpersonachat-ja.yaml)
+pins the archive revision. The adapter reads one JSON file per dialogue at
+`real_persona_chat/dialogues/*.json`; `utterances` contains local IDs and text.
+The publisher's release masks personal information and omits problematic
+dialogues; this pipeline omits the remaining masked utterances. The separate
+interlocutor profiles, personality measurements, and
 demographic tables are unnecessary for a sentence database. Do not accidentally
 include `llm_dialogue_system/`, which contains generated experimental dialogue.
 Respect the publisher's requests against re-identification and impersonation.

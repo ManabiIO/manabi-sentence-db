@@ -110,12 +110,13 @@ request reports which sources failed and preserves completed snapshots.
 | `wikivoyage-ja` | CC BY-SA 4.0 for covered text | Same adapter; practical full-source development input |
 | `wikinews-ja` | `LicenseRef-Wikinews-JA`: historical BY 4.0 / BY 2.5 / BY 2.1 Japan notices retained | Explicit archived `pages-articles` export, or selected API pages |
 | `tatoeba-ja` | CC BY 2.0 **France** | Detailed Japanese TSV, tags, optional English/direct-link TSV |
+| `realpersonachat-ja` | CC BY-SA 4.0 | Commit-pinned human-dialogue JSON archive; excludes profiles, model conversations, and masked utterances |
 
 See [source research and admission decisions](docs/sources.md) for primary
 licensing evidence, source-specific exceptions, and approximately thirty
 researched source families. Priorities for future adapters include
-RealPersonaChat, NICT Kyoto, ALT's parallel corpus, JMultiWOZ, ASDC, and Global
-Voices Japanese. They are researched candidates, not enabled downloads.
+NICT Kyoto, ALT's parallel corpus, JMultiWOZ, ASDC, and Global Voices Japanese.
+They are researched candidates, not enabled downloads.
 
 Wikimedia's new export checksum manifest is the completion signal. The project
 does not silently fall back to a different dump format when an export is absent.
@@ -177,6 +178,10 @@ lists, tables, references, media, and marked quotations. Unknown inline markup
 invalidates the affected sentence rather than joining words across a removed
 template. It also omits sentences with Japanese corner-quoted passages, including
 some title mentions, as a conservative first-version tradeoff.
+Visible external-link labels are retained, but an unlabelled or empty-label link
+leaves the same omission marker as an unknown template. Its neighboring words
+must not be silently joined into an invented example. Explicit reference tags
+continue to be omitted as footnotes.
 
 Shared rules reject malformed, very short/long, obviously archaic, or non-Japanese
 units. Tatoeba's correction/archaic/unnatural tags additionally influence
@@ -184,8 +189,12 @@ selection. Historical kana in names and ambiguous short spellings alone do not
 establish a sentence's era: modern text such as `空を見てふと思い出した。` remains
 eligible. The era heuristic retains specific historical constructions and does
 not treat modern nouns ending in `候`, such as `気候` or `兆候`, as the historical
-auxiliary. Some historical passages without a recognized construction can pass;
-explicit upstream `archaic` / `old-fashioned` tags still exclude a sentence.
+auxiliary. Likewise, `給へ` within a modern noun followed by `へ`, such as
+`時給への不満` or `供給への備え`, is not a historical auxiliary. The same boundary
+rule protects modern `意思ひとつ` and `格言ふう` from the `思ひ` / `言ふ` patterns.
+This deliberately allows some compound historical spellings, such as `物思ひ`,
+through the text heuristic; explicit upstream `archaic` / `old-fashioned` tags
+still exclude a sentence.
 The fixed construction `べからず`, still used in contemporary warnings, is retained
 with the occurrence tag `style:classical-construction`. It is style evidence, not
 a source-era verdict or a content flag. Raw snapshots permit offline recovery of

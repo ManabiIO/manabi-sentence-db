@@ -53,6 +53,14 @@ def test_quality_rejects_unknown_templates_and_archaic_language():
     "店名はヱビスです。",
     "看板にはゑんやと書かれている。",
     "ヰノウエさんに手紙を書いた。",
+    "最低時給への不満が高まっている。",
+    "安定供給への備えが必要です。",
+    "水分補給への配慮をお願いします。",
+    "本人の意思ひとつで決められる。",
+    "教訓を格言ふうに書いてみた。",
+    "冗談を名言ふうに言ってみた。",
+    "試合でボールをけり返した。",
+    "箱をけり飛ばした。",
 ])
 def test_modern_words_and_names_are_not_rejected_as_archaic(text):
     assert assess_sentence(text) == (True, [], None)
@@ -64,9 +72,24 @@ def test_modern_words_and_names_are_not_rejected_as_archaic(text):
     "山の上になりけり。",
     "書状を受け取り候。",
     "「承知いたし候。」",
+    "これを読み給へ。",
+    "花を与え給ふ。",
+    "給へと願った。",
+    "『給へ。』",
+    "思ひ出の道を歩いた。",
+    "言ふことなし。",
+    "【思ひ出の道。】",
+    "彼は“言ふことなし。”と書いた。",
 ])
 def test_specific_historical_constructions_remain_excluded(text):
     assert assess_sentence(text)[2] == "archaic-language"
+
+
+@pytest.mark.parametrize("text", ["物思ひに沈んだ。", "片思ひの歌を読んだ。"])
+def test_ambiguous_compound_spellings_are_not_a_source_era_verdict(text):
+    # A tokenizer-free substring rule cannot distinguish compound boundaries
+    # reliably. Prefer a false negative here to rejecting 意思 + ひとつ.
+    assert assess_sentence(text) == (True, [], None)
 
 
 def test_flags_are_annotations_instead_of_blanket_rejection():
