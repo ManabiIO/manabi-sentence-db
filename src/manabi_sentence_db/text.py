@@ -11,7 +11,7 @@ from __future__ import annotations
 import re
 import unicodedata
 
-TEXT_PROCESSOR_VERSION = "ja-conservative-v2"
+TEXT_PROCESSOR_VERSION = "ja-conservative-v3"
 OMITTED_MARKUP = "\ufffc"
 
 _PAIRS = {
@@ -29,7 +29,7 @@ _JAPANESE = re.compile(r"[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff]")
 # are not mistaken for the historical auxiliary. This remains a heuristic, not
 # a complete era detector; explicit source-era tags are handled by the builder.
 _ARCHAIC = re.compile(
-    r"(?:なりけり|ありけり|ざりけり|給ふ|給へ|思ひ|言ふ|べからず)"
+    r"(?:なりけり|ありけり|ざりけり|給ふ|給へ|思ひ|言ふ)"
     r"|(?<=[ぁ-ゖ])候(?=[。！？!?」』）]|$)"
 )
 _MARKUP = re.compile(r"\ufffc|\{\{|\}\}|\[\[|\]\]|<[^>]+>|https?://|ISBN\s*[0-9]")
@@ -40,6 +40,13 @@ _FLAGS = {
     "self-harm": re.compile(r"自殺|自傷|リストカット"),
     "profanity": re.compile(r"くそったれ|クソ野郎|死ね|くたばれ"),
 }
+
+
+def style_tags(text: str, language: str = "ja") -> list[str]:
+    """Weak style evidence is searchable metadata, not proof of source era."""
+    if language.split("-", 1)[0] == "ja" and "べからず" in text:
+        return ["style:classical-construction"]
+    return []
 
 
 def _normalize(text: str) -> str:

@@ -81,3 +81,13 @@ def test_sentence_sources_can_have_unpunctuated_utterances():
     assert assess_sentence("あ。")[2] == "too-short"
     assert assess_sentence("あ" * 501)[2] == "too-long"
     assert assess_sentence("正常\x00ではない。")[2] == "control-character"
+
+
+def test_classical_construction_in_modern_warning_is_style_evidence():
+    from manabi_sentence_db.text import style_tags
+
+    text = "芝生に入るべからず。"
+    assert assess_sentence(text) == (True, [], None)
+    assert style_tags(text) == ["style:classical-construction"]
+    assert style_tags("普通の現代日本語です。") == []
+    assert style_tags(text, "en") == []

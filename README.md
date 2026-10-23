@@ -186,6 +186,10 @@ eligible. The era heuristic retains specific historical constructions and does
 not treat modern nouns ending in `候`, such as `気候` or `兆候`, as the historical
 auxiliary. Some historical passages without a recognized construction can pass;
 explicit upstream `archaic` / `old-fashioned` tags still exclude a sentence.
+The fixed construction `べからず`, still used in contemporary warnings, is retained
+with the occurrence tag `style:classical-construction`. It is style evidence, not
+a source-era verdict or a content flag. Raw snapshots permit offline recovery of
+previously rejected examples by rebuilding; existing releases are not rewritten.
 A small transparent lexicon annotates sexual content, violence,
 self-harm, and profanity. Sexual-content flags are excluded by default;
 `--exclude-flag violence` adds an exclusion and `--include-sexual-content`

@@ -296,3 +296,21 @@ def test_no_nc_or_nd_license_is_admitted():
     for identifier in ["CC-BY-NC-4.0", "CC-BY-ND-4.0", "CC-BY-NC-SA-4.0", "unknown"]:
         with pytest.raises(DataError, match="Unreviewed"):
             validate_license({"id": identifier, "url": "https://example.org/license"})
+
+
+def test_weak_style_tag_is_preserved_without_overriding_upstream_era():
+    raw = raw_document()
+    raw["sentences"] = [
+        {"text": "芝生に入るべからず。", "tags": ["warning"]},
+        {"text": "門に入るべからず。", "tags": ["archaic"]},
+    ]
+    stats = Counter()
+    manifest = {"source_id": "tatoeba-ja", "snapshot_id": "snapshot",
+                "source": {"adapter": "tatoeba"}}
+    record = canonical_document(raw, manifest, stats, set())
+    assert len(record["sentences"]) == 1
+    item = record["sentences"][0]
+    assert item["tags"] == ["style:classical-construction", "warning"]
+    assert item["review_state"] == "unreviewed"
+    assert item["content_flags"] == []
+    assert stats["rejected:archaic-language"] == 1
