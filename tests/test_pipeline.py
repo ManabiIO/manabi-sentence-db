@@ -225,6 +225,25 @@ def test_tatoeba_editorial_tags_exclude_known_bad_units(tag, reason):
     assert stats[f"rejected:{reason}"] == 1
 
 
+def test_era_filter_preserves_modern_candidates_without_claiming_review():
+    raw = raw_document()
+    modern = ["この地域は温暖な気候。", "空を見てふと思い出した。", "ゐろはさんと歩いた。"]
+    raw["sentences"] = [{"text": text} for text in modern] + [
+        {"text": "昔のことを思ひ出した。"},
+        {"text": "けふも空は晴れている。", "tags": ["archaic"]},
+    ]
+    stats = Counter()
+    manifest = {
+        "source_id": "tatoeba-ja",
+        "snapshot_id": "snapshot",
+        "source": {"adapter": "tatoeba"},
+    }
+    record = canonical_document(raw, manifest, stats, set())
+    assert [item["text"] for item in record["sentences"]] == modern
+    assert all(item["review_state"] == "unreviewed" for item in record["sentences"])
+    assert stats["rejected:archaic-language"] == 2
+
+
 def test_reference_schema_forbids_redistributed_sentence_text(tmp_path):
     build = make_build(tmp_path)
     record = next(iter_records(build, verify_build(build)))

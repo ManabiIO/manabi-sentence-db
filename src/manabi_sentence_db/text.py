@@ -11,7 +11,7 @@ from __future__ import annotations
 import re
 import unicodedata
 
-TEXT_PROCESSOR_VERSION = "ja-conservative-v1"
+TEXT_PROCESSOR_VERSION = "ja-conservative-v2"
 OMITTED_MARKUP = "\ufffc"
 
 _PAIRS = {
@@ -22,9 +22,15 @@ _PAIRS = {
 # an opening/closing delimiter, but is retained after terminal punctuation.
 _CLOSERS = "".join(_PAIRS.values()) + "’\"'"
 _JAPANESE = re.compile(r"[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff]")
+# Historical kana can occur in modern names, and short spellings such as てふ
+# can cross modern word boundaries (見て + ふと). Neither is sufficient evidence
+# to discard a sentence. Keep the more specific constructions, and require a
+# hiragana ending before sentence-final 候 so nouns such as 気候, 兆候 and 居候
+# are not mistaken for the historical auxiliary. This remains a heuristic, not
+# a complete era detector; explicit source-era tags are handled by the builder.
 _ARCHAIC = re.compile(
-    r"[ゐゑヰヱ]|(?:なりけり|ありけり|ざりけり|給ふ|給へ|思ひ|言ふ|けふ|てふ|べからず)"
-    r"|候(?=[。！？!?」』）]|$)"
+    r"(?:なりけり|ありけり|ざりけり|給ふ|給へ|思ひ|言ふ|べからず)"
+    r"|(?<=[ぁ-ゖ])候(?=[。！？!?」』）]|$)"
 )
 _MARKUP = re.compile(r"\ufffc|\{\{|\}\}|\[\[|\]\]|<[^>]+>|https?://|ISBN\s*[0-9]")
 _METADATA = re.compile(r"^(?:[*#;:|]|Category:|カテゴリ:|ファイル:|File:|出典[:：]|注釈[:：])", re.I)
