@@ -8,12 +8,12 @@ from __future__ import annotations
 
 import hashlib
 import os
+import shutil
 import sqlite3
 import tempfile
 import zipfile
 from pathlib import Path
 
-from .build import iter_records, verify_build
 from .serialization import DataError, canonical_json, sha256_file
 
 
@@ -22,6 +22,8 @@ def sentence_identity(language: str, text: str) -> str:
 
 
 def export_normalized(build: Path, output: Path, *, source_id=None, catalog=None) -> Path:
+    from .build import iter_records, verify_build
+
     catalog = catalog or verify_build(build)
     if output.exists() or output.is_symlink():
         raise DataError(f"Output already exists: {output}")
@@ -98,26 +100,40 @@ def export_normalized(build: Path, output: Path, *, source_id=None, catalog=None
             "identity": "sha256(canonical_json([language,NFC_text]))",
             "members": {f"{name}.jsonl": sha256_file(root / f"{name}.jsonl") for name in names},
         }
-        # Fixed member timestamps make identical records reproducible.
-        with zipfile.ZipFile(
-            root / "corpus.zip", "w", compression=zipfile.ZIP_DEFLATED, compresslevel=6
-        ) as archive:
-            for name in names:
-                info = zipfile.ZipInfo(f"{name}.jsonl")
-                info.compress_type = zipfile.ZIP_DEFLATED
-                with archive.open(info, "w", force_zip64=True) as outgoing:
-                    with (root / f"{name}.jsonl").open("rb") as incoming:
-                        import shutil
-
-                        shutil.copyfileobj(incoming, outgoing)
-            archive.writestr("manifest.json", canonical_json(manifest))
-            archive.write(build / "licenses.json", "licenses.json")
-            archive.write(build / "catalog.json", "catalog.json")
-            for snapshot in catalog["snapshots"]:
-                if source_id is None or snapshot["source_id"] == source_id:
-                    archive.write(build / snapshot["manifest"], snapshot["manifest"])
+        _write_normalized_archive(root, build, catalog, source_id, manifest)
         with zipfile.ZipFile(root / "corpus.zip") as archive:
             if archive.testzip() is not None:
                 raise DataError("Normalized archive failed CRC verification")
         os.replace(root / "corpus.zip", output)
     return output
+
+
+def _write_normalized_archive(root, build, catalog, source_id, manifest):
+    """Stream verified staging files with reproducible ZIP transport metadata.
+
+    Embedded provenance bytes are unchanged. Byte reproducibility assumes the
+    same Python/zlib runtime, not identical compressed output across codecs.
+    """
+    def info(name):
+        member = zipfile.ZipInfo(name, date_time=(1980, 1, 1, 0, 0, 0))
+        member.compress_type = zipfile.ZIP_DEFLATED
+        member.create_system = 3
+        member.external_attr = 0o100644 << 16
+        return member
+
+    with zipfile.ZipFile(
+        root / "corpus.zip", "w", compression=zipfile.ZIP_DEFLATED, compresslevel=6
+    ) as archive:
+        def write_file(path, name):
+            with archive.open(info(name), "w", force_zip64=True) as outgoing:
+                with path.open("rb") as incoming:
+                    shutil.copyfileobj(incoming, outgoing, length=1024 * 1024)
+
+        for name in ("works", "sentences", "occurrences", "translations", "references"):
+            write_file(root / f"{name}.jsonl", f"{name}.jsonl")
+        archive.writestr(info("manifest.json"), canonical_json(manifest), compresslevel=6)
+        for name in ("licenses.json", "catalog.json"):
+            write_file(build / name, name)
+        for snapshot in catalog["snapshots"]:
+            if source_id is None or snapshot["source_id"] == source_id:
+                write_file(build / snapshot["manifest"], snapshot["manifest"])
