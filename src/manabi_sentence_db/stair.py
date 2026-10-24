@@ -23,7 +23,7 @@ def iter_documents(manifest, snapshot_dir):
             ledger.execute("CREATE TABLE seen(id INTEGER PRIMARY KEY)")
             seen_members = set()
             for entry in manifest["files"]:
-                if entry["role"] != "stair-tar":
+                if entry["role"] not in {"stair-tar", "stair-captions"}:
                     continue
                 with tarfile.open(safe_relative(snapshot_dir, entry["path"]), mode="r|gz") as archive:
                     for member in archive:

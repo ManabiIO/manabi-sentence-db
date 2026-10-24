@@ -114,6 +114,7 @@ request reports which sources failed and preserves completed snapshots.
 | `jmultiwoz-ja` | CC BY-SA 4.0 | Commit/hash-pinned human task dialogue turns; excludes goals, worker metadata, backend data, and model outputs |
 | `stair-captions-ja` | CC BY 4.0 | Commit/hash-pinned v1.2 Japanese caption text; excludes images and tokenized duplicates |
 | `scp-jp-aptitude-ja` | CC BY-SA 3.0 | One reviewed contemporary Tale, revision/body-hash pinned; exact raw HTML and paragraph units retained |
+| `scp-jp-duck-merchant-ja`, `scp-jp-id-photo-ja`, `scp-jp-fixed-point-ja` | CC BY-SA 3.0 | Three additional individually reviewed contemporary Tales; direct prose only, exact credit/revision/body pins |
 | `wikibooks-ja` | CC BY-SA 4.0 for covered text | Current-revision MediaWiki exports or selected API pages; textbook prose only |
 
 See [source research and admission decisions](docs/sources.md) for primary
@@ -293,10 +294,11 @@ images, and tokenized duplicates, and preserve each source's separate rights.
 Captions explicitly retain their dependence on an image that is not included.
 See [source review and exact scopes](docs/sources.md#additional-enabled-sources-2026-10-23).
 
-A one-work allowlist adds the contemporary SCP-JP narrative **『適性』** with
-individually checked author/license credit, revision and body hash. It preserves
-paragraph context and does not admit the rest of the site. See
-[the narrative review](docs/sources.md#one-curated-contemporary-japanese-narrative-適性).
+An explicit four-work allowlist adds contemporary SCP-JP narratives
+**『適性』『カモと商人』『証明写真』『定点観測』** with individually checked
+author/license credits, revisions and body hashes. It preserves paragraph context
+and does not admit the rest of the site. See [the original narrative review](docs/sources.md#one-curated-contemporary-japanese-narrative-適性)
+and [the additional work reviews](docs/sources.md#three-additional-curated-contemporary-tales).
 
 Processor 5 splits multi-sentence publisher units before indexing. It preserves
 the original unit, exact Unicode ranges, and original-unit translations in

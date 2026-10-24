@@ -428,3 +428,37 @@ by the publisher's `jp` and `tale` classification and its
 [FAQ definition of Tale-JP originals](https://scp-jp.wikidot.com/faq-jp), not by an inferred author's
 nationality. All extracted/adapted text retains CC BY-SA 3.0 and a modification
 notice. No external media or translations are included.
+
+
+### Three additional curated contemporary Tales
+
+Reviewed on 2026-10-24, each of these original Japanese Tales credits
+**aisurakuto (2019)** in its own publisher credit module, with CC BY-SA 3.0. The
+creation year is not a confirmed publication date. Human authorship remains unknown.
+The original-Japanese evidence is the individual `jp` and `tale` tags, interpreted
+using the publisher FAQ cited above. These are fictional narrative/dialogue,
+including references to the shared fictional SCP universe; none is a collection
+of externally quoted texts. No linked page, image, script, rating, credit module,
+footer or comment is imported as prose.
+
+| Work | Pinned revision | Revision timestamp (UTC) | Extracted body SHA-256 |
+|---|---|---|---|
+| [カモと商人](https://scp-jp.wikidot.com/a-duck-and-a-merchant) | 8 | 2026-09-25T05:15:53Z | `4e85ec9b7e8cef50f8ec2c587bed7600f4c45a5ff8bf3fb801f714ac2ca2103d` |
+| [証明写真](https://scp-jp.wikidot.com/id-photo) | 5 | 2022-01-28T13:48:52Z | `ab519e18e659d5f54700886392ac5f99f15e4833b90ef2de3c721eafafb70474` |
+| [定点観測](https://scp-jp.wikidot.com/fixed-point-observation) | 9 | 2022-07-23T16:37:43Z | `eea86d516075c45ebcb7d7dcea825848a27f5f09d576356a50d885894ca00319` |
+
+The reviewed boundary selects direct `p` children of `page-content`, validates
+inline-only content, and skips spacing-only paragraphs. Nested modules are never
+traversed. The body hash covers all selected nonblank paragraphs, joined by two
+newlines. The source ID fixes the page URL and boundary profile in code; source
+configuration cannot repurpose the adapter for an arbitrary page. The exact title,
+credit (including the publisher's copyright prefix), license link, revision,
+timestamp, tags and body hash are revalidated during acquisition and every build.
+The three snapshots yield 124 nonblank paragraphs and 462 admitted sentence
+occurrences after ordinary short-fragment rejection; this remains a small genre
+supplement, not evidence of broad narrative coverage.
+
+The inspected candidate `before-date` is excluded from this expansion because of
+explicit sexual content. `the-kitten-couldn-t-get-down` and `last-holiday` remain
+deferred because the inspected pages did not provide the required individual
+credit module. These exclusions are not a site-wide rights determination.

@@ -1,6 +1,7 @@
 import copy
 import hashlib
 from collections import Counter
+from datetime import datetime
 from pathlib import Path
 
 import pytest
@@ -81,12 +82,14 @@ def test_fail_closed_on_content_metadata_and_layout_drift(sample, before, after,
 
 def test_source_cannot_be_repurposed_for_other_page_or_license(sample):
     source, data, _ = sample
-    for field in ("url", "license"):
+    for field in ("url", "license", "id"):
         changed = copy.deepcopy(source)
         if field == "url":
             changed["acquisition"]["url"] = "https://scp-jp.wikidot.com/other"
-        else:
+        elif field == "license":
             changed["license"]["id"] = "CC-BY-4.0"
+        else:
+            changed["id"] = "scp-jp-unreviewed-ja"
         with pytest.raises(DataError, match="Only the reviewed"):
             extract(data, changed)
 
@@ -123,3 +126,64 @@ def test_failed_pin_is_not_published_as_a_snapshot(sample, tmp_path, monkeypatch
     with pytest.raises(DataError, match="body changed"):
         create_snapshot(source, tmp_path / "snapshot", mode="full")
     assert not (tmp_path / "snapshot").exists()
+
+
+@pytest.mark.parametrize("source_id", [
+    "scp-jp-duck-merchant-ja", "scp-jp-id-photo-ja", "scp-jp-fixed-point-ja",
+])
+def test_reviewed_direct_paragraph_profile_is_pinned_and_excludes_modules(
+    source_id, tmp_path, monkeypatch,
+):
+    source = load_source(Path("sources") / f"{source_id}.yaml")
+    pin = source["acquisition"]
+    timestamp = int(datetime.fromisoformat(pin["timestamp"].replace("Z", "+00:00")).timestamp())
+    data = f"""<div id="page-title">{pin['title']}</div>
+<div id="page-content">
+<div id="u-credit-view"><div class="credit">タイトル: {pin['title']} 著者: {pin['credit_author']} 作成年: {pin['year']}</div>
+<a href="https://creativecommons.org/licenses/by-sa/3.0/deed.ja">license</a></div>
+<div class="rating"><p>MODULE NOT NARRATIVE</p></div>
+<p>　今日は図書館へ行きました。</p><p><br> </p>
+<p>「静かですね。」<br>「そうですね。」</p>
+<div class="footer"><p>FOOTER NOT NARRATIVE</p><img src="not-fetched"></div></div>
+<div class="page-tags"><a>jp</a><a>tale</a></div>
+<div id="page-info">ページリビジョン: {pin['revision']}, 最終更新: <span class="time_{timestamp}"></span></div>""".encode()
+    paragraphs, digest = extract(data, source, check_hash=False)
+    assert paragraphs == ["　今日は図書館へ行きました。", "「静かですね。」\n「そうですね。」"]
+    source["acquisition"]["body_sha256"] = digest
+    assert extract(data, source)[1] == digest
+    slug = pin['url'].rsplit('/', 1)[1]
+    (tmp_path / f"{slug}.html").write_bytes(data)
+    raw = list(iter_documents({"source": source, "files": [
+        {"role": ROLE, "path": f"{slug}.html"},
+    ]}, tmp_path))[0]
+    assert raw['url'] == pin['url'] and raw['native_id'] == slug
+    assert raw['authorship'] == 'unknown'
+    assert 'published_at' not in raw  # Credit year is not a publication date.
+    calls = []
+
+    def metadata(url, agent):
+        calls.append(url)
+        assert url == pin['url']
+        return data
+
+    monkeypatch.setattr('manabi_sentence_db.snapshot._metadata', metadata)
+    snapshot = create_snapshot(source, tmp_path / 'snapshot', mode='full')
+    assert (snapshot.parent / f'{slug}.html').read_bytes() == data
+    assert create_snapshot(source, snapshot.parent, mode='full') == snapshot
+    assert calls == [pin['url']]
+    build_corpus([snapshot], tmp_path / 'build')
+    catalog = verify_build(tmp_path / 'build')
+    assert len(list(iter_records(tmp_path / 'build', catalog))) == 1
+    for before, after, message in [
+        ('今日は図書館', '明日は図書館', 'body changed'),
+        (pin['credit_author'], 'Other Author', 'attribution changed'),
+        ('by-sa/3.0/deed.ja', 'by-nc/3.0/deed.ja', 'license changed'),
+        (f"リビジョン: {pin['revision']},", 'リビジョン: 999,', 'revision changed'),
+        ('<p>　今日は', '<p><img src="third-party">今日は', 'media'),
+    ]:
+        with pytest.raises(DataError, match=message):
+            extract(data.decode().replace(before, after).encode(), source)
+    changed = copy.deepcopy(source)
+    changed['acquisition']['url'] = 'https://scp-jp.wikidot.com/unreviewed'
+    with pytest.raises(DataError, match='Only the reviewed'):
+        extract(data, changed)
