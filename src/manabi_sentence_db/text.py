@@ -11,7 +11,7 @@ from __future__ import annotations
 import re
 import unicodedata
 
-TEXT_PROCESSOR_VERSION = "ja-conservative-v5"
+TEXT_PROCESSOR_VERSION = "ja-conservative-v6"
 PUBLISHER_SEGMENTER_VERSION = "publisher-unit-segmentation-v1"
 OMITTED_MARKUP = "\ufffc"
 
@@ -87,6 +87,17 @@ def sentence_spans(text: str, language: str = "ja") -> list[tuple[int, int]]:
                 and i + 1 < len(line)
                 and line[i - 1].isdigit()
                 and line[i + 1].isdigit()
+            ):
+                i += 1
+                continue
+            # Japanese prose can contain names/labels such as Zou! or
+            # Yahoo! followed by a Japanese particle. Their punctuation does
+            # not end the surrounding sentence. Do not join ordinary Japanese
+            # exclamations, whitespace-separated sentences, or line boundaries.
+            if (
+                japanese and line[i] in "!?！？" and i > 0
+                and line[i - 1].isascii() and line[i - 1].isalnum()
+                and line[i + 1:].startswith(("の", "は", "が", "を", "に", "で", "と", "も", "へ", "から", "まで"))
             ):
                 i += 1
                 continue
