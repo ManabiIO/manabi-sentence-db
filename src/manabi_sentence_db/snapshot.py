@@ -533,14 +533,13 @@ def create_snapshot(
         elif adapter == "tatoeba":
             files = _tatoeba(source, staging, requested_translations, agent)
         elif adapter == "scp-curated":
-            from .scp_curated import ROLE, URL, extract
+            from .scp_curated import ROLE, extract, reviewed_page
             if mode != "full" or date or max_files or titles:
                 raise SnapshotError("The curated narrative uses its complete one-work allowlist")
-            if source["acquisition"]["url"] != URL:
-                raise SnapshotError("Unreviewed curated narrative URL")
-            data = _metadata(URL, agent)
+            slug, url, _ = reviewed_page(source)
+            data = _metadata(url, agent)
             extract(data, source)
-            files = [_save_metadata(staging, "aptitude.html", ROLE, URL, data)]
+            files = [_save_metadata(staging, f"{slug}.html", ROLE, url, data)]
         elif adapter in {"realpersonachat", "jmultiwoz", "stair"}:
             if mode != "full" or date or max_files or titles:
                 raise SnapshotError(

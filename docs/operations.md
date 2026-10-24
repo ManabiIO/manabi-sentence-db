@@ -168,8 +168,8 @@ those would mislabel the pinned complete archive. Use `build --max-documents 10`
 for a development sample. Complete archives are verified against their reviewed
 SHA-256 and byte length. STAIR image data is never requested.
 
-The curated narrative uses its complete one-work allowlist. Its live page must
-still match the reviewed title, author, license, revision and body hash; changes
+Each curated narrative source uses its complete one-work allowlist. Its live page
+must still match the reviewed title, author, license, revision and body hash; changes
 require a new source review before acquisition succeeds.
 
 Builds use exactly one snapshot per source. To apply publisher-unit segmentation
@@ -184,3 +184,11 @@ for translation alignment and Unicode offset details, and
 [vocabulary coverage](vocabulary-coverage.md) for comparisons that measure what
 new sources add beyond repeated sentence text. These operations do not publish
 or replace a live corpus automatically.
+
+
+The curated narrative allowlist also includes `scp-jp-duck-merchant-ja`,
+`scp-jp-id-photo-ja`, and `scp-jp-fixed-point-ja`; snapshot each separately with
+`--mode full`. Cached raw snapshots remain immutable. The STAIR adapter accepts
+the legacy `stair-captions` role as well as the current `stair-tar` role so earlier
+verified snapshot manifests can be rebuilt without modifying their identities or
+redownloading the pinned archive. Both roles run identical member/identity checks.

@@ -1,4 +1,4 @@
-# Source priorities and admission policy — 2026-10-22
+# Source priorities and admission policy — 2026-10-24
 
 Accept licenses allowing commercial redistribution **and modification**. Exclude
 all NC and ND variants, machine-generated Japanese, historical Japanese, and
@@ -9,8 +9,8 @@ and language origin must remain unknown; translations do not become Japanese ori
 ## Enabled adapters
 
 Wikipedia, Wikivoyage, Wikibooks, archived Japanese Wikinews, Tatoeba,
-RealPersonaChat, JMultiWOZ, STAIR Captions, and the single curated SCP-JP Tale
-『適性』.
+RealPersonaChat, JMultiWOZ, STAIR Captions, and four individually curated SCP-JP Tales
+『適性』『カモと商人』『証明写真』『定点観測』.
 Wikimedia and Tatoeba provenance does not establish blanket human authorship or
 original Japanese. Their releases preserve that uncertainty. Machine generation
 metadata explicitly excludes an item from the Japanese corpus. Heuristic era and
@@ -45,8 +45,8 @@ specific release and underlying content rights are reviewed.
 
 ## Fiction and longer writing
 
-One original SCP-JP Tale, [『適性』](sources.md#one-curated-contemporary-japanese-narrative-適性),
-is now admitted with per-work credit, CC BY-SA 3.0, and revision/body-hash pins.
+Four original SCP-JP Tales are admitted with per-work credit, CC BY-SA 3.0, and
+revision/body-hash pins; see the [individual review notes](sources.md#three-additional-curated-contemporary-tales).
 Further original SCP-JP Tales and Backrooms JP require per-work exception checks,
 separating translated international fiction from original Japanese. Preserve mixed
 BY-SA versions. Hoshizora's API license filters can identify individual BY/BY-SA/PD

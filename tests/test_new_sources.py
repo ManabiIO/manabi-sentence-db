@@ -96,3 +96,11 @@ def test_stair_fails_on_incomplete_or_ambiguous_corpus(tmp_path, options):
     _tar(tmp_path, **options)
     with pytest.raises(DataError):
         list(captions(_manifest("stair-captions-ja", "stair-tar", "source.tar.gz"), tmp_path))
+
+
+def test_stair_reads_immutable_legacy_snapshot_role(tmp_path):
+    # Existing published snapshots used this role. Do not rewrite their manifest
+    # identities or redownload the unchanged pinned archive.
+    _tar(tmp_path)
+    manifest = _manifest("stair-captions-ja", "stair-captions", "source.tar.gz")
+    assert len(list(captions(manifest, tmp_path))) == 2

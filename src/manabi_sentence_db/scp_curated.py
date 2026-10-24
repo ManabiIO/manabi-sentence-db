@@ -1,4 +1,4 @@
-"""One reviewed Japanese Tale; fail closed on changed text, credit, or layout."""
+"""Reviewed Japanese Tales; fail closed on changed text, credit, or layout."""
 
 import hashlib
 import re
@@ -9,7 +9,24 @@ from html.parser import HTMLParser
 from .serialization import DataError, safe_relative
 
 URL = "https://scp-jp.wikidot.com/aptitude"
+# Source identity also fixes the extraction boundary. New pages require review,
+# an explicit entry here, and a separately pinned source manifest.
+REVIEWED = {
+    "scp-jp-aptitude-ja": ("aptitude", "justified-div"),
+    "scp-jp-duck-merchant-ja": ("a-duck-and-a-merchant", "direct-paragraphs"),
+    "scp-jp-id-photo-ja": ("id-photo", "direct-paragraphs"),
+    "scp-jp-fixed-point-ja": ("fixed-point-observation", "direct-paragraphs"),
+}
 ROLE = "scp-curated-html"
+
+
+def reviewed_page(source):
+    slug, boundary = REVIEWED.get(source["id"], (None, None))
+    url = f"https://scp-jp.wikidot.com/{slug}"
+    if slug is None or source["acquisition"]["url"] != url:
+        raise DataError("Only the reviewed narrative work URLs are allowed")
+    return slug, url, boundary
+
 MAX_HTML_BYTES = 256 * 1024
 VOID = {
     "area",
@@ -87,13 +104,12 @@ def _one(nodes, description):
 def extract(data, source, *, check_hash=True):
     """Return reviewed paragraph units; no scripts, links, or media are fetched."""
     pin = source["acquisition"]
+    _, _, boundary = reviewed_page(source)
     if (
-        source["id"] != "scp-jp-aptitude-ja"
-        or pin["url"] != URL
-        or source["license"]
+        source["license"]
         != {"id": "CC-BY-SA-3.0", "url": "https://creativecommons.org/licenses/by-sa/3.0/"}
     ):
-        raise DataError("Only the reviewed aptitude work and license are allowed")
+        raise DataError("Only the reviewed narrative license is allowed")
     if len(data) > MAX_HTML_BYTES:
         raise DataError("Oversized curated narrative HTML")
     page = Page()
@@ -108,7 +124,7 @@ def extract(data, source, *, check_hash=True):
     credit_view = by_id("u-credit-view")
     credits = [n for n in credit_view.walk() if "credit" in n.attrs.get("class", "").split()]
     credit = re.sub(r"\s+", " ", _one(credits, "credit").text()).strip()
-    if credit != f"タイトル: {pin['title']} 著者: {pin['author']} 作成年: {pin['year']}":
+    if credit != f"タイトル: {pin['title']} 著者: {pin.get('credit_author', pin['author'])} 作成年: {pin['year']}":
         raise DataError("Curated narrative attribution changed")
     license_links = [
         n.attrs.get("href", "")
@@ -134,18 +150,19 @@ def extract(data, source, *, check_hash=True):
     if not {"jp", "tale"} <= tags:
         raise DataError("Curated narrative original-Japanese tags changed")
     content = by_id("page-content")
-    body = _one(
-        [
-            n
-            for n in content.children
-            if isinstance(n, Node)
-            and n.tag == "div"
-            and n.attrs == {"style": "text-align: justify;"}
-        ],
-        "body boundary",
-    )
+    if boundary == "justified-div":
+        body = _one(
+            [n for n in content.children if isinstance(n, Node) and n.tag == "div"
+             and n.attrs == {"style": "text-align: justify;"}],
+            "body boundary",
+        )
+        children = body.children
+    else:
+        # Reviewed pages put prose directly under page-content. Deliberately do
+        # not descend into credit, rating, navigation, media or other modules.
+        children = [n for n in content.children if isinstance(n, Node) and n.tag == "p"]
     paragraphs = []
-    for child in body.children:
+    for child in children:
         if isinstance(child, str):
             if child.strip():
                 raise DataError("Unexpected text outside narrative paragraphs")
@@ -168,6 +185,8 @@ def extract(data, source, *, check_hash=True):
         text = "\n".join(line.strip(" \t\r\n") for line in inline(child).split("\n")).strip(
             " \t\r\n"
         )
+        if not text and boundary == "direct-paragraphs":
+            continue  # Publisher spacing-only paragraphs are not sentence units.
         if not text or len(text) > 20_000:
             raise DataError("Invalid curated narrative paragraph")
         paragraphs.append(text)
@@ -186,6 +205,7 @@ def iter_documents(manifest, snapshot_dir):
     if path.stat().st_size > MAX_HTML_BYTES:
         raise DataError("Oversized curated narrative HTML")
     paragraphs, digest = extract(path.read_bytes(), source)
+    slug, url, _ = reviewed_page(source)
     pin, position, sentences = source["acquisition"], 0, []
     for ordinal, paragraph in enumerate(paragraphs):
         sentences.append(
@@ -204,13 +224,13 @@ def iter_documents(manifest, snapshot_dir):
         )
         position += len(paragraph) + 2
     yield {
-        "native_id": "aptitude",
+        "native_id": slug,
         "language": "ja",
         "title": pin["title"],
-        "url": URL,
+        "url": url,
         "license": source["license"],
         "attribution": source["attribution"],
-        "revision": {"id": str(pin["revision"]), "timestamp": pin["timestamp"], "url": URL},
+        "revision": {"id": str(pin["revision"]), "timestamp": pin["timestamp"], "url": url},
         "authorship": "unknown",
         "language_origin": "original_japanese",
         "content_type": "narrative",
