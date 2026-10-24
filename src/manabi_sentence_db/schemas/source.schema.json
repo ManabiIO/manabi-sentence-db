@@ -21,7 +21,10 @@
       "enum": [
         "wikimedia",
         "tatoeba",
-        "realpersonachat"
+        "realpersonachat",
+        "jmultiwoz",
+        "stair",
+        "scp-curated"
       ]
     },
     "license": {

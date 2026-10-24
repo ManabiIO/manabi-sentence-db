@@ -149,3 +149,38 @@ Record-level licensing and attribution remain attached even in a combined databa
 `uv.lock` pins Python dependencies. Build metadata records the processor version/code identity, input snapshots, filtering configuration, and runtime versions. ZIP member order, dates, and permissions are fixed. Canonical record and shard hashes provide the stable content comparison; SQLite binary bytes may differ across SQLite runtime versions, so compare artifacts within the documented runtime when binary identity matters.
 
 Refresh a source only through an explicit snapshot operation. Keep snapshots needed for published versions and do not replace a release asset in place. If content must be removed or corrected, create a new snapshot/build and release with clear replacement metadata. The source and license review in [sources.md](sources.md) remains part of that decision.
+
+
+
+## Additional sources and boundary rebuilds (processor 5)
+
+Acquire the reviewed sources explicitly:
+
+```sh
+mise run snapshot -- --source jmultiwoz-ja --mode full --output data/snapshots/jmultiwoz
+mise run snapshot -- --source stair-captions-ja --mode full --output data/snapshots/stair
+mise run snapshot -- --source wikibooks-ja --mode sample --output data/snapshots/wikibooks-sample
+mise run snapshot -- --source scp-jp-aptitude-ja --mode full --output data/snapshots/scp-aptitude
+```
+
+JMultiWOZ and STAIR reject sample/date/file-limit acquisition options because
+those would mislabel the pinned complete archive. Use `build --max-documents 10`
+for a development sample. Complete archives are verified against their reviewed
+SHA-256 and byte length. STAIR image data is never requested.
+
+The curated narrative uses its complete one-work allowlist. Its live page must
+still match the reviewed title, author, license, revision and body hash; changes
+require a new source review before acquisition succeeds.
+
+Builds use exactly one snapshot per source. To apply publisher-unit segmentation
+to existing Tatoeba/RealPersonaChat data, rebuild their retained raw snapshots
+with processor 5; no source redownload is required. Use a new output directory,
+review rejection counts and source-unit context, then repackage and rebuild the
+private serving index. Keep old releases available by their original build IDs;
+do not mix old and rebuilt snapshots of one source in a consumer index.
+
+See [the source-unit contract](normalized-format.md#publisher-unit-segmentation)
+for translation alignment and Unicode offset details, and
+[vocabulary coverage](vocabulary-coverage.md) for comparisons that measure what
+new sources add beyond repeated sentence text. These operations do not publish
+or replace a live corpus automatically.

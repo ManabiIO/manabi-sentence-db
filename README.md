@@ -111,11 +111,15 @@ request reports which sources failed and preserves completed snapshots.
 | `wikinews-ja` | `LicenseRef-Wikinews-JA`: historical BY 4.0 / BY 2.5 / BY 2.1 Japan notices retained | Explicit archived `pages-articles` export, or selected API pages |
 | `tatoeba-ja` | CC BY 2.0 **France** | Detailed Japanese TSV, tags, optional English/direct-link TSV |
 | `realpersonachat-ja` | CC BY-SA 4.0 | Commit-pinned human-dialogue JSON archive; excludes profiles, model conversations, and masked utterances |
+| `jmultiwoz-ja` | CC BY-SA 4.0 | Commit/hash-pinned human task dialogue turns; excludes goals, worker metadata, backend data, and model outputs |
+| `stair-captions-ja` | CC BY 4.0 | Commit/hash-pinned v1.2 Japanese caption text; excludes images and tokenized duplicates |
+| `scp-jp-aptitude-ja` | CC BY-SA 3.0 | One reviewed contemporary Tale, revision/body-hash pinned; exact raw HTML and paragraph units retained |
+| `wikibooks-ja` | CC BY-SA 4.0 for covered text | Current-revision MediaWiki exports or selected API pages; textbook prose only |
 
 See [source research and admission decisions](docs/sources.md) for primary
 licensing evidence, source-specific exceptions, and approximately thirty
 researched source families. Priorities for future adapters include
-NICT Kyoto, ALT's parallel corpus, JMultiWOZ, ASDC, and Global Voices Japanese.
+NICT Kyoto, ALT's parallel corpus, ASDC, and Global Voices Japanese.
 They are researched candidates, not enabled downloads.
 
 Wikimedia's new export checksum manifest is the completion signal. The project
@@ -271,8 +275,39 @@ original document-oriented exports. New consumers should use v2 to separate uniq
 sentences from their independently licensed occurrences. See
 [the normalized format](docs/normalized-format.md).
 
-RealPersonaChat is now an enabled fifth source. Its pinned archive contains 13,583
+RealPersonaChat is an enabled dialogue source. Its pinned archive contains 13,583
 human dialogues; profiles and model conversations are excluded. Acquire once with
 `mise run snapshot -- --source realpersonachat-ja --mode full --output data/snapshots/realpersonachat`,
 then build offline. Use `build --max-documents 10` for a small development corpus.
 The latest source priorities and exclusions are in [the updated shortlist](docs/source-priorities.md).
+
+
+## Source breadth and sentence units
+
+The reviewed catalog now also enables **JMultiWOZ** human task dialogues,
+**STAIR Captions** original Japanese image descriptions (text only), and
+**Japanese Wikibooks** expository textbook prose. JMultiWOZ and STAIR snapshots
+pin both a publisher commit and verified archive SHA-256. The adapters stream
+individual dialogues/captions, omit worker profiles, models, backend databases,
+images, and tokenized duplicates, and preserve each source's separate rights.
+Captions explicitly retain their dependence on an image that is not included.
+See [source review and exact scopes](docs/sources.md#additional-enabled-sources-2026-10-23).
+
+A one-work allowlist adds the contemporary SCP-JP narrative **『適性』** with
+individually checked author/license credit, revision and body hash. It preserves
+paragraph context and does not admit the rest of the site. See
+[the narrative review](docs/sources.md#one-curated-contemporary-japanese-narrative-適性).
+
+Processor 5 splits multi-sentence publisher units before indexing. It preserves
+the original unit, exact Unicode ranges, and original-unit translations in
+`source_unit`; those translations are never relabeled as fragment translations.
+Quoted reporting clauses stay together. Rebuild from retained snapshots and
+recompile the consumer index to apply this change to existing records.
+[The interchange contract](docs/normalized-format.md#publisher-unit-segmentation)
+explains offsets, identity changes, context limits, and compatibility.
+
+Use `vocabulary-coverage` to compare unique analyzed lemmas and their marginal
+coverage against a fixed set of existing sources. Analysis has an explicit
+version and missing analysis is reported as unknown. This public pipeline does
+not include a proprietary tokenizer or treat substring counts as vocabulary.
+See [vocabulary coverage](docs/vocabulary-coverage.md) for the export contract and commands.

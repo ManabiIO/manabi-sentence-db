@@ -34,8 +34,8 @@ Each derived build identifies those snapshots and the extraction/filter versions
 
 ## Enabled source catalog
 
-The implementation provides Wikimedia, Tatoeba, and RealPersonaChat adapters for
-the five sources below. The high-priority additions farther down are researched
+The implementation provides Wikimedia, Tatoeba, RealPersonaChat, JMultiWOZ, and
+STAIR adapters for the sources below. The high-priority additions farther down are researched
 options, not currently enabled ingestion jobs.
 
 | Source | Intended use | Rights and acquisition |
@@ -45,6 +45,10 @@ options, not currently enabled ingestion jobs.
 | Japanese Wikinews | Archived journalistic prose | Current Japanese footer offers CC BY 4.0 for post-2005-09-25 text; historical versions and pre-cutoff text require the separate treatment below. The project is closed. |
 | Tatoeba Japanese | Sentence-first material with optional direct translation links | CC BY 2.0 **France** by default; some CC0 sentences. Weekly detailed TSV exports preserve sentence IDs and current-owner usernames. Audio is a separate rights decision. |
 | [RealPersonaChat](https://github.com/nu-dialogue/real-persona-chat) | Contemporary conversation; upstream release has 13,583 human dialogues and 408,619 utterances before filtering | CC BY-SA 4.0; commit-pinned JSON, dialogue text only. Profiles, model conversations, and masked utterances are excluded. |
+
+| [JMultiWOZ](https://github.com/nu-dialogue/jmultiwoz) | Human task-oriented role-play; 4,246 dialogues and 61,186 turns in the inspected archive | CC BY-SA 4.0; pinned human turns only; no goals, worker IDs, backend database or model output. |
+| [STAIR Captions](https://github.com/STAIR-Lab-CIT/STAIR-captions) | Short descriptive Japanese; 616,435 public captions in the inspected v1.2 train/validation files | CC BY 4.0 for captions; no images or tokenized duplicates; visual-context dependence retained. |
+| [Japanese Wikibooks](https://ja.wikibooks.org/) | Textbook explanations and other nonfiction prose | CC BY-SA 4.0 for covered text; revision/history attribution and conservative third-party quotation exclusions. |
 
 ### Wikipedia and Wikivoyage
 
@@ -158,8 +162,9 @@ variants, `archaic`, `old-fashioned`, `unnatural`, and `possibly unnatural` for
 this source. It interprets `vulgar` as a profanity flag and `sexual` as a sexual
 content flag; the default content policy excludes sexual-content entries. Raw
 tags remain attached to admitted records, and rejection reasons are counted.
-The adapter itself preserves publisher sentence units, including unpunctuated
-ones, and does not silently rewrite their content. The reuse guide explicitly
+The adapter itself preserves publisher units, including unpunctuated ones;
+processor 5 splits multi-sentence units with exact original-unit context and
+preserves whole-unit translations separately. The reuse guide explicitly
 identifies `@change`, `archaic`, and `vulgar`; the other exact labels were also
 observed in the pinned Japanese export used for implementation verification.
 
@@ -173,12 +178,11 @@ conversation and well-attributed parallel data over another copy of Wikipedia.
 | --- | --- | --- |
 | [NICT Kyoto Wikipedia corpus](https://alaginrc.nict.go.jp/WikiCorpus/index_E.html) | Approximately 500,000 Japanese–English pairs in 14,111 article XML files | CC BY-SA 3.0; human translations with stages and required NICT attribution. Prefer original XML over flattened KFTT copies. |
 | [NICT ALT Parallel Corpus](https://www2.nict.go.jp/astrec-att/member/mutiyama/ALT/) | 20,106 aligned sentences from 1,893 English Wikinews articles, 13 languages including Japanese | CC BY 4.0 parallel ZIP only. Same page's treebank/annotation downloads are NC and excluded. |
-| [JMultiWOZ](https://github.com/nu-dialogue/jmultiwoz) | 4,246 human role-play travel dialogues spanning six domains | CC BY-SA 4.0; versioned ZIP and JSON; retain dialogue/turn IDs. |
 | [Accommodation Search Dialog Corpus](https://github.com/megagonlabs/asdc) | 210 main dialogues; additional crowdwritten vanilla and supplemental material | Corpus/annotations/docs CC BY 4.0; code Apache 2.0. Admit only selected text fields and record the subset. |
 | [Global Voices Japanese](https://jp.globalvoices.org/) | Ongoing translated reporting across many countries and topics | CC BY 3.0 for covered editorial content; per-post author/translator and exceptions. Needs a bounded, polite snapshot crawler or verified export. |
 | [JEC basic sentences](https://alaginrc.nict.go.jp/jecbs/index.htm) | 5,304 revised basic Japanese sentences with English and Chinese translations | CC BY 3.0; filter placeholder templates; record Kyoto/NICT credits and exact spreadsheet version. |
 | [MDN Japanese documentation](https://github.com/mdn/translated-content) | Substantial technical prose with source files in Git | CC BY-SA 2.5 or later for documentation; pin commit, skip code, retain document/contributor credit. |
-| [Japanese Wikibooks](https://ja.wikibooks.org/wiki/Wikibooks:著作権) / [Wikiversity](https://ja.wikiversity.org/wiki/Wikiversity:著作権) | Educational prose; natural reuse of the Wikimedia adapter | General Wikimedia CC BY-SA 4.0 framework, subject to local/imported exceptions. Tag register and exclude classical-language exercises/quotations. |
+| [Japanese Wikiversity](https://ja.wikiversity.org/wiki/Wikiversity:著作権) | Educational prose; natural reuse of the Wikimedia adapter | General Wikimedia CC BY-SA 4.0 framework, subject to local/imported exceptions. Tag register and exclude classical-language exercises/quotations. Wikibooks is already enabled. |
 
 ### Conversational corpora
 
@@ -329,3 +333,98 @@ Keep original occurrences distinct when attribution or license provenance differ
 Normalized-text hashes can support duplicate grouping without discarding source
 credits. Export partitions should make it possible to consume a single source or
 license family without downloading the entire corpus.
+
+
+
+## Additional enabled sources 2026-10-23
+
+### JMultiWOZ
+
+Publisher: Nagoya University's dialogue research group. The
+[pinned license statement](https://github.com/nu-dialogue/jmultiwoz/blob/a78dd334b907e12318b76bb23d0a9ed1498b8d15/README.md#license)
+covers the dataset under CC BY-SA 4.0. The
+[publisher data guide](https://github.com/nu-dialogue/jmultiwoz/blob/a78dd334b907e12318b76bb23d0a9ed1498b8d15/dataset/README.md)
+and [paper](https://aclanthology.org/2024.lrec-main.835/) distinguish human
+Wizard-of-Oz turns from generated benchmark outputs. Only
+`JMultiWOZ_1.0/dialogues.json` is read, one dialogue at a time. `SYSTEM` is a human
+wizard role. Worker identifiers, goals, belief states, backend databases, and
+model outputs are excluded. Credit all four named authors in the manifest.
+Source links point to the exact publisher archive; native dialogue/turn IDs
+identify the contained unit without inventing a web page for it.
+
+The 11,016,438-byte pinned archive has SHA-256
+`283dea36f5abeea8f016fea2bd4df4dfba67a40f89c4600e47ed701c57ea2bc2`.
+A complete streaming inspection read 4,246 dialogues and 61,186 original turns.
+Those counts precede splitting and filtering. Role-play data can be repetitive,
+context-dependent, and contain outdated facility facts; it is not travel advice.
+
+### STAIR Captions v1.2
+
+The [publisher license](https://github.com/STAIR-Lab-CIT/STAIR-captions/blob/6ac656e65d80cbe2c914d93626a1d5454e35a5d6/README.md#license)
+grants CC BY 4.0 for the caption dataset. The
+[publisher project page](https://stair-lab-cit.github.io/STAIR-captions-web/)
+describes original Japanese image captions and distinguishes its public subset
+from larger research totals. The adapter reads only the non-tokenized train and
+validation JSON members. It omits images, image URLs/metadata, and tokenized
+copies. Each caption is a separate work with its native caption ID; captions of
+the same image are not falsely represented as consecutive conversational context.
+Image IDs and `context:image-not-included` tags remain available to consumers.
+Credit Yoshikawa, Shigeto, and Takeuchi with the publisher URL and license link.
+
+The 57,913,104-byte pinned archive has SHA-256
+`8d47b7971d2883bffcba92e2ab44918e70e22c434d80dfffc01670c1654a7735`.
+A complete streaming inspection read 616,435 caption records with unique IDs.
+They are descriptive text, not evidence of a verified event or a guarantee of
+standalone meaning. Shared image subjects and repeated wording require
+relevance-aware duplicate handling in the consumer.
+
+### Japanese Wikibooks
+
+The current [Japanese copyright policy](https://ja.wikibooks.org/wiki/Wikibooks:著作権)
+explicitly identifies CC BY-SA 4.0 and discourages external copyrighted quotations.
+Covered main-namespace textbook prose is admitted through the existing Wikimedia
+adapter. It omits tables, code, media, marked quotations and recognized rights
+problems; revision/history links preserve contributor attribution. Use official
+API samples or dated exports with the existing identified client, one-request-per-
+second behavior, and retry policy. No generic website crawler is added.
+Authorship and original-language status remain unknown. Historical writing and
+unmarked third-party quotations are not solved by the site's general license;
+the conservative extractor and quality gates remain bounded safeguards.
+
+Contemporary original fiction requires per-work exception and authorship review.
+Apart from the single reviewed SCP-JP work below, SCP/Backrooms/Hoshizora site-wide
+imports remain deferred; their entire sites and Massif's underlying Narou novels
+are not blanket reusable sources.
+
+### One curated contemporary Japanese narrative: 適性
+
+The [SCP-JP Tale 『適性』](https://scp-jp.wikidot.com/aptitude) credits terukami
+and gives a creation year of 2023; that year is not represented as a confirmed
+publication date. Its credit module and page footer explicitly identify CC BY-SA 3.0.
+The [publisher licensing guide](https://scp-jp.wikidot.com/licensing-guide)
+requires individual title, author, source, and license attribution. This source
+is a one-work allowlist, not permission to crawl SCP-JP generally. The reviewed
+text is a short fictional café recruitment conversation followed by a telephone
+conversation. It contains no media in the narrative body. Linked words retain
+only their displayed text; linked pages are never fetched or imported.
+
+The source pins page revision 10, timestamp `2026-05-15T14:14:29Z`, and SHA-256
+`1878a3f7438818c7279a0d7e608db48dbc0301f979878b077904228032cf3de4` of the
+extracted paragraph texts joined with two newlines. Acquisition preserves the
+complete raw HTML and its independent SHA-256. Both acquisition and every offline
+build revalidate title, credit, license, revision/timestamp, `jp` and `tale` tags,
+the reviewed body boundary, inline-only markup, and body hash. Drift fails closed
+until a maintainer reviews and updates the pin. Navigation, ratings, credit
+modules, comments, scripts, and media are not sentence material.
+
+The HTML extraction preserves paragraph order and authored `<br>` line breaks;
+HTML source whitespace is collapsed. Paragraph ranges refer to codepoints in the
+extracted body, not raw HTML bytes. The existing splitter retains multi-sentence
+paragraphs as original source units, with exact fragment offsets. Scene separators
+remain units for quality rejection rather than being silently joined. This is a
+small genre sample and does not establish narrative vocabulary coverage. Human
+authorship remains `unknown`; original-Japanese status is supported specifically
+by the publisher's `jp` and `tale` classification and its
+[FAQ definition of Tale-JP originals](https://scp-jp.wikidot.com/faq-jp), not by an inferred author's
+nationality. All extracted/adapted text retains CC BY-SA 3.0 and a modification
+notice. No external media or translations are included.

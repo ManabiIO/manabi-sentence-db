@@ -9,7 +9,7 @@ The initial source grants are:
 
 | Source | Recorded license and evidence |
 | --- | --- |
-| Wikipedia / Wikivoyage covered text | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/); [Wikimedia Terms of Use](https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use) |
+| Wikipedia / Wikivoyage / Wikibooks covered text | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/); [Wikimedia Terms of Use](https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use) |
 | Tatoeba sentence text | [CC BY 2.0 France](https://creativecommons.org/licenses/by/2.0/fr/); [publisher reuse guide](https://en.wiki.tatoeba.org/articles/show/using-the-tatoeba-corpus) |
 | Japanese Wikinews archive | `LicenseRef-Wikinews-JA`, preserving [BY 4.0](https://creativecommons.org/licenses/by/4.0/), [BY 2.5](https://creativecommons.org/licenses/by/2.5/), and [BY 2.1 Japan](https://creativecommons.org/licenses/by/2.1/jp/) notices; [Japanese historical policy](https://ja.wikinews.org/wiki/ウィキニュース:ウィキニュースについて) |
 
@@ -59,3 +59,37 @@ normalization, and filtering are recorded as transformations. Participant profil
 evaluations, masked personal information, and separately published model conversations
 are excluded. Japanese text remains under its original content license; MIT covers
 this repository's software only.
+
+
+
+## JMultiWOZ and STAIR Captions
+
+JMultiWOZ human turns are CC BY-SA 4.0. Credit Atsumoto Ohashi, Ryu Hirai,
+Shinya Iizuka, and Ryuichiro Higashinaka, *JMultiWOZ* (2024), with the
+[publisher URL](https://github.com/nu-dialogue/jmultiwoz) and
+[license](https://creativecommons.org/licenses/by-sa/4.0/). Human wizard turns
+are distinct from the excluded generated-model experiments.
+
+STAIR caption text is CC BY 4.0. Credit Yuya Yoshikawa, Yutaro Shigeto,
+and Akikazu Takeuchi, *STAIR Captions* (2017), version 1.2, with the
+[publisher URL](https://github.com/STAIR-Lab-CIT/STAIR-captions) and
+[license](https://creativecommons.org/licenses/by/4.0/). This grant is not an
+image license. Images are neither downloaded nor redistributed by the adapter.
+
+Each source manifest pins its reviewed release and license evidence. Sentence
+segmentation and normalization are explicit transformations. When a publisher
+unit is split, any translations retain their separate rights and attribution
+inside `source_unit.translations`; they do not become sentence-aligned translations.
+
+
+## Curated SCP-JP narrative
+
+The single reviewed work [『適性』](https://scp-jp.wikidot.com/aptitude),
+by terukami (2023), is [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/).
+Its title, author, source URL, revision 10 / timestamp, license link, and
+modification notice accompany the extracted sentences. The adapter excludes all
+site navigation, rating and credit modules, comments, scripts, and media. It
+preserves paragraph context and records extraction and segmentation changes.
+The [publisher licensing guide](https://scp-jp.wikidot.com/licensing-guide)
+explains attribution and ShareAlike obligations. This admission applies only to
+the pinned work; it does not admit other SCP-JP pages, translations, or images.

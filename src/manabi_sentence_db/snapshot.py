@@ -532,11 +532,30 @@ def create_snapshot(
                 raise SnapshotError("Unknown Wikimedia export kind")
         elif adapter == "tatoeba":
             files = _tatoeba(source, staging, requested_translations, agent)
-        elif adapter == "realpersonachat":
+        elif adapter == "scp-curated":
+            from .scp_curated import ROLE, URL, extract
             if mode != "full" or date or max_files or titles:
-                raise SnapshotError("RealPersonaChat uses a pinned full archive; sample with build --max-documents")
-            files = [_download(staging, "realpersonachat.zip", "realpersonachat-zip",
-                               source["acquisition"]["url"], agent)]
+                raise SnapshotError("The curated narrative uses its complete one-work allowlist")
+            if source["acquisition"]["url"] != URL:
+                raise SnapshotError("Unreviewed curated narrative URL")
+            data = _metadata(URL, agent)
+            extract(data, source)
+            files = [_save_metadata(staging, "aptitude.html", ROLE, URL, data)]
+        elif adapter in {"realpersonachat", "jmultiwoz", "stair"}:
+            if mode != "full" or date or max_files or titles:
+                raise SnapshotError(
+                    f"{source['title']} uses a pinned full archive; sample with build --max-documents"
+                )
+            filename, role = {
+                "realpersonachat": ("realpersonachat.zip", "realpersonachat-zip"),
+                "jmultiwoz": ("jmultiwoz.zip", "jmultiwoz-zip"),
+                "stair": ("stair.tar.gz", "stair-tar"),
+            }[adapter]
+            files = [_download(
+                staging, filename, role, source["acquisition"]["url"], agent,
+                expected_sha256=source["acquisition"].get("sha256"),
+                expected_size=source["acquisition"].get("size"),
+            )]
         else:
             raise SnapshotError(f"Unsupported source adapter: {adapter}")
         manifest = {
@@ -572,3 +591,4 @@ def create_snapshot(
     finally:
         if staging.exists():
             shutil.rmtree(staging)
+

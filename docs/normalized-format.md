@@ -53,3 +53,56 @@ for existing document-oriented consumers. It contains occurrences in the histori
 new applications should consume normalized v2 instead of treating those IDs as
 unique-text identity. A serving application may compile JSONL into its own SQLite
 posting index and compressed payload store without changing this interchange model.
+
+## Publisher-unit segmentation
+
+Processor version **5**, text processor `ja-conservative-v5`, introduces
+`publisher-unit-segmentation-v1` for Tatoeba, RealPersonaChat, JMultiWOZ and STAIR.
+Wikimedia prose continues to use the conservative extraction segmenter. A quoted
+reporting clause remains one sentence; punctuation inside an unfinished quotation
+or parenthesis does not force an invalid fragment.
+
+A publisher unit with multiple sentences yields separate sentence/occurrence
+records. Each occurrence gains optional `source_unit` metadata:
+
+| Key | Contract |
+| --- | --- |
+| `id` | Stable original-unit identity, `unit_` plus 32 hexadecimal characters |
+| `text`, `text_sha256` | Original NFC unit, including internal whitespace/newlines, and exact UTF-8 hash |
+| `start`, `end` | Half-open Unicode **codepoint** offsets selecting this exact sentence from `text` |
+| `segment_index`, `segment_count` | Zero-based index and count before sentence-quality exclusions |
+| `translations` | Complete independently attributed translations of the original unit |
+
+An original unit is limited to 20,000 codepoints and 256 candidate segments.
+Its independently licensed translations are limited to 256 entries and 20,000
+codepoints per translated text; transport record-size bounds still apply.
+Oversized original texts or segment counts are counted as rejected; invalid
+translation metadata fails validation. Whole-unit masked information, excluded
+content, unresolved markup, invalid control bytes and broken delimiters cannot
+leak back through embedded context. Original `source_range` and native identity
+remain separate; a dialogue utterance range still refers to the original turn.
+Fragment native IDs suffix the original ID with exact character offsets. Existing
+single-sentence native IDs remain unchanged. Ordinals order the expanded units;
+source ranges, not consecutive ordinals, establish original positions.
+
+Do not display unit translations as if they translated just one fragment. Split
+fragments have empty sentence-level `translations`; their original-unit translations
+remain under `source_unit.translations` and therefore do not appear as false
+sentence-aligned rows in `translations.jsonl`. Each such translation uses the
+same complete translation contract (ID, text/hash, language, source URL, license,
+attribution and optional generation/alignment). License inventories include both
+translation scopes.
+
+This is an additive occurrence metadata extension; normalized interchange remains
+v2. `metadata_json` carries it without a relational table change. The legacy v1
+SQLite export adds a `sentence_context` table with `source_range_json` and
+`source_unit_json`, keeping existing sentence columns intact. Original-unit
+translations remain in that JSON with their licenses recorded in the license table.
+
+**Rebuild required:** rebuild retained snapshots with processor 5, then rebuild
+the private serving index. Old releases are not silently reinterpreted. The
+shorter text changes normalized sentence IDs for split units, so do not combine
+old and rebuilt snapshots of the same source. Consumers should show the source
+unit as explicitly labeled context, retain its attribution, and compute sentence
+difficulty/highlighting/copy text only from the selected fragment.
+
