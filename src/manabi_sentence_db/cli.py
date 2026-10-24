@@ -96,6 +96,16 @@ def parser() -> argparse.ArgumentParser:
         "verify-build", help="Verify all artifacts and validate canonical records offline"
     )
     check.add_argument("--build", type=Path, required=True)
+    coverage = commands.add_parser(
+        "vocabulary-coverage", help="Compare analyzed vocabulary breadth and marginal source coverage offline"
+    )
+    coverage.add_argument("--archive", type=Path, action="append", required=True)
+    coverage.add_argument("--analysis", type=Path, required=True)
+    coverage.add_argument("--analyzer", required=True, help="Exact tokenizer/lexicon configuration identity")
+    coverage.add_argument("--metadata", type=Path, help="Optional checked analysis-export sidecar")
+    coverage.add_argument("--baseline-source", action="append", default=[])
+    coverage.add_argument("--target-vocabulary", type=Path, help="Optional JSON array of target lemmas")
+    coverage.add_argument("--output", type=Path, required=True)
     demo = commands.add_parser(
         "demo", help="Run the complete pipeline with original synthetic fixtures, offline"
     )
@@ -221,6 +231,14 @@ def main(argv: list[str] | None = None) -> int:
                 catalog = verify_build(args.build)
                 count = sum(1 for _ in iter_records(args.build, catalog))
                 print(f"Verified {count} canonical documents in {catalog['build_id']}")
+            case "vocabulary-coverage":
+                from .coverage import vocabulary_coverage
+
+                print(vocabulary_coverage(
+                    args.archive, args.analysis, args.output, analyzer=args.analyzer,
+                    baseline_sources=args.baseline_source, target_vocabulary=args.target_vocabulary,
+                    metadata=args.metadata,
+                ))
             case "demo":
                 from .demo import create_demo_snapshot
 
@@ -234,3 +252,4 @@ def main(argv: list[str] | None = None) -> int:
     except (DataError, SnapshotError, OSError, yaml.YAMLError, json.JSONDecodeError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2
+

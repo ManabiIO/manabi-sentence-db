@@ -2,4 +2,5 @@
 
 __version__ = "0.1.0"
 SCHEMA_VERSION = 1
-PROCESSOR_VERSION = "4"
+PROCESSOR_VERSION = "5"
+

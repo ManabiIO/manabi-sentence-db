@@ -11,7 +11,8 @@ from __future__ import annotations
 import re
 import unicodedata
 
-TEXT_PROCESSOR_VERSION = "ja-conservative-v4"
+TEXT_PROCESSOR_VERSION = "ja-conservative-v5"
+PUBLISHER_SEGMENTER_VERSION = "publisher-unit-segmentation-v1"
 OMITTED_MARKUP = "\ufffc"
 
 _PAIRS = {
@@ -57,21 +58,18 @@ def _normalize(text: str) -> str:
     return unicodedata.normalize("NFC", text.replace("\r\n", "\n").replace("\r", "\n"))
 
 
-def split_sentences(text: str, language: str = "ja") -> list[str]:
-    """Split punctuation-delimited sentences without crossing source line boundaries.
+def sentence_spans(text: str, language: str = "ja") -> list[tuple[int, int]]:
+    """Return exact Unicode-codepoint spans; never normalize source offsets.
 
-    Closing quotes stay attached. A quoted question followed by a Japanese
-    reporting particle (``「本当？」と聞いた。``) remains one sentence. Decimal
-    points are not terminators in the generic non-Japanese fallback. Only the
-    Japanese rules are currently used by the shipped Wikimedia sources.
+    Quote/reporting-clause and parenthesis boundaries remain conservative. A
+    source newline is a hard boundary; unpunctuated utterances remain usable.
+    Callers choose the normalization of the supplied source-unit text.
     """
     japanese = language.split("-", 1)[0] == "ja"
     endings = "。！？!?" if japanese else ".!?。！？"
-    result: list[str] = []
-    for raw_line in _normalize(text).split("\n"):
-        line = re.sub(r"[\t \u3000]+", " ", raw_line).strip()
-        if not line:
-            continue
+    result: list[tuple[int, int]] = []
+    offset = 0
+    for line in text.splitlines(keepends=True):
         start = 0
         i = 0
         stack: list[str] = []
@@ -115,15 +113,27 @@ def split_sentences(text: str, language: str = "ja") -> list[str]:
             ):
                 i = end
                 continue
-            sentence = line[start:end].strip()
-            if sentence:
-                result.append(sentence)
+            left = start + len(line[start:end]) - len(line[start:end].lstrip())
+            right = end - (len(line[start:end]) - len(line[start:end].rstrip()))
+            if left < right:
+                result.append((offset + left, offset + right))
             start = end
             i = end
-        remainder = line[start:].strip()
-        if remainder:
-            result.append(remainder)
+        left = start + len(line[start:]) - len(line[start:].lstrip())
+        right = len(line.rstrip())
+        if left < right:
+            result.append((offset + left, offset + right))
+        offset += len(line)
     return result
+
+
+def split_sentences(text: str, language: str = "ja") -> list[str]:
+    """Segment normalized prose, retaining the existing whitespace contract."""
+    normalized = "\n".join(
+        re.sub(r"[\t \u3000]+", " ", line).strip()
+        for line in _normalize(text).split("\n")
+    )
+    return [normalized[start:end] for start, end in sentence_spans(normalized, language)]
 
 
 def is_complete_sentence(text: str, language: str = "ja") -> bool:
@@ -133,7 +143,9 @@ def is_complete_sentence(text: str, language: str = "ja") -> bool:
     return bool(stripped) and stripped[-1] in endings
 
 
-def assess_sentence(text: str, language: str = "ja") -> tuple[bool, list[str], str | None]:
+def assess_sentence(
+    text: str, language: str = "ja", *, max_length: int = 500
+) -> tuple[bool, list[str], str | None]:
     """Return (accepted, heuristic content flags, rejection reason).
 
     Flags are intentionally a small, inspectable lexicon. Clinical/news contexts
@@ -143,7 +155,7 @@ def assess_sentence(text: str, language: str = "ja") -> tuple[bool, list[str], s
     flags = sorted(name for name, pattern in _FLAGS.items() if pattern.search(text))
     if len(text.strip()) < 4:
         return False, flags, "too-short"
-    if len(text) > 500:
+    if len(text) > max_length:
         return False, flags, "too-long"
     if any(unicodedata.category(char) == "Cc" for char in text):
         return False, flags, "control-character"
@@ -166,3 +178,4 @@ def assess_sentence(text: str, language: str = "ja") -> tuple[bool, list[str], s
         if _ARCHAIC.search(text):
             return False, flags, "archaic-language"
     return True, flags, None
+

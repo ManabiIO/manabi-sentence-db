@@ -11,6 +11,7 @@ from pathlib import Path
 
 from .licenses import validate_rights
 from .serialization import DataError, canonical_json, parse_json
+from .validation import validate_source_unit
 
 DDL = """
 PRAGMA foreign_keys=ON;
@@ -126,6 +127,13 @@ def build_normalized_database(archive_path: Path, output: Path):
                             tuple(row[k] for k in ("id", "language", "text", "text_sha256")),
                         )
                     elif table == "occurrences":
+                        if "source_unit" in row:
+                            sentence = db.execute(
+                                "SELECT text FROM sentences WHERE id=?", (row["sentence_id"],)
+                            ).fetchone()
+                            if sentence is None:
+                                raise DataError("Source-unit occurrence refers to a missing sentence")
+                            validate_source_unit(row["source_unit"], sentence[0])
                         db.execute(
                             "INSERT INTO occurrences VALUES (?,?,?,?,?)",
                             tuple(row[k] for k in ("id", "sentence_id", "work_id", "ordinal"))
@@ -165,3 +173,4 @@ def build_normalized_database(archive_path: Path, output: Path):
                 raise DataError("Invalid normalized SQLite")
         os.replace(staged, output)
     return output
+

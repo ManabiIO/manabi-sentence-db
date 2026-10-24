@@ -220,3 +220,14 @@ qualified by runtime version; canonical YAML/text hashes are the primary content
 comparison across environments. SHA-256 pins detect changed inputs or corruption;
 they are not publisher signatures. Consumers should obtain their initial release
 or catalog hash through a trusted channel.
+
+
+
+## Original publisher units
+
+Processor 5 adds optional sentence/occurrence `source_unit` metadata without
+changing existing required fields. It retains a bounded original NFC utterance
+or sentence record, exact codepoint offsets and original-unit translations when
+one source record yields several sentences. Fragment-level translations remain
+empty unless genuine aligned provenance is supplied by a future adapter.
+See [the complete field contract](normalized-format.md#publisher-unit-segmentation).

@@ -1,0 +1,24 @@
+schema_version: 1
+id: stair-captions-ja
+title: STAIR Captions
+language: ja
+adapter: stair
+homepage: https://github.com/STAIR-Lab-CIT/STAIR-captions
+license:
+  id: CC-BY-4.0
+  url: https://creativecommons.org/licenses/by/4.0/
+attribution:
+  text: Yuya Yoshikawa, Yutaro Shigeto, and Akikazu Takeuchi. STAIR Captions (ACL 2017), version 1.2.
+  url: https://github.com/STAIR-Lab-CIT/STAIR-captions
+license_evidence:
+  - https://github.com/STAIR-Lab-CIT/STAIR-captions/blob/6ac656e65d80cbe2c914d93626a1d5454e35a5d6/README.md#license
+  - https://stair-lab-cit.github.io/STAIR-captions-web/
+notes:
+  - Original human Japanese caption text only. Image rights are separate; no images are downloaded or redistributed.
+  - Imports train and validation captions once, excluding tokenized duplicate files.
+  - Captions can depend on visual context. Each occurrence is marked image-caption and context:image-not-included.
+acquisition:
+  revision: 6ac656e65d80cbe2c914d93626a1d5454e35a5d6
+  sha256: 8d47b7971d2883bffcba92e2ab44918e70e22c434d80dfffc01670c1654a7735
+  size: 57913104
+  url: https://raw.githubusercontent.com/STAIR-Lab-CIT/STAIR-captions/6ac656e65d80cbe2c914d93626a1d5454e35a5d6/stair_captions_v1.2.tar.gz

@@ -1,0 +1,26 @@
+schema_version: 1
+id: wikibooks-ja
+title: Japanese Wikibooks
+language: ja
+adapter: wikimedia
+status: active
+homepage: https://ja.wikibooks.org/
+license:
+  id: CC-BY-SA-4.0
+  url: https://creativecommons.org/licenses/by-sa/4.0/
+attribution:
+  text: Japanese Wikibooks contributors; each work preserves its exact revision and contributor history URL.
+  url: https://ja.wikibooks.org/
+license_evidence:
+  - https://ja.wikibooks.org/wiki/Wikibooks:著作権
+  - https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use
+notes:
+  - Expository textbook prose only, with conservative template, quotation, media, code, table and rights-problem exclusions.
+  - Original-language and human authorship remain unknown; a Japanese edition is not proof of either.
+  - Historical-language heuristics are incomplete. Source revisions are not publication dates.
+acquisition:
+  wiki_id: jawikibooks
+  api_url: https://ja.wikibooks.org/w/api.php
+  sample_titles:
+    - 小学校理科/3学年
+  export_kind: content-current

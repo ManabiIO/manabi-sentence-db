@@ -54,6 +54,10 @@ CREATE TABLE sentence_content_flags(
     sentence_id TEXT NOT NULL REFERENCES sentences(id), flag TEXT NOT NULL,
     PRIMARY KEY(sentence_id,flag)
 ) STRICT;
+CREATE TABLE sentence_context(
+    sentence_id TEXT PRIMARY KEY REFERENCES sentences(id),
+    source_range_json TEXT, source_unit_json TEXT
+) STRICT;
 CREATE INDEX sentence_text_hash ON sentences(language,text_sha256);
 CREATE INDEX sentence_document ON sentences(document_id,ordinal);
 CREATE INDEX translation_sentence ON translations(sentence_id,language);
@@ -174,6 +178,15 @@ def build_database(
                     "INSERT INTO sentence_content_flags VALUES (?,?)",
                     [(sentence["id"], flag) for flag in sentence["content_flags"]],
                 )
+                if "source_range" in sentence or "source_unit" in sentence:
+                    connection.execute(
+                        "INSERT INTO sentence_context VALUES (?,?,?)",
+                        (sentence["id"],
+                         _json(sentence["source_range"]) if "source_range" in sentence else None,
+                         _json(sentence["source_unit"]) if "source_unit" in sentence else None),
+                    )
+                    for translation in sentence.get("source_unit", {}).get("translations", []):
+                        _license(connection, translation["license"])
                 for translation in sentence["translations"]:
                     _license(connection, translation["license"])
                     connection.execute(
@@ -211,3 +224,4 @@ def build_database(
         if connection is not None:
             connection.close()
         staging.unlink(missing_ok=True)
+

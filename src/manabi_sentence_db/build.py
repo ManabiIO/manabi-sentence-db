@@ -18,6 +18,7 @@ from pathlib import Path
 import yaml
 
 from . import PROCESSOR_VERSION, SCHEMA_VERSION
+from .segments import publisher_items
 from .serialization import (
     DataError,
     StrictLoader,
@@ -30,7 +31,15 @@ from .serialization import (
     sha256_file,
     write_json,
 )
+from .text import PUBLISHER_SEGMENTER_VERSION
 from .validation import text_sha256, validate, validate_record
+
+
+class _AliasFreeSafeDumper(yaml.SafeDumper):
+    """Shared Python metadata objects must still be plain portable YAML values."""
+
+    def ignore_aliases(self, data):
+        return True
 
 
 def _identity(prefix: str, *parts: str) -> str:
@@ -68,6 +77,8 @@ def canonical_document(
                 "conservative-quotation-exclusion",
             ]
             if manifest["source"]["adapter"] == "wikimedia"
+            else ["publisher-html-narrative-extraction", "publisher-paragraph-unit"]
+            if manifest["source"]["adapter"] == "scp-curated"
             else ["publisher-sentence-unit"]
         )
         + ["NFC", "edge-whitespace-trim"],
@@ -85,7 +96,7 @@ def canonical_document(
         if raw.get(field) is not None:
             record[field] = raw[field]
     occurrences: Counter = Counter()
-    for ordinal, item in enumerate(raw["sentences"]):
+    for ordinal, item in enumerate(publisher_items(raw, manifest, stats, excluded_flags)):
         text = _normalized_text(item["text"])
         accepted, flags, reason = assess_sentence(text, raw["language"])
         stats["sentences_seen"] += 1
@@ -131,30 +142,23 @@ def canonical_document(
             "review_state": "unreviewed",
             "translations": [],
         }
+        if item.get("source_unit"):
+            unit = dict(item["source_unit"])
+            unit["translations"] = _canonical_translations(
+                unit["translations"], unit["id"]
+            )
+            sentence["source_unit"] = unit
+            if PUBLISHER_SEGMENTER_VERSION not in record["transformations"]:
+                record["transformations"].append(PUBLISHER_SEGMENTER_VERSION)
         if item.get("source_range"):
             sentence["source_range"] = item["source_range"]
         if item.get("native_id") is not None:
             sentence["native_id"] = str(item["native_id"])
         if item.get("generation"):
             sentence["generation"] = item["generation"]
-        for original in item.get("translations", []):
-            translated_text = _normalized_text(original["text"])
-            if not translated_text:
-                continue
-            translation = dict(original)
-            translation["text"] = translated_text
-            if "native_id" in translation:
-                translation["native_id"] = str(translation["native_id"])
-            translation["text_sha256"] = text_sha256(translated_text)
-            translation["id"] = _identity(
-                "tr_",
-                sentence_id,
-                translation["language"],
-                translation.get("native_id", translation["text_sha256"]),
-                translation["source_url"],
-            )
-            sentence["translations"].append(translation)
-        sentence["translations"].sort(key=lambda item: (item["language"], item["id"]))
+        sentence["translations"] = _canonical_translations(
+            item.get("translations", []), sentence_id
+        )
         record["sentences"].append(sentence)
         stats["sentences"] += 1
         stats["translations"] += len(sentence["translations"])
@@ -163,6 +167,27 @@ def canonical_document(
         return None
     validate_record(record)
     return record
+
+
+def _canonical_translations(originals: list, owner_id: str) -> list:
+    result = []
+    for original in originals:
+        text = _normalized_text(original["text"])
+        if not text:
+            continue
+        translation = dict(original, text=text, text_sha256=text_sha256(text))
+        if "native_id" in translation:
+            translation["native_id"] = str(translation["native_id"])
+        translation["id"] = _identity(
+            "tr_", owner_id, translation["language"],
+            translation.get("native_id", translation["text_sha256"]), translation["source_url"],
+        )
+        result.append(translation)
+    return sorted(result, key=lambda value: (value["language"], value["id"]))
+
+
+def _all_translations(sentence):
+    return sentence["translations"] + sentence.get("source_unit", {}).get("translations", [])
 
 
 def _processor_fingerprint() -> str:
@@ -241,8 +266,9 @@ class ShardWriter:
 
     def append(self, record: dict) -> tuple[str, int]:
         data = (
-            yaml.safe_dump(
-                record, allow_unicode=True, sort_keys=False, explicit_start=True, width=120
+            yaml.dump(
+                record, Dumper=_AliasFreeSafeDumper, allow_unicode=True,
+                sort_keys=False, explicit_start=True, width=120
             ).encode("utf-8")
             if self.record_format == "yaml"
             else canonical_json(record) + b"\n"
@@ -368,6 +394,12 @@ def build_corpus(
                     from .tatoeba import iter_documents
                 elif source["adapter"] == "realpersonachat":
                     from .realpersonachat import iter_documents
+                elif source["adapter"] == "jmultiwoz":
+                    from .jmultiwoz import iter_documents
+                elif source["adapter"] == "stair":
+                    from .stair import iter_documents
+                elif source["adapter"] == "scp-curated":
+                    from .scp_curated import iter_documents
                 else:
                     raise DataError(f"Unsupported adapter: {source['adapter']}")
                 writer = ShardWriter(
@@ -397,7 +429,7 @@ def build_corpus(
                         *[
                             tr["license"]
                             for sentence in record["sentences"]
-                            for tr in sentence["translations"]
+                            for tr in _all_translations(sentence)
                         ],
                     ]:
                         previous = licenses.setdefault(license_value["id"], license_value)
@@ -833,7 +865,7 @@ def iter_records(build: Path, catalog: dict, source_id: str | None = None):
                                     *[
                                         tr["license"]
                                         for sentence in record.get("sentences", [])
-                                        for tr in sentence["translations"]
+                                        for tr in _all_translations(sentence)
                                     ],
                                 ]:
                                     if value is not None and licensed.get(value["id"]) != value:
@@ -851,3 +883,4 @@ def iter_records(build: Path, catalog: dict, source_id: str | None = None):
                     raise DataError("Document index contains extra entries")
         finally:
             ledger.close()
+

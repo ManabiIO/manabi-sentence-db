@@ -1,0 +1,24 @@
+schema_version: 1
+id: jmultiwoz-ja
+title: JMultiWOZ
+language: ja
+adapter: jmultiwoz
+homepage: https://github.com/nu-dialogue/jmultiwoz
+license:
+  id: CC-BY-SA-4.0
+  url: https://creativecommons.org/licenses/by-sa/4.0/
+attribution:
+  text: Atsumoto Ohashi, Ryu Hirai, Shinya Iizuka, and Ryuichiro Higashinaka. JMultiWOZ (LREC-COLING 2024).
+  url: https://github.com/nu-dialogue/jmultiwoz
+license_evidence:
+  - https://github.com/nu-dialogue/jmultiwoz/blob/a78dd334b907e12318b76bb23d0a9ed1498b8d15/README.md#license
+  - https://github.com/nu-dialogue/jmultiwoz/blob/a78dd334b907e12318b76bb23d0a9ed1498b8d15/dataset/README.md
+notes:
+  - Human role-play dialogue turns only. SYSTEM denotes a human wizard, not generated output.
+  - Excludes worker identifiers, goals, backend databases, dialogue states, models, and model outputs.
+  - Facility information is historical dialogue context, not current travel advice.
+acquisition:
+  revision: a78dd334b907e12318b76bb23d0a9ed1498b8d15
+  sha256: 283dea36f5abeea8f016fea2bd4df4dfba67a40f89c4600e47ed701c57ea2bc2
+  size: 11016438
+  url: https://raw.githubusercontent.com/nu-dialogue/jmultiwoz/a78dd334b907e12318b76bb23d0a9ed1498b8d15/dataset/JMultiWOZ_1.0.zip

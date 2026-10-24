@@ -8,7 +8,9 @@ and language origin must remain unknown; translations do not become Japanese ori
 
 ## Enabled adapters
 
-Wikipedia, Wikivoyage, archived Japanese Wikinews, Tatoeba, and RealPersonaChat.
+Wikipedia, Wikivoyage, Wikibooks, archived Japanese Wikinews, Tatoeba,
+RealPersonaChat, JMultiWOZ, STAIR Captions, and the single curated SCP-JP Tale
+『適性』.
 Wikimedia and Tatoeba provenance does not establish blanket human authorship or
 original Japanese. Their releases preserve that uncertainty. Machine generation
 metadata explicitly excludes an item from the Japanese corpus. Heuristic era and
@@ -26,24 +28,26 @@ without fabricating provenance links. The adapter has a regression for this upst
 
 | Candidate | Publisher evidence / license | Admission notes |
 |---|---|---|
-| STAIR Captions | [Publisher](https://github.com/STAIR-Lab-CIT/STAIR-captions), CC BY 4.0 | README rechecked; Japanese image captions. Images require separate rights. |
+| STAIR Captions (enabled) | [Publisher](https://github.com/STAIR-Lab-CIT/STAIR-captions), CC BY 4.0 | README rechecked; Japanese image captions. Images require separate rights. |
 | Japanese Visual Genome VQA | [Publisher](https://github.com/yahoojapan/ja-vg-vqa), reported CC BY 4.0 | Verify downloadable text license; many answers are fragments. |
 | YJ Captions | [Publisher](https://github.com/yahoojapan/yjcaptions), reported CC BY 4.0 | Caption text only; deduplicate with other image corpora. |
 | Yahoo VFD | [Publisher](https://github.com/yahoojapan/VFD-Dataset), reported CC BY 4.0 | Human imagined responses; keep modality/context flags. |
 | JMRD | [Publisher](https://github.com/ku-nlp/JMRD), reported CC BY-SA 4.0 | Conversation, not copyrighted movie scripts. |
-| JMultiWOZ | [Publisher](https://github.com/nu-dialogue/jmultiwoz), reported CC BY-SA 4.0 | Human role-play, preserve speaker/turn context without profiles. |
+| JMultiWOZ (enabled) | [Publisher](https://github.com/nu-dialogue/jmultiwoz), verified CC BY-SA 4.0 | Human role-play, preserve speaker/turn context without profiles. |
 | Multi-Party Chat | [Publisher](https://github.com/nu-dialogue/multi-relational-multi-party-chat-corpus), reported CC BY-SA 4.0 | Human conversation. |
 | ASDC | [Publisher](https://github.com/megagonlabs/asdc), reported CC BY 4.0 | Accommodation dialogues. |
 | JGLUE questions | [Publisher](https://github.com/yahoojapan/JGLUE), reported CC BY-SA 4.0 | Audit component and underlying passage rights separately. |
 | JaQuAD | [Publisher](https://github.com/SkelterLabsInc/JaQuAD), reported CC BY-SA 3.0 | Questions versus reused Wikipedia passages. |
 
-Except STAIR and RealPersonaChat, these are candidate claims supplied in the research
+Except STAIR, RealPersonaChat, and JMultiWOZ, these are candidate claims supplied in the research
 shortlist, not newly verified admission grants. Do not enable downloads until the
 specific release and underlying content rights are reviewed.
 
 ## Fiction and longer writing
 
-Prioritize original SCP-JP Tales and Backrooms JP, after per-work exception checks,
+One original SCP-JP Tale, [『適性』](sources.md#one-curated-contemporary-japanese-narrative-適性),
+is now admitted with per-work credit, CC BY-SA 3.0, and revision/body-hash pins.
+Further original SCP-JP Tales and Backrooms JP require per-work exception checks,
 separating translated international fiction from original Japanese. Preserve mixed
 BY-SA versions. Hoshizora's API license filters can identify individual BY/BY-SA/PD
 works but it is a small supplement. Rosebleu requires an exact identified release
@@ -67,3 +71,15 @@ BCCWJ material, MARC-ja without current source rights, Common Crawl-derived text
 without underlying permissions, synthetic corpora, and copyrighted scripts copied
 into otherwise open wikis. Do not report raw published unit counts as distinct,
 usable sentences; report admitted occurrences, unique texts, origin, and exclusions.
+
+
+
+### October 23 implementation update
+
+JMultiWOZ and STAIR v1.2 now have bounded, commit/hash-pinned adapters and offline
+regressions; Wikibooks uses the existing conservative Wikimedia prose adapter.
+See the [exact admitted subsets and primary evidence](sources.md#additional-enabled-sources-2026-10-23).
+Source counts are separate from admitted fragments, deduplicated texts, vocabulary
+coverage, and independence from visual/dialogue context. Beyond the one reviewed
+Tale, narrative candidates remain subject to per-work rights and original-language checks; no Narou or
+unverified fiction has been imported merely to increase sentence totals.
