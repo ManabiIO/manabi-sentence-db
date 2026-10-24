@@ -114,3 +114,12 @@ def test_classical_construction_in_modern_warning_is_style_evidence():
     assert style_tags(text) == ["style:classical-construction"]
     assert style_tags("普通の現代日本語です。") == []
     assert style_tags(text, "en") == []
+
+
+@pytest.mark.parametrize("label", ["Zou!", "Yahoo!", "Zou！"])
+def test_punctuated_latin_name_keeps_following_japanese_particle(label):
+    text = f"地域バス{label}のチケットを買います。次は電車です。"
+    assert split_sentences(text) == [f"地域バス{label}のチケットを買います。", "次は電車です。"]
+    assert split_sentences("いいね!また会おう。") == ["いいね!", "また会おう。"]
+    assert split_sentences("OK! 次は電車です。") == ["OK!", "次は電車です。"]
+    assert split_sentences("OK!\nの続きではない。") == ["OK!", "の続きではない。"]
