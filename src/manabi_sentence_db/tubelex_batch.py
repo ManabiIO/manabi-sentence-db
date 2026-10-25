@@ -468,7 +468,10 @@ class TubelexCollectionReader:
                     if len(self.readers) == self.max_open_shards:
                         _, retired = self.readers.popitem(last=False)
                         retired.close()
-                    reader = TubelexReader(safe_relative(self.root, part) / "index/citations.private.sqlite3")
+                    reader = TubelexReader(
+                        safe_relative(self.root, part) / "index/citations.private.sqlite3",
+                        _cached_literal_filter=bits,
+                    )
                     if reader.build_id != entry["build_id"]:
                         reader.close()
                         raise DataError("Citation collection shard identity mismatch")

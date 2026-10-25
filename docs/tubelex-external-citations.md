@@ -707,6 +707,11 @@ Collection diagnostics now include filter-cache hits/misses/evictions, reader
 opens/reuses and examined shards. The dedicated filter cache remains bounded at
 16 MiB by default, independently of the at-most-eight open readers. Open readers
 also retain their own filter references; the cache limit is not a process-RSS cap.
+When reopening a verified immutable shard, its reader shares any retained filter
+bytes rather than loading a second copy. The query scanner retains only the
+current stream's metadata/eligibility and reuses it across candidate matches;
+origin envelopes are fetched with one indexed statement. Decoded caption chunks
+are still short-lived, with no decoded full-track or result-history cache.
 The current 20-video sample fits comfortably. Synthetic working sets larger than
 the budget reproduce cyclic scan thrashing; production-size workload evidence is
 still needed before changing the cache layout or admission policy.

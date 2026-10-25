@@ -106,6 +106,16 @@ def test_warm_absent_literals_skip_connections_using_bounded_filter_cache(collec
         assert reader.last_search_stats["global_literal_rejections"] == 3
 
 
+def test_reopened_shards_share_cached_filter_payload_instead_of_loading_another_copy(collection_inputs):
+    snapshots, base, output = collection_inputs
+    batch.build_tubelex_collection(snapshots, base, output)
+    with batch.TubelexCollectionReader(output, max_open_shards=1) as reader:
+        assert len(reader.search("今日は")) == 3
+        assert len(reader.search("今日は")) == 3
+        part, opened = next(iter(reader.readers.items()))
+        assert opened._literal_filter is reader.filters[part]
+
+
 @pytest.mark.parametrize("selection", ["first", "diverse"])
 def test_combined_work_budget_discards_earlier_shard_results_and_reader_recovers(collection_inputs, selection):
     snapshots, base, output = collection_inputs

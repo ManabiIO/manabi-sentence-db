@@ -1039,3 +1039,30 @@ bound and indicates no observed slowdown; it does not establish a general speed
 improvement or production latency. No corpus bytes, storage format or selection
 defaults changed. Reproduction code and aggregate evidence are outside Git in
 `tubelex-bounded-search-0zw_120u`.
+
+### Follow-up: reduce citation assembly and filter-copy overhead
+
+Profiling 120 diagnostic searches on the saved real sample attributed most query
+time to citation materialization, rather than Zstandard decoding. The scanner now
+loads/decodes stream metadata once per visited stream, origin selection uses one
+indexed SQLite statement instead of two, and an accepted display-unit envelope
+does not first fetch a redundant match-only envelope. A regression reduced 800
+metadata reads to one across repeated matches and multiple chunks. Query-local
+state retains only the current stream's metadata and eligibility, not full text.
+
+All 84 query/selection/limit/profile combinations matched the previous text-free
+results on the two saved 20-video builds. Five alternating paired warm rounds
+measured workload medians of 153.50→116.53 ms (default profile) and 126.30→78.35 ms
+(model profile). Host load was variable, including one 541 ms baseline outlier;
+these small-sample medians support the observed direction, not an HTTP latency or
+universal speedup claim. File hashes and modification times stayed unchanged.
+
+Reopening an immutable shard now shares an already cached filter payload. A
+synthetic 64-shard, 256 KiB/filter fixture fitting the 16 MiB cache but exceeding
+the eight-reader pool reduced unique retained filter payloads from 18 to 16 MiB.
+Seven repeated positive-path scans loaded 112 MiB of duplicate filter bytes
+before and zero afterward; component medians were 4.32→1.96 ms. SQLite candidate
+work was stubbed in this component measurement, so these are not search timings.
+The existing negative-cache stress still reproduces thrashing for working sets
+larger than the cache; no cache capacity/admission defaults changed. Essential
+reports and reproduction scripts are outside Git in `tubelex-performance-vufbcipi`.

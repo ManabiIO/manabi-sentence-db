@@ -36,8 +36,9 @@ def benchmark(output):
                     pass
 
             class Reader:
-                def __init__(self, *args):
-                    self._literal_filter = path.read_bytes()
+                def __init__(self, *args, _cached_literal_filter=None):
+                    self._literal_filter = (_cached_literal_filter if _cached_literal_filter is not None
+                                            else path.read_bytes())
                     self._database = Database()
                     self.build_id = "fixture"
 

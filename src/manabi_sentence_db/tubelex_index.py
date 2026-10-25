@@ -213,10 +213,14 @@ def _literal_maybe_contains(bits, key):
     return all(bits[p // 8] & (1 << (p % 8)) for p in _literal_positions(key, len(bits)))
 
 
-def _load_literal_filter(database):
+def _load_literal_filter(database, cached=None):
     info = database.execute("SELECT fingerprints,length(bits) FROM literal_filter WHERE id=1").fetchone()
     if info is None or info[1] != _literal_filter_size(info[0]):
         raise DataError("Invalid private literal filter")
+    if cached is not None:
+        if not isinstance(cached, bytes) or len(cached) != info[1]:
+            raise DataError("Invalid cached private literal filter")
+        return info[0], cached
     row = database.execute("SELECT fingerprints,bits FROM literal_filter WHERE id=1").fetchone()
     if not isinstance(row[1], bytes):
         raise DataError("Invalid private literal filter")
@@ -438,26 +442,32 @@ def _decode_text(blob):
 
 
 def _origins(database, stream_id, left, right):
-    first = database.execute(
-        "SELECT start FROM origins WHERE stream_id=? AND start<=? ORDER BY start DESC LIMIT 1",
-        (stream_id, left),
-    ).fetchone()
-    if first is None:
-        raise DataError("Missing private caption alignment")
-    return database.execute(
+    rows = database.execute(
         "SELECT start,end,start_ms,end_ms FROM origins "
-        "WHERE stream_id=? AND start>=? AND start<? ORDER BY start",
-        (stream_id, first[0], right),
+        "WHERE stream_id=? AND start>=(SELECT start FROM origins WHERE stream_id=? "
+        "AND start<=? ORDER BY start DESC LIMIT 1) AND start<? ORDER BY start",
+        (stream_id, stream_id, left, right),
     ).fetchall()
+    if not rows:
+        raise DataError("Missing private caption alignment")
+    return rows
 
 
-def _match_reference(database, stream_id, left, right, *, seen_refs=None, boundaries_checked=False):
-    """Sentence proposals affect clip selection, not the indexed text coverage."""
+def _reference_stream(database, stream_id):
     stream = database.execute(
         "SELECT video_id,metadata,eligibility FROM streams WHERE id=?",
         (stream_id,),
     ).fetchone()
-    metadata = parse_json(stream[1])
+    if stream is None:
+        raise DataError("Missing private caption stream")
+    return stream[0], parse_json(stream[1]), stream[2]
+
+
+def _match_reference(database, stream_id, left, right, *, seen_refs=None, boundaries_checked=False,
+                     stream_info=None):
+    """Sentence proposals affect clip selection, not the indexed text coverage."""
+    stream = stream_info if stream_info is not None else _reference_stream(database, stream_id)
+    metadata = stream[1]
     if not 0 <= left < right <= metadata["text_length"]:
         raise DataError("Invalid private match range")
     for number in range(left // ELIGIBILITY_TILE_CHARS, (right - 1) // ELIGIBILITY_TILE_CHARS + 1):
@@ -490,13 +500,15 @@ def _match_reference(database, stream_id, left, right, *, seen_refs=None, bounda
         raise DataError("Invalid private display-unit boundary code")
     if metadata["boundary_mode"] == "punctuation" and unit_kind != "punctuation":
         return None
-    origins = _origins(database, stream_id, left, right)
+    origins = None
     boundary = "context-window"
     if unit and unit[1] - unit[0] <= 500:
         proposed = _origins(database, stream_id, unit[0], unit[1])
         if max(p[3] for p in proposed) - min(p[2] for p in proposed) <= 30_000:
             boundary = unit_kind
             origins = proposed
+    if origins is None:
+        origins = _origins(database, stream_id, left, right)
     if boundary == "context-window":
         # Include surrounding caption context where it fits, rather than
         # advertising an arbitrary single caption line as a complete sentence.
@@ -893,6 +905,7 @@ class TubelexReader:
         base_artifact: Path | None = None,
         timeout_ms: int = DEFAULT_QUERY_TIMEOUT_MS,
         max_decoded_chunks: int = DEFAULT_MAX_DECODED_CHUNKS,
+        _cached_literal_filter=None,
     ):
         if type(timeout_ms) is not int or not 1 <= timeout_ms <= 60_000:
             raise DataError("Query timeout budget must be an integer from 1 to 60000 ms")
@@ -923,7 +936,9 @@ class TubelexReader:
                 raise DataError("Invalid private citation index identity metadata")
             if base_artifact and sha256_file(base_artifact) != base_hash:
                 raise DataError("Citation index belongs to a different base artifact")
-            _, self._literal_filter = _load_literal_filter(database)
+            # Collection readers may reopen an already verified immutable
+            # shard. Reuse its exact cached bytes rather than copying the blob.
+            _, self._literal_filter = _load_literal_filter(database, _cached_literal_filter)
             self.build_id = build_id
         except BaseException:
             database.close()
@@ -1031,6 +1046,7 @@ def _search_candidates(database, query: str, limit: int, budget: _QueryBudget,
         # monotonically improving cutoff if encountered again.
         results = []
         seen_refs = collector.ids if collector is not None else set()
+        last_stream, stream_info = None, None
         interior_mask = (1 << (len(query) - 1)) - 1
         for _, stream_id, offset, compressed, bitmap in rows:
             budget.before_decode()
@@ -1050,6 +1066,11 @@ def _search_candidates(database, query: str, limit: int, budget: _QueryBudget,
                 # bookkeeping, rather than retaining every candidate position.
                 crosses = (boundaries >> (position + 1)) & interior_mask
                 if position < CHUNK_STEP and not crosses:
+                    # Chunk rowids follow stream order. Retain only the current
+                    # stream's small metadata/eligibility, never decoded text.
+                    if last_stream != stream_id:
+                        stream_info = _reference_stream(database, stream_id)
+                        last_stream = stream_id
                     record = _match_reference(
                         database,
                         stream_id,
@@ -1057,6 +1078,7 @@ def _search_candidates(database, query: str, limit: int, budget: _QueryBudget,
                         right,
                         seen_refs=seen_refs,
                         boundaries_checked=True,
+                        stream_info=stream_info,
                     )
                     if record and record["id"] not in seen_refs:
                         if collector is not None:
