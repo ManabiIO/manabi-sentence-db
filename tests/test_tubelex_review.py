@@ -220,3 +220,96 @@ def test_playback_rejects_nonstring_case_identifiers_cleanly(tmp_path):
                               "reviewer_type": "human-audio-verified", "cases": [{"id": []}]})
     with pytest.raises(DataError, match="case"):
         score_tubelex_playback_review(packet, labels)
+
+
+@pytest.mark.parametrize("damage", ["duplicate", "identity", "source-offset", "text", "core", "origin", "stream"])
+def test_scorer_rejects_internally_inconsistent_review_packets_before_inference(tmp_path, damage):
+    from manabi_sentence_db.serialization import digest_json, sha256_file
+
+    source = snapshot(tmp_path, "abcdefghijk", "今日は図書館へ行きます。明日は公園へ行きます。")
+    original, packet, labels = (tmp_path / name for name in ("original.zst", "changed.zst", "labels.zst"))
+    prepare_tubelex_review([source], original)
+    document = parse_json(_read_compressed(original))
+    case = document["cases"][0]
+    if damage == "duplicate":
+        document["cases"].append(dict(case))
+    elif damage == "identity":
+        case["id"] = "wrong"
+    else:
+        if damage == "source-offset":
+            case["source_start"] += 1
+        elif damage == "text":
+            case["text"] = "別" + case["text"][1:]
+        elif damage == "core":
+            case["core_end"] = len(case["text"]) + 1
+        elif damage == "origin":
+            case["origins"][0]["start_ms"] += 1
+        else:
+            del document["streams"][case["stream_key"]]
+        # Even a re-signed case must agree with its full source stream.
+        case["id"] = digest_json({k: v for k, v in case.items() if k != "id"})
+    _compress_private(packet, document)
+    _compress_private(labels, {"packet_sha256": sha256_file(packet), "reviewer_type": "assistant-text-only",
+                              "cases": [{"id": case["id"], "boundaries": []}]})
+    def forbidden(_):
+        pytest.fail("inference on inconsistent review packet")
+    with pytest.raises(DataError, match="review|Review"):
+        score_tubelex_review(packet, labels, segment=forbidden)
+
+
+def test_window_exclusions_follow_source_text_when_caption_stream_indices_change(tmp_path):
+    from manabi_sentence_db.serialization import digest_json, read_json, sha256_file, write_json
+
+    original_root, updated_root = tmp_path / "old", tmp_path / "updated"
+    original_root.mkdir()
+    updated_root.mkdir()
+    text = "今日は図書館で日本語の本を読みます。" * 80
+    old = snapshot(original_root, "abcdefghijk", text)
+    previous = tmp_path / "previous.zst"
+    prepare_tubelex_review([old], previous, per_video=1, window_chars=100)
+    updated = snapshot(updated_root, "abcdefghijk", text)
+    manifest = read_json(updated)
+    path = updated.parent / manifest["entries"][0]["path"]
+    caption = parse_json(_read_compressed(path))
+    caption["vtt"] = "WEBVTT\n\n00:00.000 --> 00:02.000\n初めての公園を散歩しました。\n\n00:10.000 --> 00:13.000\n" + text + "\n"
+    path.rename(path.with_suffix(".previous"))
+    _compress_private(path, caption)
+    manifest["entries"][0]["sha256"] = sha256_file(path)
+    manifest["snapshot_id"] = "tubelex_" + digest_json({k:v for k,v in manifest.items() if k != "snapshot_id"})[:32]
+    write_json(updated, manifest)
+    fresh = tmp_path / "fresh.zst"
+    prepare_tubelex_review([updated], fresh, per_video=20, window_chars=100,
+                           exclude_packets=[previous], exclude_scope="windows")
+    old_case = parse_json(_read_compressed(previous))["cases"][0]
+    cases = parse_json(_read_compressed(fresh))["cases"]
+    assert cases and all(c["stream"] == 1 for c in cases)
+    for case in cases:
+        assert case["source_start"] >= old_case["source_start"] + len(old_case["text"]) or old_case["source_start"] >= case["source_start"] + len(case["text"])
+
+
+@pytest.mark.parametrize("damage", ["duplicate", "url", "transcript-role"])
+def test_playback_scorer_checks_the_actual_packet_citations(tmp_path, damage):
+    from test_tubelex import build_fixture
+
+    from manabi_sentence_db.serialization import sha256_file
+    from manabi_sentence_db.tubelex_review import (
+        prepare_tubelex_playback_review,
+        score_tubelex_playback_review,
+    )
+
+    _, _, exports, _ = build_fixture(tmp_path)
+    original, packet, labels = (tmp_path / name for name in ("original.zst", "changed.zst", "ratings.zst"))
+    prepare_tubelex_playback_review([exports], original)
+    document = parse_json(_read_compressed(original))
+    case = document["cases"][0]
+    if damage == "duplicate":
+        document["cases"].append(dict(case))
+    elif damage == "url":
+        case["url"] += "&start=99999"
+    else:
+        document["contains_transcripts"] = True
+    _compress_private(packet, document)
+    _compress_private(labels, {"packet_sha256": sha256_file(packet), "reviewer_type": "human-audio-verified",
+        "cases": [{"id": case["id"], "listened": True, "start": "clean", "end": "clean"}]})
+    with pytest.raises(DataError):
+        score_tubelex_playback_review(packet, labels)

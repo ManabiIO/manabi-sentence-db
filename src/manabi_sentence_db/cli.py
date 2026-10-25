@@ -156,7 +156,7 @@ def parser() -> argparse.ArgumentParser:
     external_verify.add_argument("--private-build", type=Path, required=True)
     external_verify.add_argument("--references", type=Path, required=True)
     external_verify.add_argument("--base-artifact", type=Path)
-    external_verify.add_argument("--deep", action="store_true", help="Check chunk coverage, alignment and complete candidate postings")
+    external_verify.add_argument("--deep", action="store_true", help="Check coverage, complete postings and cue-derived reference inventory")
     batch = commands.add_parser("build-tubelex-batch", help="Resume immutable private snapshot shards")
     batch.add_argument("--snapshot", type=Path, action="append", required=True)
     batch.add_argument("--base-artifact", type=Path, required=True)

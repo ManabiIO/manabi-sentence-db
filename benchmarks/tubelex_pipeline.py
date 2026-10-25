@@ -24,6 +24,10 @@ from manabi_sentence_db import (
 from manabi_sentence_db.serialization import canonical_json, read_json
 
 
+class _ControlledInterruption(RuntimeError):
+    """Only the runner's deliberate interruption counts as a resumed attempt."""
+
+
 class Timings:
     def __init__(self):
         self.phases, self.stack = {}, []
@@ -61,6 +65,8 @@ def instrument():
                 segment, identity = result
 
                 def infer(text):
+                    if active[0] is None:
+                        return list(segment(text))
                     with active[0].measure("boundary_inference"):
                         return list(segment(text))
                 return infer, identity
@@ -69,22 +75,22 @@ def instrument():
         originals.append((module, name, original))
         setattr(module, name, call)
 
-    for module in (tubelex, tubelex_index, tubelex_batch):
-        wrap(module, "sha256_file", "file_hashing")
-    for module in (tubelex, tubelex_index, tubelex_batch):
-        wrap(module, "verify_tubelex_snapshot", "snapshot_integrity")
-    wrap(tubelex, "_read_compressed", "caption_decompression")
-    wrap(tubelex_cache, "_read_compressed", "prediction_cache_decompression")
-    wrap(tubelex_index, "_decode_text", "index_decompression")
-    wrap(tubelex_index, "parse_vtt", "caption_parsing")
-    wrap(tubelex_batch, "build_tubelex_index", "shard_build")
-    wrap(tubelex_batch, "verify_tubelex_index", "shard_deep_verification")
-    wrap(tubelex_batch, "_verify_bound_shard", "sealed_shard_verification")
-    wrap(tubelex_batch, "_model_identity", "model_hashing")
-    wrap(tubelex_index, "_model_identity", "model_hashing")
-    wrap(tubelex_index, "_local_sat", "model_setup", factory=True)
-    wrap(tubelex_boundaries, "local_japanese_character_model", "model_setup", factory=True)
     try:
+        for module in (tubelex, tubelex_index, tubelex_batch):
+            wrap(module, "sha256_file", "file_hashing")
+        for module in (tubelex, tubelex_index, tubelex_batch):
+            wrap(module, "verify_tubelex_snapshot", "snapshot_integrity")
+        wrap(tubelex, "_read_compressed", "caption_decompression")
+        wrap(tubelex_cache, "_read_compressed", "prediction_cache_decompression")
+        wrap(tubelex_index, "_decode_text", "index_decompression")
+        wrap(tubelex_index, "parse_vtt", "caption_parsing")
+        wrap(tubelex_batch, "build_tubelex_index", "shard_build")
+        wrap(tubelex_batch, "verify_tubelex_index", "shard_deep_verification")
+        wrap(tubelex_batch, "_verify_bound_shard", "sealed_shard_verification")
+        wrap(tubelex_batch, "_model_identity", "model_hashing")
+        wrap(tubelex_index, "_model_identity", "model_hashing")
+        wrap(tubelex_index, "_local_sat", "model_setup", factory=True)
+        wrap(tubelex_boundaries, "local_japanese_character_model", "model_setup", factory=True)
         yield active
     finally:
         for module, name, original in reversed(originals):
@@ -101,64 +107,79 @@ def benchmark(snapshots, base, output, *, model=None, threshold=0.5):
         options = dict(ja_punct_model=Path(model).resolve(strict=True),
                        ja_punct_threshold=threshold, boundary_cache=output / "cache")
     reports = []
-    with instrument() as active:
-        def run(name, destination):
-            timing = active[0] = Timings()
-            start = time.perf_counter()
-            try:
-                with timing.measure("end_to_end"):
-                    result = tubelex_batch.build_tubelex_collection(snapshots, base, destination, **options)
-            finally:
-                active[0] = None
-            report = {"mode": name, "wall_seconds": time.perf_counter() - start,
-                      "phases": timing.phases}
-            document = read_json(result)
-            report["shards"] = []
-            for entry in document["shards"]:
-                part = result.parent / entry["part"]
-                private = read_json(part / "index/manifest.private.json")
-                report["shards"].append({"build_id": private["build_id"],
-                    "index_sha256": private["index_sha256"],
-                    "export_sha256": private["asset"]["sha256"],
-                    "stored_build_stats": private["stats"]})
-            reports.append(report)
-            print(json.dumps({"mode": name, "wall_seconds": report["wall_seconds"]}), flush=True)
-            return result
-
-        run("cold_prediction_cache", output / "cold")
-        run("fresh_rebuild_warm_prediction_cache", output / "rebuild")
-        run("completed_resume", output / "cold")
-        # Controlled interruption before a second shard tests resumability, not
-        # a claim about any particular OS/process crash point.
-        if len(snapshots) > 1:
-            original = tubelex_batch.build_tubelex_index
-            calls = 0
-
-            def interrupt(*args, **kwargs):
-                nonlocal calls
-                calls += 1
-                if calls == 2:
-                    raise RuntimeError("benchmark interruption before second shard")
-                return original(*args, **kwargs)
-
-            tubelex_batch.build_tubelex_index = interrupt
-            try:
+    try:
+        with instrument() as active:
+            def run(name, destination):
+                timing = active[0] = Timings()
+                start = time.perf_counter()
+                report = {"mode": name, "outcome": "error", "phases": timing.phases}
+                reports.append(report)
                 try:
-                    run("controlled_interruption", output / "interrupted")
-                except RuntimeError as error:
-                    if str(error) != "benchmark interruption before second shard":
-                        raise
-            finally:
-                tubelex_batch.build_tubelex_index = original
-            run("interrupted_resume", output / "interrupted")
+                    with timing.measure("end_to_end"):
+                        result = tubelex_batch.build_tubelex_collection(snapshots, base, destination, **options)
+                    report["wall_seconds"] = time.perf_counter() - start
+                    document = read_json(result)
+                    report["shards"] = []
+                    for entry in document["shards"]:
+                        part = result.parent / entry["part"]
+                        private = read_json(part / "index/manifest.private.json")
+                        report["shards"].append({"build_id": private["build_id"],
+                            "index_sha256": private["index_sha256"],
+                            "export_sha256": private["asset"]["sha256"],
+                            "stored_build_stats": private["stats"]})
+                    report["outcome"] = "complete"
+                except BaseException as error:
+                    report["outcome"] = "interrupted" if isinstance(error, _ControlledInterruption) else "error"
+                    report["error_type"] = type(error).__name__
+                    raise
+                finally:
+                    report.setdefault("wall_seconds", time.perf_counter() - start)
+                    active[0] = None
+                print(json.dumps({"mode": name, "wall_seconds": report["wall_seconds"]}), flush=True)
+                return result
+
+            run("cold_prediction_cache", output / "cold")
+            run("fresh_rebuild_warm_prediction_cache", output / "rebuild")
+            run("completed_resume", output / "cold")
+            # Controlled interruption before a second shard tests resumability, not
+            # a claim about any particular OS/process crash point.
+            if len(snapshots) > 1:
+                original = tubelex_batch.build_tubelex_index
+                calls = 0
+
+                def interrupt(*args, **kwargs):
+                    nonlocal calls
+                    calls += 1
+                    if calls == 2:
+                        raise _ControlledInterruption("benchmark interruption before second shard")
+                    return original(*args, **kwargs)
+
+                tubelex_batch.build_tubelex_index = interrupt
+                try:
+                    try:
+                        run("controlled_interruption", output / "interrupted")
+                    except _ControlledInterruption:
+                        pass
+                finally:
+                    tubelex_batch.build_tubelex_index = original
+                run("interrupted_resume", output / "interrupted")
+    except BaseException:
+        # Preserve failed-attempt cost without recording exception messages,
+        # which can contain private source data from optional tools.
+        (output / "report.json").write_bytes(canonical_json({
+            "runs": reports, "complete": False, "logical_artifacts_identical": None,
+            "limits": "Incomplete benchmark; failed phases are evidence, not successful-build timings."}))
+        raise
     signatures = [[(s["build_id"], s["index_sha256"], s["export_sha256"]) for s in r["shards"]]
-                  for r in reports]
-    assert all(value == signatures[0] for value in signatures), "Rebuild/resume changed index or citations"
-    summary = {"runs": reports, "logical_artifacts_identical": True,
+                  for r in reports if r["outcome"] == "complete"]
+    identical = all(value == signatures[0] for value in signatures)
+    summary = {"runs": reports, "complete": identical, "logical_artifacts_identical": identical,
                "input_snapshots": [str(p) for p in snapshots],
                "model": bool(model), "model_threshold": threshold if model else None,
                "limits": "Offline warm-filesystem samples; nested inclusive phases overlap. No caption/audio quality judgment, full-corpus throughput or production latency claim."}
     (output / "report.json").write_bytes(canonical_json(summary))
+    if not identical:
+        raise ValueError("Rebuild/resume changed index or citations; inspect the preserved report")
     return summary
 
 

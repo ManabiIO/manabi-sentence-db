@@ -962,3 +962,52 @@ compressed review packets remain outside Git in `tubelex-findings-dx6tmrn2`.
 Only public build/search/review code, authored test fixtures and text-free
 aggregate findings belong in this repository. The private Django serving format
 and native dictionary/runtime were not changed.
+
+
+### Follow-up: bind citations and review cases to their source
+
+A second consistency gap remained after complete posting verification: a forged
+but canonical citation URL could name a different video/time, use the wrong
+boundary tag, or duplicate another exported clip while every file checksum and
+count still passed. Four red regressions reproduced this. Deep verification now
+reconstructs the `unit-and-origin-starts-v2` inventory using the same private
+cue/unit materialization rules that readers serve, deduplicates text-free IDs in
+a temporary SQLite file with a 2 MiB page cache, and compares full canonical
+citation bindings. It ignores export line/key/tag order. Stream snapshot and
+boundary-mode metadata must also match the advertised build. Intentionally empty
+punctuation-only exports remain valid. No source text is written to the ledger,
+and the main artifact remains read-only and byte-identical.
+
+Both saved 20-video builds passed the stronger check: 1,360 default references
+and 1,087 model-assisted references over 36,203 indexed characters. Five measured
+paired warm rounds gave medians of 490.55→580.35 ms (default) and 447.51→529.39 ms
+(model profile). This roughly 80–90 ms additional cost is offline deep verification,
+not search work. These checks establish consistency with stored cue alignment,
+not human listening quality or proof of upstream caption accuracy.
+
+Fresh complete-pipeline runs with the stronger verifier retained identical index
+bytes to the preceding saved builds. Default cold/rebuild/completed-resume times
+were 1.166/1.120/0.006 seconds; the frozen model profile measured
+15.267/1.467/0.101 seconds. Controlled interrupted attempts now have explicit
+report rows (0.371/0.604 seconds default/model), followed by resumed builds of
+0.757/0.958 seconds. All successful build/index/export identities matched, and
+nested exclusive times still account for the root exactly. Earlier timing tables
+predate this additional check. These remain single warm-filesystem sample pairs.
+
+Review packets now reject duplicate/altered case IDs, invalid source/core offsets,
+text differing from its full source stream, mismatched clipped origins and missing
+source streams before inference. Re-signing the changed packet/case does not make
+those inconsistencies valid. All 28 development, 13 earlier holdout and 44 fresh
+saved cases remain readable. Exclusions bind to full-source text hashes so stream
+renumbering cannot silently resample old contexts; unknown/edited streams in
+already reviewed videos are skipped conservatively. Playback packets receive the
+same canonical citation checks as artifact verification and reject duplicate IDs.
+No new boundary F1 or listening labels were manufactured.
+
+The diversity selector also matched an independent exhaustive priority oracle
+across 1,000 seeded randomized/interleaved synthetic cases, including evictions;
+its result/ID/per-video maps remained bounded by the cap. No selection default
+changed. Benchmark regressions now preserve interrupted/failed/mismatched-artifact
+reports and restore all instrumentation hooks; failed results cannot be reported
+as successful identity qualification, even with Python assertions disabled.
+Small reproduction evidence is in `tubelex-reference-review-9j3g_b02` outside Git.

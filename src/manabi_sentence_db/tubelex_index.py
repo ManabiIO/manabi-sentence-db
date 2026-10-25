@@ -104,7 +104,8 @@ class _PostingBinding:
 
     Expected terms come from bounded source windows, independently of FTS data.
     Count plus SHA-256 sum/XOR detects missing, extra and reassigned postings
-    without sorting or retaining a corpus-sized vocabulary in memory.
+    without sorting or retaining a corpus-sized vocabulary in memory. The byte
+    accumulator also binds canonical text-free citation records.
     """
     def __init__(self):
         self.count = self.total = self.xor = 0
@@ -112,7 +113,10 @@ class _PostingBinding:
     def add(self, term, chunk):
         if not isinstance(term, str) or type(chunk) is not int or chunk <= 0:
             raise DataError("Invalid private substring postings")
-        digest = hashlib.sha256(chunk.to_bytes(8, "little") + term.encode("utf-8")).digest()
+        self.add_bytes(chunk.to_bytes(8, "little") + term.encode("utf-8"))
+
+    def add_bytes(self, payload):
+        digest = hashlib.sha256(payload).digest()
         value = int.from_bytes(digest, "little")
         self.count += 1
         self.total = (self.total + value) % (1 << 256)
@@ -121,6 +125,44 @@ class _PostingBinding:
     @property
     def value(self):
         return self.count, self.total, self.xor
+
+
+def _reference_binding(binding, record):
+    # Tags are an unordered vocabulary; export line/key/tag ordering is not a
+    # semantic change. The full canonical citation, including timing, is bound.
+    binding.add_bytes(canonical_json({**record, "tags": sorted(record["tags"])}))
+
+
+def _verify_reference_inventory(database, actual):
+    """Reconstruct what queries would materialize from private cue alignment.
+
+    The text-free ID ledger lives in SQLite's temporary file, not a corpus-sized
+    Python set or an uncompressed caption file. Its page cache is bounded.
+    """
+    expected = _PostingBinding()
+    database.execute("PRAGMA temp_store=FILE")
+    database.execute("PRAGMA temp.cache_size=-2048")
+    database.execute("CREATE TEMP TABLE verification_reference_ids(id TEXT PRIMARY KEY) WITHOUT ROWID")
+    try:
+        for (stream_id,) in database.execute("SELECT id FROM streams ORDER BY id"):
+            starts = database.execute(
+                "SELECT start FROM origins WHERE stream_id=? UNION "
+                "SELECT start FROM units WHERE stream_id=? ORDER BY start",
+                (stream_id, stream_id),
+            )
+            try:
+                for (left,) in starts:
+                    record = _match_reference(database, stream_id, left, left + 1)
+                    if record and database.execute(
+                        "INSERT OR IGNORE INTO temp.verification_reference_ids VALUES (?)", (record["id"],),
+                    ).rowcount:
+                        _reference_binding(expected, record)
+            finally:
+                starts.close()
+        if expected.value != actual.value:
+            raise DataError("Exported reference inventory disagrees with private cue alignment")
+    finally:
+        database.execute("DROP TABLE temp.verification_reference_ids")
 
 
 def _expected_postings(text, bitmap, chunk, bindings):
@@ -1026,6 +1068,32 @@ def _search_candidates(database, query: str, limit: int, budget: _QueryBudget,
         rows.close()
 
 
+def _check_reference_record(record, snapshot_id):
+    """Shared offline canonical citation check for verification and review."""
+    validate_record(record)
+    if record.get("kind") != "reference" or record.get("snapshot_id") != snapshot_id:
+        raise DataError("Unexpected record in text-free reference export")
+    identity = re.fullmatch(r"([A-Za-z0-9_-]{11}):([0-9]{1,15}):([0-9]{1,15})", record["native_id"])
+    if identity is None:
+        raise DataError("Invalid external citation identity")
+    video, start, end = identity.groups()
+    tags = set(record["tags"])
+    boundaries = tags & {"boundary:model", "boundary:punctuation", "boundary:pause-inferred",
+                         "boundary:unsegmented", "boundary:context-window"}
+    if (len(boundaries) != 1 or len(tags) != len(record["tags"])
+            or not {"manual-captions", "timing:cue-envelope"} <= tags
+            or tags - boundaries - {"manual-captions", "timing:cue-envelope", "timing:wide-cue-envelope"}):
+        raise DataError("Unexpected text in external reference tags")
+    boundary = next(iter(boundaries))[9:]
+    expected = reference_record(AlignedSentence("", int(start), int(end), boundary),
+                                video_id=video, snapshot_id=snapshot_id)
+    if any(record[key] != expected[key] for key in ("id", "url", "locator")):
+        raise DataError("External citation URL and timing disagree")
+    if (set(record) != set(expected)
+            or any(record[k] != expected[k] for k in expected if k != "tags")):
+        raise DataError("Unexpected text or metadata in external reference export")
+
+
 def verify_tubelex_index(
     private_build: Path,
     references: Path,
@@ -1120,51 +1188,16 @@ def _verify_tubelex_index(
     if sha256_file(export) != public["asset"]["sha256"]:
         raise DataError("External reference export checksum mismatch")
     count = 0
+    actual_references = _PostingBinding() if deep else None
     with export.open("rb") as raw, zstandard.ZstdDecompressor().stream_reader(raw) as decoded:
         with io.TextIOWrapper(decoded, encoding="utf-8") as lines:
             while line := lines.readline(64 * 1024 + 1):
                 if len(line) > 64 * 1024:
                     raise DataError("Oversized external reference record")
                 record = parse_json(line)
-                validate_record(record)
-                if record["kind"] != "reference" or record["snapshot_id"] != public["snapshot_id"]:
-                    raise DataError("Unexpected record in text-free reference export")
-                locator = record["locator"]
-                identity = re.fullmatch(
-                    r"([A-Za-z0-9_-]{11}):([0-9]{1,15}):([0-9]{1,15})", record["native_id"]
-                )
-                if identity is None:
-                    raise DataError("Invalid external citation identity")
-                video, start, end = identity.groups()
-                expected = reference_record(
-                    AlignedSentence("", int(start), int(end), ""),
-                    video_id=video,
-                    snapshot_id=public["snapshot_id"],
-                )
-                if any(record[key] != expected[key] for key in ("id", "url", "locator")):
-                    raise DataError("External citation URL and timing disagree")
-                if set(record) != set(expected) or any(
-                    record[key] != expected[key] for key in expected if key != "tags"
-                ):
-                    raise DataError("Unexpected text or metadata in external reference export")
-                allowed_boundaries = {
-                    "boundary:model",
-                    "boundary:punctuation",
-                    "boundary:pause-inferred",
-                    "boundary:unsegmented",
-                    "boundary:context-window",
-                }
-                tags = set(record["tags"])
-                if (
-                    not {"manual-captions", "timing:cue-envelope"} <= tags
-                    or len(tags & allowed_boundaries) != 1
-                    or tags
-                    - allowed_boundaries
-                    - {"manual-captions", "timing:cue-envelope", "timing:wide-cue-envelope"}
-                ):
-                    raise DataError("Unexpected text in external reference tags")
-                if locator["type"] != "media":
-                    raise DataError("Unexpected non-media external citation")
+                _check_reference_record(record, public["snapshot_id"])
+                if actual_references is not None:
+                    _reference_binding(actual_references, record)
                 count += 1
                 if count > public["references"]:
                     raise DataError("External reference export exceeds its inventory")
@@ -1228,7 +1261,9 @@ def _verify_tubelex_index(
                 "SELECT id,metadata,eligibility FROM streams ORDER BY id"
             ):
                 stream_info = parse_json(stream_metadata)
-                if not isinstance(stream_info, dict):
+                if (not isinstance(stream_info, dict)
+                        or stream_info.get("snapshot_id") != public["snapshot_id"]
+                        or stream_info.get("boundary_mode") != public["options"]["boundary_mode"]):
                     raise DataError("Invalid private caption stream metadata")
                 length = stream_info.get("text_length")
                 if type(length) is not int or not 0 < length <= chunks * CHUNK_CHARS:
@@ -1342,6 +1377,7 @@ def _verify_tubelex_index(
             for table, expected in expected_postings.items():
                 if expected.value != actual_postings[table].value:
                     raise DataError(f"Private {table} postings disagree with caption text")
+            _verify_reference_inventory(database, actual_references)
     result = {
         "build_id": public["build_id"],
         "schema_version": SCHEMA_VERSION,
@@ -1353,5 +1389,6 @@ def _verify_tubelex_index(
     if deep:
         result["indexed_characters"] = decoded_chars
         result["posting_verification"] = "complete-term-document-v1"
+        result["reference_verification"] = "private-cue-inventory-v1"
         result["verified_postings"] = {table: binding.count for table, binding in actual_postings.items()}
     return result

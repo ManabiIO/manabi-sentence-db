@@ -12,6 +12,7 @@ import heapq
 import io
 import json
 import random
+import re
 from bisect import bisect_right
 from collections import Counter
 from dataclasses import asdict
@@ -20,7 +21,7 @@ from pathlib import Path
 from .serialization import DataError, digest_json, parse_json, safe_relative, sha256_file
 from .tubelex import (
     MAX_INPUT_BYTES,
-    AlignedSentence,
+    VIDEO_ID,
     CaptionStream,
     Origin,
     _compress_private,
@@ -29,7 +30,6 @@ from .tubelex import (
     caption_streams,
     parse_vtt,
     read_private_caption,
-    reference_record,
     stream_units,
     verify_tubelex_snapshot,
 )
@@ -43,6 +43,79 @@ def _review_size(value, remaining):
         if size > remaining:
             raise DataError("Private review packet exceeds 32 MiB; reduce max-videos or per-video")
     return size
+
+
+def _validated_review_cases(packet):
+    """Ground every review offset and clipped origin in the original stream."""
+    if (not isinstance(packet, dict) or packet.get("kind") != "private-tubelex-blind-review"
+            or type(packet.get("schema_version")) is not int or packet["schema_version"] != 1
+            or not isinstance(packet.get("cases"), list) or not 1 <= len(packet["cases"]) <= 20000
+            or not isinstance(packet.get("streams"), dict)):
+        raise DataError("Invalid private review packet")
+    streams = packet["streams"]
+    for source in streams.values():
+        if (not isinstance(source, dict) or set(source) != {"text", "origins", "voice", "region"}
+                or not isinstance(source["text"], str) or not source["text"]
+                or not isinstance(source["origins"], list) or not source["origins"]
+                or not isinstance(source["voice"], str) or not isinstance(source["region"], str)):
+            raise DataError("Invalid private review source stream")
+        cursor = 0
+        for origin in source["origins"]:
+            if (not isinstance(origin, dict)
+                    or set(origin) != {"start", "end", "start_ms", "end_ms", "cue_ids"}
+                    or any(type(origin[k]) is not int for k in ("start", "end", "start_ms", "end_ms"))
+                    or origin["start"] != cursor or not cursor < origin["end"] <= len(source["text"])
+                    or not 0 <= origin["start_ms"] < origin["end_ms"]
+                    or not isinstance(origin["cue_ids"], list) or not origin["cue_ids"]
+                    or any(not isinstance(cue, str) or not re.fullmatch(r"cue-[1-9][0-9]*", cue)
+                           for cue in origin["cue_ids"])):
+                raise DataError("Invalid private review source origins")
+            cursor = origin["end"]
+        if cursor != len(source["text"]):
+            raise DataError("Private review origins do not cover their source")
+    cases, used = {}, set()
+    fields = {"id", "video_id", "snapshot_id", "stream", "source_start", "text", "stream_key",
+              "core_start", "core_end", "origins", "voice", "region"}
+    for case in packet["cases"]:
+        if (not isinstance(case, dict) or set(case) != fields
+                or not isinstance(case["id"], str) or case["id"] in cases
+                or not isinstance(case["video_id"], str) or not VIDEO_ID.fullmatch(case["video_id"])
+                or not isinstance(case["snapshot_id"], str)
+                or not re.fullmatch(r"tubelex_[0-9a-f]{32}", case["snapshot_id"])
+                or any(type(case[k]) is not int for k in ("stream", "source_start", "core_start", "core_end"))
+                or case["stream"] < 0 or case["source_start"] < 0
+                or not isinstance(case["text"], str) or not case["text"]
+                or not 0 <= case["core_start"] < case["core_end"] <= len(case["text"])
+                or case["stream_key"] != f"{case['video_id']}:{case['stream']}"
+                or case["stream_key"] not in streams):
+            raise DataError("Invalid or duplicate private review case")
+        source = streams[case["stream_key"]]
+        a, b = case["source_start"], case["source_start"] + len(case["text"])
+        if (b > len(source["text"]) or case["text"] != source["text"][a:b]
+                or any(case[k] != source[k] for k in ("voice", "region"))
+                or case["id"] != digest_json({k:v for k,v in case.items() if k != "id"})):
+            raise DataError("Private review case disagrees with its source or identity")
+        origins = source["origins"]
+        first = max(0, bisect_right(origins, a, key=lambda p: p["start"]) - 1)
+        last = bisect_right(origins, b - 1, key=lambda p: p["start"])
+        clipped = [{**p, "start": max(p["start"], a) - a, "end": min(p["end"], b) - a}
+                   for p in origins[first:last] if p["end"] > a]
+        if case["origins"] != clipped:
+            raise DataError("Private review case origins disagree with its source")
+        cases[case["id"]] = case
+        used.add(case["stream_key"])
+    if set(streams) != used:
+        raise DataError("Unreferenced private review source streams")
+    return cases
+
+
+def _review_cases(packet):
+    try:
+        return _validated_review_cases(packet)
+    except DataError:
+        raise
+    except (KeyError, TypeError, ValueError) as exc:
+        raise DataError("Invalid private review packet") from exc
 
 
 def prepare_tubelex_review(snapshots, output, *, per_video=4, window_chars=200,
@@ -59,17 +132,13 @@ def prepare_tubelex_review(snapshots, output, *, per_video=4, window_chars=200,
     for path in exclude_packets:
         path = Path(path).resolve(strict=True)
         prior = parse_json(_read_compressed(path))
-        if (not isinstance(prior, dict) or prior.get("kind") != "private-tubelex-blind-review"
-                or prior.get("schema_version") != 1 or not isinstance(prior.get("cases"), list)):
-            raise DataError("Exclusions require a previous private blind review packet")
+        prior_cases = _review_cases(prior)
         prior_hashes.append(sha256_file(path))
-        for case in prior["cases"]:
-            if (not isinstance(case, dict) or not isinstance(case.get("video_id"), str)
-                    or type(case.get("stream")) is not int or type(case.get("source_start")) is not int
-                    or not isinstance(case.get("text"), str)):
-                raise DataError("Invalid previous review case")
+        hashes = {key: hashlib.sha256(source["text"].encode()).digest()
+                  for key, source in prior["streams"].items()}
+        for case in prior_cases.values():
             excluded.add(case["video_id"])
-            prior_windows.setdefault((case["video_id"], case["stream"]), []).append(
+            prior_windows.setdefault((case["video_id"], hashes[case["stream_key"]]), []).append(
                 (case["source_start"], case["source_start"] + len(case["text"]))
             )
     output = _new_output(Path(output))
@@ -122,11 +191,17 @@ def prepare_tubelex_review(snapshots, output, *, per_video=4, window_chars=200,
             for left in range(0, len(stream.text), window_chars)
             if min(len(stream.text), left + window_chars) - left >= 20
         ]
-        if exclude_scope == "windows":
+        if exclude_scope == "windows" and video in excluded:
+            hashes = {number: hashlib.sha256(stream.text.encode()).digest()
+                      for number, stream in enumerate(streams)}
+            # Indices can move when a caption snapshot gains/removes a stream.
+            # Reuse offsets only for an identical original source; unknown or
+            # edited streams in a previously seen video are conservatively skipped.
             windows = [(number, left, right) for number, left, right in windows
-                       if not any(max(0, left - 100) < b
-                                  and min(len(streams[number].text), right + 100) > a
-                                  for a, b in prior_windows.get((video, number), ())) ]
+                       if (video, hashes[number]) in prior_windows
+                       and not any(max(0, left - 100) < b
+                                   and min(len(streams[number].text), right + 100) > a
+                                   for a, b in prior_windows[video, hashes[number]])]
         for number, left, right in rng.sample(windows, min(per_video, len(windows))):
             stream = streams[number]
             stream_key = f"{video}:{number}"
@@ -175,11 +250,11 @@ def score_tubelex_review(packet_path, labels_path, *, segment=None, pause_ms=800
         or packet.get("kind") != "private-tubelex-blind-review" or packet.get("schema_version") != 1
         or not isinstance(packet.get("cases"), list) or not isinstance(packet.get("streams"), dict)
         or labels.get("packet_sha256") != sha256_file(Path(packet_path))
-        or labels.get("reviewer_type") not in {"human-text-only", "human-audio-verified", "assistant-text-only"}
+        or labels.get("reviewer_type") not in ("human-text-only", "human-audio-verified", "assistant-text-only")
         or not isinstance(labels.get("cases"), list) or not labels["cases"]
     ):
         raise DataError("Review labels must bind the packet and declare their reviewer type")
-    cases = {case["id"]: case for case in packet["cases"]}
+    cases = _review_cases(packet)
     totals, videos, seen, predictions = Counter(), {}, set(), {}
     for label in labels["cases"]:
         if (not isinstance(label, dict) or not isinstance(label.get("id"), str)
@@ -255,7 +330,7 @@ def prepare_tubelex_playback_review(exports, output, *, max_cases=40, seed=20261
     """
     import zstandard
 
-    from .validation import validate_record
+    from .tubelex_index import _check_reference_record
 
     if type(max_cases) is not int or not 1 <= max_cases <= 500 or not 1 <= len(exports) <= 4096:
         raise DataError("Use 1..4096 reference exports and 1..500 playback cases")
@@ -283,26 +358,7 @@ def prepare_tubelex_playback_review(exports, output, *, max_cases=40, seed=20261
                     if len(line) > 65536:
                         raise DataError("Oversized playback reference")
                     record = parse_json(line)
-                    validate_record(record)
-                    if record["kind"] != "reference" or record["snapshot_id"] != manifest["snapshot_id"]:
-                        raise DataError("Playback packets require text-free references")
-                    try:
-                        video, start, end = record["native_id"].split(":")
-                        boundaries = [tag[9:] for tag in record["tags"] if tag.startswith("boundary:")]
-                        if len(boundaries) != 1:
-                            raise DataError("Invalid playback boundary tag")
-                        expected = reference_record(
-                            AlignedSentence("", int(start), int(end), boundaries[0]),
-                            video_id=video, snapshot_id=record["snapshot_id"],
-                        )
-                    except (KeyError, ValueError, TypeError) as exc:
-                        raise DataError("Invalid playback citation identity") from exc
-                    tags = set(record["tags"])
-                    if (set(record) != set(expected)
-                            or any(record[k] != expected[k] for k in expected if k != "tags")
-                            or not set(expected["tags"]) <= tags
-                            or tags - set(expected["tags"]) - {"timing:wide-cue-envelope"}):
-                        raise DataError("Unexpected metadata in playback reference")
+                    _check_reference_record(record, manifest["snapshot_id"])
                     count += 1
                     priority = int.from_bytes(hashlib.sha256(f"{seed}:{record['id']}".encode()).digest(), "big")
                     if record["id"] in retained or (len(heap) == max_cases and priority >= -heap[0][0]):
@@ -337,7 +393,17 @@ def score_tubelex_playback_review(packet_path, labels_path):
             or labels.get("reviewer_type") != "human-audio-verified"
             or not isinstance(labels.get("cases"), list) or not labels["cases"]):
         raise DataError("Playback labels must bind the packet and declare human-audio-verified review")
-    cases = {case["id"] for case in packet["cases"]}
+    from .tubelex_index import _check_reference_record
+
+    if (type(packet["schema_version"]) is not int or packet.get("contains_transcripts") is not False
+            or len(packet["cases"]) > 500):
+        raise DataError("Invalid playback review packet")
+    cases = set()
+    for case in packet["cases"]:
+        if case["id"] in cases:
+            raise DataError("Duplicate playback review packet case")
+        _check_reference_record(case, case.get("snapshot_id"))
+        cases.add(case["id"])
     seen, counts = set(), Counter()
     for label in labels["cases"]:
         if (not isinstance(label, dict) or not isinstance(label.get("id"), str)

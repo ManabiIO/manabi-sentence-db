@@ -147,7 +147,13 @@ orphaned index records. It independently derives every expected distinct
 sum/XOR bindings with both FTS vocabularies. Missing, extra and reassigned postings
 are rejected even after file checksums are recomputed and FTS integrity passes.
 The comparison streams the vocabularies once and retains only one chunk's term
-set. It does not assess linguistic or playback quality. Validate once when activating
+set. Deep mode also reconstructs the declared unit/origin-start clip inventory
+from private cue alignment and compares complete canonical citations, so a valid
+URL for a different video, timestamp, boundary tag or duplicated clip is rejected.
+Export line/key/tag ordering is immaterial. A temporary text-free ID ledger uses
+SQLite file storage and a 2 MiB page cache; it is dropped before closing the
+read-only main database, including on failure. No caption plaintext or second
+full search index is created. These checks do not assess linguistic/audio quality. Validate once when activating
 a build; serving code should not hash a large base artifact on every query.
 
 `data/private/tubelex-index-001/` contains a SQLite index and private manifest.
@@ -687,7 +693,11 @@ The pipeline runner measures file hashing, compressed caption/index decoding,
 optional inference, deep shard verification and sealed-shard verification.
 It compares cold prediction-cache builds, fresh warm-cache rebuilds, completed
 resume and controlled interrupted resume. Nested inclusive times overlap;
-exclusive times account for the end-to-end total. Stored shard build stats describe
+exclusive times account for the end-to-end total. Controlled interrupted attempts
+retain their own timing row; unsuccessful benchmarks preserve partial reports,
+and identity mismatches preserve evidence before raising an error. Instrumentation
+is restored on exceptions. Error reports record exception types without copying
+potentially private exception messages. Stored shard build stats describe
 the original build, not inference newly performed during resume. With optional
 `--ja-punct-model` and `--ja-punct-threshold`, use the provisioned model runtime;
 the runner downloads nothing. The default-cache runner is a synthetic byte/cache
@@ -723,7 +733,12 @@ mise run prepare-tubelex-review -- --snapshot /path/to/new-snapshot   --exclude-
 
 Video-level exclusion is the default. Explicit `--exclude-scope windows` instead
 selects nonoverlapping context windows in previously seen videos; these are not
-a new-video holdout. Packets and scoring reports retain the exclusion scope and
+a new-video holdout. Exclusions follow identical full-source text, not mutable
+stream numbers. Edited or unrecognized streams in a previously reviewed video
+are conservatively skipped. Scoring and exclusion inputs validate case IDs,
+source slices/core offsets, clipped cue origins and stream identity before
+inference. Playback scoring also validates each canonical clip and rejects
+duplicate packet IDs. Packets and scoring reports retain the exclusion scope and
 evaluation role. Sentence labels remain independent of model predictions and
 must declare assistant text, human text, or human audio review.
 
