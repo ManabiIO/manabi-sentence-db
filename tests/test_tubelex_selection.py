@@ -42,7 +42,7 @@ def test_diverse_scan_bounds_deduplication_by_result_cap(tmp_path, monkeypatch):
     pool = _DiverseReferences("今日は", 3)
     with index.TubelexReader(path) as reader:
         assert index._search_database(reader._database, "今日は", 3, 1000, collector=pool) == []
-        assert len(observed_sizes) >= 240  # Includes repeated same-cue matches.
+        assert 0 < len(observed_sizes) <= 5  # Stop materializing once this video cannot enter.
         assert max(observed_sizes) <= 3
         # The exhaustive first-match path is independent of the diverse pool.
         monkeypatch.setattr(index, "_match_reference", original)
@@ -62,7 +62,8 @@ def test_bounded_diversity_matches_exhaustive_deduplication_after_evictions():
         rng.shuffle(records)
         pool = _DiverseReferences(query, limit)
         for record in records:
-            pool.add(record)
+            if pool.accepts_video(record["native_id"].split(":")[0]):
+                pool.add(record)
             assert len(pool.ids) == len(pool.heap) <= limit
             assert sum(pool.counts.values()) == len(pool.heap)
         assert pool.results() == exhaustive_selection(records, query, limit), case
@@ -74,7 +75,7 @@ def test_query_reads_stream_metadata_once_across_repeated_matches_and_chunks(tmp
     statements = []
     with index.TubelexReader(path, timeout_ms=10000) as reader:
         reader._database.set_trace_callback(statements.append)
-        pool = _DiverseReferences("今日は", 3)
+        pool = _DiverseReferences("今日は", 250)
         index._search_database(reader._database, "今日は", 3, 10000, collector=pool)
     metadata_reads = [sql for sql in statements if sql.startswith("SELECT video_id,metadata,eligibility FROM streams")]
     assert len(metadata_reads) == 1

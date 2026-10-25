@@ -729,6 +729,9 @@ visited in a shard. An evicted clip cannot beat the improving selection cutoff
 when encountered again, so repeated clips do not require an unbounded seen set.
 Query-stable video ordering makes selection reproducible across shard order.
 It visits all retained candidates under the same shared deadline/decode budget;
+once a video's next slot cannot beat the pool cutoff, its remaining candidate
+chunks and clip materialization are skipped. The cutoff only improves, so this
+preserves the exhaustive selection, including across later streams/shards.
 expiration discards all results. Scanning more candidates can cost more than the
 unchanged default `selection="first"`. The Django integration is separate; this
 option is not a claim about semantic ranking or a change to public-site defaults.

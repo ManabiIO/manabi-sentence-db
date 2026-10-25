@@ -377,6 +377,14 @@ class _DiverseReferences:
         self.query, self.limit = query, limit
         self.heap, self.ids, self.counts = [], set(), {}
 
+    def accepts_video(self, video):
+        if len(self.heap) < self.limit:
+            return True
+        ordinal = self.counts.get(video, 0)
+        order = int.from_bytes(hashlib.sha256((self.query + "\0" + video).encode()).digest(), "big")
+        priority = (-ordinal, -order, -int.from_bytes(video.encode(), "big"))
+        return priority > self.heap[0][:3]
+
     def add(self, record):
         if record["id"] in self.ids:
             return

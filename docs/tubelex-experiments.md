@@ -1066,3 +1066,34 @@ work was stubbed in this component measurement, so these are not search timings.
 The existing negative-cache stress still reproduces thrashing for working sets
 larger than the cache; no cache capacity/admission defaults changed. Essential
 reports and reproduction scripts are outside Git in `tubelex-performance-vufbcipi`.
+
+### Scale qualification and exact diverse-search pruning
+
+A fresh authored workload contains 1,024 distinct generated tracks, 32,768 cues
+and four shards, with punctuated/unpunctuated text, zero-gap cues, quoted Latin
+names, per-video identifiers and diagnostic negative grams. It is not 1,024
+independently acquired real videos. Build/deep-verify/completed-resume took
+33.73/19.22/0.53 seconds; all generated snapshot/index/export/state files totalled
+5,098,445 bytes. Captions remained compressed throughout.
+
+The first query pass exposed broad diverse-search timeouts at the default
+one-second budget: complete scans still materialized clips from videos whose
+next slot could no longer enter the result pool. The collector now exposes that
+priority cutoff. The scanner skips those videos before decoding further chunks
+and stops materializing their remaining clips. An eviction can only reduce a
+video's retained count to an already rejected priority, so the improving cutoff
+cannot later admit a skipped clip. The default early-first path is unchanged.
+
+The pre-skip exhaustive reader, given an extended offline oracle timeout, returned
+exactly the same results as pruning for all 14 diagnostic query/selection pairs.
+The randomized repeated-clip oracle also exercises this admission check in 1,000
+cases. Final timing runs keep the normal one-second/2,048-chunk budgets. Broad
+diverse query medians fell from roughly 701–1,000 ms to 40–53 ms serially; all
+four-worker runs completed, with corresponding medians 46–69 ms and maxima up to
+137 ms. No partial success was returned in the earlier timeout cases. Final
+worker maximum RSS was about 45–49 MB including Python/imports, measured on macOS
+with Python 3.13.5; RSS excludes other processes and is not incremental text size.
+The 16 concurrent samples per query/profile are warm local process measurements,
+not production HTTP or cold-I/O qualification. Real-caption quality and larger
+independent-source coverage still require separate evaluation. Detailed reports
+and the deterministic generator remain in `tubelex-performance-vufbcipi` outside Git.

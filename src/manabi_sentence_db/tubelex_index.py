@@ -1026,8 +1026,11 @@ def _search_candidates(database, query: str, limit: int, budget: _QueryBudget,
             return []
     if len(query) < 3:
         rows = database.execute(
-            "SELECT c.id,c.stream_id,c.start,c.text_zstd,c.boundary_bits FROM short_substring p "
-            "JOIN chunks c ON c.id=p.rowid WHERE short_substring MATCH ? ORDER BY p.rowid",
+            "SELECT c.id,c.stream_id,c.start,c.text_zstd,c.boundary_bits" +
+            (",s.video_id" if collector is not None else "") + " FROM short_substring p "
+            "JOIN chunks c ON c.id=p.rowid" +
+            (" JOIN streams s ON s.id=c.stream_id" if collector is not None else "") +
+            " WHERE short_substring MATCH ? ORDER BY p.rowid",
             ("s" + query.encode().hex(),),
         )
     else:
@@ -1036,8 +1039,11 @@ def _search_candidates(database, query: str, limit: int, budget: _QueryBudget,
         grams = sorted({query[i : i + 3] for i in range(len(query) - 2)})
         match = " AND ".join('"' + g.replace('"', '""') + '"' for g in grams)
         rows = database.execute(
-            "SELECT c.id,c.stream_id,c.start,c.text_zstd,c.boundary_bits FROM substring f "
-            "JOIN chunks c ON c.id=f.rowid WHERE substring MATCH ? ORDER BY f.rowid",
+            "SELECT c.id,c.stream_id,c.start,c.text_zstd,c.boundary_bits" +
+            (",s.video_id" if collector is not None else "") + " FROM substring f "
+            "JOIN chunks c ON c.id=f.rowid" +
+            (" JOIN streams s ON s.id=c.stream_id" if collector is not None else "") +
+            " WHERE substring MATCH ? ORDER BY f.rowid",
             (match,),
         )
     try:
@@ -1048,7 +1054,12 @@ def _search_candidates(database, query: str, limit: int, budget: _QueryBudget,
         seen_refs = collector.ids if collector is not None else set()
         last_stream, stream_info = None, None
         interior_mask = (1 << (len(query) - 1)) - 1
-        for _, stream_id, offset, compressed, bitmap in rows:
+        for row in rows:
+            _, stream_id, offset, compressed, bitmap = row[:5]
+            if collector is not None and not collector.accepts_video(row[5]):
+                budget.check()
+                budget.stats["diversity_skipped_chunks"] = budget.stats.get("diversity_skipped_chunks", 0) + 1
+                continue
             budget.before_decode()
             text = _decode_text(compressed)
             budget.stats["decoded_characters"] += len(text)
@@ -1058,6 +1069,8 @@ def _search_candidates(database, query: str, limit: int, budget: _QueryBudget,
             )
             examined = 0
             while position >= 0:
+                if collector is not None and not collector.accepts_video(row[5]):
+                    break
                 if examined % 32 == 0:
                     budget.check()
                 examined += 1

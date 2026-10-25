@@ -396,7 +396,7 @@ def test_diversity_pool_is_bounded_and_round_robins_videos():
     assert len({r["native_id"].split(":")[0] for r in pool.results()}) == 5
 
 
-def test_diverse_selection_does_not_let_one_video_fill_a_shard_budget(collection_inputs):
+def test_diverse_selection_does_not_let_one_video_fill_a_shard_budget(collection_inputs, monkeypatch):
     from manabi_sentence_db.serialization import digest_json, parse_json, write_json
     from manabi_sentence_db.tubelex import _compress_private, _read_compressed
 
@@ -417,5 +417,13 @@ def test_diverse_selection_does_not_let_one_video_fill_a_shard_budget(collection
     batch.build_tubelex_collection(snapshots, base, output)
     with batch.TubelexCollectionReader(output) as reader:
         assert {r["native_id"].split(":")[0] for r in reader.search("今日は", limit=3)} == {"abcdefghijk"}
+        from manabi_sentence_db import tubelex_index as index
+        calls = []
+        original = index._match_reference
+        def counted(*args, **kwargs):
+            calls.append(1)
+            return original(*args, **kwargs)
+        monkeypatch.setattr(index, "_match_reference", counted)
         result = reader.search("今日は", limit=3, selection="diverse")
         assert len({r["native_id"].split(":")[0] for r in result}) == 3
+        assert len(calls) <= 5  # Three initial slots plus one from each later video.
