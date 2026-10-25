@@ -1026,7 +1026,11 @@ def _search_candidates(database, query: str, limit: int, budget: _QueryBudget,
             (match,),
         )
     try:
-        results, seen_refs = [], set()
+        # Full diverse scans must not retain every match in the shard. The
+        # collector owns a bounded ID set; evicted clips cannot outrank its
+        # monotonically improving cutoff if encountered again.
+        results = []
+        seen_refs = collector.ids if collector is not None else set()
         interior_mask = (1 << (len(query) - 1)) - 1
         for _, stream_id, offset, compressed, bitmap in rows:
             budget.before_decode()
@@ -1055,10 +1059,10 @@ def _search_candidates(database, query: str, limit: int, budget: _QueryBudget,
                         boundaries_checked=True,
                     )
                     if record and record["id"] not in seen_refs:
-                        seen_refs.add(record["id"])
                         if collector is not None:
                             collector.add(record)
                         else:
+                            seen_refs.add(record["id"])
                             results.append(record)
                             if len(results) == limit:
                                 return results

@@ -366,7 +366,13 @@ def verify_tubelex_collection(path: Path, *, base_artifact=None, deep=False):
 
 
 class _DiverseReferences:
-    """Bounded round-robin-by-video selection with query-stable tie ordering."""
+    """Bounded round-robin-by-video selection with query-stable tie ordering.
+
+    Eviction removes a video's last retained slot. Its next candidate therefore
+    has the evicted priority, which cannot beat the improving heap cutoff.
+    Remembering retained IDs suffices even when an evicted clip appears again;
+    the shard scanner shares this set instead of retaining all matching IDs.
+    """
     def __init__(self, query, limit):
         self.query, self.limit = query, limit
         self.heap, self.ids, self.counts = [], set(), {}

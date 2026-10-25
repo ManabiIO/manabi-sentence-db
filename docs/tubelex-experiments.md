@@ -1011,3 +1011,31 @@ changed. Benchmark regressions now preserve interrupted/failed/mismatched-artifa
 reports and restore all instrumentation hooks; failed results cannot be reported
 as successful identity qualification, even with Python assertions disabled.
 Small reproduction evidence is in `tubelex-reference-review-9j3g_b02` outside Git.
+
+### Follow-up: bound diverse-search deduplication end to end
+
+The preceding pool-level bound omitted a separate shard-scanner seen-ID set.
+Unlike the bounded result pool, it retained every matching clip during a diverse
+scan. A 120-cue regression with a three-result cap reproduced 120 retained IDs.
+The scanner now shares the pool's retained-ID set. Eviction removes a video's
+last retained slot, and its next candidate has the evicted priority, which cannot
+beat the monotonically improving heap cutoff. This also rejects repeated evicted
+clips without retaining their IDs. The ordinary first-match path is unchanged.
+
+A separate exhaustive oracle globally deduplicates records, assigns per-video
+arrival ordinals and sorts the complete candidate list. The bounded selector
+matched it in 1,000 seeded randomized cases with interleaved videos and repeated
+clips, including repeats after eviction. All 42 query/limit/profile combinations
+on the saved 20-video default/model samples returned identical text-free results
+before and after the scanner change.
+
+The existing authored continuous 10,000-cue track (130,000 characters) gave the
+same 250 results in both implementations. Observed scanner deduplication high
+water fell from 9,999 IDs to 250; peak query-time Python-traced allocations fell
+from 1,762,806 to 501,544 bytes. This excludes SQLite/native memory, reader setup
+and process RSS. Five serial warm rounds per version measured medians of
+289.59 ms before and 279.78 ms after. This single workload supports the memory
+bound and indicates no observed slowdown; it does not establish a general speed
+improvement or production latency. No corpus bytes, storage format or selection
+defaults changed. Reproduction code and aggregate evidence are outside Git in
+`tubelex-bounded-search-0zw_120u`.

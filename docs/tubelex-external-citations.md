@@ -719,6 +719,9 @@ mise run search-tubelex -- --collection /path/to/collection   --query 'です' -
 
 `TubelexCollectionReader.search(..., selection="diverse")` keeps a bounded
 250-record pool and favors a first result from each video before second results.
+Deduplication shares the pool's retained IDs instead of remembering every clip
+visited in a shard. An evicted clip cannot beat the improving selection cutoff
+when encountered again, so repeated clips do not require an unbounded seen set.
 Query-stable video ordering makes selection reproducible across shard order.
 It visits all retained candidates under the same shared deadline/decode budget;
 expiration discards all results. Scanning more candidates can cost more than the
