@@ -9,3 +9,6 @@ data/
 build/
 dist/
 .DS_Store
+*.private.sqlite3
+*.private.json
+*.private.json.zst

@@ -1,5 +1,13 @@
 # Manabi Sentence DB
 
+Optional [TUBELEX Japanese external citations](docs/tubelex-external-citations.md)
+can be built privately beside a downloaded corpus release. This separate opt-in
+step indexes manual captions for literal substring searches and emits only timed
+YouTube references; transcript text and its derived index stay out of public
+content artifacts.
+The extension also supports resumable snapshot shards, combined private searches,
+and separate compressed review packets for sentence boundaries and playback quality.
+
 **Current format:** bulk CLI builds default to JSONL. Release SQLite uses normalized
 v2 tables with unique sentences and independent occurrences; normalized JSONL ZIPs
 are also included. YAML and the legacy `build-db` command remain supported.
