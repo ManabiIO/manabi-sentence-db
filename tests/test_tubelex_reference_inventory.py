@@ -94,3 +94,29 @@ def test_deep_verifier_binds_stream_metadata_to_advertised_options(tmp_path, fie
     assert verify_tubelex_index(private, public)["deep"] is False
     with pytest.raises(DataError, match="stream metadata"):
         verify_tubelex_index(private, public, deep=True)
+
+
+def test_build_and_deep_verification_read_stream_metadata_once(tmp_path, monkeypatch):
+    from test_tubelex import _build_vtt
+
+    from manabi_sentence_db import tubelex_index as index
+
+    original = index._reference_stream
+    reads = []
+
+    def observed(database, stream_id):
+        reads.append(stream_id)
+        return original(database, stream_id)
+
+    monkeypatch.setattr(index, "_reference_stream", observed)
+    vtt = "WEBVTT\n\n" + "\n\n".join(
+        f"00:00:{number:02}.000 --> 00:00:{number + 1:02}.000\n"
+        "今日は図書館へ行きます。明日は公園へ行きます。"
+        for number in range(20)
+    )
+    path, manifest = _build_vtt(tmp_path, vtt)
+    assert len(reads) <= manifest["stats"]["streams"]
+    reads.clear()
+    result = verify_tubelex_index(path.parent, tmp_path / "public", deep=True)
+    assert result["references"] == manifest["references"]
+    assert len(reads) == result["streams"]

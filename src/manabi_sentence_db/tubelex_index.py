@@ -80,7 +80,9 @@ def _decode_boundary_bitmap(blob: bytes, text_length: int) -> int:
     if not isinstance(blob, bytes) or len(blob) > (CHUNK_CHARS + 7) // 8:
         raise DataError("Invalid private boundary bitmap size")
     bits = int.from_bytes(blob, "little")
-    if bits & 1 or bits.bit_length() >= text_length or len(blob) != (bits.bit_length() + 7) // 8:
+    # A boundary at offset length - 1 leaves a valid one-character final span.
+    # bit_length() is the highest set offset plus one, not the offset itself.
+    if bits & 1 or bits.bit_length() > text_length or len(blob) != (bits.bit_length() + 7) // 8:
         raise DataError("Invalid private boundary bitmap padding or encoding")
     return bits
 
@@ -145,6 +147,7 @@ def _verify_reference_inventory(database, actual):
     database.execute("CREATE TEMP TABLE verification_reference_ids(id TEXT PRIMARY KEY) WITHOUT ROWID")
     try:
         for (stream_id,) in database.execute("SELECT id FROM streams ORDER BY id"):
+            stream_info = _reference_stream(database, stream_id)
             starts = database.execute(
                 "SELECT start FROM origins WHERE stream_id=? UNION "
                 "SELECT start FROM units WHERE stream_id=? ORDER BY start",
@@ -152,7 +155,9 @@ def _verify_reference_inventory(database, actual):
             )
             try:
                 for (left,) in starts:
-                    record = _match_reference(database, stream_id, left, left + 1)
+                    record = _match_reference(
+                        database, stream_id, left, left + 1, stream_info=stream_info,
+                    )
                     if record and database.execute(
                         "INSERT OR IGNORE INTO temp.verification_reference_ids VALUES (?)", (record["id"],),
                     ).rowcount:
@@ -676,12 +681,14 @@ def build_tubelex_index(
                             "source_metadata": caption["metadata"],
                             "text_length": len(stream.text),
                         }
+                        eligibility = _eligibility_bits(stream.text)
+                        stream_info = (entry["video_id"], metadata, eligibility)
                         stream_id = database.execute(
                             "INSERT INTO streams(video_id,metadata,eligibility) VALUES (?,?,?)",
                             (
                                 entry["video_id"],
                                 canonical_json(metadata),
-                                _eligibility_bits(stream.text),
+                                eligibility,
                             ),
                         ).lastrowid
                         database.executemany(
@@ -783,6 +790,7 @@ def build_tubelex_index(
                                 stream_id,
                                 left,
                                 left + 1,
+                                stream_info=stream_info,
                             )
                             if (
                                 record

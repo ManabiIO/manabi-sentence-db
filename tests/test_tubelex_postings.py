@@ -72,3 +72,33 @@ def test_deep_verification_rejects_terms_reassigned_to_other_chunks(tmp_path):
     write_json(db_path.parent / "manifest.private.json", manifest)
     with pytest.raises(DataError, match="postings"):
         verify_tubelex_index(db_path.parent, tmp_path / "public", deep=True)
+
+
+@pytest.mark.parametrize("text", [
+    "今日は図書館へ行きます。あ",
+    "今日は図書館へ行きます。" + "あ" * 4081 + "終。明日は公園へ行きます。",
+], ids=["single-character-tail", "storage-chunk-edge"])
+def test_boundary_before_last_chunk_character_builds_and_keeps_exact_search(tmp_path, text):
+    from test_tubelex import _build_vtt
+
+    from manabi_sentence_db.tubelex_index import TubelexReader
+
+    path, _ = _build_vtt(tmp_path, f"WEBVTT\n\n00:00.000 --> 00:20.000\n{text}\n")
+    assert verify_tubelex_index(path.parent, tmp_path / "public", deep=True)["deep"]
+    with TubelexReader(path) as reader:
+        assert reader.search("図書館")
+        assert reader.search("す。あ") == []
+        assert reader.search("終。明") == []
+        if text.endswith("あ"):
+            assert reader.search("あ")
+
+
+@pytest.mark.parametrize("length", [2, 8, 9, 4096])
+def test_boundary_bitmap_accepts_last_interior_offset_and_rejects_end(length):
+    from manabi_sentence_db.tubelex_index import _decode_boundary_bitmap
+
+    valid = (1 << (length - 1)).to_bytes((length + 7) // 8, "little")
+    assert _decode_boundary_bitmap(valid, length) == 1 << (length - 1)
+    invalid = (1 << length).to_bytes((length + 8) // 8, "little")
+    with pytest.raises(DataError, match="boundary bitmap"):
+        _decode_boundary_bitmap(invalid, length)

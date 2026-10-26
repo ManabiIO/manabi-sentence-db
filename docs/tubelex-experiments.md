@@ -1097,3 +1097,30 @@ The 16 concurrent samples per query/profile are warm local process measurements,
 not production HTTP or cold-I/O qualification. Real-caption quality and larger
 independent-source coverage still require separate evaluation. Detailed reports
 and the deterministic generator remain in `tubelex-performance-vufbcipi` outside Git.
+
+
+## Final build-boundary and inventory review (2026-10-26)
+
+A caption ending in a complete sentence plus one trailing character, such as
+`今日は図書館へ行きます。あ`, exposed an off-by-one rejection in boundary-bitmap
+decoding. The same rejection could occur inside a longer track when a punctuation
+boundary fell immediately before the final character of a 4,096-character chunk.
+The builder emitted a valid interior offset, but validation compared its integer
+bit length as though it were the offset. The decoder now accepts the last
+interior boundary while still rejecting offset zero, the chunk end and padding.
+Regression cases run complete builds, deep verification and exact searches,
+including exclusion of literals crossing the punctuation boundary. This corrects
+storage-boundary validation; it does not broaden boundary inference policy.
+
+Static reference export and deep reference-inventory reconstruction now retain
+only the current stream's metadata and eligibility bits, reusing them for its
+clip starts. A 20-cue regression exposed 40 repeated metadata reads during export
+before the change; export now reuses the in-memory values, and deep reconstruction
+reads once per stream. Existing canonical export bindings still verify in full.
+On one authored 2,000-cue fixture, five alternating retained warm rounds after
+one warmup measured reference-inventory medians of **91.47→63.78 ms**. This is a
+component measurement on the same immutable database, not full-build or serving
+latency. The former path was reproduced by discarding the supplied stream context
+and reparsing metadata for every clip. The script and all paired timings remain
+outside Git in `tubelex-final-review-7x4jqzjv`; generated fixtures moved to host
+Trash. The complete suite passed **560 tests**, Ruff and all 12 source schemas.
