@@ -8,7 +8,7 @@ this is neither a readability model nor a calibrated JLPT assessment.
 import re
 import unicodedata
 
-WIKIPEDIA_QUALITY_VERSION = "wikipedia-example-quality-v1"
+WIKIPEDIA_QUALITY_VERSION = "wikipedia-example-quality-v2"
 
 _NUMBERS = re.compile(r"[0-9０-９]+(?:[.,．][0-9０-９]+)*")
 _KANJI = re.compile(r"[\u3400-\u4dbf\u4e00-\u9fff]")
@@ -17,6 +17,11 @@ _HIRAGANA = re.compile(r"[ぁ-ゖ]")
 _LATIN = re.compile(r"[A-Za-zＡ-Ｚａ-ｚ]")
 _EQUATION = re.compile(r"[A-Za-zＡ-Ｚａ-ｚ0-9０-９α-ωΑ-Ω]\s*[=＝<>＜＞≤≥≠≈]")
 _PARENS = {"（": "）", "(": ")", "［": "］", "[": "]"}
+_FOLLOWING_MATERIAL = re.compile(
+    r"(?:以下|次)の(?:よう|とおり|通り)|(?:以下|次)に(?:示|挙げ|述べ)"
+    r"|^(?:以下|上記|上述|前述|後述)(?:は|の|を|に|で)"
+)
+_ORPHAN = re.compile(r"^(?:は(?!虫類|虫|行)|を)(?=[一-鿿A-Za-z0-9])")
 # Require several distinct terms plus structural density. A single term, or
 # repeated mentions of one term, never establishes specialist density.
 _SPECIALIST = (
@@ -26,7 +31,11 @@ _SPECIALIST = (
     "塩基配列", "転写因子", "遺伝子発現", "ポリメラーゼ", "リン酸化",
     "触媒活性", "配位子", "求核", "求電子", "立体異性", "モル濃度",
     "帰無仮説", "有意水準", "尤度", "共分散", "漸近", "確率密度",
+    "格子欠陥", "不対電子", "共有結合", "物性", "表面再構成", "ダングリングボンド",
+    "直観論理", "結合子", "双対", "線形含意", "シークエント", "部分構造論理", "カット規則",
+    "棘条", "軟条", "小離鰭", "臀鰭", "背鰭", "腹鰭", "側線鱗", "尾叉長", "黒色素胞",
 )
+_SPECIALIST_PATTERN = re.compile("|".join(sorted(_SPECIALIST, key=len, reverse=True)))
 
 
 def assess_wikipedia_sentence(text: str) -> tuple[str | None, list[str]]:
@@ -38,9 +47,13 @@ def assess_wikipedia_sentence(text: str) -> tuple[str | None, list[str]]:
     length = len(text)
     if length > 180:
         return "wikipedia-long-sentence", []
+    if _FOLLOWING_MATERIAL.search(text) or _ORPHAN.search(text):
+        return "wikipedia-dependent-fragment", []
     symbols = sum(unicodedata.category(char) == "Sm" for char in text)
     if symbols >= 3 or (
         _EQUATION.search(text) and (symbols >= 2 or re.search(r"\^[0-9０-９]", text))
+    ) or (
+        symbols >= 2 and any(char in text for char in "⇒⇔∧∨∀∃∈⊂⊆⊢⊨")
     ):
         return "wikipedia-formula-heavy", []
     if length >= 35:
@@ -75,9 +88,9 @@ def assess_wikipedia_sentence(text: str) -> tuple[str | None, list[str]]:
     # insufficient, and short ordinary nonfiction stays eligible.
     if length >= 55 and len(_LONG_COMPOUNDS.findall(text)) >= 4:
         return "wikipedia-compound-density", []
-    distinct_terms = sum(term in text for term in _SPECIALIST)
+    distinct_terms = len(set(_SPECIALIST_PATTERN.findall(text)))
     kanji_ratio = len(_KANJI.findall(text)) / max(length, 1)
-    if distinct_terms >= 3 and (length >= 65 or kanji_ratio >= 0.50):
+    if distinct_terms >= 3 and (length >= 45 or kanji_ratio >= 0.50):
         return "wikipedia-specialist-density", []
     tags = ["style:specialist-vocabulary"] if distinct_terms >= 2 else []
     return None, tags

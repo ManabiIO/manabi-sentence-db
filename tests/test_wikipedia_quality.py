@@ -24,6 +24,8 @@ from manabi_sentence_db.wikipedia_quality import (
     "日本の人口は約1億人であり、多くの人が都市で生活している。",
     "公園（駅の近くにある）には大きな池があり、春になると多くの人が訪れる。",
     "国際連合教育科学文化機関は、世界の文化や教育に関する活動を行い、多くの国と協力している。",
+    "は虫類は卵を産む。",
+    "は行の発音を練習した。",
 ])
 def test_accessible_prose_including_science_and_dates_is_retained(text):
     assert assess_wikipedia_sentence(text) == (None, [])
@@ -33,6 +35,7 @@ def test_accessible_prose_including_science_and_dates_is_retained(text):
     ("地域には" + "多くの人が暮らしており、" * 18 + "毎日電車で通勤している。", "long-sentence"),
     ("この関係はE=mc^2によって表される。", "formula-heavy"),
     ("x＝y＋zかつa＞bであると仮定する。", "formula-heavy"),
+    ("この式では、P ⇒ Q という命題から P ∧ Q という結論が得られる。", "formula-heavy"),
     ("値は、12、24、36、48、60、72、84の順であり、表にまとめられている。", "number-heavy"),
     ("International Association of Very Specialized Researchersは、この分野の専門家を対象に活動を行っている。", "latin-heavy"),
     ("日本国東京都特別区内交通運輸事業関係法規施行条例改正案附則施行期日決定。", "low-prose"),
@@ -40,6 +43,10 @@ def test_accessible_prose_including_science_and_dates_is_retained(text):
     ("これは、固有値と固有ベクトルを持つテンソルの性質であり、微分方程式における解の存在条件とその一意性を記述するための一般的な理論である。", "specialist-density"),
     ("市の講座では、海洋生物学、情報工学研究、環境経済学、応用言語学について、各分野の専門家が順番に詳しく説明する予定である。", "compound-density"),
     ("この方式（" + "詳しい内容（さらに別の条件（ここでは省略される）を含む）についての説明が続く。" * 2 + "）を採用している。", "parenthetical-density"),
+    ("は反対の性質を持つ。", "dependent-fragment"),
+    ("この結果は次のようにまとめられる。", "dependent-fragment"),
+    ("以下は、主な分類である。", "dependent-fragment"),
+    ("この結晶では、格子欠陥の周囲にある不対電子と共有結合が、表面の物性を変化させる重要な原因となっている。", "specialist-density"),
 ])
 def test_dense_examples_are_excluded_with_specific_reasons(text, reason):
     assert assess_wikipedia_sentence(text)[0] == "wikipedia-" + reason
