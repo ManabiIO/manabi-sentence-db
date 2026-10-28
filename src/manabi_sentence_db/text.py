@@ -11,7 +11,7 @@ from __future__ import annotations
 import re
 import unicodedata
 
-TEXT_PROCESSOR_VERSION = "ja-conservative-v6"
+TEXT_PROCESSOR_VERSION = "ja-conservative-v7"
 PUBLISHER_SEGMENTER_VERSION = "publisher-unit-segmentation-v1"
 OMITTED_MARKUP = "\ufffc"
 
@@ -34,7 +34,7 @@ _JAPANESE = re.compile(r"[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff]")
 _ARCHAIC = re.compile(
     r"(?:なりけり|ありけり|ざりけり)"
     rf"|(?:^|(?<=[ぁ-ゖ\s{re.escape(''.join(_PAIRS))}]))(?:給[ふへ]|思ひ|言ふ)"
-    r"|(?<=[ぁ-ゖ])候(?=[。！？!?」』）]|$)"
+    r"|(?<=[ぁ-ゖ])候(?=[。｡！？!?」』）]|$)"
 )
 _MARKUP = re.compile(r"\ufffc|\{\{|\}\}|\[\[|\]\]|<[^>]+>|https?://|ISBN\s*[0-9]")
 _METADATA = re.compile(r"^(?:[*#;:|]|Category:|カテゴリ:|ファイル:|File:|出典[:：]|注釈[:：])", re.I)
@@ -66,7 +66,7 @@ def sentence_spans(text: str, language: str = "ja") -> list[tuple[int, int]]:
     Callers choose the normalization of the supplied source-unit text.
     """
     japanese = language.split("-", 1)[0] == "ja"
-    endings = "。！？!?" if japanese else ".!?。！？"
+    endings = "。｡！？!?" if japanese else ".!?。！？"
     result: list[tuple[int, int]] = []
     offset = 0
     for line in text.splitlines(keepends=True):
@@ -150,7 +150,7 @@ def split_sentences(text: str, language: str = "ja") -> list[str]:
 def is_complete_sentence(text: str, language: str = "ja") -> bool:
     """Require terminal punctuation for prose extracted from documents."""
     stripped = text.rstrip().rstrip(_CLOSERS).rstrip()
-    endings = "。！？!?" if language.split("-", 1)[0] == "ja" else ".!?。！？"
+    endings = "。｡！？!?" if language.split("-", 1)[0] == "ja" else ".!?。！？"
     return bool(stripped) and stripped[-1] in endings
 
 

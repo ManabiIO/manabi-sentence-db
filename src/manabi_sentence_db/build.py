@@ -87,6 +87,10 @@ def canonical_document(
     }
     if raw.get("revision"):
         record["revision"] = raw["revision"]
+    if manifest["source"]["adapter"] == "scp-curated":
+        from .scp_curated import RUBY_TRANSFORMATION
+
+        record["transformations"].append(RUBY_TRANSFORMATION)
     if wikipedia_quality:
         from .wikipedia_quality import WIKIPEDIA_QUALITY_VERSION
 

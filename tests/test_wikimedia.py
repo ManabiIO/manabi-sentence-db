@@ -25,6 +25,12 @@ def manifest(path, role="mediawiki-xml", source=None):
     return {"source": source or SOURCE, "files": [{"path": path, "role": role}]}
 
 
+def test_halfwidth_stops_survive_prose_completion_without_joining_sentences():
+    sentences, tags = extract_prose("朝は公園を歩いた｡ 夕方は家で休んだ｡\n[[Category:生活]]")
+    assert sentences == ["朝は公園を歩いた｡", "夕方は家で休んだ｡"]
+    assert tags == ["category:生活"]
+
+
 def test_xml_provenance_main_namespace_and_bzip_stream(tmp_path):
     target = tmp_path / "pages.xml.bz2"
     target.write_bytes(bz2.compress(FIXTURE.read_bytes()))

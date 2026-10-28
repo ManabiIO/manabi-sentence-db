@@ -18,6 +18,7 @@ REVIEWED = {
     "scp-jp-fixed-point-ja": ("fixed-point-observation", "direct-paragraphs"),
 }
 ROLE = "scp-curated-html"
+RUBY_TRANSFORMATION = "publisher-ruby-base-text-v1"
 
 
 def reviewed_page(source):
@@ -161,7 +162,7 @@ def extract(data, source, *, check_hash=True):
         # Reviewed pages put prose directly under page-content. Deliberately do
         # not descend into credit, rating, navigation, media or other modules.
         children = [n for n in content.children if isinstance(n, Node) and n.tag == "p"]
-    paragraphs = []
+    paragraphs, reviewed_paragraphs = [], []
     for child in children:
         if isinstance(child, str):
             if child.strip():
@@ -172,13 +173,39 @@ def extract(data, source, *, check_hash=True):
 
         # HTML source newlines are collapsible whitespace; authored <br> is a
         # line break. Preserve Japanese indentation and paragraph boundaries.
-        def inline(node):
+        def inline(node, *, retain_readings=False, ruby_annotation=False):
+            classes = node.attrs.get("class", "").split()
+            if not retain_readings:
+                if "rt" in classes:
+                    if node.tag != "span" or not ruby_annotation or "ruby" in classes:
+                        raise DataError("Unexpected narrative ruby annotation")
+                    return ""
+                if "ruby" in classes:
+                    if ruby_annotation:
+                        raise DataError("Nested narrative ruby layout")
+                    annotations = [
+                        n for n in node.children
+                        if isinstance(n, Node) and "rt" in n.attrs.get("class", "").split()
+                    ]
+                    if (
+                        node.tag != "span" or len(annotations) != 1
+                        or any(isinstance(c, Node) for c in annotations[0].children)
+                    ):
+                        raise DataError("Unexpected narrative ruby layout")
+                    base = "".join(
+                        re.sub(r"[\t\r\n ]+", " ", c) if isinstance(c, str)
+                        else inline(c, ruby_annotation=True)
+                        for c in node.children
+                    )
+                    if not base.strip() or not annotations[0].text().strip():
+                        raise DataError("Empty narrative ruby base or annotation")
+                    return base
             return "".join(
                 re.sub(r"[\t\r\n ]+", " ", c)
                 if isinstance(c, str)
                 else "\n"
                 if c.tag == "br"
-                else inline(c)
+                else inline(c, retain_readings=retain_readings)
                 for c in node.children
             )
 
@@ -190,9 +217,17 @@ def extract(data, source, *, check_hash=True):
         if not text or len(text) > 20_000:
             raise DataError("Invalid curated narrative paragraph")
         paragraphs.append(text)
+        # Keep the existing reviewed-body pin over complete source inline text,
+        # including readings. The derived surface text has its own digest below;
+        # changed readings cannot bypass snapshot review just because we omit them.
+        reviewed_paragraphs.append("\n".join(
+            line.strip(" \t\r\n")
+            for line in inline(child, retain_readings=True).split("\n")
+        ).strip(" \t\r\n"))
     body_text = "\n\n".join(paragraphs)
     digest = hashlib.sha256(body_text.encode()).hexdigest()
-    if not 1 <= len(paragraphs) <= 100 or (check_hash and digest != pin["body_sha256"]):
+    reviewed_digest = hashlib.sha256("\n\n".join(reviewed_paragraphs).encode()).hexdigest()
+    if not 1 <= len(paragraphs) <= 100 or (check_hash and reviewed_digest != pin["body_sha256"]):
         raise DataError("Curated narrative body changed; review and pin a new snapshot")
     return paragraphs, digest
 
