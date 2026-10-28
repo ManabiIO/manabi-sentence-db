@@ -153,6 +153,31 @@ def verify_package(output: Path, *, catalog: dict | None = None) -> dict:
             }
         )
         _verify_zip(output / "provenance-and-schemas.zip", provenance)
+        normalized_parts = set()
+        for normalized in release.get("normalized_archives", []):
+            names = normalized["parts"]
+            if not names:
+                raise DataError("Package normalized archive has no parts")
+            expected_kind = "normalized-jsonl-zip" if len(names) == 1 else "normalized-jsonl-zip-part"
+            for name in names:
+                asset = assets[name]
+                if name in normalized_parts or asset["kind"] != expected_kind:
+                    raise DataError("Package normalized archive has invalid or repeated parts")
+                if (asset["source_id"], asset["language"]) != (
+                    normalized["source_id"], normalized["language"]
+                ):
+                    raise DataError("Package normalized part has a different source/language")
+                normalized_parts.add(name)
+            source = _PartsReader(safe_relative(output, name) for name in names)
+            try:
+                _verify_stream(source, normalized["size"], normalized["sha256"], normalized["path"])
+            finally:
+                source.close()
+        if "normalized_archives" in release and normalized_parts != {
+            name for name, asset in assets.items()
+            if asset["kind"] in {"normalized-jsonl-zip", "normalized-jsonl-zip-part"}
+        }:
+            raise DataError("Package has unassigned normalized archive parts")
         used_parts = set()
         for database in release["databases"]:
             names = database["parts"]
@@ -257,6 +282,38 @@ class _PartsWriter:
             self.paths[0] = new
 
 
+def _split_archive(path: Path, max_bytes: int) -> list[Path]:
+    """Keep small ZIP names; split large ZIPs without retaining a duplicate ZIP.
+
+    Copy the tail before truncating the original into part zero. Only task-owned
+    staging files are mutated, and failed staging directories never publish.
+    """
+    size = path.stat().st_size
+    if size <= max_bytes:
+        return [path]
+    first = path.with_name(path.name + ".part0000")
+    paths = [first]
+    with path.open("rb") as source:
+        source.seek(max_bytes)
+        remaining = size - max_bytes
+        while remaining:
+            part = path.with_name(f"{path.name}.part{len(paths):04d}")
+            with part.open("xb") as target:
+                count = min(remaining, max_bytes)
+                while count:
+                    chunk = source.read(min(count, READ_BYTES))
+                    if not chunk:
+                        raise DataError("Normalized archive changed while splitting")
+                    target.write(chunk)
+                    count -= len(chunk)
+                    remaining -= len(chunk)
+            paths.append(part)
+    with path.open("r+b") as target:
+        target.truncate(max_bytes)
+    path.rename(first)
+    return paths
+
+
 def package_build(
     build: Path,
     output: Path,
@@ -285,6 +342,7 @@ def package_build(
     staging = Path(tempfile.mkdtemp(prefix=f".{output.name}-", dir=output.parent))
     assets = []
     databases = []
+    normalized_archives = []
     try:
         partitions: dict[tuple[str, str], list[dict]] = defaultdict(list)
         for shard in catalog["shards"]:
@@ -295,15 +353,6 @@ def package_build(
 
             normalized = staging / f"{source_id}.{language}.normalized.zip"
             export_normalized(build, normalized, source_id=source_id, catalog=catalog)
-            assets.append(
-                _entry(
-                    staging,
-                    normalized,
-                    kind="normalized-jsonl-zip",
-                    source_id=source_id,
-                    language=language,
-                )
-            )
             groups: list[list[dict]] = []
             group: list[dict] = []
             size = 0
@@ -388,6 +437,22 @@ def package_build(
                     }
                 )
                 db_path.unlink()
+            identity = _entry(staging, normalized)
+            paths = _split_archive(normalized, part_bytes)
+            assets.extend(
+                _entry(
+                    staging, path,
+                    kind="normalized-jsonl-zip" if len(paths) == 1 else "normalized-jsonl-zip-part",
+                    source_id=source_id, language=language,
+                )
+                for path in paths
+            )
+            normalized_archives.append({
+                "source_id": source_id, "language": language,
+                "path": identity["path"], "size": identity["size"],
+                "sha256": identity["sha256"],
+                "parts": [path.name for path in paths],
+            })
         for name in ["catalog.json", "licenses.json", "documents.jsonl"]:
             shutil.copyfile(build / name, staging / name)
             assets.append(_entry(staging, staging / name, kind="metadata"))
@@ -411,6 +476,8 @@ def package_build(
             "scope": catalog["scope"],
             "assets": assets,
             "databases": databases,
+            "normalized_archives": normalized_archives,
+            "normalized_restore": "Verify each part checksum, concatenate each normalized archive's parts in listed order, and verify the restored ZIP size and SHA-256 before importing. Parts are byte slices, not independent ZIP files.",
             "sqlite_restore": "Concatenate each database's parts in listed order, then decompress the single zstd stream. Verify the uncompressed SHA-256.",
             "yaml_restore": "Extract YAML ZIP members into a common directory. The external catalog and document index locate a document's shard without decompressing the entire corpus.",
         }

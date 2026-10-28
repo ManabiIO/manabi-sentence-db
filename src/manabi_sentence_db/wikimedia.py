@@ -13,6 +13,7 @@ import copy
 import gzip
 import json
 import re
+from collections import Counter
 from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
@@ -25,7 +26,16 @@ from mwparserfromhell import nodes
 
 from .text import OMITTED_MARKUP, is_complete_sentence, split_sentences
 
-WIKIMEDIA_PROCESSOR_VERSION = "wikimedia-prose-v2"
+WIKIMEDIA_PROCESSOR_VERSION = "wikimedia-prose-v3"
+
+# Bound parser AST and subsequent whole-page prose/sentence materialization.
+# Count Unicode code points without allocating a second UTF-8 copy of the page.
+MAX_WIKITEXT_CHARACTERS = 1_000_000
+
+
+class PageTextLimitExceeded(ValueError):
+    """The entire page is rejected rather than truncating source prose."""
+
 
 _EXCLUDED_SECTIONS = {
     "脚注", "注釈", "出典", "参考文献", "関連項目", "外部リンク", "脚注と出典",
@@ -249,6 +259,8 @@ def extract_prose(wikitext: str, language: str = "ja") -> tuple[list[str], list[
     mentions). Unknown templates leave a sentinel which the shared quality
     filter rejects. These heuristics cannot identify every third-party passage.
     """
+    if len(wikitext) > MAX_WIKITEXT_CHARACTERS:
+        raise PageTextLimitExceeded("Wikimedia page exceeds 1,000,000 Unicode characters")
     if re.match(r"\s*#(?:redirect|転送|リダイレクト)\b", wikitext, re.I):
         return [], []
     code = mwparserfromhell.parse(wikitext)
@@ -282,7 +294,9 @@ def extract_prose(wikitext: str, language: str = "ja") -> tuple[list[str], list[
     return sentences, sorted(categories)
 
 
-def iter_documents(manifest: dict, snapshot_dir: Path) -> Iterator[dict]:
+def iter_documents(
+    manifest: dict, snapshot_dir: Path, *, stats: Counter | None = None
+) -> Iterator[dict]:
     source = manifest["source"]
     language = source["language"]
     origin = urlsplit(source.get("acquisition", {}).get("api_url") or source["homepage"])
@@ -296,7 +310,14 @@ def iter_documents(manifest: dict, snapshot_dir: Path) -> Iterator[dict]:
         for page in pages:
             if not page["native_id"] or not page["revision_id"] or not page["title"]:
                 continue
-            sentences, tags = extract_prose(page["text"], language)
+            if stats is not None:
+                stats["wikimedia_pages_seen"] += 1
+            try:
+                sentences, tags = extract_prose(page["text"], language)
+            except PageTextLimitExceeded:
+                if stats is not None:
+                    stats["rejected:page-text-limit"] += 1
+                continue
             if not sentences:
                 continue
             title = page["title"]

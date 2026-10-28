@@ -148,3 +148,49 @@ def test_duplicate_zip_member_is_rejected(corpus, tmp_path):
     write_json(output / "release.json", release)
     with pytest.raises(DataError, match="ZIP member inventory mismatch"):
         verify_package(output)
+
+
+def test_normalized_split_restores_identical_importable_zip(corpus, tmp_path):
+    whole = tmp_path / "whole"
+    split = tmp_path / "split"
+    package_build(corpus, whole, include_sqlite=False)
+    package_build(corpus, split, part_bytes=1024, include_sqlite=False)
+    release = read_json(split / "release.json")
+    normalized = release["normalized_archives"][0]
+    assert len(normalized["parts"]) > 1
+    assert all((split / name).stat().st_size <= 1024 for name in normalized["parts"])
+    restored = b"".join((split / name).read_bytes() for name in normalized["parts"])
+    assert restored == (whole / normalized["path"]).read_bytes()
+    assert not (split / normalized["path"]).exists()
+    with zipfile.ZipFile(io.BytesIO(restored)) as archive:
+        assert archive.testzip() is None
+        assert "manifest.json" in archive.namelist()
+    assert verify_package(split) == release
+    release["normalized_archives"][0]["parts"].reverse()
+    write_json(split / "release.json", release)
+    with pytest.raises(DataError, match="Package content mismatch"):
+        verify_package(split)
+
+
+def test_small_normalized_archive_keeps_name_and_legacy_readback(corpus, tmp_path):
+    output = tmp_path / "release"
+    package_build(corpus, output, include_sqlite=False)
+    release = read_json(output / "release.json")
+    normalized = release["normalized_archives"][0]
+    assert normalized["parts"] == [normalized["path"]]
+    assert next(asset for asset in release["assets"] if asset["path"] == normalized["path"])["kind"] == "normalized-jsonl-zip"
+    del release["normalized_archives"]
+    del release["normalized_restore"]
+    write_json(output / "release.json", release)
+    assert verify_package(output) == release
+
+
+@pytest.mark.parametrize("size", [1024, 1025, 2048, 2049])
+def test_archive_split_boundaries(tmp_path, size):
+    path = tmp_path / "corpus.zip"
+    content = bytes(range(256)) * (size // 256) + bytes(range(size % 256))
+    path.write_bytes(content)
+    paths = package_module._split_archive(path, 1024)
+    assert b"".join(part.read_bytes() for part in paths) == content
+    assert len(paths) == (size + 1023) // 1024
+    assert all(0 < part.stat().st_size <= 1024 for part in paths)

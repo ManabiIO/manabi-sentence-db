@@ -412,7 +412,12 @@ def build_corpus(
                 )
                 writers.append(writer)
                 source_stats: Counter = Counter()
-                for raw in iter_documents(manifest, manifest_path.parent):
+                documents = (
+                    iter_documents(manifest, manifest_path.parent, stats=source_stats)
+                    if source["adapter"] == "wikimedia"
+                    else iter_documents(manifest, manifest_path.parent)
+                )
+                for raw in documents:
                     if (
                         max_documents is not None
                         and source_stats["documents_seen"] >= max_documents
