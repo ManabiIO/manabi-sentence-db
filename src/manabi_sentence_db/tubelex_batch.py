@@ -488,16 +488,31 @@ class TubelexCollectionReader:
                 self.readers[part] = reader
                 if part not in self.filters and len(reader._literal_filter) <= self.max_filter_bytes:
                     while self.filters and self.filter_bytes + len(reader._literal_filter) > self.max_filter_bytes:
-                        _, retired_bits = self.filters.popitem(last=False)
+                        retired_part, retired_bits = self.filters.popitem(last=False)
                         self.filter_bytes -= len(retired_bits)
                         budget.stats["filter_cache_evictions"] += 1
+                        # An open reader owns another reference to the same
+                        # payload. Retire it with the cache entry so the byte
+                        # budget covers all resident filters, not just LRU keys.
+                        retired_reader = self.readers.pop(retired_part, None)
+                        if retired_reader is not None:
+                            retired_reader.close()
                     self.filters[part] = reader._literal_filter
                     self.filter_bytes += len(reader._literal_filter)
                 arguments = {"collector": collector} if collector is not None else {}
-                matches = _search_database(
-                    reader._database, query, limit - len(results), self.timeout_ms, budget=budget,
-                    literal_filter=reader._literal_filter, **arguments,
-                )
+                try:
+                    matches = _search_database(
+                        reader._database, query, limit - len(results), self.timeout_ms, budget=budget,
+                        literal_filter=reader._literal_filter, **arguments,
+                    )
+                finally:
+                    # Filters too large for the cache (including every filter
+                    # when max_filter_bytes is zero) must not linger in the
+                    # open-reader LRU outside the budget.
+                    if part not in self.filters:
+                        transient = self.readers.pop(part, None)
+                        if transient is not None:
+                            transient.close()
                 for record in matches:
                     if record["id"] not in seen:
                         seen.add(record["id"])

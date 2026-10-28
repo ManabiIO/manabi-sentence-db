@@ -66,7 +66,8 @@ def benchmark(output):
     finally:
         batch._read_collection, batch.TubelexReader = original_read, original_factory
     result = {"profiles": reports, "limits": __doc__.strip(),
-              "defaults_changed": False, "fixture": "All synthetic shards read the same zero-filled file per size; warm byte loading/eviction only. Retained payload bytes are not peak RSS."}
+              "defaults_changed": False,
+              "fixture": "All synthetic shards read the same zero-filled file per size; warm byte loading/eviction only. The filter budget includes payloads held by open readers; when the working set exceeds it, readers may be reopened on later queries, trading throughput for bounded filter memory. Retained payload bytes are not peak RSS."}
     (output / "report.json").write_bytes(canonical_json(result))
     print(json.dumps(result))
     return result
