@@ -187,3 +187,60 @@ def test_reviewed_direct_paragraph_profile_is_pinned_and_excludes_modules(
     changed['acquisition']['url'] = 'https://scp-jp.wikidot.com/unreviewed'
     with pytest.raises(DataError, match='Only the reviewed'):
         extract(data, changed)
+
+
+def test_ruby_annotation_is_not_appended_to_narrative_base_text(sample, tmp_path):
+    source, data, paragraphs = sample
+    source = copy.deepcopy(source)
+    base = "　コーヒーを飲みました。電話が鳴りました。"
+    annotated = '　<span class="ruby">撮影技師<span class="rt">カメラマン</span></span>が来た。'
+    data = data.decode().replace(base, annotated).encode()
+    # The existing body pin protects the complete reviewed inline text, including
+    # annotation readings. Removing a reading must not weaken snapshot identity.
+    reviewed = ["　撮影技師カメラマンが来た。", paragraphs[1]]
+    source["acquisition"]["body_sha256"] = hashlib.sha256(
+        "\n\n".join(reviewed).encode()
+    ).hexdigest()
+    cleaned, digest = extract(data, source)
+    assert cleaned == ["　撮影技師が来た。", paragraphs[1]]
+    assert digest == hashlib.sha256("\n\n".join(cleaned).encode()).hexdigest()
+    assert digest != source["acquisition"]["body_sha256"]
+    (tmp_path / "aptitude.html").write_bytes(data)
+    manifest = {
+        "source": source, "source_id": source["id"], "snapshot_id": "synthetic",
+        "files": [{"role": ROLE, "path": "aptitude.html"}],
+    }
+    raw = next(iter_documents(manifest, tmp_path))
+    assert raw["source_text_hash"] == digest
+    assert raw["sentences"][1]["source_range"]["start"] == len(cleaned[0]) + 2
+    record = canonical_document(raw, manifest, Counter(), set())
+    assert "publisher-ruby-base-text-v1" in record["transformations"]
+    assert record["sentences"][0]["text"] == "撮影技師が来た。"
+    assert "カメラマン" not in str(record)
+    with pytest.raises(DataError, match="body changed"):
+        extract(data.replace("カメラマン".encode(), "かめらまん".encode()), source)
+
+
+@pytest.mark.parametrize("inline", [
+    '<span class="rt">読みだけ</span>',
+    '<span class="ruby"><span class="rt">読みだけ</span></span>',
+    '<span class="ruby">本文<span class="rt">読み</span><span class="rt">別読み</span></span>',
+    '<span class="ruby">本文<span class="rt"><img src="thirdparty"></span></span>',
+    '<span class="ruby">本文<span class="rt"><em>別読み</em></span></span>',
+    '<span class="ruby"><span class="ruby">本文<span class="rt">よみ</span></span><span class="rt">よみ</span></span>',
+])
+def test_unreviewed_or_ambiguous_ruby_layout_fails_closed(sample, inline):
+    source, data, _ = sample
+    changed = data.decode().replace("コーヒー", inline).encode()
+    with pytest.raises(DataError, match="ruby|media"):
+        extract(changed, source, check_hash=False)
+
+
+def test_unmarked_inline_words_and_authorial_paragraph_break_are_preserved(sample):
+    source, data, _ = sample
+    changed = data.decode().replace(
+        "　コーヒーを飲みました。電話が鳴りました。",
+        '<span>撮影技師</span><span>カメラマン</span>が来た。',
+    ).replace("「もしもし。」<br>「お疲れ様です。」", "俺が一息ついて、").encode()
+    paragraphs, _ = extract(changed, source, check_hash=False)
+    assert paragraphs == ["撮影技師カメラマンが来た。", "俺が一息ついて、"]

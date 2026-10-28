@@ -1,6 +1,25 @@
 import pytest
 
-from manabi_sentence_db.text import assess_sentence, is_complete_sentence, split_sentences
+from manabi_sentence_db.text import (
+    assess_sentence,
+    is_complete_sentence,
+    sentence_spans,
+    split_sentences,
+)
+
+
+def test_halfwidth_japanese_stops_preserve_offsets_and_quotation_protection():
+    text = "電車で駅に着いた｡ 明日は家で休む｡"
+    assert split_sentences(text) == ["電車で駅に着いた｡", "明日は家で休む｡"]
+    assert [text[a:b] for a, b in sentence_spans(text)] == split_sentences(text)
+    assert is_complete_sentence("明日は家で休む｡")
+    assert split_sentences("彼は「今日は晴れ｡明日は雨｡」と言った｡帰宅した｡") == [
+        "彼は「今日は晴れ｡明日は雨｡」と言った｡", "帰宅した｡",
+    ]
+    assert split_sentences("説明（これは例｡）を読んだ｡終わった｡") == [
+        "説明（これは例｡）を読んだ｡", "終わった｡",
+    ]
+    assert assess_sentence("書状を受け取り候｡")[2] == "archaic-language"
 
 
 def test_japanese_punctuation_closers_and_reporting_clause():

@@ -418,7 +418,13 @@ until a maintainer reviews and updates the pin. Navigation, ratings, credit
 modules, comments, scripts, and media are not sentence material.
 
 The HTML extraction preserves paragraph order and authored `<br>` line breaks;
-HTML source whitespace is collapsed. Paragraph ranges refer to codepoints in the
+HTML source whitespace is collapsed. Reviewed `span.ruby > span.rt` annotations
+produce base text rather than concatenating a pronunciation onto its word.
+`publisher-ruby-base-text-v1` records that transformation. The existing reviewed
+body pin still covers complete inline text including readings, so changing only
+a reading still fails the pin check. The derived `source_text_hash` separately
+covers the extracted base-text paragraphs. Ambiguous ruby layouts fail closed.
+Paragraph ranges refer to codepoints in the
 extracted body, not raw HTML bytes. The existing splitter retains multi-sentence
 paragraphs as original source units, with exact fragment offsets. Scene separators
 remain units for quality rejection rather than being silently joined. This is a
@@ -441,7 +447,7 @@ including references to the shared fictional SCP universe; none is a collection
 of externally quoted texts. No linked page, image, script, rating, credit module,
 footer or comment is imported as prose.
 
-| Work | Pinned revision | Revision timestamp (UTC) | Extracted body SHA-256 |
+| Work | Pinned revision | Revision timestamp (UTC) | Reviewed inline body SHA-256, including ruby readings |
 |---|---|---|---|
 | [カモと商人](https://scp-jp.wikidot.com/a-duck-and-a-merchant) | 8 | 2026-09-25T05:15:53Z | `4e85ec9b7e8cef50f8ec2c587bed7600f4c45a5ff8bf3fb801f714ac2ca2103d` |
 | [証明写真](https://scp-jp.wikidot.com/id-photo) | 5 | 2022-01-28T13:48:52Z | `ab519e18e659d5f54700886392ac5f99f15e4833b90ef2de3c721eafafb70474` |

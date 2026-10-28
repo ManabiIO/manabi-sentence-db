@@ -67,6 +67,13 @@ posting index and compressed payload store without changing this interchange mod
 
 ## Publisher-unit segmentation
 
+The current Japanese text processor `ja-conservative-v7` recognizes the
+half-width Japanese full stop `｡` as a boundary alongside `。`. Source spelling
+and Unicode-codepoint ranges are preserved; quotations and parentheses retain
+the same boundary protection. This does not infer new unpunctuated boundaries
+or join authored fragments across paragraphs. Existing artifacts are immutable;
+the changed processor fingerprint identifies future builds.
+
 Processor version **5**, text processor `ja-conservative-v5`, introduces
 `publisher-unit-segmentation-v1` for Tatoeba, RealPersonaChat, JMultiWOZ and STAIR.
 Wikimedia prose continues to use the conservative extraction segmenter. A quoted
