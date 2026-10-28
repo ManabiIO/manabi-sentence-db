@@ -11,7 +11,7 @@ from pathlib import Path
 
 from .licenses import validate_rights
 from .serialization import DataError, canonical_json, parse_json
-from .validation import validate_source_unit
+from .validation import validate_record, validate_source_unit
 
 DDL = """
 PRAGMA foreign_keys=ON;
@@ -157,10 +157,18 @@ def build_normalized_database(archive_path: Path, output: Path):
                             + (row["license"]["id"], metadata),
                         )
                     else:
+                        if row.get("kind") != "reference":
+                            raise DataError("Expected normalized reference record")
+                        validate_record(row)
                         db.execute(
                             "INSERT INTO external_references VALUES (?,?)",
                             (row["id"], metadata),
                         )
+            if db.execute(
+                "SELECT 1 FROM occurrences o JOIN sentences s ON s.id=o.sentence_id "
+                "JOIN works w ON w.id=o.work_id WHERE s.language != w.language LIMIT 1"
+            ).fetchone():
+                raise DataError("Occurrence sentence language does not match its work")
             if db.execute("PRAGMA foreign_key_check").fetchone():
                 raise DataError("Broken normalized foreign key")
             if db.execute(
@@ -168,6 +176,11 @@ def build_normalized_database(archive_path: Path, output: Path):
                 "WHERE t.sentence_id != o.sentence_id LIMIT 1"
             ).fetchone():
                 raise DataError("Translation does not match its occurrence's sentence")
+            if db.execute(
+                "SELECT 1 FROM translations t JOIN occurrences o ON o.id=t.occurrence_id "
+                "WHERE json_type(o.metadata_json, '$.source_unit') IS NOT NULL LIMIT 1"
+            ).fetchone():
+                raise DataError("Split source-unit translations are not sentence-aligned")
             db.commit()
             if db.execute("PRAGMA integrity_check").fetchone() != ("ok",):
                 raise DataError("Invalid normalized SQLite")

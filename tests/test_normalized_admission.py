@@ -229,3 +229,58 @@ def test_oversized_manifest_is_rejected_before_read(tmp_path, monkeypatch):
 
     monkeypatch.setattr(normalized_database, "MAX_RECORD_BYTES", 50)
     rejected(tmp_path, fixture_tables(), "Oversized normalized manifest")
+
+
+def reference_fixture():
+    return {
+        "schema_version": 1, "id": "r", "kind": "reference",
+        "source_id": "fixture", "snapshot_id": "snapshot", "language": "ja",
+        "native_id": "native", "title": "Fixture reference",
+        "url": "https://example.org/watch", "tags": [],
+        "attribution": {"text": "Fixture author", "url": "https://example.org/author"},
+        "locator": {"type": "media", "start_seconds": 10, "end_seconds": 20},
+    }
+
+
+@pytest.mark.parametrize("field", ["text", "sentences", "translations", "source_unit"])
+def test_normalized_references_cannot_smuggle_unlicensed_text(tmp_path, field):
+    tables = fixture_tables()
+    tables["references"] = [dict(reference_fixture(), **{field: "Unlicensed text"})]
+    rejected(tmp_path, tables, "Invalid record")
+
+
+def test_normalized_reference_media_interval_is_validated(tmp_path):
+    tables = fixture_tables()
+    reference = reference_fixture()
+    reference["locator"]["end_seconds"] = 5
+    tables["references"] = [reference]
+    rejected(tmp_path, tables, "media end")
+
+
+def test_normalized_reference_preserves_valid_locator(tmp_path):
+    tables = fixture_tables()
+    tables["references"] = [reference_fixture()]
+    output = build_normalized_database(write_archive(tmp_path, tables), tmp_path / "out.sqlite")
+    with sqlite3.connect(output) as db:
+        assert json.loads(db.execute(
+            "SELECT metadata_json FROM external_references"
+        ).fetchone()[0]) == reference_fixture()
+
+
+def test_occurrence_language_must_match_work(tmp_path):
+    tables = fixture_tables()
+    tables["works"][0]["language"] = "en"
+    rejected(tmp_path, tables, "Occurrence.*language")
+
+
+def test_split_source_unit_cannot_claim_sentence_aligned_translation(tmp_path):
+    tables = fixture_tables()
+    text = tables["sentences"][0]["text"]
+    full_text = text + "宿を探します。"
+    tables["occurrences"][0]["source_unit"] = {
+        "id": "unit_" + "a" * 32, "text": full_text,
+        "text_sha256": hashlib.sha256(full_text.encode()).hexdigest(),
+        "start": 0, "end": len(text), "segment_index": 0, "segment_count": 2,
+        "translations": [],
+    }
+    rejected(tmp_path, tables, "Split source-unit translations")
