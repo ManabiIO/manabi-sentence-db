@@ -210,11 +210,12 @@ through the text heuristic; explicit upstream `archaic` / `old-fashioned` tags
 still exclude a sentence.
 
 Japanese Wikipedia has an additional sentence-level example gate,
-`wikipedia-example-quality-v1`. It rejects sentences longer than 180 characters,
+`wikipedia-example-quality-v2`. It rejects sentences longer than 180 characters,
 dense formulas, long Latin passages, numerical enumerations, unusually low
 hiragana prose, deeply nested/large parenthetical explanations, long enumerations,
 clusters of long kanji compounds and several distinct specialist terms combined
-with length or kanji density. A simple science sentence, a date, a single term or
+with length or kanji density. Orphaned particle-led fragments and sentences
+introducing missing following material are also omitted. A simple science sentence, a date, a single term or
 an organization name is insufficient for rejection. Retained sentences containing
 two specialist terms receive `style:specialist-vocabulary`. Exact thresholds and
 the deliberately limited vocabulary are in `wikipedia_quality.py`; per-reason
