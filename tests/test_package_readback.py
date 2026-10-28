@@ -194,3 +194,35 @@ def test_archive_split_boundaries(tmp_path, size):
     assert b"".join(part.read_bytes() for part in paths) == content
     assert len(paths) == (size + 1023) // 1024
     assert all(0 < part.stat().st_size <= 1024 for part in paths)
+
+
+def test_split_releases_completed_tail_before_copying_next_part(tmp_path, monkeypatch):
+    path = tmp_path / "corpus.zip"
+    content = bytes(range(256)) * 20 + b"tail"
+    path.write_bytes(content)
+    original_open = type(path).open
+    stored_sizes = []
+
+    def observe_open(self, mode="r", *args, **kwargs):
+        if self.name.startswith("corpus.zip.part") and mode == "xb":
+            stored_sizes.append(sum(file.stat().st_size for file in tmp_path.iterdir()))
+        return original_open(self, mode, *args, **kwargs)
+
+    monkeypatch.setattr(type(path), "open", observe_open)
+    parts = package_module._split_archive(path, 1024)
+    assert b"".join(part.read_bytes() for part in parts) == content
+    # Retire each copied tail immediately, bounding temporary duplicate bytes
+    # to one part instead of retaining almost a second full archive.
+    assert len(stored_sizes) == 5
+    assert max(stored_sizes) <= len(content)
+
+
+def test_split_parts_require_the_complete_archive_identity(corpus, tmp_path):
+    output = tmp_path / "release"
+    package_build(corpus, output, part_bytes=1024, include_sqlite=False)
+    release = read_json(output / "release.json")
+    assert len(release["normalized_archives"][0]["parts"]) > 1
+    del release["normalized_archives"]
+    write_json(output / "release.json", release)
+    with pytest.raises(DataError, match="normalized archive inventory"):
+        verify_package(output)

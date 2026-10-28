@@ -153,6 +153,10 @@ def verify_package(output: Path, *, catalog: dict | None = None) -> dict:
             }
         )
         _verify_zip(output / "provenance-and-schemas.zip", provenance)
+        if "normalized_archives" not in release and any(
+            asset["kind"] == "normalized-jsonl-zip-part" for asset in assets.values()
+        ):
+            raise DataError("Split release is missing its normalized archive inventory")
         normalized_parts = set()
         for normalized in release.get("normalized_archives", []):
             names = normalized["parts"]
@@ -285,32 +289,32 @@ class _PartsWriter:
 def _split_archive(path: Path, max_bytes: int) -> list[Path]:
     """Keep small ZIP names; split large ZIPs without retaining a duplicate ZIP.
 
-    Copy the tail before truncating the original into part zero. Only task-owned
-    staging files are mutated, and failed staging directories never publish.
+    Work backwards and truncate each copied tail before the next part. Temporary
+    duplication is bounded by one part, rather than almost a second whole ZIP.
+    Only task-owned staging files are mutated; failed staging never publishes.
     """
     size = path.stat().st_size
     if size <= max_bytes:
         return [path]
-    first = path.with_name(path.name + ".part0000")
-    paths = [first]
-    with path.open("rb") as source:
-        source.seek(max_bytes)
-        remaining = size - max_bytes
-        while remaining:
-            part = path.with_name(f"{path.name}.part{len(paths):04d}")
+    paths = [path.with_name(f"{path.name}.part{number:04d}")
+             for number in range((size + max_bytes - 1) // max_bytes)]
+    if any(part.exists() or part.is_symlink() for part in paths):
+        raise DataError("Normalized archive part already exists")
+    with path.open("r+b") as source:
+        for number in range(len(paths) - 1, 0, -1):
+            offset = number * max_bytes
+            source.seek(offset)
+            part = paths[number]
             with part.open("xb") as target:
-                count = min(remaining, max_bytes)
+                count = min(size - offset, max_bytes)
                 while count:
                     chunk = source.read(min(count, READ_BYTES))
                     if not chunk:
                         raise DataError("Normalized archive changed while splitting")
                     target.write(chunk)
                     count -= len(chunk)
-                    remaining -= len(chunk)
-            paths.append(part)
-    with path.open("r+b") as target:
-        target.truncate(max_bytes)
-    path.rename(first)
+            source.truncate(offset)
+    path.rename(paths[0])
     return paths
 
 

@@ -142,6 +142,9 @@ individual transport part. Clients that download only assets of kind
 Small releases remain directly importable, and package verification still
 accepts older releases without the additive inventory. Splitting uses the
 already completed ZIP after SQLite generation; it does not reduce the disk
-space required to build the normalized ZIP, and temporarily stores copied tail
-bytes before truncating its first part. GitHub's total asset-count limit still
+space required to build the normalized ZIP. Splitting works backwards, truncating
+each completed tail before copying the next, so temporary duplication is bounded
+by one part instead of nearly a second full ZIP. Split assets require the complete
+archive inventory; the legacy exception only applies to unsplit releases.
+GitHub's total asset-count limit still
 applies and is checked before publication.
