@@ -106,6 +106,39 @@ def test_warm_absent_literals_skip_connections_using_bounded_filter_cache(collec
         assert reader.last_search_stats["global_literal_rejections"] == 3
 
 
+def test_zero_filter_budget_does_not_retain_open_readers_or_filter_payloads(collection_inputs):
+    snapshots, base, output = collection_inputs
+    batch.build_tubelex_collection(snapshots, base, output)
+    with batch.TubelexCollectionReader(output, max_filter_bytes=0) as reader:
+        assert len(reader.search("今日は")) == 3
+        assert reader.filter_bytes == 0
+        assert not reader.filters
+        assert not reader.readers
+        assert len(reader.search("今日は")) == 3
+        assert reader.last_search_stats["reader_opens"] == 3
+        assert not reader.readers
+
+
+def test_filter_eviction_retires_open_reader_payloads(collection_inputs):
+    snapshots, base, output = collection_inputs
+    batch.build_tubelex_collection(snapshots, base, output)
+    manifest = read_json(output / "collection.private.json")
+    lengths = []
+    for shard in manifest["shards"]:
+        opened = TubelexReader(output / shard["part"] / "index/citations.private.sqlite3")
+        lengths.append(len(opened._literal_filter))
+        opened.close()
+    budget = max(lengths)
+    assert sum(lengths) > budget
+    with batch.TubelexCollectionReader(output, max_filter_bytes=budget) as reader:
+        assert len(reader.search("今日は")) == 3
+        assert reader.last_search_stats["filter_cache_evictions"] > 0
+        assert reader.filter_bytes <= budget
+        assert sum({id(bits): len(bits) for bits in reader.filters.values()}.values()) <= budget
+        assert all(reader.filters[part] is reader.readers[part]._literal_filter
+                   for part in reader.readers)
+
+
 def test_reopened_shards_share_cached_filter_payload_instead_of_loading_another_copy(collection_inputs):
     snapshots, base, output = collection_inputs
     batch.build_tubelex_collection(snapshots, base, output)
