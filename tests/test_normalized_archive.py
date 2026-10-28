@@ -71,7 +71,16 @@ def make_archive(tmp_path):
                 },
             }
         ],
-        "references": [{"id": "reference", "url": "https://example.org/reference"}],
+        "references": [{
+            "schema_version": 1, "id": "reference", "kind": "reference",
+            "source_id": "fixture", "snapshot_id": "snapshot", "language": "ja",
+            "native_id": "reference", "title": "Synthetic reference",
+            "url": "https://example.org/reference", "tags": [],
+            "attribution": {
+                "text": "Synthetic test author", "url": "https://example.org/reference",
+            },
+            "locator": {"type": "media", "start_seconds": 1, "end_seconds": 4},
+        }],
     }
     catalog = {
         "build_id": "synthetic-build",
@@ -122,6 +131,8 @@ def test_normalized_archive_round_trip_preserves_identity_and_metadata(tmp_path)
         )
         translation = db.execute("SELECT metadata_json FROM translations").fetchone()[0]
         assert json.loads(translation) == tables["translations"][0]
+        reference = db.execute("SELECT metadata_json FROM external_references").fetchone()[0]
+        assert json.loads(reference) == tables["references"][0]
         saved_manifest = db.execute("SELECT value FROM metadata WHERE key='manifest'").fetchone()[0]
         assert json.loads(saved_manifest) == manifest
 

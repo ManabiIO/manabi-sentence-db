@@ -153,6 +153,35 @@ def verify_package(output: Path, *, catalog: dict | None = None) -> dict:
             }
         )
         _verify_zip(output / "provenance-and-schemas.zip", provenance)
+        if "normalized_archives" not in release and any(
+            asset["kind"] == "normalized-jsonl-zip-part" for asset in assets.values()
+        ):
+            raise DataError("Split release is missing its normalized archive inventory")
+        normalized_parts = set()
+        for normalized in release.get("normalized_archives", []):
+            names = normalized["parts"]
+            if not names:
+                raise DataError("Package normalized archive has no parts")
+            expected_kind = "normalized-jsonl-zip" if len(names) == 1 else "normalized-jsonl-zip-part"
+            for name in names:
+                asset = assets[name]
+                if name in normalized_parts or asset["kind"] != expected_kind:
+                    raise DataError("Package normalized archive has invalid or repeated parts")
+                if (asset["source_id"], asset["language"]) != (
+                    normalized["source_id"], normalized["language"]
+                ):
+                    raise DataError("Package normalized part has a different source/language")
+                normalized_parts.add(name)
+            source = _PartsReader(safe_relative(output, name) for name in names)
+            try:
+                _verify_stream(source, normalized["size"], normalized["sha256"], normalized["path"])
+            finally:
+                source.close()
+        if "normalized_archives" in release and normalized_parts != {
+            name for name, asset in assets.items()
+            if asset["kind"] in {"normalized-jsonl-zip", "normalized-jsonl-zip-part"}
+        }:
+            raise DataError("Package has unassigned normalized archive parts")
         used_parts = set()
         for database in release["databases"]:
             names = database["parts"]
@@ -257,6 +286,38 @@ class _PartsWriter:
             self.paths[0] = new
 
 
+def _split_archive(path: Path, max_bytes: int) -> list[Path]:
+    """Keep small ZIP names; split large ZIPs without retaining a duplicate ZIP.
+
+    Work backwards and truncate each copied tail before the next part. Temporary
+    duplication is bounded by one part, rather than almost a second whole ZIP.
+    Only task-owned staging files are mutated; failed staging never publishes.
+    """
+    size = path.stat().st_size
+    if size <= max_bytes:
+        return [path]
+    paths = [path.with_name(f"{path.name}.part{number:04d}")
+             for number in range((size + max_bytes - 1) // max_bytes)]
+    if any(part.exists() or part.is_symlink() for part in paths):
+        raise DataError("Normalized archive part already exists")
+    with path.open("r+b") as source:
+        for number in range(len(paths) - 1, 0, -1):
+            offset = number * max_bytes
+            source.seek(offset)
+            part = paths[number]
+            with part.open("xb") as target:
+                count = min(size - offset, max_bytes)
+                while count:
+                    chunk = source.read(min(count, READ_BYTES))
+                    if not chunk:
+                        raise DataError("Normalized archive changed while splitting")
+                    target.write(chunk)
+                    count -= len(chunk)
+            source.truncate(offset)
+    path.rename(paths[0])
+    return paths
+
+
 def package_build(
     build: Path,
     output: Path,
@@ -285,6 +346,7 @@ def package_build(
     staging = Path(tempfile.mkdtemp(prefix=f".{output.name}-", dir=output.parent))
     assets = []
     databases = []
+    normalized_archives = []
     try:
         partitions: dict[tuple[str, str], list[dict]] = defaultdict(list)
         for shard in catalog["shards"]:
@@ -295,15 +357,6 @@ def package_build(
 
             normalized = staging / f"{source_id}.{language}.normalized.zip"
             export_normalized(build, normalized, source_id=source_id, catalog=catalog)
-            assets.append(
-                _entry(
-                    staging,
-                    normalized,
-                    kind="normalized-jsonl-zip",
-                    source_id=source_id,
-                    language=language,
-                )
-            )
             groups: list[list[dict]] = []
             group: list[dict] = []
             size = 0
@@ -388,6 +441,22 @@ def package_build(
                     }
                 )
                 db_path.unlink()
+            identity = _entry(staging, normalized)
+            paths = _split_archive(normalized, part_bytes)
+            assets.extend(
+                _entry(
+                    staging, path,
+                    kind="normalized-jsonl-zip" if len(paths) == 1 else "normalized-jsonl-zip-part",
+                    source_id=source_id, language=language,
+                )
+                for path in paths
+            )
+            normalized_archives.append({
+                "source_id": source_id, "language": language,
+                "path": identity["path"], "size": identity["size"],
+                "sha256": identity["sha256"],
+                "parts": [path.name for path in paths],
+            })
         for name in ["catalog.json", "licenses.json", "documents.jsonl"]:
             shutil.copyfile(build / name, staging / name)
             assets.append(_entry(staging, staging / name, kind="metadata"))
@@ -411,6 +480,8 @@ def package_build(
             "scope": catalog["scope"],
             "assets": assets,
             "databases": databases,
+            "normalized_archives": normalized_archives,
+            "normalized_restore": "Verify each part checksum, concatenate each normalized archive's parts in listed order, and verify the restored ZIP size and SHA-256 before importing. Parts are byte slices, not independent ZIP files.",
             "sqlite_restore": "Concatenate each database's parts in listed order, then decompress the single zstd stream. Verify the uncompressed SHA-256.",
             "yaml_restore": "Extract YAML ZIP members into a common directory. The external catalog and document index locate a document's shard without decompressing the entire corpus.",
         }

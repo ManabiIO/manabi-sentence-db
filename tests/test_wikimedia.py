@@ -185,3 +185,60 @@ def test_saved_api_errors_are_not_silently_empty(tmp_path):
     (tmp_path / "error.json").write_text('{"error":{"code":"maxlag"}}', encoding="utf-8")
     with pytest.raises(ValueError, match="contains an error"):
         list(iter_documents(manifest("error.json", "mediawiki-api"), tmp_path))
+
+
+def test_page_text_limit_precedes_parser_and_keeps_exact_boundary(monkeypatch):
+    from manabi_sentence_db import wikimedia
+
+    calls = []
+    original_parse = wikimedia.mwparserfromhell.parse
+
+    def recording_parse(text):
+        calls.append(len(text))
+        return original_parse(text)
+
+    monkeypatch.setattr(wikimedia.mwparserfromhell, "parse", recording_parse)
+    # A multibyte character counts once; do not allocate an encoded page copy.
+    text = "あ" * wikimedia.MAX_WIKITEXT_CHARACTERS
+    with pytest.raises(wikimedia.PageTextLimitExceeded):
+        wikimedia.extract_prose(text + "。")
+    assert calls == []
+    wikimedia.extract_prose(text)
+    assert calls == [wikimedia.MAX_WIKITEXT_CHARACTERS]
+
+
+@pytest.mark.parametrize("role", ["mediawiki-api", "mediawiki-xml"])
+def test_oversized_page_is_counted_and_next_page_survives(tmp_path, monkeypatch, role):
+    from manabi_sentence_db import wikimedia
+
+    monkeypatch.setattr(wikimedia, "MAX_WIKITEXT_CHARACTERS", 30)
+    texts = ["あ" * 31, "公園には大きな木がある。"]
+    if role == "mediawiki-api":
+        payload = {"query": {"pages": [
+            {"pageid": i, "ns": 0, "title": f"記事{i}",
+             "revisions": [{"revid": i, "content": text}]}
+            for i, text in enumerate(texts, 1)
+        ]}}
+        path = tmp_path / "pages.json"
+        path.write_text(json.dumps(payload), encoding="utf-8")
+    else:
+        path = tmp_path / "pages.xml"
+        path.write_text("<mediawiki>" + "".join(
+            f"<page><title>記事{i}</title><ns>0</ns><id>{i}</id>"
+            f"<revision><id>{i}</id><text>{text}</text></revision></page>"
+            for i, text in enumerate(texts, 1)
+        ) + "</mediawiki>", encoding="utf-8")
+    original_parse = wikimedia.mwparserfromhell.parse
+    parsed = []
+
+    def guarded_parse(text):
+        assert len(text) <= 30
+        parsed.append(text)
+        return original_parse(text)
+
+    monkeypatch.setattr(wikimedia.mwparserfromhell, "parse", guarded_parse)
+    stats = Counter()
+    documents = list(iter_documents(manifest(path.name, role), tmp_path, stats=stats))
+    assert [doc["native_id"] for doc in documents] == ["2"]
+    assert parsed == [texts[1]]
+    assert stats == {"wikimedia_pages_seen": 2, "rejected:page-text-limit": 1}

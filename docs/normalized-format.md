@@ -40,6 +40,17 @@ For Wikimedia, extraction also omits material before canonical ordinals are
 assigned, so even consecutive ordinals do not establish adjacency in the source.
 Consumers must not present these pointers alone as uninterrupted original context.
 
+Wikimedia processor `wikimedia-prose-v3` rejects whole pages exceeding 1,000,000
+Unicode characters before calling the wikitext parser. This fixed limit bounds
+parser input and subsequent whole-page prose/sentence lists; pages are never
+truncated into misleading excerpts. Build source and aggregate statistics report
+`wikimedia_pages_seen` (eligible pages reaching extraction) and
+`rejected:page-text-limit`. These are extraction exclusions, not acquisition
+sampling: snapshot completeness still describes the saved upstream inputs, not
+retention of every article. XML decoding still holds one complete page before
+this check; saved API JSON responses are loaded as a whole. The limit therefore
+bounds wikitext parsing, not all input-decoder memory or adversarial parser CPU.
+
 Default JSONL release builds compile normalized **v2 SQLite** with `sentences`,
 `works`, `occurrences`, `translations`, and `external_references`. `metadata_json`
 columns retain complete provenance and optional fields. `PRAGMA user_version` is 2;
@@ -106,3 +117,34 @@ old and rebuilt snapshots of the same source. Consumers should show the source
 unit as explicitly labeled context, retain its attribution, and compute sentence
 difficulty/highlighting/copy text only from the selected fragment.
 
+
+### Release transport parts
+
+`package` applies `--part-bytes` (default 1 GiB) to normalized ZIP transport as
+well as compressed SQLite transport. A normalized ZIP at or below the budget
+keeps its existing filename and `normalized-jsonl-zip` asset kind. Larger ZIPs
+become deterministic `.normalized.zip.part0000`, `.part0001`, … byte slices,
+with asset kind `normalized-jsonl-zip-part`. These slices are not independent
+ZIPs. The standalone normalized exporter still produces an ordinary ZIP.
+
+The additive `release.json.normalized_archives` inventory records each logical
+ZIP's `source_id`, `language`, original `path`, complete `size` and `sha256`,
+and ordered `parts` filenames. Every part also has a size and SHA-256 in
+`assets` and an entry in `SHA256SUMS`. Verify these identities, concatenate the
+parts in manifest order to the original filename, then verify the complete ZIP
+size and SHA-256 before passing it to an existing normalized importer. Do not
+extract individual parts or assume lexical filename order. Package read-back
+checks the concatenated identity with bounded memory and no restored ZIP.
+
+Existing normalized importers accept a complete ZIP, not a release manifest or
+individual transport part. Clients that download only assets of kind
+`normalized-jsonl-zip` must add the assembly step to consume larger releases.
+Small releases remain directly importable, and package verification still
+accepts older releases without the additive inventory. Splitting uses the
+already completed ZIP after SQLite generation; it does not reduce the disk
+space required to build the normalized ZIP. Splitting works backwards, truncating
+each completed tail before copying the next, so temporary duplication is bounded
+by one part instead of nearly a second full ZIP. Split assets require the complete
+archive inventory; the legacy exception only applies to unsplit releases.
+GitHub's total asset-count limit still
+applies and is checked before publication.

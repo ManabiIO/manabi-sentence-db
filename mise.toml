@@ -62,3 +62,51 @@ run = "uv run --locked sentence-db build-normalized-db"
 description = "Compare distinct and marginal vocabulary using an explicit analyzer export"
 run = "uv run --locked sentence-db vocabulary-coverage"
 
+[tasks.snapshot-tubelex]
+description = "Opt-in TUBELEX Japanese manual captions; never part of public corpus snapshots"
+run = "uv run --locked sentence-db snapshot-tubelex"
+
+[tasks.build-tubelex]
+description = "Offline private citation index beside a downloaded CC corpus release"
+run = "uv run --locked sentence-db build-tubelex"
+
+[tasks.search-tubelex]
+description = "Private exact-substring search returning only timed YouTube references"
+run = "uv run --locked sentence-db search-tubelex"
+
+[tasks.verify-tubelex]
+description = "Verify the private citation index and text-free references before activation"
+run = "uv run --locked sentence-db verify-tubelex"
+
+[tasks.build-tubelex-batch]
+description = "Build/resume immutable private shards from disjoint caption snapshots"
+run = "uv run --locked sentence-db build-tubelex-batch"
+
+[tasks.verify-tubelex-collection]
+description = "Verify a completed private citation shard collection offline"
+run = "uv run --locked sentence-db verify-tubelex-collection"
+
+[tasks.prepare-tubelex-review]
+description = "Prepare a compressed private review packet without showing predictions"
+run = "uv run --locked sentence-db prepare-tubelex-review"
+
+[tasks.score-tubelex-review]
+description = "Compare independent boundary annotations with fixed processing profiles"
+run = "uv run --locked sentence-db score-tubelex-review"
+
+
+[tasks.prepare-tubelex-playback-review]
+description = "Prepare text-free clips for an independent listening review"
+run = "uv run --locked sentence-db prepare-tubelex-playback-review"
+
+[tasks.score-tubelex-playback-review]
+description = "Score explicitly declared listening ratings separately from sentence boundaries"
+run = "uv run --locked sentence-db score-tubelex-playback-review"
+
+[tasks.benchmark-tubelex-pipeline]
+description = "Measure offline build, warm rebuild and sealed/interrupted resume phases"
+run = "uv run --locked python benchmarks/tubelex_pipeline.py"
+
+[tasks.benchmark-tubelex-filter-cache]
+description = "Stress default bounded filter-cache working sets with synthetic byte fixtures"
+run = "uv run --locked python benchmarks/tubelex_filter_cache.py"

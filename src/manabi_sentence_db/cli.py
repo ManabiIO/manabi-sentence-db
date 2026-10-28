@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import sqlite3
 import sys
 from pathlib import Path
 
@@ -26,7 +27,7 @@ def parser() -> argparse.ArgumentParser:
     commands.add_parser("sources", help="List reviewed source configurations (offline)")
     commands.add_parser("validate-config", help="Validate source catalog and schemas (offline)")
     snapshot = commands.add_parser(
-        "snapshot", help="Explicitly acquire source data; the only upstream network command"
+        "snapshot", help="Explicitly acquire redistributable corpus source data"
     )
     snapshot.add_argument("--source", required=True, help="Source ID, or all")
     snapshot.add_argument("--output", type=Path, required=True)
@@ -106,6 +107,94 @@ def parser() -> argparse.ArgumentParser:
     coverage.add_argument("--baseline-source", action="append", default=[])
     coverage.add_argument("--target-vocabulary", type=Path, help="Optional JSON array of target lemmas")
     coverage.add_argument("--output", type=Path, required=True)
+    tubelex_snapshot = commands.add_parser(
+        "snapshot-tubelex", help="Opt-in Japanese manual captions; PRIVATE compressed snapshot"
+    )
+    tubelex_snapshot.add_argument("--output", type=Path, required=True)
+    tubelex_snapshot.add_argument("--videos-csv", type=Path, help="Local TUBELEX videos-ja.csv")
+    tubelex_snapshot.add_argument("--captions-dir", type=Path, help="Offline .info.json/.ja.vtt import")
+    tubelex_snapshot.add_argument("--cache", type=Path, help="Reusable PRIVATE compressed caption cache")
+    tubelex_snapshot.add_argument("--max-videos", type=int, default=10)
+    tubelex_snapshot.add_argument("--offset", type=int, default=0, help="Start after N eligible video IDs")
+    tubelex_snapshot.add_argument("--delay", type=float, default=5)
+    tubelex_snapshot.add_argument("--yt-dlp", default="yt-dlp", help="Installed metadata extractor")
+    tubelex_snapshot.add_argument("--user-agent", default=os.getenv("SENTENCE_DB_USER_AGENT"))
+    external = commands.add_parser(
+        "build-tubelex", help="Offline private citation sidecar bound to a prebuilt corpus release"
+    )
+    external.add_argument("--snapshot", type=Path, required=True)
+    external.add_argument("--base-artifact", type=Path, required=True)
+    external.add_argument("--private-output", type=Path, required=True)
+    external.add_argument("--references-output", type=Path, required=True)
+    external.add_argument("--boundary-mode", choices=["hybrid", "punctuation"], default="hybrid")
+    external.add_argument("--pause-ms", type=int, default=800)
+    external.add_argument("--sat-model", type=Path, help="Optional local SaT model directory")
+    external.add_argument("--sat-tokenizer", type=Path, help="Local tokenizer directory for SaT")
+    external.add_argument("--sat-threshold", type=float, default=0.25, help="Explicit boundary threshold; 0.25 for SaT SM")
+    external.add_argument("--ja-punct-model", type=Path, help="Optional local four-label Japanese character ONNX model")
+    external.add_argument("--ja-punct-threshold", type=float, default=0.5)
+    external.add_argument("--boundary-cache", type=Path,
+                          help="Optional PRIVATE reusable model-offset cache; one writer per cache")
+    external_search = commands.add_parser(
+        "search-tubelex", help="Search PRIVATE literal substring index; emit only external references"
+    )
+    search_target = external_search.add_mutually_exclusive_group(required=True)
+    search_target.add_argument("--index", type=Path)
+    search_target.add_argument("--collection", type=Path, help="Completed private shard collection")
+    external_search.add_argument("--base-artifact", type=Path, help="Check base release compatibility")
+    external_search.add_argument("--query", required=True)
+    external_search.add_argument("--limit", type=int, default=250)
+    external_search.add_argument("--selection", choices=["first", "diverse"], default="first",
+                                 help="Collection only: opt-in video diversity; shares the full work/deadline budget")
+    external_search.add_argument("--timeout-ms", type=int, default=1000,
+                                 help="Query budget in milliseconds (1..60000); no partial results")
+    external_search.add_argument("--max-decoded-chunks", type=int, default=2048)
+    external_search.add_argument("--stats", action="store_true", help="Text-free work counters on stderr")
+    external_verify = commands.add_parser(
+        "verify-tubelex", help="Verify a closed private citation index and its text-free export offline"
+    )
+    external_verify.add_argument("--private-build", type=Path, required=True)
+    external_verify.add_argument("--references", type=Path, required=True)
+    external_verify.add_argument("--base-artifact", type=Path)
+    external_verify.add_argument("--deep", action="store_true", help="Check coverage, complete postings and cue-derived reference inventory")
+    batch = commands.add_parser("build-tubelex-batch", help="Resume immutable private snapshot shards")
+    batch.add_argument("--snapshot", type=Path, action="append", required=True)
+    batch.add_argument("--base-artifact", type=Path, required=True)
+    batch.add_argument("--output", type=Path, required=True)
+    batch.add_argument("--boundary-mode", choices=["hybrid", "punctuation"], default="hybrid")
+    batch.add_argument("--pause-ms", type=int, default=800)
+    batch.add_argument("--sat-model", type=Path)
+    batch.add_argument("--sat-tokenizer", type=Path)
+    batch.add_argument("--sat-threshold", type=float, default=0.25)
+    batch.add_argument("--ja-punct-model", type=Path)
+    batch.add_argument("--ja-punct-threshold", type=float, default=0.5)
+    batch.add_argument("--boundary-cache", type=Path)
+    collection_verify = commands.add_parser("verify-tubelex-collection")
+    collection_verify.add_argument("--collection", type=Path, required=True)
+    collection_verify.add_argument("--base-artifact", type=Path)
+    collection_verify.add_argument("--deep", action="store_true")
+    review = commands.add_parser("prepare-tubelex-review", help="Compressed private blind review packet")
+    review.add_argument("--snapshot", type=Path, action="append", required=True)
+    review.add_argument("--output", type=Path, required=True)
+    review.add_argument("--per-video", type=int, default=4)
+    review.add_argument("--window-chars", type=int, default=200)
+    review.add_argument("--max-videos", type=int, default=20, help="Uniformly sample at most this many videos")
+    review.add_argument("--exclude-packet", type=Path, action="append", default=[])
+    review.add_argument("--exclude-scope", choices=["videos", "windows"], default="videos")
+    playback = commands.add_parser("prepare-tubelex-playback-review", help="Text-free clips for independent listening review")
+    playback.add_argument("--references", type=Path, action="append", required=True)
+    playback.add_argument("--output", type=Path, required=True)
+    playback.add_argument("--max-cases", type=int, default=40)
+    playback_score = commands.add_parser("score-tubelex-playback-review", help="Score separately declared listening labels")
+    playback_score.add_argument("--packet", type=Path, required=True)
+    playback_score.add_argument("--labels", type=Path, required=True)
+    score = commands.add_parser("score-tubelex-review", help="Score independent private boundary labels")
+    score.add_argument("--packet", type=Path, required=True)
+    score.add_argument("--labels", type=Path, required=True)
+    score.add_argument("--ja-punct-model", type=Path)
+    score.add_argument("--ja-punct-threshold", type=float, default=0.5)
+    score.add_argument("--pause-ms", type=int, default=800)
+    score.add_argument("--legacy-punctuation-policy", action="store_true")
     demo = commands.add_parser(
         "demo", help="Run the complete pipeline with original synthetic fixtures, offline"
     )
@@ -248,8 +337,106 @@ def main(argv: list[str] | None = None) -> int:
                 build_corpus([manifest], args.output / "corpus")
                 build_database(args.output / "corpus", args.output / "corpus.sqlite3")
                 print(package_build(args.output / "corpus", args.output / "release"))
+            case "snapshot-tubelex":
+                from .tubelex import snapshot_tubelex
+
+                options = {"user_agent": args.user_agent} if args.user_agent else {}
+                print(snapshot_tubelex(
+                    args.output, videos_csv=args.videos_csv, captions_dir=args.captions_dir,
+                    cache=args.cache, max_videos=args.max_videos, delay=args.delay,
+                    yt_dlp=args.yt_dlp, **options,
+                    offset=args.offset,
+                ))
+            case "build-tubelex":
+                from .tubelex_index import build_tubelex_index
+
+                print(build_tubelex_index(
+                    args.snapshot, args.base_artifact, args.private_output, args.references_output,
+                    boundary_mode=args.boundary_mode, pause_ms=args.pause_ms,
+                    sat_model=args.sat_model, sat_tokenizer=args.sat_tokenizer,
+                    sat_threshold=args.sat_threshold,
+                    ja_punct_model=args.ja_punct_model, ja_punct_threshold=args.ja_punct_threshold,
+                    boundary_cache=args.boundary_cache,
+                ))
+            case "search-tubelex":
+                from .tubelex_index import TubelexReader
+
+                if args.selection != "first" and not args.collection:
+                    raise DataError("Diverse selection requires --collection")
+                if args.collection:
+                    from .tubelex_batch import TubelexCollectionReader
+
+                    reader = TubelexCollectionReader(
+                        args.collection, base_artifact=args.base_artifact, timeout_ms=args.timeout_ms,
+                        max_decoded_chunks=args.max_decoded_chunks,
+                    )
+                else:
+                    reader = TubelexReader(
+                        args.index, base_artifact=args.base_artifact, timeout_ms=args.timeout_ms,
+                        max_decoded_chunks=args.max_decoded_chunks,
+                    )
+                with reader:
+                    selection = {"selection": args.selection} if args.collection else {}
+                    records = reader.search(args.query, limit=args.limit, **selection)
+                    print(json.dumps(records, ensure_ascii=False))
+                    if args.stats:
+                        print(json.dumps(reader.last_search_stats, sort_keys=True), file=sys.stderr)
+            case "verify-tubelex":
+                from .tubelex_index import verify_tubelex_index
+
+                print(json.dumps(verify_tubelex_index(
+                    args.private_build, args.references, base_artifact=args.base_artifact, deep=args.deep,
+                ), sort_keys=True))
+            case "build-tubelex-batch":
+                from .tubelex_batch import build_tubelex_collection
+
+                print(build_tubelex_collection(
+                    args.snapshot, args.base_artifact, args.output,
+                    boundary_mode=args.boundary_mode, pause_ms=args.pause_ms,
+                    sat_model=args.sat_model, sat_tokenizer=args.sat_tokenizer,
+                    sat_threshold=args.sat_threshold, ja_punct_model=args.ja_punct_model,
+                    ja_punct_threshold=args.ja_punct_threshold, boundary_cache=args.boundary_cache,
+                ))
+            case "verify-tubelex-collection":
+                from .tubelex_batch import verify_tubelex_collection
+
+                print(json.dumps(verify_tubelex_collection(
+                    args.collection, base_artifact=args.base_artifact, deep=args.deep,
+                ), sort_keys=True))
+            case "prepare-tubelex-review":
+                from .tubelex_review import prepare_tubelex_review
+
+                print(json.dumps(prepare_tubelex_review(
+                    args.snapshot, args.output, per_video=args.per_video, window_chars=args.window_chars,
+                    max_videos=args.max_videos, exclude_packets=args.exclude_packet,
+                    exclude_scope=args.exclude_scope,
+                ), sort_keys=True))
+            case "prepare-tubelex-playback-review":
+                from .tubelex_review import prepare_tubelex_playback_review
+
+                print(json.dumps(prepare_tubelex_playback_review(
+                    args.references, args.output, max_cases=args.max_cases,
+                ), sort_keys=True))
+            case "score-tubelex-playback-review":
+                from .tubelex_review import score_tubelex_playback_review
+
+                print(json.dumps(score_tubelex_playback_review(args.packet, args.labels), sort_keys=True))
+            case "score-tubelex-review":
+                from .tubelex_review import score_tubelex_review
+
+                segment = None
+                if args.ja_punct_model:
+                    from .tubelex_boundaries import local_japanese_character_model
+
+                    segment, _ = local_japanese_character_model(
+                        args.ja_punct_model, threshold=args.ja_punct_threshold,
+                    )
+                print(json.dumps(score_tubelex_review(
+                    args.packet, args.labels, segment=segment, pause_ms=args.pause_ms,
+                    refine_punctuated=not args.legacy_punctuation_policy,
+                ), sort_keys=True))
         return 0
-    except (DataError, SnapshotError, OSError, yaml.YAMLError, json.JSONDecodeError) as exc:
+    except (DataError, SnapshotError, OSError, sqlite3.Error, yaml.YAMLError, json.JSONDecodeError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2
 
