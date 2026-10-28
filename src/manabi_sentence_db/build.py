@@ -56,6 +56,7 @@ def canonical_document(
     from .text import assess_sentence, style_tags
 
     source_id = manifest["source_id"]
+    wikipedia_quality = source_id.startswith("wikipedia-") and raw["language"].split("-", 1)[0] == "ja"
     native_id = str(raw["native_id"])
     record = {
         "schema_version": SCHEMA_VERSION,
@@ -86,6 +87,10 @@ def canonical_document(
     }
     if raw.get("revision"):
         record["revision"] = raw["revision"]
+    if wikipedia_quality:
+        from .wikipedia_quality import WIKIPEDIA_QUALITY_VERSION
+
+        record["transformations"].append(WIKIPEDIA_QUALITY_VERSION)
     for field in (
         "published_at",
         "language_origin",
@@ -99,6 +104,12 @@ def canonical_document(
     for ordinal, item in enumerate(publisher_items(raw, manifest, stats, excluded_flags)):
         text = _normalized_text(item["text"])
         accepted, flags, reason = assess_sentence(text, raw["language"])
+        quality_tags = []
+        if accepted and wikipedia_quality:
+            from .wikipedia_quality import assess_wikipedia_sentence
+
+            reason, quality_tags = assess_wikipedia_sentence(text)
+            accepted = reason is None
         stats["sentences_seen"] += 1
         if manifest["source"]["adapter"] == "tatoeba":
             upstream_tags = {tag.casefold().strip() for tag in item.get("tags", [])}
@@ -137,7 +148,7 @@ def canonical_document(
             "ordinal": ordinal,
             "text": text,
             "text_sha256": text_hash,
-            "tags": sorted(set(item.get("tags", [])) | set(style_tags(text, raw["language"]))),
+            "tags": sorted(set(item.get("tags", [])) | set(style_tags(text, raw["language"])) | set(quality_tags)),
             "content_flags": flags,
             "review_state": "unreviewed",
             "translations": [],
