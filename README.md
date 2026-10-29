@@ -121,6 +121,14 @@ absent from the snapshot fail the build. Present pages with no eligible prose
 may produce no documents; an entirely empty build fails. Selection avoids parsing
 unselected wikitext but still streams the compressed XML snapshot.
 
+For large builds, add `--shard-compression zstd` to write YAML or JSONL shards
+directly as compressed `.yaml.zst` or `.jsonl.zst` files. The catalog records their
+compressed sizes and checksums; document positions still refer to logical records.
+Verification, normalized export, SQLite compilation and packaging read these shards
+as streams. Release ZIPs retain the compressed members. The default remains plain
+shards for human editing. Normalized export always compresses its temporary tables
+and produces the same ordinary JSONL members inside its portable ZIP download.
+
 Repeating the same local snapshot request reuses verified existing files without
 contacting upstream. `--refresh` downloads a complete candidate snapshot before
 comparing its identity; it does not use conditional HTTP requests or ETags. A

@@ -65,6 +65,7 @@ def parser() -> argparse.ArgumentParser:
     build.add_argument("--snapshot", type=Path, action="append", required=True)
     build.add_argument("--output", type=Path, required=True)
     build.add_argument("--format", choices=["jsonl", "yaml"], default="jsonl")
+    build.add_argument("--shard-compression", choices=("none", "zstd"), default="none")
     build.add_argument("--shard-bytes", type=int, default=4 * 1024**2)
     build.add_argument("--shard-documents", type=int, default=500)
     build.add_argument(
@@ -296,6 +297,7 @@ def main(argv: list[str] | None = None) -> int:
                         args.snapshot,
                         args.output,
                         shard_bytes=args.shard_bytes,
+                        shard_compression=args.shard_compression,
                         shard_documents=args.shard_documents,
                         excluded_flags=excluded,
                         max_documents=args.max_documents,

@@ -1,3 +1,5 @@
+import gzip
+import hashlib
 import json
 import zipfile
 
@@ -58,3 +60,30 @@ def test_normalized_relational_database(tmp_path):
         assert db.execute(
             "SELECT count(*) FROM sentences s JOIN occurrences o ON o.sentence_id=s.id JOIN works w ON w.id=o.work_id"
         ).fetchone() == (4,)
+
+
+def test_export_keeps_staging_tables_compressed_and_hashes_logical_bytes(tmp_path, monkeypatch):
+    from manabi_sentence_db import normalized
+
+    snapshot = create_demo_snapshot(tmp_path / "snapshot")
+    build_corpus([snapshot], tmp_path / "build")
+    write_archive = normalized._write_normalized_archive
+    inspected = []
+
+    def inspect(root, build, catalog, source_id, manifest, **options):
+        assert options == {"compressed_tables": True}
+        assert not list(root.glob("*.jsonl"))
+        for name, digest in manifest["members"].items():
+            path = root / (name + ".gz")
+            assert path.read_bytes().startswith(b"\x1f\x8b")
+            assert hashlib.sha256(gzip.decompress(path.read_bytes())).hexdigest() == digest
+        inspected.append(root)
+        return write_archive(root, build, catalog, source_id, manifest, **options)
+
+    monkeypatch.setattr(normalized, "_write_normalized_archive", inspect)
+    output = export_normalized(tmp_path / "build", tmp_path / "corpus.zip")
+    assert inspected and all(not root.exists() for root in inspected)
+    with zipfile.ZipFile(output) as archive:
+        manifest = json.loads(archive.read("manifest.json"))
+        assert all(hashlib.sha256(archive.read(name)).hexdigest() == digest
+                   for name, digest in manifest["members"].items())

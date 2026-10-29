@@ -6,15 +6,16 @@ No probabilistic normalization is allowed to collapse distinct original spelling
 
 from __future__ import annotations
 
+import gzip
 import hashlib
 import os
-import shutil
 import sqlite3
 import tempfile
 import zipfile
+from contextlib import ExitStack
 from pathlib import Path
 
-from .serialization import DataError, canonical_json, sha256_file
+from .serialization import DataError, canonical_json
 
 
 def sentence_identity(language: str, text: str) -> str:
@@ -30,14 +31,22 @@ def export_normalized(build: Path, output: Path, *, source_id=None, catalog=None
     output.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix=".normalized-", dir=output.parent) as temporary:
         root = Path(temporary)
-        with sqlite3.connect(root / "ledger.sqlite") as db:
+        with sqlite3.connect(root / "ledger.sqlite") as db, ExitStack() as stack:
             db.execute("CREATE TABLE seen(id TEXT PRIMARY KEY) WITHOUT ROWID")
             names = ("works", "sentences", "occurrences", "translations", "references")
-            handles = {name: (root / f"{name}.jsonl").open("wb") for name in names}
+            # Keep bulk source text compressed throughout staging. The public
+            # ZIP still contains ordinary JSONL members for existing consumers.
+            handles = {
+                name: stack.enter_context(gzip.open(root / f"{name}.jsonl.gz", "wb", compresslevel=3))
+                for name in names
+            }
             counts = dict.fromkeys(names, 0)
+            digests = {name: hashlib.sha256() for name in names}
 
             def write(name, value):
-                handles[name].write(canonical_json(value) + b"\n")
+                data = canonical_json(value) + b"\n"
+                handles[name].write(data)
+                digests[name].update(data)
                 counts[name] += 1
 
             try:
@@ -98,9 +107,9 @@ def export_normalized(build: Path, output: Path, *, source_id=None, catalog=None
             "source_id": source_id,
             "counts": counts,
             "identity": "sha256(canonical_json([language,NFC_text]))",
-            "members": {f"{name}.jsonl": sha256_file(root / f"{name}.jsonl") for name in names},
+            "members": {f"{name}.jsonl": digests[name].hexdigest() for name in names},
         }
-        _write_normalized_archive(root, build, catalog, source_id, manifest)
+        _write_normalized_archive(root, build, catalog, source_id, manifest, compressed_tables=True)
         with zipfile.ZipFile(root / "corpus.zip") as archive:
             if archive.testzip() is not None:
                 raise DataError("Normalized archive failed CRC verification")
@@ -108,7 +117,7 @@ def export_normalized(build: Path, output: Path, *, source_id=None, catalog=None
     return output
 
 
-def _write_normalized_archive(root, build, catalog, source_id, manifest):
+def _write_normalized_archive(root, build, catalog, source_id, manifest, *, compressed_tables=False):
     """Stream verified staging files with reproducible ZIP transport metadata.
 
     Embedded provenance bytes are unchanged. Byte reproducibility assumes the
@@ -124,13 +133,20 @@ def _write_normalized_archive(root, build, catalog, source_id, manifest):
     with zipfile.ZipFile(
         root / "corpus.zip", "w", compression=zipfile.ZIP_DEFLATED, compresslevel=6
     ) as archive:
-        def write_file(path, name):
+        def write_file(path, name, *, compressed=False, expected_hash=None):
+            digest = hashlib.sha256()
             with archive.open(info(name), "w", force_zip64=True) as outgoing:
-                with path.open("rb") as incoming:
-                    shutil.copyfileobj(incoming, outgoing, length=1024 * 1024)
+                with (gzip.open(path, "rb") if compressed else path.open("rb")) as incoming:
+                    for chunk in iter(lambda: incoming.read(1024 * 1024), b""):
+                        outgoing.write(chunk)
+                        digest.update(chunk)
+            if expected_hash is not None and digest.hexdigest() != expected_hash:
+                raise DataError(f"Normalized staging bytes changed: {name}")
 
         for name in ("works", "sentences", "occurrences", "translations", "references"):
-            write_file(root / f"{name}.jsonl", f"{name}.jsonl")
+            member = f"{name}.jsonl"
+            write_file(root / (member + ".gz" if compressed_tables else member), member,
+                       compressed=compressed_tables, expected_hash=manifest["members"][member])
         archive.writestr(info("manifest.json"), canonical_json(manifest), compresslevel=6)
         for name in ("licenses.json", "catalog.json"):
             write_file(build / name, name)

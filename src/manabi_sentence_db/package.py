@@ -483,7 +483,7 @@ def package_build(
             "normalized_archives": normalized_archives,
             "normalized_restore": "Verify each part checksum, concatenate each normalized archive's parts in listed order, and verify the restored ZIP size and SHA-256 before importing. Parts are byte slices, not independent ZIP files.",
             "sqlite_restore": "Concatenate each database's parts in listed order, then decompress the single zstd stream. Verify the uncompressed SHA-256.",
-            "yaml_restore": "Extract YAML ZIP members into a common directory. The external catalog and document index locate a document's shard without decompressing the entire corpus.",
+            "yaml_restore": "Extract YAML/JSONL ZIP members into a common directory. When catalog options declare shard_compression=zstd, retain the .zst members and use the corpus reader, or decompress individual shards with zstd. The external catalog and document index locate a document's shard without decompressing the entire corpus.",
         }
         write_json(staging / "release.json", release)
         checksum_paths = sorted(path for path in staging.iterdir() if path.is_file())
