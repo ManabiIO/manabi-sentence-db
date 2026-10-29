@@ -8,8 +8,9 @@ and language origin must remain unknown; translations do not become Japanese ori
 
 ## Enabled adapters
 
-Wikipedia, Wikivoyage, Wikibooks, archived Japanese Wikinews, Tatoeba,
-RealPersonaChat, JMultiWOZ, STAIR Captions, and four individually curated SCP-JP Tales
+Wikipedia, Kyoto Wikipedia pairs, Wikivoyage, Wikibooks, archived Japanese
+Wikinews, Tatoeba, RealPersonaChat, JMultiWOZ, STAIR Captions, JEC Basic
+Sentence Data, and four individually curated SCP-JP Tales
 『適性』『カモと商人』『証明写真』『定点観測』.
 Wikimedia and Tatoeba provenance does not establish blanket human authorship or
 original Japanese. Their releases preserve that uncertainty. Machine generation
@@ -23,6 +24,18 @@ location of model experiments. The adapter reads only `real_persona_chat/dialogu
 It excludes profiles, evaluations, model-generated dialogues and masked utterances.
 There are two duplicate internal dialogue IDs; filename identity preserves all works
 without fabricating provenance links. The adapter has a regression for this upstream defect.
+
+## Enabled parallel data
+
+The [NICT Kyoto Wikipedia corpus](https://alaginrc.nict.go.jp/WikiCorpus/index_E.html)
+is now enabled as `wikipedia-kyoto-ja`. The pinned v2.01 archive provides
+Japanese Wikipedia sentences with NICT English translations; only the final
+checked translation is imported. This adds explicit Japanese-English alignment
+and translation attribution, but overlaps the Japanese Wikipedia corpus.
+Article history, translator IDs, and the publisher's CC BY-SA 3.0 notice are
+preserved. Source-flagged errors, classical or incomplete examples, quotes,
+and reference sections are excluded. Counts should distinguish admitted
+pairs from source rows and from text overlap with Wikipedia.
 
 ## Next structured datasets
 
@@ -62,8 +75,7 @@ label does not resolve older report exceptions. J-STAGE requires per-article scr
 
 StoryWeaver story text (reported BY 4.0) is separate from NC-ND readalong/video editions.
 Global Voices and MDN Japanese should be classified by original versus translated
-work. Kyoto Wikipedia is useful aligned material but overlaps Wikipedia. Common
-Voice is on hold pending redistribution-policy review. Open2ch remains on hold
+work. Common Voice is on hold pending redistribution-policy review. Open2ch remains on hold
 because poster rights are unresolved. Aozora is deferred for the contemporary cut.
 
 Exclude Livedoor (ND), KokoroChat/Japanese Daily Dialogue/NUCC (NC/ND), restricted

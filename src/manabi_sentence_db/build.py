@@ -95,6 +95,8 @@ def canonical_document(
         from .wikipedia_quality import WIKIPEDIA_QUALITY_VERSION
 
         record["transformations"].append(WIKIPEDIA_QUALITY_VERSION)
+    if manifest["source"]["adapter"] == "kyoto-wikipedia":
+        record["transformations"] += ["kyoto-final-checked-pairs-v1", "conservative-quotation-exclusion"]
     for field in (
         "published_at",
         "language_origin",
@@ -106,6 +108,10 @@ def canonical_document(
             record[field] = raw[field]
     occurrences: Counter = Counter()
     for ordinal, item in enumerate(publisher_items(raw, manifest, stats, excluded_flags)):
+        if manifest["source"]["adapter"] == "kyoto-wikipedia":
+            # Keep gaps from excluded pairs; spreadsheet/paragraph positions do
+            # not authorize joining prose across omitted source material.
+            ordinal = item["source_ordinal"]
         text = _normalized_text(item["text"])
         accepted, flags, reason = assess_sentence(text, raw["language"])
         quality_tags = []
@@ -419,6 +425,8 @@ def build_corpus(
                     from .scp_curated import iter_documents
                 elif source["adapter"] == "jec-basic":
                     from .jec_basic import iter_documents
+                elif source["adapter"] == "kyoto-wikipedia":
+                    from .kyoto_wikipedia import iter_documents
                 else:
                     raise DataError(f"Unsupported adapter: {source['adapter']}")
                 writer = ShardWriter(
@@ -433,7 +441,7 @@ def build_corpus(
                 source_stats: Counter = Counter()
                 documents = (
                     iter_documents(manifest, manifest_path.parent, stats=source_stats)
-                    if source["adapter"] in {"wikimedia", "jec-basic"}
+                    if source["adapter"] in {"wikimedia", "jec-basic", "kyoto-wikipedia"}
                     else iter_documents(manifest, manifest_path.parent)
                 )
                 for raw in documents:

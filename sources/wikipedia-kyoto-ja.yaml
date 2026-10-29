@@ -1,0 +1,32 @@
+schema_version: 1
+id: wikipedia-kyoto-ja
+title: NICT Japanese-English Wikipedia Kyoto Corpus v2.01
+language: ja
+adapter: kyoto-wikipedia
+homepage: https://alaginrc.nict.go.jp/WikiCorpus/index_E.html
+license:
+  id: CC-BY-SA-3.0
+  url: https://creativecommons.org/licenses/by-sa/3.0/
+attribution:
+  text: Japanese Wikipedia contributors and National Institute of Information and Communications Technology (NICT); per-article contributor lists, history links and the publisher's required translation notice are retained.
+  url: https://alaginrc.nict.go.jp/WikiCorpus/index_E.html
+license_evidence:
+  - https://alaginrc.nict.go.jp/WikiCorpus/index_E.html
+  - https://alaginrc.nict.go.jp/WikiCorpus/src/readme.pdf
+  - https://creativecommons.org/licenses/by-sa/3.0/
+notes:
+  - Publisher manually translated Japanese Wikipedia; Japanese-native primary translators, English-native revision, then Japanese-native terminology checks. The README forbids use of machine translation systems. This is human translation, not machine translation with human review.
+  - Import only final check/ver=1 English pairs, never title/section translations or translator comments. Publisher pair units remain intact so translations are not falsely assigned to smaller fragments.
+  - Historical subjects do not establish archaic language. Exclude incomplete prose and Japanese quotation/title spans conservatively; apply shared modern-text, content and Wikipedia density policies as well.
+  - Each article retains its exact raw XML hash, original dump ID, supplied contributor notice and Wikipedia page/history URL. Dump dates are not article publication dates or page revision IDs.
+  - The published archive contains one invalid XML entity in a contributor name in GNM/GNM00155.xml. Only that exact member hash and exact byte sequence have a reviewed serialization repair; decoded attribution retains the literal ampersand. Any other malformed XML fails closed.
+  - KFTT is derived from this source; do not count it as an independent corpus or import it again.
+  - Paragraph and section breaks were detected automatically and are approximate. Source ordinal gaps remain after filtering.
+acquisition:
+  version: '2.01'
+  url: https://alaginrc.nict.go.jp/WikiCorpus/src/wiki_corpus_2.01.tar.gz
+  sha256: 456172bdd1d7a32dbe68ae3e55e0a6de25a4f40582636fd7712a5404319a10e5
+  size: 74096805
+  article_count: 14111
+  index_sha256: 504d27d90959e91993b2f1606297b2ad5b12440a521df0252467daf45aa7a537
+  readme_sha256: ebe1be6c5a4c04cecf9189d26f8e60e7590dcee21062c8c35cc5fa435adce5dc

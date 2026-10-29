@@ -97,6 +97,19 @@ retaining numeric ranges such as `2～3`. It pins the v1.3 archive, workbook,
 and README hashes. See the [source page](https://alaginrc.nict.go.jp/jecbs/index.htm)
 and the [Kyoto University data description](https://nlp.ist.i.kyoto-u.ac.jp/index.php?%E6%97%A5%E8%8B%B1%E4%B8%AD%E5%9F%BA%E6%9C%AC%E6%96%87%E3%83%87%E3%83%BC%E3%82%BF).
 
+## NICT Kyoto Wikipedia Corpus
+
+Japanese source text and NICT English translations are covered by
+[CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/). The publisher
+requires attribution to NICT and the underlying Japanese Wikipedia material;
+each article preserves its source copyright notice, Wikipedia page/history
+reference, and NICT notice. Only the final checked English translation is
+imported; earlier translation stages and their comments are not presented as
+examples. The adapter excludes source-marked translation errors, incomplete or
+classical examples, quotations, and reference sections. It pins the NICT Kyoto
+corpus v2.01 archive and associated index and readme hashes. See the
+[publisher license and documentation](https://alaginrc.nict.go.jp/WikiCorpus/index_E.html).
+
 
 ## Curated SCP-JP narrative
 

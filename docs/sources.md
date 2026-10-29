@@ -35,7 +35,7 @@ Each derived build identifies those snapshots and the extraction/filter versions
 ## Enabled source catalog
 
 The implementation provides Wikimedia, Tatoeba, RealPersonaChat, JMultiWOZ,
-STAIR, JEC Basic Sentence, and curated SCP-JP adapters for the enabled sources
+STAIR, JEC Basic Sentence, Kyoto Wikipedia pairs, and curated SCP-JP adapters for the enabled sources
 below. The high-priority additions farther down are researched options, not
 currently enabled ingestion jobs.
 
@@ -50,6 +50,7 @@ currently enabled ingestion jobs.
 | [JMultiWOZ](https://github.com/nu-dialogue/jmultiwoz) | Human task-oriented role-play; 4,246 dialogues and 61,186 turns in the inspected archive | CC BY-SA 4.0; pinned human turns only; no goals, worker IDs, backend database or model output. |
 | [STAIR Captions](https://github.com/STAIR-Lab-CIT/STAIR-captions) | Short descriptive Japanese; 616,435 public captions in the inspected v1.2 train/validation files | CC BY 4.0 for captions; no images or tokenized duplicates; visual-context dependence retained. |
 | [JEC Basic Sentence Data](https://alaginrc.nict.go.jp/jecbs/index.htm) | 5,304 Japanese sentence patterns aligned row by row with English and Chinese translations | CC BY 3.0; hash-pinned Kyoto University v1.3 ZIP, workbook, and README; unresolved `X`/quotation placeholders excluded, numeric ranges retained; Kyoto University Japanese and NICT translation attribution are separate. Translation method and individual sentence authorship are not specified. |
+| [NICT Kyoto Wikipedia corpus](https://alaginrc.nict.go.jp/WikiCorpus/index_E.html) | Japanese Wikipedia sentences aligned to English translations | CC BY-SA 3.0; hash-pinned v2.01 archive; import final checked translations only, preserve article/page/history links, and exclude source-flagged typo, incomplete, classical, quotation, and reference material. |
 | [Japanese Wikibooks](https://ja.wikibooks.org/) | Textbook explanations and other nonfiction prose | CC BY-SA 4.0 for covered text; revision/history attribution and conservative third-party quotation exclusions. |
 
 ### Wikipedia and Wikivoyage
@@ -173,12 +174,12 @@ observed in the pinned Japanese export used for implementation verification.
 ## High-priority additions
 
 These sources have useful primary licensing evidence but need their own reviewed
-adapters and fixtures before being enabled. Prioritize varied contemporary
-conversation and well-attributed parallel data over another copy of Wikipedia.
+adapters and fixtures before being enabled. Prioritize human-translated Wikipedia
+pairs before expanding unpaired encyclopedia prose; the implemented Kyoto adapter
+is described below.
 
 | Candidate | Upstream scale and character | License / implementation decision |
 | --- | --- | --- |
-| [NICT Kyoto Wikipedia corpus](https://alaginrc.nict.go.jp/WikiCorpus/index_E.html) | Approximately 500,000 Japanese–English pairs in 14,111 article XML files | CC BY-SA 3.0; human translations with stages and required NICT attribution. Prefer original XML over flattened KFTT copies. |
 | [NICT ALT Parallel Corpus](https://www2.nict.go.jp/astrec-att/member/mutiyama/ALT/) | 20,106 aligned sentences from 1,893 English Wikinews articles, 13 languages including Japanese | CC BY 4.0 parallel ZIP only. Same page's treebank/annotation downloads are NC and excluded. |
 | [Accommodation Search Dialog Corpus](https://github.com/megagonlabs/asdc) | 210 main dialogues; additional crowdwritten vanilla and supplemental material | Corpus/annotations/docs CC BY 4.0; code Apache 2.0. Admit only selected text fields and record the subset. |
 | [Global Voices Japanese](https://jp.globalvoices.org/) | Ongoing translated reporting across many countries and topics | CC BY 3.0 for covered editorial content; per-post author/translator and exceptions. Needs a bounded, polite snapshot crawler or verified export. |
@@ -218,14 +219,40 @@ starting point, not wholesale flattening of the repository.
 
 ### Parallel corpora
 
-The NICT Kyoto corpus records original Japanese, primary translation, revised
-translation, and final checked translation. Prefer the final
-`<e type="check" ver="1">` variant and record human provenance. Preserve article
-metadata and the required NICT/Wikipedia attribution specified on its
+The enabled [Kyoto Wikipedia configuration](../sources/wikipedia-kyoto-ja.yaml)
+pins NICT Kyoto corpus v2.01. It selects original Japanese and only the final
+checked `<e type="check" ver="1">` English translation; primary and revised
+translation stages are retained as upstream evidence but not imported as
+parallel examples. Preserve article metadata and the required NICT/Wikipedia
+attribution specified on its
 [license section](https://alaginrc.nict.go.jp/WikiCorpus/index_E.html).
-Version 2.01 is a roughly 74 MB archive. Historical subject matter does not itself
-mean archaic language, but quoted historical passages need filtering. KFTT is a
-derivative of this material, not an additional independent corpus to count twice.
+Version 2.01 is a hash-pinned 74,096,805-byte archive. Historical subject
+matter does not itself mean archaic language, but quoted historical passages
+need filtering. KFTT is a derivative of this material, not an additional
+independent corpus to count twice. The adapter preserves article-level
+Wikipedia page/history references and source copyright notices, and excludes
+reference/quote sections and source-flagged incomplete, classical, or typo
+examples. Sentence IDs retain upstream ordinal gaps after filtering.
+
+The original release has 443,849 sentence units in 14,111 article XML files;
+the publisher's approximate 500,000-pair figure also covers translated headings.
+The README describes Japanese-native primary translators, English-native revision
+against the Japanese, and Japanese-native technical checking. It prohibits use
+of machine translation systems. These translations therefore have
+`generation.kind: human`; they are not machine translations with human post-editing.
+No generic machine-translation native-review field is added: this source does
+not supply that kind of annotation. The publisher's process description is
+evidence about translation workflow, not a human quality rating assigned by this
+project. Source dump dates are not article publication dates, and headings never
+become sentence examples.
+
+The first complete default build processed all 14,111 articles and admitted
+288,201 sentence-pair occurrences from 14,094 works: 282,624 distinct Japanese
+texts and 288,201 final English translations. The normalized ZIP is 125,447,542
+bytes. This is compressed interchange size, not serving SQLite/index size.
+Excluded spans include incomplete prose, quotations/title quotes, source-noted
+defects/classical material, references and shared/Wikipedia quality failures.
+These are deterministic admission counts, not human usefulness ratings.
 
 For ALT, use `ALT-Parallel-Corpus-20191206.zip` and preserve the supplied
 [article URL map](https://www2.nict.go.jp/astrec-att/member/mutiyama/ALT/ALT-Parallel-Corpus-20191206/URL.txt)

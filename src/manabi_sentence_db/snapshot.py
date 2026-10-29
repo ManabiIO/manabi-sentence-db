@@ -540,7 +540,7 @@ def create_snapshot(
             data = _metadata(url, agent)
             extract(data, source)
             files = [_save_metadata(staging, f"{slug}.html", ROLE, url, data)]
-        elif adapter in {"realpersonachat", "jmultiwoz", "stair", "jec-basic"}:
+        elif adapter in {"realpersonachat", "jmultiwoz", "stair", "jec-basic", "kyoto-wikipedia"}:
             if mode != "full" or date or max_files or titles:
                 raise SnapshotError(
                     f"{source['title']} uses a pinned full archive; sample with build --max-documents"
@@ -550,6 +550,7 @@ def create_snapshot(
                 "jmultiwoz": ("jmultiwoz.zip", "jmultiwoz-zip"),
                 "stair": ("stair.tar.gz", "stair-tar"),
                 "jec-basic": ("jec-basic-v1-3.zip", "jec-basic-zip"),
+                "kyoto-wikipedia": ("wiki_corpus_2.01.tar.gz", "kyoto-wikipedia-tar"),
             }[adapter]
             files = [_download(
                 staging, filename, role, source["acquisition"]["url"], agent,
