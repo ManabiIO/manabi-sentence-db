@@ -6,7 +6,6 @@ No probabilistic normalization is allowed to collapse distinct original spelling
 
 from __future__ import annotations
 
-import gzip
 import hashlib
 import os
 import sqlite3
@@ -14,6 +13,8 @@ import tempfile
 import zipfile
 from contextlib import ExitStack
 from pathlib import Path
+
+import zstandard
 
 from .serialization import DataError, canonical_json
 
@@ -37,7 +38,10 @@ def export_normalized(build: Path, output: Path, *, source_id=None, catalog=None
             # Keep bulk source text compressed throughout staging. The public
             # ZIP still contains ordinary JSONL members for existing consumers.
             handles = {
-                name: stack.enter_context(gzip.open(root / f"{name}.jsonl.gz", "wb", compresslevel=3))
+                name: stack.enter_context(zstandard.open(
+                    root / f"{name}.jsonl.zst", "wb",
+                    cctx=zstandard.ZstdCompressor(level=3, write_checksum=True),
+                ))
                 for name in names
             }
             counts = dict.fromkeys(names, 0)
@@ -136,7 +140,7 @@ def _write_normalized_archive(root, build, catalog, source_id, manifest, *, comp
         def write_file(path, name, *, compressed=False, expected_hash=None):
             digest = hashlib.sha256()
             with archive.open(info(name), "w", force_zip64=True) as outgoing:
-                with (gzip.open(path, "rb") if compressed else path.open("rb")) as incoming:
+                with (zstandard.open(path, "rb") if compressed else path.open("rb")) as incoming:
                     for chunk in iter(lambda: incoming.read(1024 * 1024), b""):
                         outgoing.write(chunk)
                         digest.update(chunk)
@@ -145,7 +149,7 @@ def _write_normalized_archive(root, build, catalog, source_id, manifest, *, comp
 
         for name in ("works", "sentences", "occurrences", "translations", "references"):
             member = f"{name}.jsonl"
-            write_file(root / (member + ".gz" if compressed_tables else member), member,
+            write_file(root / (member + ".zst" if compressed_tables else member), member,
                        compressed=compressed_tables, expected_hash=manifest["members"][member])
         archive.writestr(info("manifest.json"), canonical_json(manifest), compresslevel=6)
         for name in ("licenses.json", "catalog.json"):

@@ -1,6 +1,5 @@
 """Synthetic, offline checks of normalized ZIP transport and SQLite read-back."""
 
-import gzip
 import hashlib
 import json
 import os
@@ -10,6 +9,7 @@ from contextlib import contextmanager
 from pathlib import Path
 
 import pytest
+import zstandard
 
 from manabi_sentence_db import normalized_database as database
 from manabi_sentence_db.normalized import _write_normalized_archive, sentence_identity
@@ -242,12 +242,12 @@ def test_compressed_staging_emits_identical_archive_and_detects_changed_bytes(tm
     path, (root, build, catalog, tables, manifest) = make_archive(tmp_path)
     expected = path.read_bytes()
     for name in tables:
-        with gzip.open(root / f"{name}.jsonl.gz", "wb", compresslevel=3) as stream:
+        with zstandard.open(root / f"{name}.jsonl.zst", "wb") as stream:
             stream.write((root / f"{name}.jsonl").read_bytes())
     _write_normalized_archive(root, build, catalog, None, manifest, compressed_tables=True)
     assert path.read_bytes() == expected
 
-    with gzip.open(root / "sentences.jsonl.gz", "wb", compresslevel=3) as stream:
+    with zstandard.open(root / "sentences.jsonl.zst", "wb") as stream:
         stream.write(b"changed but valid compressed data\n")
     with pytest.raises(DataError, match="staging bytes changed: sentences.jsonl"):
         _write_normalized_archive(root, build, catalog, None, manifest, compressed_tables=True)

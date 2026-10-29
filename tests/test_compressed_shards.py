@@ -90,3 +90,15 @@ def test_compressor_finalization_failure_closes_unpublished_shard(tmp_path):
     assert not writer.entries
     assert not list(tmp_path.rglob("*.jsonl.zst"))
     writer.abort()
+
+
+def test_compressed_shard_rejects_large_window_from_header_before_reading_records(tmp_path):
+    # A valid empty frame declaring a 128 MiB window must exceed the 64 MiB cap.
+    # This pins the library's actual byte units rather than trusting its docs.
+    frame = b"\x28\xb5\x2f\xfd\x00\x88\x01\x00\x00"
+    assert zstandard.get_frame_parameters(frame).window_size == 128 * 1024**2
+    path = tmp_path / "large.jsonl.zst"
+    path.write_bytes(frame)
+    catalog = {"options": {"record_format": "jsonl", "shard_compression": "zstd"}}
+    with pytest.raises(DataError, match="requires too much memory"):
+        list(_shard_records(tmp_path, catalog, {"path": path.name, "documents": 1}))

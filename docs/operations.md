@@ -192,3 +192,23 @@ The curated narrative allowlist also includes `scp-jp-duck-merchant-ja`,
 the legacy `stair-captions` role as well as the current `stair-tar` role so earlier
 verified snapshot manifests can be rebuilt without modifying their identities or
 redownloading the pinned archive. Both roles run identical member/identity checks.
+
+
+## Compressed local intermediates
+
+Use `build --format jsonl --shard-compression zstd` for bulk work. Shard budgets
+still limit the uncompressed logical input, while catalogs record the stored
+compressed sizes/hashes. The reader checks a single complete frame, rejects
+trailing data, and bounds the decompression window and each canonical record.
+Release ZIPs preserve `.jsonl.zst`/`.yaml.zst` member names; `documents.jsonl`
+continues to locate logical document positions within those shards.
+
+Normalized export stages five Zstandard-compressed tables and an identity-only
+SQLite ledger. It streams logical JSONL bytes into the portable ZIP and verifies
+their hashes during copying. This avoids a full uncompressed normalized staging
+copy. The ZIP still contains ordinary JSONL members and the same provenance.
+An offline 3.22 MB Wikivoyage shard comparison favored Zstandard level 3 for
+short-lived tables: 0.932 MB versus gzip level 3's 1.079 MB, with median compression
+times of 0.0094 s versus 0.0355 s across three trials. This is a small phase
+comparison, not a whole-build benchmark; evidence is outside Git in
+`wikipedia-compressed-pilot-orujb597/compression-comparison.json`.

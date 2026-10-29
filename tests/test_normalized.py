@@ -1,7 +1,8 @@
-import gzip
 import hashlib
 import json
 import zipfile
+
+import zstandard
 
 from manabi_sentence_db.build import build_corpus
 from manabi_sentence_db.demo import create_demo_snapshot
@@ -74,9 +75,10 @@ def test_export_keeps_staging_tables_compressed_and_hashes_logical_bytes(tmp_pat
         assert options == {"compressed_tables": True}
         assert not list(root.glob("*.jsonl"))
         for name, digest in manifest["members"].items():
-            path = root / (name + ".gz")
-            assert path.read_bytes().startswith(b"\x1f\x8b")
-            assert hashlib.sha256(gzip.decompress(path.read_bytes())).hexdigest() == digest
+            path = root / (name + ".zst")
+            assert path.read_bytes().startswith(b"\x28\xb5\x2f\xfd")
+            with zstandard.open(path, "rb") as stream:
+                assert hashlib.sha256(stream.read()).hexdigest() == digest
         inspected.append(root)
         return write_archive(root, build, catalog, source_id, manifest, **options)
 
