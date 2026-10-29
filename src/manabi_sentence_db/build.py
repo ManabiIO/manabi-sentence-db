@@ -16,6 +16,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import yaml
+import zstandard
 
 from . import PROCESSOR_VERSION, SCHEMA_VERSION
 from .segments import publisher_items
@@ -271,7 +272,10 @@ class ShardWriter:
         max_bytes: int,
         max_documents: int,
         record_format="yaml",
+        shard_compression="none",
     ):
+        self.shard_compression = shard_compression
+        self.compressor = None
         self.record_format = record_format
         self.root = root
         self.source_id = source_id
@@ -304,13 +308,18 @@ class ShardWriter:
             self.close()
         if not self.handle:
             self.filename = f"{self.record_format}/{self.language}/{self.source_id}/{len(self.entries):06d}.{self.record_format}"
+            if self.shard_compression == "zstd":
+                self.filename += ".zst"
             target = safe_relative(self.root, self.filename)
             target.parent.mkdir(parents=True, exist_ok=True)
             self.temporary = target.with_name(f".{target.name}.part")
             self.handle = self.temporary.open("xb")
+            if self.shard_compression == "zstd":
+                self.compressor = zstandard.ZstdCompressor(level=9, write_checksum=True).compressobj()
         index = self.count
-        self.handle.write(data)
-        self.digest.update(data)
+        encoded = self.compressor.compress(data) if self.compressor else data
+        self.handle.write(encoded)
+        self.digest.update(encoded)
         self.count += 1
         self.sentences += len(record.get("sentences", []))
         self.size += len(data)
@@ -320,16 +329,23 @@ class ShardWriter:
         if self.handle is None:
             return
         try:
-            self.handle.close()
+            if self.compressor is not None:
+                tail = self.compressor.flush()
+                self.handle.write(tail)
+                self.digest.update(tail)
+                self.compressor = None
         finally:
-            self.handle = None
+            try:
+                self.handle.close()
+            finally:
+                self.handle = None
         assert self.temporary is not None
         expected_hash = self.digest.hexdigest()
         if (
-            self.temporary.stat().st_size != self.size
-            or sha256_file(self.temporary) != expected_hash
+            sha256_file(self.temporary) != expected_hash
         ):
             raise DataError(f"Shard bytes changed while writing: {self.filename}")
+        stored_size = self.temporary.stat().st_size
         os.replace(self.temporary, self.root / self.filename)
         self.temporary = None
         self.entries.append(
@@ -339,7 +355,7 @@ class ShardWriter:
                 "language": self.language,
                 "documents": self.count,
                 "sentences": self.sentences,
-                "size": self.size,
+                "size": stored_size,
                 "sha256": expected_hash,
             }
         )
@@ -367,11 +383,14 @@ def build_corpus(
     excluded_flags: set[str] | None = None,
     max_documents: int | None = None,
     record_format: str = "yaml",
+    shard_compression: str = "none",
     document_selection: Path | None = None,
 ) -> Path:
     from .snapshot import verify_snapshot
 
     require_new_directory(output)
+    if shard_compression not in {"none", "zstd"}:
+        raise DataError("Unsupported shard compression")
     if record_format not in {"yaml", "jsonl"}:
         raise DataError("Unsupported record format")
     if not snapshot_paths or shard_bytes < 1024 or shard_documents < 1:
@@ -447,6 +466,7 @@ def build_corpus(
                     shard_bytes,
                     shard_documents,
                     record_format,
+                    shard_compression,
                 )
                 writers.append(writer)
                 source_stats: Counter = Counter()
@@ -549,6 +569,8 @@ def build_corpus(
             "excluded_flags": sorted(excluded_flags),
             "max_documents_per_source": max_documents,
         }
+        if shard_compression != "none":
+            options["shard_compression"] = shard_compression
         if selection is not None:
             options["document_selection"] = selection
             options["document_selection_sha256"] = digest_json(selection)
@@ -680,6 +702,7 @@ def verify_build(build: Path) -> dict:
         raise DataError("Catalog statistics disagree with source totals")
 
     options = catalog["options"]
+    _record_encoding(catalog)
     positive(options.get("shard_bytes"), "shard_bytes")
     positive(options.get("shard_documents"), "shard_documents")
     if options.get("max_documents_per_source") is not None:
@@ -806,6 +829,7 @@ def verify_build(build: Path) -> dict:
         positive(entry.get("sentences"), "shard sentence count", zero=True)
         if "size" not in entry:
             raise DataError("Shard is missing its byte size")
+        _record_encoding(catalog, entry["path"])
         artifact(entry)
         shard_totals["documents"] += entry["documents"]
         shard_totals["sentences"] += entry["sentences"]
@@ -824,6 +848,63 @@ def verify_build(build: Path) -> dict:
             raise DataError("Duplicate license catalog entry")
         license_ids.add(value["id"])
     return catalog
+
+
+def _record_encoding(catalog, path=None):
+    options = catalog["options"]
+    record_format = options.get("record_format", "yaml")
+    compression = options.get("shard_compression", "none")
+    if (not isinstance(record_format, str) or not isinstance(compression, str)
+            or record_format not in {"yaml", "jsonl"} or compression not in {"none", "zstd"}):
+        raise DataError("Unsupported canonical record format/compression")
+    if path is not None:
+        suffix = "." + record_format + (".zst" if compression == "zstd" else "")
+        if not isinstance(path, str) or not path.endswith(suffix):
+            raise DataError("Shard path disagrees with canonical format/compression")
+    return record_format, compression
+
+
+def _shard_records(build, catalog, entry):
+    """Decode one checked frame and bound each canonical record before parsing."""
+    record_format, compression = _record_encoding(catalog, entry["path"])
+    decoder = zstandard.ZstdDecompressor(max_window_size=64 * 1024 * 1024).decompressobj() if compression == "zstd" else None
+    limit = 32 * 1024 * 1024
+    pending = b""
+    total = 0
+    def parse(data):
+        try:
+            text = data.decode("utf-8")
+            return parse_json(text) if record_format == "jsonl" else yaml.load(text, Loader=StrictLoader)
+        except (UnicodeError, yaml.YAMLError) as exc:
+            raise DataError("Malformed canonical shard record") from exc
+    try:
+        with safe_relative(build, entry["path"]).open("rb") as source:
+            for chunk in iter(lambda: source.read(128 if decoder else 65536), b""):
+                if decoder:
+                    if decoder.eof:
+                        raise DataError("Trailing bytes after canonical zstd frame")
+                    chunk = decoder.decompress(chunk)
+                    if decoder.unused_data:
+                        raise DataError("Trailing bytes after canonical zstd frame")
+                total += len(chunk)
+                if total > entry["documents"] * limit:
+                    raise DataError("Canonical shard exceeds decompressed record bound")
+                pending += chunk
+                separator = b"\n" if record_format == "jsonl" else b"\n---\n"
+                while (position := pending.find(separator)) >= 0:
+                    end = position + 1
+                    data, pending = pending[:end], pending[end:]
+                    if len(data) > limit:
+                        raise DataError("Canonical record exceeds 32 MiB bound")
+                    yield parse(data)
+                if len(pending) > limit:
+                    raise DataError("Canonical record exceeds 32 MiB bound")
+            if decoder and not decoder.eof:
+                raise DataError("Truncated canonical zstd frame")
+            if pending:
+                yield parse(pending)
+    except zstandard.ZstdError as exc:
+        raise DataError(f"Invalid canonical zstd frame: {exc}") from exc
 
 
 def iter_records(build: Path, catalog: dict, source_id: str | None = None):
@@ -872,82 +953,77 @@ def iter_records(build: Path, catalog: dict, source_id: str | None = None):
                     if source_id is not None and entry["source_id"] != source_id:
                         continue
                     count = sentence_count = 0
-                    with safe_relative(build, entry["path"]).open(encoding="utf-8") as handle:
-                        for record in (
-                            map(parse_json, handle)
-                            if entry["path"].endswith(".jsonl")
-                            else yaml.load_all(handle, Loader=StrictLoader)
+                    for record in _shard_records(build, catalog, entry):
+                        validate_record(record)
+                        if (selection and record["source_id"] == selection["source_id"]
+                                and record["native_id"] not in selected_ids):
+                            raise DataError("Document is outside the selected Wikimedia pages")
+                        if (
+                            record["source_id"] != entry["source_id"]
+                            or record["language"] != entry["language"]
+                            or record["snapshot_id"] != snapshots[entry["source_id"]]
                         ):
-                            validate_record(record)
-                            if (selection and record["source_id"] == selection["source_id"]
-                                    and record["native_id"] not in selected_ids):
-                                raise DataError("Document is outside the selected Wikimedia pages")
-                            if (
-                                record["source_id"] != entry["source_id"]
-                                or record["language"] != entry["language"]
-                                or record["snapshot_id"] != snapshots[entry["source_id"]]
-                            ):
-                                raise DataError(
-                                    "Record source/language/snapshot does not match its shard"
-                                )
-                            if (
-                                record["kind"] == "document"
-                                and record["license"] != sources[record["source_id"]]["license"]
-                            ):
-                                raise DataError(
-                                    "Record license disagrees with current source adapter policy"
-                                )
-                            expected = {
-                                "id": record["id"],
-                                "source_id": record["source_id"],
-                                "native_id": record["native_id"],
-                                "title": record["title"],
-                                "shard": entry["path"],
-                                "position": count,
-                            }
-                            if next(rows, None) != expected:
-                                raise DataError(
-                                    "Document index disagrees with canonical record order/identity"
-                                )
-                            try:
+                            raise DataError(
+                                "Record source/language/snapshot does not match its shard"
+                            )
+                        if (
+                            record["kind"] == "document"
+                            and record["license"] != sources[record["source_id"]]["license"]
+                        ):
+                            raise DataError(
+                                "Record license disagrees with current source adapter policy"
+                            )
+                        expected = {
+                            "id": record["id"],
+                            "source_id": record["source_id"],
+                            "native_id": record["native_id"],
+                            "title": record["title"],
+                            "shard": entry["path"],
+                            "position": count,
+                        }
+                        if next(rows, None) != expected:
+                            raise DataError(
+                                "Document index disagrees with canonical record order/identity"
+                            )
+                        try:
+                            ledger.execute(
+                                "INSERT INTO identities VALUES ('document',?)", (record["id"],)
+                            )
+                            ledger.execute(
+                                "INSERT INTO identities VALUES ('native-document',?)",
+                                (digest_json([record["source_id"], record["native_id"]]),),
+                            )
+                            ordinals = set()
+                            for sentence in record.get("sentences", []):
+                                if sentence["ordinal"] in ordinals:
+                                    raise DataError("Duplicate sentence ordinal in document")
+                                ordinals.add(sentence["ordinal"])
                                 ledger.execute(
-                                    "INSERT INTO identities VALUES ('document',?)", (record["id"],)
+                                    "INSERT INTO identities VALUES ('sentence',?)",
+                                    (sentence["id"],),
                                 )
-                                ledger.execute(
-                                    "INSERT INTO identities VALUES ('native-document',?)",
-                                    (digest_json([record["source_id"], record["native_id"]]),),
-                                )
-                                ordinals = set()
-                                for sentence in record.get("sentences", []):
-                                    if sentence["ordinal"] in ordinals:
-                                        raise DataError("Duplicate sentence ordinal in document")
-                                    ordinals.add(sentence["ordinal"])
+                                for translation in sentence["translations"]:
                                     ledger.execute(
-                                        "INSERT INTO identities VALUES ('sentence',?)",
-                                        (sentence["id"],),
+                                        "INSERT INTO identities VALUES ('translation',?)",
+                                        (translation["id"],),
                                     )
-                                    for translation in sentence["translations"]:
-                                        ledger.execute(
-                                            "INSERT INTO identities VALUES ('translation',?)",
-                                            (translation["id"],),
-                                        )
-                                for value in [
-                                    record.get("license"),
-                                    *[
-                                        tr["license"]
-                                        for sentence in record.get("sentences", [])
-                                        for tr in _all_translations(sentence)
-                                    ],
-                                ]:
-                                    if value is not None and licensed.get(value["id"]) != value:
-                                        raise DataError(
-                                            "Record license is absent or differs from release notices"
-                                        )
-                            except sqlite3.IntegrityError as exc:
-                                raise DataError("Duplicate identity in canonical corpus") from exc
-                            count += 1
-                            sentence_count += len(record.get("sentences", []))
-                            yield record
+                            for value in [
+                                record.get("license"),
+                                *[
+                                    tr["license"]
+                                    for sentence in record.get("sentences", [])
+                                    for tr in _all_translations(sentence)
+                                ],
+                            ]:
+                                if value is not None and licensed.get(value["id"]) != value:
+                                    raise DataError(
+                                        "Record license is absent or differs from release notices"
+                                    )
+                        except sqlite3.IntegrityError as exc:
+                            raise DataError("Duplicate identity in canonical corpus") from exc
+                        count += 1
+                        sentence_count += len(record.get("sentences", []))
+                        yield record
                     if count != entry["documents"] or sentence_count != entry["sentences"]:
                         raise DataError("Shard record/sentence counts disagree with catalog")
                 if next(rows, None) is not None:
