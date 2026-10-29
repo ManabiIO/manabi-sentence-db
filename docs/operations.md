@@ -212,3 +212,13 @@ short-lived tables: 0.932 MB versus gzip level 3's 1.079 MB, with median compres
 times of 0.0094 s versus 0.0355 s across three trials. This is a small phase
 comparison, not a whole-build benchmark; evidence is outside Git in
 `wikipedia-compressed-pilot-orujb597/compression-comparison.json`.
+
+
+The shard reader retains an unfinished record in a mutable buffer and scans only
+new bytes plus the delimiter overlap. It compacts once per compressed input chunk,
+so long documents do not trigger repeated whole-record copying/scanning. On a
+seeded 2.10 MB Unicode JSONL record compressed to 1.19 MB, three alternating trials
+reduced median file decode/parse time from 0.249 s to 0.0112 s with identical rows.
+The input chunk size, frame/record limits and corruption checks are unchanged.
+This synthetic long-record comparison is separate from full-corpus timing;
+reproduction functions and results are in `compressed-reader-buffering-pjpex1i3`.
