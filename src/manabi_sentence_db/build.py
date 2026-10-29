@@ -385,6 +385,7 @@ def build_corpus(
     record_format: str = "yaml",
     shard_compression: str = "none",
     document_selection: Path | None = None,
+    progress=None,
 ) -> Path:
     from .snapshot import verify_snapshot
 
@@ -400,7 +401,11 @@ def build_corpus(
     if document_selection is not None and max_documents is not None:
         raise DataError("document_selection cannot be combined with max_documents")
     excluded_flags = {"sexual-content"} if excluded_flags is None else excluded_flags
-    inputs = [(path, verify_snapshot(path)) for path in snapshot_paths]
+    notify = progress or (lambda _: None)
+    inputs = []
+    for path in snapshot_paths:
+        notify("Verifying cached snapshot bytes")
+        inputs.append((path, verify_snapshot(path)))
     selection = None
     page_ids = None
     if document_selection is not None:
@@ -470,11 +475,13 @@ def build_corpus(
                 )
                 writers.append(writer)
                 source_stats: Counter = Counter()
+                notify(f"{source_id}: processing cached snapshot")
                 documents = (
                     iter_documents(
                         manifest, manifest_path.parent, stats=source_stats,
                         **({"page_ids": page_ids} if selection is not None
                            and selection["source_id"] == source_id else {}),
+                        **({"progress": progress} if source["adapter"] == "wikimedia" else {}),
                     )
                     if source["adapter"] in {"wikimedia", "jec-basic", "kyoto-wikipedia"}
                     else iter_documents(manifest, manifest_path.parent)
@@ -535,7 +542,12 @@ def build_corpus(
                     index.write(index_line)
                     index_digest.update(index_line)
                     source_stats["documents"] += 1
+                    if source_stats["documents"] % 500 == 0:
+                        notify(f"{source_id}: wrote {source_stats['documents']} documents; "
+                               f"{source_stats['sentences']} sentences")
                 writer.close()
+                notify(f"{source_id}: finished {source_stats['documents']} documents; "
+                       f"{source_stats['sentences']} sentences")
                 entries.extend(writer.entries)
                 sources.append({"source": source, "statistics": dict(sorted(source_stats.items()))})
                 stats.update(source_stats)
@@ -625,7 +637,9 @@ def build_corpus(
         # Compare every completed artifact with its intended bytes again before
         # making the build visible. A later truncated/corrupted shard must never
         # become a successful build merely because it was valid when first closed.
+        notify("Verifying completed corpus artifacts")
         verify_build(staging)
+        notify("Publishing verified corpus")
         os.replace(staging, output)
         return output / "catalog.json"
     finally:
