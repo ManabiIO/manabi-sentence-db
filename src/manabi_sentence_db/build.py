@@ -869,7 +869,9 @@ def _shard_records(build, catalog, entry):
     record_format, compression = _record_encoding(catalog, entry["path"])
     decoder = zstandard.ZstdDecompressor(max_window_size=64 * 1024 * 1024).decompressobj() if compression == "zstd" else None
     limit = 32 * 1024 * 1024
-    pending = b""
+    pending = bytearray()
+    search_from = 0
+    separator = b"\n" if record_format == "jsonl" else b"\n---\n"
     total = 0
     def parse(data):
         try:
@@ -889,14 +891,22 @@ def _shard_records(build, catalog, entry):
                 total += len(chunk)
                 if total > entry["documents"] * limit:
                     raise DataError("Canonical shard exceeds decompressed record bound")
-                pending += chunk
-                separator = b"\n" if record_format == "jsonl" else b"\n---\n"
-                while (position := pending.find(separator)) >= 0:
+                pending.extend(chunk)
+                consumed = 0
+                while (position := pending.find(separator, search_from)) >= 0:
                     end = position + 1
-                    data, pending = pending[:end], pending[end:]
-                    if len(data) > limit:
+                    if end - consumed > limit:
                         raise DataError("Canonical record exceeds 32 MiB bound")
-                    yield parse(data)
+                    record = parse(pending[consumed:end])
+                    consumed = end
+                    search_from = end
+                    yield record
+                # Compact once per input chunk. Only the new bytes and the
+                # delimiter-sized overlap need scanning on the next iteration;
+                # copying/rescanning a growing 32 MiB record is quadratic.
+                if consumed:
+                    del pending[:consumed]
+                search_from = max(0, len(pending) - len(separator) + 1)
                 if len(pending) > limit:
                     raise DataError("Canonical record exceeds 32 MiB bound")
             if decoder and not decoder.eof:

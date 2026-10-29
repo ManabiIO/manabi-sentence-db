@@ -1,3 +1,4 @@
+import random
 import zipfile
 
 import pytest
@@ -102,3 +103,21 @@ def test_compressed_shard_rejects_large_window_from_header_before_reading_record
     catalog = {"options": {"record_format": "jsonl", "shard_compression": "zstd"}}
     with pytest.raises(DataError, match="requires too much memory"):
         list(_shard_records(tmp_path, catalog, {"path": path.name, "documents": 1}))
+
+
+@pytest.mark.parametrize("record_format", ["jsonl", "yaml"])
+def test_large_multibyte_record_and_following_records_survive_chunk_boundaries(tmp_path, record_format):
+    import json
+
+    import yaml
+
+    rng = random.Random(20261029)
+    text = "".join(chr(0x4E00 + rng.randrange(1000)) for _ in range(700_000))
+    records = [{"text": text}, {"text": "次の文です。"}, {"text": "最後の文です。"}]
+    data = (b"".join(json.dumps(row, ensure_ascii=False).encode() + b"\n" for row in records)
+            if record_format == "jsonl" else
+            yaml.safe_dump_all(records, allow_unicode=True, explicit_start=True).encode())
+    path = tmp_path / ("large." + record_format + ".zst")
+    path.write_bytes(zstandard.ZstdCompressor().compress(data))
+    catalog = {"options": {"record_format": record_format, "shard_compression": "zstd"}}
+    assert list(_shard_records(tmp_path, catalog, {"path": path.name, "documents": 3})) == records
