@@ -230,7 +230,9 @@ def _git_revision() -> str | None:
 
 def _runtime_versions() -> dict:
     dependencies = {}
-    for name in ["PyYAML", "jsonschema", "mwparserfromhell", "defusedxml", "zstandard"]:
+    for name in [
+        "PyYAML", "jsonschema", "mwparserfromhell", "defusedxml", "zstandard", "xlrd"
+    ]:
         dependencies[name] = importlib.metadata.version(name)
     return {
         "python": platform.python_version(),
@@ -415,6 +417,8 @@ def build_corpus(
                     from .stair import iter_documents
                 elif source["adapter"] == "scp-curated":
                     from .scp_curated import iter_documents
+                elif source["adapter"] == "jec-basic":
+                    from .jec_basic import iter_documents
                 else:
                     raise DataError(f"Unsupported adapter: {source['adapter']}")
                 writer = ShardWriter(
@@ -429,7 +433,7 @@ def build_corpus(
                 source_stats: Counter = Counter()
                 documents = (
                     iter_documents(manifest, manifest_path.parent, stats=source_stats)
-                    if source["adapter"] == "wikimedia"
+                    if source["adapter"] in {"wikimedia", "jec-basic"}
                     else iter_documents(manifest, manifest_path.parent)
                 )
                 for raw in documents:
