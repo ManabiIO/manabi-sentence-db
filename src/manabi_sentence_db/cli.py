@@ -71,6 +71,8 @@ def parser() -> argparse.ArgumentParser:
         "--max-documents", type=int, help="Limit documents per source; output is labeled sample"
     )
     build.add_argument("--exclude-flag", action="append", default=[])
+    build.add_argument("--document-selection", type=Path,
+                       help="Snapshot-bound Wikimedia page-ID allowlist JSON")
     build.add_argument(
         "--include-sexual-content",
         action="store_true",
@@ -298,6 +300,7 @@ def main(argv: list[str] | None = None) -> int:
                         excluded_flags=excluded,
                         max_documents=args.max_documents,
                         record_format=args.format,
+                        document_selection=args.document_selection,
                     )
                 )
             case "build-normalized-db":

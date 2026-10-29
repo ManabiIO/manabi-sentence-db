@@ -295,10 +295,12 @@ def extract_prose(wikitext: str, language: str = "ja") -> tuple[list[str], list[
 
 
 def iter_documents(
-    manifest: dict, snapshot_dir: Path, *, stats: Counter | None = None
+    manifest: dict, snapshot_dir: Path, *, stats: Counter | None = None,
+    page_ids: frozenset[str] | None = None,
 ) -> Iterator[dict]:
     source = manifest["source"]
     language = source["language"]
+    unmatched = set(page_ids) if page_ids is not None else None
     origin = urlsplit(source.get("acquisition", {}).get("api_url") or source["homepage"])
     base = f"{origin.scheme}://{origin.netloc}"
     for entry in manifest["files"]:
@@ -312,6 +314,14 @@ def iter_documents(
                 continue
             if stats is not None:
                 stats["wikimedia_pages_seen"] += 1
+            if page_ids is not None and page["native_id"] not in page_ids:
+                if stats is not None:
+                    stats["wikimedia_pages_not_selected"] += 1
+                continue
+            if unmatched is not None:
+                unmatched.discard(page["native_id"])
+                if stats is not None:
+                    stats["wikimedia_pages_selected"] += 1
             try:
                 sentences, tags = extract_prose(page["text"], language)
             except PageTextLimitExceeded:
@@ -347,3 +357,8 @@ def iter_documents(
                     for text in sentences
                 ],
             }
+    if unmatched:
+        from .serialization import DataError
+
+        raise DataError("Selected Wikimedia pages absent from snapshot content: "
+                        + ", ".join(sorted(unmatched, key=int)[:5]))
