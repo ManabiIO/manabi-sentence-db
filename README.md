@@ -126,7 +126,12 @@ directly as compressed `.yaml.zst` or `.jsonl.zst` files. The catalog records th
 compressed sizes and checksums; document positions still refer to logical records.
 Verification, normalized export, SQLite compilation and packaging read these shards
 as streams. Release ZIPs retain the compressed members. The default remains plain
-shards for human editing. Normalized export always compresses its temporary tables
+shards for human editing. Add `--progress` to send snapshot verification,
+Wikimedia scan counts, document counts and publication milestones to stderr;
+stdout still contains only the
+completed catalog path. Progress is optional and does not change build identity.
+
+Normalized export always compresses its temporary tables
 and produces the same ordinary JSONL members inside its portable ZIP download.
 
 Repeating the same local snapshot request reuses verified existing files without

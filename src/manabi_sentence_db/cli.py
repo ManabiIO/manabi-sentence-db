@@ -66,6 +66,7 @@ def parser() -> argparse.ArgumentParser:
     build.add_argument("--output", type=Path, required=True)
     build.add_argument("--format", choices=["jsonl", "yaml"], default="jsonl")
     build.add_argument("--shard-compression", choices=("none", "zstd"), default="none")
+    build.add_argument("--progress", action="store_true", help="Write build progress to stderr")
     build.add_argument("--shard-bytes", type=int, default=4 * 1024**2)
     build.add_argument("--shard-documents", type=int, default=500)
     build.add_argument(
@@ -303,6 +304,8 @@ def main(argv: list[str] | None = None) -> int:
                         max_documents=args.max_documents,
                         record_format=args.format,
                         document_selection=args.document_selection,
+                        progress=(lambda message: print(message, file=sys.stderr, flush=True))
+                        if args.progress else None,
                     )
                 )
             case "build-normalized-db":

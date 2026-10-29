@@ -297,10 +297,12 @@ def extract_prose(wikitext: str, language: str = "ja") -> tuple[list[str], list[
 def iter_documents(
     manifest: dict, snapshot_dir: Path, *, stats: Counter | None = None,
     page_ids: frozenset[str] | None = None,
+    progress=None,
 ) -> Iterator[dict]:
     source = manifest["source"]
     language = source["language"]
     unmatched = set(page_ids) if page_ids is not None else None
+    pages_seen = 0
     origin = urlsplit(source.get("acquisition", {}).get("api_url") or source["homepage"])
     base = f"{origin.scheme}://{origin.netloc}"
     for entry in manifest["files"]:
@@ -308,10 +310,15 @@ def iter_documents(
         if role not in {"mediawiki-xml", "mediawiki-api"}:
             continue
         path = _snapshot_path(snapshot_dir, entry["path"])
+        if progress:
+            progress(f"{source['id']}: scanning {entry['path']}")
         pages = _xml_pages(path) if role == "mediawiki-xml" else _api_pages(path)
         for page in pages:
             if not page["native_id"] or not page["revision_id"] or not page["title"]:
                 continue
+            pages_seen += 1
+            if progress and pages_seen % 100000 == 0:
+                progress(f"{source['id']}: scanned {pages_seen} pages")
             if stats is not None:
                 stats["wikimedia_pages_seen"] += 1
             if page_ids is not None and page["native_id"] not in page_ids:
