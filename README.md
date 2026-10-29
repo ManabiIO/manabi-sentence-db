@@ -103,6 +103,24 @@ Wikipedia download. For development, `--max-files` limits Wikimedia export chunk
 and labels the snapshot `partial`; `build --max-documents` limits processing
 without any source request. A single Wikipedia chunk can still be several GB.
 
+For reusable article selection, pass `build --document-selection selection.json`.
+The optional JSON allowlist binds positive page-ID strings to one exact input
+snapshot, for example:
+
+```json
+{"schema_version":1,"source_id":"wikipedia-ja","snapshot_id":"<snapshot_id from manifest.json>","page_ids":["123","456"]}
+```
+
+This filters Wikimedia pages before prose extraction, in original dump order;
+it does not rank, rewrite, or truncate sentences. Other input sources are unchanged.
+The catalog embeds the complete selection and its canonical SHA-256 in build
+options, which contribute to build identity. Selected output is labeled `sample`.
+The default without this option is unchanged. `--document-selection` cannot be
+combined with `--max-documents`, so every selected ID is checked. Selected IDs
+absent from the snapshot fail the build. Present pages with no eligible prose
+may produce no documents; an entirely empty build fails. Selection avoids parsing
+unselected wikitext but still streams the compressed XML snapshot.
+
 Repeating the same local snapshot request reuses verified existing files without
 contacting upstream. `--refresh` downloads a complete candidate snapshot before
 comparing its identity; it does not use conditional HTTP requests or ETags. A

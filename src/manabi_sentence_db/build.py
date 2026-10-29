@@ -367,6 +367,7 @@ def build_corpus(
     excluded_flags: set[str] | None = None,
     max_documents: int | None = None,
     record_format: str = "yaml",
+    document_selection: Path | None = None,
 ) -> Path:
     from .snapshot import verify_snapshot
 
@@ -377,8 +378,18 @@ def build_corpus(
         raise DataError("Provide snapshots and positive shard limits (at least 1024 bytes)")
     if max_documents is not None and max_documents < 1:
         raise DataError("max_documents must be positive")
+    if document_selection is not None and max_documents is not None:
+        raise DataError("document_selection cannot be combined with max_documents")
     excluded_flags = {"sexual-content"} if excluded_flags is None else excluded_flags
     inputs = [(path, verify_snapshot(path)) for path in snapshot_paths]
+    selection = None
+    page_ids = None
+    if document_selection is not None:
+        from .document_selection import validate_selection
+
+        selection = read_json(document_selection.resolve())
+        page_ids = validate_selection(selection, [m for _, m in inputs])
+        selection = {**selection, "page_ids": sorted(page_ids, key=int)}
     inputs.sort(key=lambda pair: pair[1]["source_id"])
     if len({manifest["source_id"] for _, manifest in inputs}) != len(inputs):
         raise DataError("A build must use exactly one snapshot per source")
@@ -440,7 +451,11 @@ def build_corpus(
                 writers.append(writer)
                 source_stats: Counter = Counter()
                 documents = (
-                    iter_documents(manifest, manifest_path.parent, stats=source_stats)
+                    iter_documents(
+                        manifest, manifest_path.parent, stats=source_stats,
+                        **({"page_ids": page_ids} if selection is not None
+                           and selection["source_id"] == source_id else {}),
+                    )
                     if source["adapter"] in {"wikimedia", "jec-basic", "kyoto-wikipedia"}
                     else iter_documents(manifest, manifest_path.parent)
                 )
@@ -534,6 +549,9 @@ def build_corpus(
             "excluded_flags": sorted(excluded_flags),
             "max_documents_per_source": max_documents,
         }
+        if selection is not None:
+            options["document_selection"] = selection
+            options["document_selection_sha256"] = digest_json(selection)
         if _processor_fingerprint() != processor_hash:
             raise DataError(
                 "Processor files changed during the build; rebuild with a stable checkout"
@@ -561,7 +579,7 @@ def build_corpus(
             "build_id": build_id,
             "built_at": datetime.now(timezone.utc).isoformat(),
             "scope": "sample"
-            if max_documents or any(m["mode"] != "full" for _, m in inputs)
+            if selection is not None or max_documents or any(m["mode"] != "full" for _, m in inputs)
             else "full",
             "processor_version": PROCESSOR_VERSION,
             "processor_sha256": processor_hash,
@@ -727,9 +745,25 @@ def verify_build(build: Path) -> dict:
         modes.append(entry["mode"])
     if snapshot_sources != set(sources):
         raise DataError("Every source must have exactly one snapshot")
+    selection = options.get("document_selection")
+    if selection is not None:
+        if options.get("max_documents_per_source") is not None:
+            raise DataError("document_selection cannot be combined with max_documents")
+        from .document_selection import validate_selection
+
+        validate_selection(selection, [
+            {"source_id": entry["source_id"], "snapshot_id": entry["snapshot_id"],
+             "source": sources[entry["source_id"]]}
+            for entry in catalog["snapshots"]
+        ])
+        if options.get("document_selection_sha256") != digest_json(selection):
+            raise DataError("Document selection digest mismatch")
+    elif "document_selection_sha256" in options:
+        raise DataError("Document selection digest has no selection")
     expected_scope = (
         "sample"
-        if options.get("max_documents_per_source") or any(mode != "full" for mode in modes)
+        if selection is not None or options.get("max_documents_per_source")
+        or any(mode != "full" for mode in modes)
         else "full"
     )
     if catalog.get("scope") != expected_scope:
@@ -798,6 +832,8 @@ def iter_records(build: Path, catalog: dict, source_id: str | None = None):
 
     sources = {item["source"]["id"]: item["source"] for item in catalog["sources"]}
     snapshots = {item["source_id"]: item["snapshot_id"] for item in catalog["snapshots"]}
+    selection = catalog["options"].get("document_selection")
+    selected_ids = frozenset(selection["page_ids"]) if selection else None
     licensed = {
         value["id"]: value
         for value in read_json(safe_relative(build, catalog["licenses"]["path"]))["licenses"]
@@ -843,6 +879,9 @@ def iter_records(build: Path, catalog: dict, source_id: str | None = None):
                             else yaml.load_all(handle, Loader=StrictLoader)
                         ):
                             validate_record(record)
+                            if (selection and record["source_id"] == selection["source_id"]
+                                    and record["native_id"] not in selected_ids):
+                                raise DataError("Document is outside the selected Wikimedia pages")
                             if (
                                 record["source_id"] != entry["source_id"]
                                 or record["language"] != entry["language"]
