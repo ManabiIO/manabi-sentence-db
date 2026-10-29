@@ -34,9 +34,10 @@ Each derived build identifies those snapshots and the extraction/filter versions
 
 ## Enabled source catalog
 
-The implementation provides Wikimedia, Tatoeba, RealPersonaChat, JMultiWOZ, and
-STAIR adapters for the sources below. The high-priority additions farther down are researched
-options, not currently enabled ingestion jobs.
+The implementation provides Wikimedia, Tatoeba, RealPersonaChat, JMultiWOZ,
+STAIR, JEC Basic Sentence, and curated SCP-JP adapters for the enabled sources
+below. The high-priority additions farther down are researched options, not
+currently enabled ingestion jobs.
 
 | Source | Intended use | Rights and acquisition |
 | --- | --- | --- |
@@ -48,6 +49,7 @@ options, not currently enabled ingestion jobs.
 
 | [JMultiWOZ](https://github.com/nu-dialogue/jmultiwoz) | Human task-oriented role-play; 4,246 dialogues and 61,186 turns in the inspected archive | CC BY-SA 4.0; pinned human turns only; no goals, worker IDs, backend database or model output. |
 | [STAIR Captions](https://github.com/STAIR-Lab-CIT/STAIR-captions) | Short descriptive Japanese; 616,435 public captions in the inspected v1.2 train/validation files | CC BY 4.0 for captions; no images or tokenized duplicates; visual-context dependence retained. |
+| [JEC Basic Sentence Data](https://alaginrc.nict.go.jp/jecbs/index.htm) | 5,304 Japanese sentence patterns aligned row by row with English and Chinese translations | CC BY 3.0; hash-pinned Kyoto University v1.3 ZIP, workbook, and README; unresolved `X`/quotation placeholders excluded, numeric ranges retained; Kyoto University Japanese and NICT translation attribution are separate. Translation method and individual sentence authorship are not specified. |
 | [Japanese Wikibooks](https://ja.wikibooks.org/) | Textbook explanations and other nonfiction prose | CC BY-SA 4.0 for covered text; revision/history attribution and conservative third-party quotation exclusions. |
 
 ### Wikipedia and Wikivoyage
@@ -180,7 +182,6 @@ conversation and well-attributed parallel data over another copy of Wikipedia.
 | [NICT ALT Parallel Corpus](https://www2.nict.go.jp/astrec-att/member/mutiyama/ALT/) | 20,106 aligned sentences from 1,893 English Wikinews articles, 13 languages including Japanese | CC BY 4.0 parallel ZIP only. Same page's treebank/annotation downloads are NC and excluded. |
 | [Accommodation Search Dialog Corpus](https://github.com/megagonlabs/asdc) | 210 main dialogues; additional crowdwritten vanilla and supplemental material | Corpus/annotations/docs CC BY 4.0; code Apache 2.0. Admit only selected text fields and record the subset. |
 | [Global Voices Japanese](https://jp.globalvoices.org/) | Ongoing translated reporting across many countries and topics | CC BY 3.0 for covered editorial content; per-post author/translator and exceptions. Needs a bounded, polite snapshot crawler or verified export. |
-| [JEC basic sentences](https://alaginrc.nict.go.jp/jecbs/index.htm) | 5,304 revised basic Japanese sentences with English and Chinese translations | CC BY 3.0; filter placeholder templates; record Kyoto/NICT credits and exact spreadsheet version. |
 | [MDN Japanese documentation](https://github.com/mdn/translated-content) | Substantial technical prose with source files in Git | CC BY-SA 2.5 or later for documentation; pin commit, skip code, retain document/contributor credit. |
 | [Japanese Wikiversity](https://ja.wikiversity.org/wiki/Wikiversity:著作権) | Educational prose; natural reuse of the Wikimedia adapter | General Wikimedia CC BY-SA 4.0 framework, subject to local/imported exceptions. Tag register and exclude classical-language exercises/quotations. Wikibooks is already enabled. |
 

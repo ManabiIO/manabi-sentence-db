@@ -81,6 +81,22 @@ segmentation and normalization are explicit transformations. When a publisher
 unit is split, any translations retain their separate rights and attribution
 inside `source_unit.translations`; they do not become sentence-aligned translations.
 
+## JEC Basic Sentence Data
+
+The Japanese, English, and Chinese components are each available under
+[CC BY 3.0](https://creativecommons.org/licenses/by/3.0/). The Japanese component
+is attributed to Kyoto University Kurohashi–Kawahara Laboratory; Kyoto University
+describes it as case-frame-derived sentences that were human corrected, without
+identifying individual sentence authors. The aligned English and Chinese
+translations are attributed separately to NICT Master Project Multilingual
+Translation Laboratory. The primary source does not identify their translation
+method, so records do not label them human or machine translated. The source
+row is the alignment unit; row order is not asserted to provide discourse
+context. The adapter excludes unresolved `X` and quotation placeholders while
+retaining numeric ranges such as `2～3`. It pins the v1.3 archive, workbook,
+and README hashes. See the [source page](https://alaginrc.nict.go.jp/jecbs/index.htm)
+and the [Kyoto University data description](https://nlp.ist.i.kyoto-u.ac.jp/index.php?%E6%97%A5%E8%8B%B1%E4%B8%AD%E5%9F%BA%E6%9C%AC%E6%96%87%E3%83%87%E3%83%BC%E3%82%BF).
+
 
 ## Curated SCP-JP narrative
 

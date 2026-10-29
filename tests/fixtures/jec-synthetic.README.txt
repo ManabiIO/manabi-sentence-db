@@ -1,0 +1,7 @@
+jec-synthetic.xls contains four authored synthetic rows for offline parser tests.
+It is not copied from the JEC corpus or publisher workbook. Dedicated to CC0.
+
+Generated with xlwt 1.3.0, worksheet ALL_NEW, no header, four string columns:
+row ID, Japanese, English, Chinese. It tests complete sentences, X templates,
+numeric wave-dash ranges and quotation placeholders. No upstream requests or
+spreadsheet-writing dependency is required to run the tests.

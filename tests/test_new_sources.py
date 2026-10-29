@@ -8,12 +8,65 @@ from pathlib import Path
 import pytest
 
 from manabi_sentence_db.build import canonical_document
+from manabi_sentence_db.jec_basic import ARCHIVE_MEMBER, README_MEMBER
+from manabi_sentence_db.jec_basic import iter_documents as jec_documents
 from manabi_sentence_db.jmultiwoz import MEMBER
 from manabi_sentence_db.jmultiwoz import iter_documents as dialogues
 from manabi_sentence_db.serialization import DataError
 from manabi_sentence_db.stair import MEMBERS
 from manabi_sentence_db.stair import iter_documents as captions
 from manabi_sentence_db.validation import load_source
+
+
+def _jec_fixture(tmp_path, monkeypatch, rows):
+    """A synthetic ZIP/workbook fixture; it is not upstream JEC text."""
+    import hashlib
+
+    source = load_source(Path("sources/jec-basic-ja.yaml"))
+    workbook_bytes = b"synthetic workbook bytes"
+    readme_bytes = b"synthetic README bytes"
+    archive_path = tmp_path / "jec.zip"
+    with zipfile.ZipFile(archive_path, "w") as archive:
+        archive.writestr(ARCHIVE_MEMBER, workbook_bytes)
+        archive.writestr(README_MEMBER, readme_bytes)
+    source["acquisition"].update(
+        size=archive_path.stat().st_size,
+        workbook_sha256=hashlib.sha256(workbook_bytes).hexdigest(),
+        workbook_size=len(workbook_bytes),
+        readme_sha256=hashlib.sha256(readme_bytes).hexdigest(),
+        readme_size=len(readme_bytes),
+        rows=len(rows),
+    )
+
+    class Sheet:
+        ncols = 4
+        nrows = len(rows)
+
+        def cell_value(self, row, col):
+            return rows[row][col]
+
+    class Workbook:
+        def sheet_names(self):
+            return ["ALL_NEW"]
+
+        def sheet_by_index(self, index):
+            assert index == 0
+            return Sheet()
+
+        def release_resources(self):
+            pass
+
+    monkeypatch.setattr(
+        "manabi_sentence_db.jec_basic.xlrd.open_workbook",
+        lambda **kwargs: Workbook(),
+    )
+    manifest = {
+        "source": source,
+        "source_id": source["id"],
+        "snapshot_id": "synthetic-fixture-snapshot",
+        "files": [{"role": "jec-basic-zip", "path": archive_path.name}],
+    }
+    return manifest, tmp_path
 
 
 def _manifest(source_id, role, path):
@@ -104,3 +157,119 @@ def test_stair_reads_immutable_legacy_snapshot_role(tmp_path):
     _tar(tmp_path)
     manifest = _manifest("stair-captions-ja", "stair-captions", "source.tar.gz")
     assert len(list(captions(manifest, tmp_path))) == 2
+
+
+def test_jec_preserves_aligned_text_and_excludes_only_template_placeholders(tmp_path, monkeypatch):
+    rows = [
+        ["#0001", "２～３人が来ます", "Two or three people will come.", "两三个人会来。"],
+        ["#0002", "彼は「明日来る」と言う", "He says \"I'll come tomorrow.\"", "他说“明天来”。"],
+        ["#0003", "２～３人が「～」と言う", "Two or three people say \"~\".", "两三个人说“～”。"],
+        ["#0004", "今日は雨です", "It is raining today.", "今天下雨。"],
+    ]
+    manifest, root = _jec_fixture(tmp_path, monkeypatch, rows)
+    stats = Counter()
+    raw = list(jec_documents(manifest, root, stats=stats))
+    assert [doc["native_id"] for doc in raw] == ["#0001", "#0002", "#0004"]
+    assert raw[0]["sentences"][0]["text"] == rows[0][1]
+    translations = raw[0]["sentences"][0]["translations"]
+    assert [(item["language"], item["text"]) for item in translations] == [
+        ("en", rows[0][2]), ("zh", rows[0][3]),
+    ]
+    assert all(item["alignment"] == "unknown" for item in translations)
+    assert translations[0]["license"]["id"] == "CC-BY-3.0"
+    assert raw[0]["authorship"] == "unknown"
+    assert stats["rows_in_workbook"] == 4
+    assert stats["excluded:unresolved-template-placeholder"] == 1
+    record = canonical_document(raw[0], manifest, Counter(), set())
+    assert record["sentences"][0]["text"] == rows[0][1]
+    assert record["sentences"][0]["translations"][0]["text"] == rows[0][2]
+
+
+def test_jec_rejects_bad_member_checksum_and_row_identity(tmp_path, monkeypatch):
+
+    rows = [["#0001", "今日は雨です", "It is raining today.", "今天下雨。"]]
+    manifest, root = _jec_fixture(tmp_path, monkeypatch, rows)
+    bad_hash = {**manifest, "source": {**manifest["source"], "acquisition": {
+        **manifest["source"]["acquisition"], "workbook_sha256": "0" * 64,
+    }}}
+    with pytest.raises(DataError, match="workbook member checksum"):
+        list(jec_documents(bad_hash, root))
+    bad_rows = {**manifest, "source": {**manifest["source"], "acquisition": {
+        **manifest["source"]["acquisition"], "rows": 2,
+    }}}
+    with pytest.raises(DataError, match="row or column count"):
+        list(jec_documents(bad_rows, root))
+
+    wrong_id = [["#0002", *rows[0][1:]]]
+    class Sheet:
+        ncols = 4
+        nrows = 1
+        def cell_value(self, row, col):
+            return wrong_id[row][col]
+    class Workbook:
+        def sheet_names(self): return ["ALL_NEW"]
+        def sheet_by_index(self, index): return Sheet()
+        def release_resources(self): pass
+    monkeypatch.setattr(
+        "manabi_sentence_db.jec_basic.xlrd.open_workbook",
+        lambda **kwargs: Workbook(),
+    )
+    with pytest.raises(DataError, match="row ID"):
+        list(jec_documents(manifest, root))
+
+
+def test_jec_real_xls_runs_through_offline_normalized_build(tmp_path):
+    import hashlib
+
+    from manabi_sentence_db.build import build_corpus, verify_build
+    from manabi_sentence_db.normalized import export_normalized
+    from manabi_sentence_db.serialization import canonical_json
+    from manabi_sentence_db.snapshot import snapshot_identity
+
+    # Authored synthetic examples exercise the actual XLS parser without fetching
+    # upstream or committing the real workbook. The snapshot remains a sample.
+    workbook = (Path(__file__).parent / "fixtures/jec-synthetic.xls").read_bytes()
+    readme = b"Synthetic test fixture; CC0. Not a publisher release."
+    source = load_source(Path("sources/jec-basic-ja.yaml"))
+    root = tmp_path / "snapshot"
+    root.mkdir()
+    archive_path = root / "jec.zip"
+    with zipfile.ZipFile(archive_path, "w") as archive:
+        archive.writestr(ARCHIVE_MEMBER, workbook)
+        archive.writestr(README_MEMBER, readme)
+    raw = archive_path.read_bytes()
+    source["acquisition"].update(
+        size=len(raw), sha256=hashlib.sha256(raw).hexdigest(), rows=4,
+        workbook_size=len(workbook), readme_size=len(readme),
+        workbook_sha256=hashlib.sha256(workbook).hexdigest(),
+        readme_sha256=hashlib.sha256(readme).hexdigest(),
+    )
+    manifest = {
+        "schema_version": 1, "source_id": source["id"], "source": source,
+        "source_config_sha256": hashlib.sha256(canonical_json(source)).hexdigest(),
+        "retrieved_at": "2026-10-29T00:00:00Z", "mode": "sample",
+        "upstream_date": None, "request": {"synthetic": True},
+        "files": [{"role": "jec-basic-zip", "path": archive_path.name,
+                   "url": source["acquisition"]["url"], "size": len(raw),
+                   "sha256": hashlib.sha256(raw).hexdigest()}],
+    }
+    manifest["snapshot_id"] = snapshot_identity(manifest)
+    manifest_path = root / "manifest.json"
+    manifest_path.write_text(json.dumps(manifest))
+    build = tmp_path / "build"
+    build_corpus([manifest_path], build, record_format="jsonl")
+    catalog = verify_build(build)
+    assert catalog["scope"] == "sample"
+    assert catalog["statistics"]["sentences"] == 2
+    assert catalog["statistics"]["translations"] == 4
+    assert catalog["statistics"]["excluded:unresolved-template-placeholder"] == 2
+    normalized = export_normalized(build, tmp_path / "normalized.zip")
+    with zipfile.ZipFile(normalized) as archive:
+        works = [json.loads(line) for line in archive.read("works.jsonl").splitlines()]
+        occurrences = [json.loads(line) for line in archive.read("occurrences.jsonl").splitlines()]
+        translations = [json.loads(line) for line in archive.read("translations.jsonl").splitlines()]
+    assert {w["native_id"] for w in works} == {"#0001", "#0003"}
+    assert all(o["previous_id"] is None and o["next_id"] is None for o in occurrences)
+    assert {t["language"] for t in translations} == {"en", "zh"}
+    assert all("generation" not in t for t in translations)
+    assert all(t["license"]["id"] == "CC-BY-3.0" for t in translations)

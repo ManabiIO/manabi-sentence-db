@@ -1,0 +1,40 @@
+schema_version: 1
+id: jec-basic-ja
+title: JEC Basic Sentence Data v1.3
+language: ja
+adapter: jec-basic
+homepage: https://alaginrc.nict.go.jp/jecbs/index.htm
+license:
+  id: CC-BY-3.0
+  url: https://creativecommons.org/licenses/by/3.0/
+attribution:
+  text: Japanese basic sentences, Kyoto University Kurohashi–Kawahara Laboratory; extracted from Kyoto University case frames and human corrected. Individual sentence authorship is not identified.
+  url: https://nlp.ist.i.kyoto-u.ac.jp/index.php?%E6%97%A5%E8%8B%B1%E4%B8%AD%E5%9F%BA%E6%9C%AC%E6%96%87%E3%83%87%E3%83%BC%E3%82%BF
+license_evidence:
+  - https://alaginrc.nict.go.jp/jecbs/index.htm
+  - https://nlp.ist.i.kyoto-u.ac.jp/index.php?%E6%97%A5%E8%8B%B1%E4%B8%AD%E5%9F%BA%E6%9C%AC%E6%96%87%E3%83%87%E3%83%BC%E3%82%BF
+  - https://creativecommons.org/licenses/by/3.0/
+notes:
+  - Each spreadsheet row is one independent sentence-pattern example; row order is not conversational or discourse adjacency.
+  - Japanese was automatically extracted from Kyoto University case frames and human corrected; the source does not identify individual sentence authors.
+  - English and Chinese translations are aligned row by row. The primary source does not specify whether each translation was produced by a human or machine, so translation method is unknown.
+  - The source defines X as a noun phrase or clause placeholder and ～ as a quotation placeholder; numeric ranges such as 2～3 are ordinary text. Rows with unresolved X/quotation placeholders are excluded; numeric ranges are retained.
+  - Translations retain separate NICT attribution and CC BY 3.0 rights.
+  - Kyoto University notes that some English translations were corrected in v1.3 on 2020-03-28; this source pins that v1.3 release.
+acquisition:
+  version: v1.3
+  url: https://nlp.ist.i.kyoto-u.ac.jp/index.php?plugin=attach&refer=%E6%97%A5%E8%8B%B1%E4%B8%AD%E5%9F%BA%E6%9C%AC%E6%96%87%E3%83%87%E3%83%BC%E3%82%BF&openfile=JEC_basic_sentence_v1-3.zip
+  sha256: f15379cb2c6cc49d1fc6f8b6f060b10972d6e873e4e73f68ca9b939c098cfaee
+  size: 426035
+  workbook_sha256: c4324bd486f55b18b815654d4f5c6a1948f6c1e5c68fac79dfaba3a22c60b183
+  workbook_size: 1070080
+  readme_sha256: cbb48e1cce7ef363005ecaf7c4afa39e9bb8d4c58b8ef3eea021dc6bc300e7a6
+  readme_size: 2047
+  rows: 5304
+  translation_rights:
+    license:
+      id: CC-BY-3.0
+      url: https://creativecommons.org/licenses/by/3.0/
+    attribution:
+      text: English and Chinese translations, NICT Master Project Multilingual Translation Laboratory; translation method not specified in primary source.
+      url: https://alaginrc.nict.go.jp/jecbs/index.htm
