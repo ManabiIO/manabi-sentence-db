@@ -8,7 +8,7 @@ this is neither a readability model nor a calibrated JLPT assessment.
 import re
 import unicodedata
 
-WIKIPEDIA_QUALITY_VERSION = "wikipedia-example-quality-v2"
+WIKIPEDIA_QUALITY_VERSION = "wikipedia-example-quality-v3"
 
 _NUMBERS = re.compile(r"[0-9０-９]+(?:[.,．][0-9０-９]+)*")
 _KANJI = re.compile(r"[\u3400-\u4dbf\u4e00-\u9fff]")
@@ -20,6 +20,8 @@ _PARENS = {"（": "）", "(": ")", "［": "］", "[": "]"}
 _FOLLOWING_MATERIAL = re.compile(
     r"(?:以下|次)の(?:よう|とおり|通り)|(?:以下|次)に(?:示|挙げ|述べ)"
     r"|^(?:以下|上記|上述|前述|後述)(?:は|の|を|に|で)"
+    r"|(?:下記|下表|次表|上表|右表|左表|上図|下図)"
+    r"(?:の(?:とおり|通り|よう)|(?:に|を)(?:示|掲げ|参照)|参照)"
 )
 _ORPHAN = re.compile(r"^(?:は(?!虫類|虫|行)|を)(?=[一-鿿A-Za-z0-9])")
 # Require several distinct terms plus structural density. A single term, or

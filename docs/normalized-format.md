@@ -67,12 +67,20 @@ posting index and compressed payload store without changing this interchange mod
 
 ## Publisher-unit segmentation
 
-The current Japanese text processor `ja-conservative-v7` recognizes the
+The current Japanese text processor `ja-conservative-v8` recognizes the
 half-width Japanese full stop `｡` as a boundary alongside `。`. Source spelling
 and Unicode-codepoint ranges are preserved; quotations and parentheses retain
 the same boundary protection. This does not infer new unpunctuated boundaries
 or join authored fragments across paragraphs. Existing artifacts are immutable;
 the changed processor fingerprint identifies future builds.
+
+Version 8 adds explicit sexual-aid and sex-business terms to the existing
+`sexual-content` annotation lexicon. Anatomy alone and ordinary cultural uses of
+風俗 are not added triggers. Japanese Wikipedia quality policy v3 also rejects
+explicit references such as 下記の通り and 下図に示す when the referenced material
+is omitted. These are narrow heuristic extensions, not a complete safety or
+readability classifier; exclusion still depends on the configured flags.
+These policy changes apply to new builds and do not relabel existing releases.
 
 Processor version **5**, text processor `ja-conservative-v5`, introduces
 `publisher-unit-segmentation-v1` for Tatoeba, RealPersonaChat, JMultiWOZ and STAIR.

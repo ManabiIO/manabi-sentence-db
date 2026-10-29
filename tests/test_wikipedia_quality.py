@@ -26,6 +26,7 @@ from manabi_sentence_db.wikipedia_quality import (
     "国際連合教育科学文化機関は、世界の文化や教育に関する活動を行い、多くの国と協力している。",
     "は虫類は卵を産む。",
     "は行の発音を練習した。",
+    "「下記」という表現の意味を辞書で調べた。",
 ])
 def test_accessible_prose_including_science_and_dates_is_retained(text):
     assert assess_wikipedia_sentence(text) == (None, [])
@@ -47,6 +48,8 @@ def test_accessible_prose_including_science_and_dates_is_retained(text):
     ("この結果は次のようにまとめられる。", "dependent-fragment"),
     ("以下は、主な分類である。", "dependent-fragment"),
     ("この結晶では、格子欠陥の周囲にある不対電子と共有結合が、表面の物性を変化させる重要な原因となっている。", "specialist-density"),
+    ("距離は参加者の所属する学年により下記の通り異なる。", "dependent-fragment"),
+    ("部品の配置は下図に示した通りである。", "dependent-fragment"),
 ])
 def test_dense_examples_are_excluded_with_specific_reasons(text, reason):
     assert assess_wikipedia_sentence(text)[0] == "wikipedia-" + reason
