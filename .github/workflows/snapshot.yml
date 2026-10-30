@@ -6,7 +6,7 @@ on:
       source:
         description: Source to acquire; all processes sources serially
         type: choice
-        options: [wikivoyage-ja, wikipedia-ja, wikibooks-ja, wikinews-ja, tatoeba-ja, realpersonachat-ja, jmultiwoz-ja, stair-captions-ja, scp-jp-aptitude-ja, scp-jp-duck-merchant-ja, scp-jp-id-photo-ja, scp-jp-fixed-point-ja, all]
+        options: [wikivoyage-ja, wikipedia-ja, wikibooks-ja, wikinews-ja, tatoeba-ja, realpersonachat-ja, jmultiwoz-ja, stair-captions-ja, scp-jp-aptitude-ja, scp-jp-duck-merchant-ja, scp-jp-id-photo-ja, scp-jp-fixed-point-ja, scp-jp-shaving-ja, all]
         default: wikivoyage-ja
       mode:
         description: Sample fetches only selected Wikimedia pages; full downloads exports

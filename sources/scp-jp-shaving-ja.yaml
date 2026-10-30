@@ -1,0 +1,34 @@
+schema_version: 1
+id: scp-jp-shaving-ja
+title: 'SCP-JP curated narrative: 髭を剃ったあとは気分がいい。'
+language: ja
+adapter: scp-curated
+homepage: https://scp-jp.wikidot.com/feeling-good-after-shaving
+license:
+  id: CC-BY-SA-3.0
+  url: https://creativecommons.org/licenses/by-sa/3.0/
+attribution:
+  text: '「髭を剃ったあとは気分がいい。」 by aisurakuto (2020), SCP財団. Narrative paragraphs extracted and split into sentences; CC BY-SA 3.0.'
+  url: https://scp-jp.wikidot.com/feeling-good-after-shaving
+license_evidence:
+  - https://scp-jp.wikidot.com/feeling-good-after-shaving
+  - https://scp-jp.wikidot.com/licensing-guide
+notes:
+  - One explicitly reviewed original Japanese Tale; this does not license or crawl the wider site.
+  - Original-language evidence is the publisher jp and tale tags and FAQ definition (https://scp-jp.wikidot.com/faq-jp); human authorship remains unknown.
+  - Excludes navigation, credit/rating modules, comments, scripts, media, and their content.
+  - Retains exact raw HTML; revalidates title, author, license, revision, tags, body boundary and extracted body hash at acquisition and build.
+  - Source character offsets refer to extracted paragraphs joined by two newline characters, not HTML bytes.
+  - Only direct page-content prose paragraphs are selected; whitespace-only paragraphs and nested modules are excluded. The empty horizontal rule is a scene boundary, not sentence text.
+  - Complete work reviewed for admission on 2026-10-30; psychological horror about compulsive shaving and severed relationships, with ordinary physical actions and fictional conversation. No imported third-party quotation collection or narrative media was identified.
+  - Admission review does not establish sentence quality or native-speaker review; sentences remain unreviewed. No translation or confirmed publication date is supplied.
+acquisition:
+  url: https://scp-jp.wikidot.com/feeling-good-after-shaving
+  title: 髭を剃ったあとは気分がいい。
+  author: aisurakuto
+  credit_author: ©︎aisurakuto
+  year: 2020
+  revision: 12
+  timestamp: '2026-09-24T23:08:35Z'
+  body_sha256: 62006a02867311fa3c1cf12d15860ce62d38c75b57e8906da61d5d5fa4ebc57b
+  scene_breaks: [38]

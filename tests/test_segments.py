@@ -79,6 +79,32 @@ def test_whole_unit_exclusion_prevents_context_leaks(text):
     assert any(k.startswith("rejected:") for k in stats)
 
 
+@pytest.mark.parametrize("withheld", [
+    {"text": "写真を撮りました。＊＊で働いています。"},
+    {"text": "写真を撮りました。性行為に関する説明です。"},
+    {"text": "写真を撮りました。{{不明}}です。"},
+    {"text": "写真を撮りました。「閉じていません。"},
+    {"text": "生成された文章です。", "generation": {"kind": "machine", "tool": "fixture"}},
+    {"text": "文" * 20_001},
+    {"text": "猫が来た。" * 257},
+])
+def test_withheld_whole_unit_preserves_a_context_gap_between_retained_units(withheld):
+    source = load_source(Path("sources/tatoeba-ja.yaml"))
+    manifest = {"source": source, "source_id": source["id"], "snapshot_id": "fixture"}
+    raw = dict(native_id="context-gap", language="ja", title="Synthetic units",
+               url="https://example.org/units", license=source["license"],
+               attribution=source["attribution"], sentences=[
+                   {"native_id": "before", "text": "今日は晴れです。図書館へ行きます。"},
+                   dict(withheld, native_id="withheld"),
+                   {"native_id": "after", "text": "明日は家で本を読みます。"},
+               ])
+    record = canonical_document(raw, manifest, Counter(), {"sexual-content"})
+    assert [(s["ordinal"], s["text"]) for s in record["sentences"]] == [
+        (0, "今日は晴れです。"), (1, "図書館へ行きます。"), (3, "明日は家で本を読みます。")]
+    assert "withheld" not in str(record)
+    assert "publisher-context-barriers-v1" in record["transformations"]
+
+
 def test_fragment_hash_offsets_and_index_are_validated():
     record, _ = _record("写真を撮りました。本を読みました。")
     for field, value in [("start", 1), ("end", 1000), ("segment_index", 2),

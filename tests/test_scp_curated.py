@@ -72,6 +72,7 @@ def test_exact_narrative_boundaries_rights_and_paragraph_units(sample, tmp_path)
         ("text-align: justify;", "text-align: left;", "body boundary"),
         ("<p>　コーヒー", '<p><img src="thirdparty">　コーヒー', "media"),
         ("<p>　コーヒー", "<p><script>text</script>　コーヒー", "media"),
+        ("<p>「もしもし。", "<hr><p>「もしもし。", "scene breaks changed"),
     ],
 )
 def test_fail_closed_on_content_metadata_and_layout_drift(sample, before, after, reason):
@@ -130,11 +131,14 @@ def test_failed_pin_is_not_published_as_a_snapshot(sample, tmp_path, monkeypatch
 
 @pytest.mark.parametrize("source_id", [
     "scp-jp-duck-merchant-ja", "scp-jp-id-photo-ja", "scp-jp-fixed-point-ja",
+    "scp-jp-shaving-ja",
 ])
 def test_reviewed_direct_paragraph_profile_is_pinned_and_excludes_modules(
     source_id, tmp_path, monkeypatch,
 ):
     source = load_source(Path("sources") / f"{source_id}.yaml")
+    if "scene_breaks" in source["acquisition"]:
+        source["acquisition"]["scene_breaks"] = []  # Synthetic two-paragraph body.
     pin = source["acquisition"]
     timestamp = int(datetime.fromisoformat(pin["timestamp"].replace("Z", "+00:00")).timestamp())
     data = f"""<div id="page-title">{pin['title']}</div>
@@ -244,3 +248,36 @@ def test_unmarked_inline_words_and_authorial_paragraph_break_are_preserved(sampl
     ).replace("「もしもし。」<br>「お疲れ様です。」", "俺が一息ついて、").encode()
     paragraphs, _ = extract(changed, source, check_hash=False)
     assert paragraphs == ["撮影技師カメラマンが来た。", "俺が一息ついて、"]
+
+
+def test_direct_narrative_scene_rules_preserve_gaps_and_pinned_positions(tmp_path):
+    source = load_source(Path("sources/scp-jp-shaving-ja.yaml"))
+    pin = source["acquisition"]
+    stamp = int(datetime.fromisoformat(pin["timestamp"].replace("Z", "+00:00")).timestamp())
+    html = f"""<div id="page-title">{pin['title']}</div>
+<div id="page-content"><div id="u-credit-view"><div class="credit">タイトル: {pin['title']} 著者: {pin['credit_author']} 作成年: {pin['year']}</div>
+<a href="https://creativecommons.org/licenses/by-sa/3.0/deed.ja">license</a></div>
+<hr><p>今日は晴れです。図書館へ行きました。</p><hr><hr><p><br> </p>
+<p>明日は家で本を読みます。</p><hr></div>
+<div class="page-tags"><a>jp</a><a>tale</a></div>
+<div id="page-info">ページリビジョン: {pin['revision']}, 最終更新: <span class="time_{stamp}"></span></div>""".encode()
+    source["acquisition"]["body_sha256"] = extract(html, source, check_hash=False)[1]
+    source["acquisition"]["scene_breaks"] = [1]
+    paragraphs, digest = extract(html, source)
+    assert paragraphs == ["今日は晴れです。図書館へ行きました。", "明日は家で本を読みます。"]
+    path = tmp_path / "shaving.html"
+    path.write_bytes(html)
+    manifest = dict(source=source, source_id=source["id"], snapshot_id="scene-fixture",
+                    files=[dict(role=ROLE, path=path.name)])
+    raw = next(iter_documents(manifest, tmp_path))
+    stats = Counter()
+    record = canonical_document(raw, manifest, stats, set())
+    assert [(s["ordinal"], s["text"]) for s in record["sentences"]] == [
+        (0, paragraphs[0][:8]), (1, "図書館へ行きました。"), (3, paragraphs[1])]
+    assert record["source_text_hash"] == digest
+    assert stats["context_breaks"] == 1
+    assert "publisher-context-barriers-v1" in record["transformations"]
+    assert record["sentences"][-1]["source_range"]["start"] == len(paragraphs[0]) + 2
+    assert not any("hr" in s["text"] for s in record["sentences"])
+    with pytest.raises(DataError, match="scene breaks changed"):
+        extract(html.replace(b"</p><hr><hr>", b"</p>"), source)
