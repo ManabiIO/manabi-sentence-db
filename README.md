@@ -164,6 +164,7 @@ request reports which sources failed and preserves completed snapshots.
 | `wikinews-ja` | `LicenseRef-Wikinews-JA`: historical BY 4.0 / BY 2.5 / BY 2.1 Japan notices retained | Explicit archived `pages-articles` export, or selected API pages |
 | `tatoeba-ja` | CC BY 2.0 **France** | Detailed Japanese TSV, tags, optional English/direct-link TSV |
 | `realpersonachat-ja` | CC BY-SA 4.0 | Commit-pinned human-dialogue JSON archive; excludes profiles, model conversations, and masked utterances |
+| `mrmp-ja` | CC BY-SA 4.0 | Pinned human multi-party chat; verifies exact publisher license/README, excludes profiles/evaluations, preserves utterance gaps |
 | `jmultiwoz-ja` | CC BY-SA 4.0 | Commit/hash-pinned human task dialogue turns; excludes goals, worker metadata, backend data, and model outputs |
 | `stair-captions-ja` | CC BY 4.0 | Commit/hash-pinned v1.2 Japanese caption text; excludes images and tokenized duplicates |
 | `jec-basic-ja` | CC BY 3.0 | Hash-pinned Kyoto University / NICT Japanese-English-Chinese sentence patterns; excludes unresolved X and quotation placeholders |

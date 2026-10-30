@@ -1,0 +1,27 @@
+schema_version: 1
+id: mrmp-ja
+title: Multi-Relational Multi-Party Chat Corpus
+language: ja
+adapter: mrmp
+homepage: https://github.com/nu-dialogue/multi-relational-multi-party-chat-corpus
+license:
+  id: CC-BY-SA-4.0
+  url: https://creativecommons.org/licenses/by-sa/4.0/
+attribution:
+  text: Taro Tsuda, Sanae Yamashita, Koji Inoue, Tatsuya Kawahara, and Ryuichiro Higashinaka. Multi-Relational Multi-Party Chat Corpus (2025).
+  url: https://github.com/nu-dialogue/multi-relational-multi-party-chat-corpus
+license_evidence:
+  - https://github.com/nu-dialogue/multi-relational-multi-party-chat-corpus/blob/e6e39cb896df88781c7a2e0451226a527c5f1e2e/README.md
+  - https://github.com/nu-dialogue/multi-relational-multi-party-chat-corpus/blob/e6e39cb896df88781c7a2e0451226a527c5f1e2e/LICENSE
+notes:
+  - Human Japanese chat turns only. Never import participant profiles, interpersonal relationships, evaluations or model outputs.
+  - The pinned publisher tree has 960 dialogue files (477 first-time and 483 family-included); its README reports 100680 utterances. These are publisher counts, not admitted sentence or novelty counts.
+  - Short conversational turns can depend on context. Preserve turn IDs and gaps; exclude masked personal information through the ordinary build gate. Do not rewrite mentions or names into invented prose.
+  - Current primary GitHub README and LICENSE grant CC BY-SA 4.0. The Hugging Face loader still labels an older tag BY-ND; do not substitute its tag or license string for this exact reviewed primary revision.
+  - No translation or native-review annotations are supplied or invented. Occurrences remain unreviewed.
+acquisition:
+  revision: e6e39cb896df88781c7a2e0451226a527c5f1e2e
+  url: https://codeload.github.com/nu-dialogue/multi-relational-multi-party-chat-corpus/zip/e6e39cb896df88781c7a2e0451226a527c5f1e2e
+  dialogue_count: 960
+  license_sha256: 23ee78c8bae49cf08ea2f0c84945c66b987ebe4520881fb51b3dad4fb43d07c2
+  readme_sha256: 90a7a223a438efe099ed423d8b9f026254dab6d83e072bfb924fc646ab881248

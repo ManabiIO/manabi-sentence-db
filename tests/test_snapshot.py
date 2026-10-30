@@ -2,6 +2,7 @@ import hashlib
 import http.client
 import io
 import json
+from pathlib import Path
 
 import pytest
 
@@ -269,3 +270,13 @@ def test_tatoeba_optional_translations_and_current_date(tmp_path, monkeypatch):
     assert len(requested) == 2
     translated = create_snapshot(source, tmp_path / "en", mode="full", translations=["en"])
     assert len(verify_snapshot(translated)["files"]) == 4
+
+
+def test_manual_snapshot_choices_cover_every_enabled_source():
+    from manabi_sentence_db.serialization import load_yaml
+
+    root = Path(__file__).parents[1]
+    workflow = load_yaml(root / ".github/workflows/snapshot.yml")
+    options = workflow["on"]["workflow_dispatch"]["inputs"]["source"]["options"]
+    assert len(options) == len(set(options))
+    assert set(options) == {path.stem for path in (root / "sources").glob("*.yaml")} | {"all"}
