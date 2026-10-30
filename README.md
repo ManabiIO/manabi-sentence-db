@@ -257,7 +257,7 @@ through the text heuristic; explicit upstream `archaic` / `old-fashioned` tags
 still exclude a sentence.
 
 Japanese Wikipedia has an additional sentence-level example gate,
-`wikipedia-example-quality-v2`. It rejects sentences longer than 180 characters,
+`wikipedia-example-quality-v4`. It rejects sentences longer than 180 characters,
 dense formulas, long Latin passages, numerical enumerations, unusually low
 hiragana prose, deeply nested/large parenthetical explanations, long enumerations,
 clusters of long kanji compounds and several distinct specialist terms combined
@@ -272,6 +272,11 @@ context consumers. This gate does not apply to other Wikimedia projects or other
 languages. It is an inspectable first selection policy, not a calibrated
 readability/JLPT model; it can lose useful advanced examples and miss dense prose.
 Existing compressed snapshots remain reusable for offline policy changes.
+Terminal list introductions such as `以下から構成される` / `以下の理由による`
+and detached `と、3種類に区分される` classifications are omitted per sentence;
+the rest of the work retains its original text, attribution and ordinal gaps.
+Numerical uses of `以下`, named materials, ordinary anaphora and modern prose
+about historical events are not excluded by these additional patterns.
 The fixed construction `べからず`, still used in contemporary warnings, is retained
 with the occurrence tag `style:classical-construction`. It is style evidence, not
 a source-era verdict or a content flag. Raw snapshots permit offline recovery of

@@ -27,6 +27,14 @@ from manabi_sentence_db.wikipedia_quality import (
     "は虫類は卵を産む。",
     "は行の発音を練習した。",
     "「下記」という表現の意味を辞書で調べた。",
+    "この商品は三千円以下で買うことができる。",
+    "十歳以下の子供は、保護者と一緒に参加する。",
+    "材料は水、塩、砂糖から構成される。",
+    "予定を変更した理由は、電車が止まったためである。",
+    "「以下から構成される」という表現を使った。",
+    "これは衣かつぎとして食べるのに最も適しているためである。",
+    "中緯度各地に同様の気候があるが、地域により時期は若干ずれる。",
+    "1989年にはスローフード運動の国際化が行われた。",
 ])
 def test_accessible_prose_including_science_and_dates_is_retained(text):
     assert assess_wikipedia_sentence(text) == (None, [])
@@ -50,6 +58,10 @@ def test_accessible_prose_including_science_and_dates_is_retained(text):
     ("この結晶では、格子欠陥の周囲にある不対電子と共有結合が、表面の物性を変化させる重要な原因となっている。", "specialist-density"),
     ("距離は参加者の所属する学年により下記の通り異なる。", "dependent-fragment"),
     ("部品の配置は下図に示した通りである。", "dependent-fragment"),
+    ("と、3種類に区分される。", "dependent-fragment"),
+    ("と、三つに分類されている。", "dependent-fragment"),
+    ("ベッドシートは多くの国々でペアで使用され、（ベッドシートのペアとしての）ベッドシーツは以下から構成される。", "dependent-fragment"),
+    ("こういった構造が利用されるのは、主に以下の理由による。", "dependent-fragment"),
 ])
 def test_dense_examples_are_excluded_with_specific_reasons(text, reason):
     assert assess_wikipedia_sentence(text)[0] == "wikipedia-" + reason
@@ -61,6 +73,24 @@ def test_repetition_of_one_specialist_term_is_not_multiple_evidence():
     assert assess_wikipedia_sentence("固有値と固有ベクトルの関係を学ぶ。")[1] == [
         "style:specialist-vocabulary"
     ]
+
+
+def test_list_introduction_exclusion_keeps_other_work_sentences_and_context_gaps():
+    source = yaml.safe_load((Path(__file__).parents[1] / "sources/wikipedia-ja.yaml").read_text())
+    texts = ["ベッドシートは寝具の一つである。", "主に以下の理由による。",
+             "洗濯して清潔に保つことが大切である。"]
+    raw = dict(native_id="list-gap", language="ja", title="架空の寝具記事",
+               url="https://example.invalid/bedding", license=source["license"],
+               attribution=source["attribution"], sentences=[{"text": text} for text in texts])
+    stats = Counter()
+    record = canonical_document(raw, dict(source_id="wikipedia-ja", snapshot_id="fixture", source=source),
+                                stats, set())
+    assert [(sentence["ordinal"], sentence["text"]) for sentence in record["sentences"]] == [
+        (0, texts[0]), (2, texts[2])]
+    assert record["license"] == source["license"]
+    assert record["attribution"] == source["attribution"]
+    assert WIKIPEDIA_QUALITY_VERSION in record["transformations"]
+    assert stats["rejected:wikipedia-dependent-fragment"] == 1
 
 
 @pytest.mark.parametrize("source_id", ["wikipedia-ja", "wikivoyage-ja", "tatoeba-ja"])

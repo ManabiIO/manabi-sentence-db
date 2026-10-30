@@ -82,6 +82,16 @@ is omitted. These are narrow heuristic extensions, not a complete safety or
 readability classifier; exclusion still depends on the configured flags.
 These policy changes apply to new builds and do not relabel existing releases.
 
+Japanese Wikipedia quality policy v4 additionally rejects terminal
+`以下から構成される` / `以下の理由による` list introductions and detached
+particle-led classifications such as `と、3種類に区分される。`. These narrow
+patterns came from an assistant-only review of cached processed works; they
+do not certify readability or identify every missing antecedent. Exclusion is
+sentence-level, preserving the other sentences and their original ordinal gaps.
+Do not reject whole articles for one such unit, ordinary anaphora, historical
+subject matter or a numerical `以下` expression. Existing artifacts retain
+their original policy fingerprint and require a rebuild to adopt the change.
+
 Processor version **5**, text processor `ja-conservative-v5`, introduces
 `publisher-unit-segmentation-v1` for Tatoeba, RealPersonaChat, JMultiWOZ and STAIR.
 Wikimedia prose continues to use the conservative extraction segmenter. A quoted
