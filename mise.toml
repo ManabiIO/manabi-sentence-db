@@ -58,6 +58,10 @@ run = "uv run --locked sentence-db verify-build"
 description = "Compile normalized JSONL ZIP into deduplicated relational SQLite"
 run = "uv run --locked sentence-db build-normalized-db"
 
+[tasks.export-normalized]
+description = "Export normalized compressed ZIP, optionally selecting reviewed whole works"
+run = "uv run --locked sentence-db export-normalized"
+
 [tasks.vocabulary-coverage]
 description = "Compare distinct and marginal vocabulary using an explicit analyzer export"
 run = "uv run --locked sentence-db vocabulary-coverage"
