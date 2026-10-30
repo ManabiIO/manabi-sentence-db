@@ -1,4 +1,6 @@
+import sqlite3
 from collections import Counter
+from itertools import permutations
 
 import pytest
 
@@ -66,6 +68,7 @@ def test_oversized_pages_and_bad_ids_never_enter_topic_routing(monkeypatch):
     def forbidden(*args):
         pytest.fail("Rejected pages entered category routing")
     monkeypatch.setattr(selection, "classify", forbidden)
+    monkeypatch.setattr(selection, "digest_json", forbidden)
     pages = [page(1, text="あ" * (selection.MAX_WIKITEXT_CHARACTERS + 1)), page("bad")]
     rows, counts = selection.sample_pages(pages, snapshot_id="fixture", per_topic=1, general=1)
     assert not rows and counts["page-text-limit"] == counts["invalid-identity"] == 1
@@ -153,3 +156,62 @@ def test_changed_selector_code_cannot_publish_a_mislabeled_plan(tmp_path, monkey
         selection.select_wikimedia_documents(snapshot, output)
     assert not (output / "selection.json").exists()
     assert not (output / "selection-report.json").exists()
+
+
+@pytest.mark.parametrize("change", [
+    {"title": "違う記事"},
+    {"revision_id": "999"},
+    {"text": "別文の文章です。[[Category:]]"},
+    {"text": "本文の文章です。[[Category:健康]]"},
+    {"title": "長" * 500 + "別"},
+])
+def test_conflicting_duplicates_fail_in_every_order_after_eviction(change):
+    ranked = sorted(range(1, 10), key=lambda i: digest_json(
+        [selection.POLICY, "fixture", "", str(i)]))
+    original = page(ranked[-1])
+    if "title" in change and len(change["title"]) > 500:
+        original["title"] = "長" * 500 + "元"
+    conflict = original | change
+    for pages in permutations([original, page(ranked[0]), conflict]):
+        with pytest.raises(DataError, match="Conflicting retained Wikimedia page identity"):
+            selection.sample_pages(pages, snapshot_id="fixture", per_topic=1, general=1)
+
+
+def test_exact_duplicates_after_eviction_preserve_unique_choices():
+    pages = [page(i) for i in range(1, 10)]
+    expected, _ = selection.sample_pages(pages, snapshot_id="fixture", per_topic=0, general=1)
+    actual, _ = selection.sample_pages(pages + pages[::-1], snapshot_id="fixture",
+                                      per_topic=0, general=1)
+    assert actual == expected
+
+
+@pytest.mark.parametrize("interrupt", [False, True])
+def test_identity_database_has_bounded_cache_and_closes_on_interruption(monkeypatch, interrupt):
+    connect = sqlite3.connect
+    connections = []
+
+    def tracked(filename):
+        assert filename == ""
+        connection = connect(filename)
+        connections.append(connection)
+        return connection
+
+    def pages():
+        connection = connections[0]
+        assert connection.execute("PRAGMA cache_size").fetchone()[0] == -1024
+        assert connection.execute("PRAGMA mmap_size").fetchone() in (None, (0,))
+        assert connection.execute("PRAGMA journal_mode").fetchone()[0] == "off"
+        yield page(1)
+        stored = connection.execute("SELECT typeof(fingerprint),length(fingerprint) FROM seen").fetchone()
+        assert stored == ("blob", 32)
+        if interrupt:
+            raise RuntimeError("interrupted")
+
+    monkeypatch.setattr(selection.sqlite3, "connect", tracked)
+    if interrupt:
+        with pytest.raises(RuntimeError, match="interrupted"):
+            selection.sample_pages(pages(), snapshot_id="fixture", per_topic=0, general=1)
+    else:
+        selection.sample_pages(pages(), snapshot_id="fixture", per_topic=0, general=1)
+    with pytest.raises(sqlite3.ProgrammingError, match="closed"):
+        connections[0].execute("SELECT 1")
