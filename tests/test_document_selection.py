@@ -18,14 +18,14 @@ def test_selection_filters_before_extraction_and_preserves_records(tmp_path, mon
     path = tmp_path / "selection.json"
     write_json(path, selection)
     baseline = list(wikimedia.iter_documents(manifest, snapshot.parent))
-    original = wikimedia.extract_prose
+    original = wikimedia._extract_prose_items
     seen = []
 
     def extract(text, language):
         seen.append(text)
         return original(text, language)
 
-    monkeypatch.setattr(wikimedia, "extract_prose", extract)
+    monkeypatch.setattr(wikimedia, "_extract_prose_items", extract)
     output = tmp_path / "build"
     build_corpus([snapshot], output, document_selection=path)
     catalog = verify_build(output)
@@ -118,7 +118,7 @@ def test_catalog_rejects_selection_with_document_cap(tmp_path):
 def test_present_selected_page_without_prose_is_not_missing(tmp_path, monkeypatch):
     snapshot = create_demo_snapshot(tmp_path / "snapshot")
     manifest = read_json(snapshot)
-    monkeypatch.setattr(wikimedia, "extract_prose", lambda text, language: ([], []))
+    monkeypatch.setattr(wikimedia, "_extract_prose_items", lambda text, language: ([], []))
     stats = Counter()
     assert list(wikimedia.iter_documents(
         manifest, snapshot.parent, page_ids=frozenset({"2"}), stats=stats

@@ -88,6 +88,12 @@ def canonical_document(
     }
     if raw.get("revision"):
         record["revision"] = raw["revision"]
+    if manifest["source"]["adapter"] == "wikimedia" and all(
+        "source_ordinal" in item for item in raw["sentences"]
+    ):
+        from .wikimedia import WIKIMEDIA_CONTEXT_VERSION
+
+        record["transformations"].append(WIKIMEDIA_CONTEXT_VERSION)
     if manifest["source"]["adapter"] == "scp-curated":
         from .scp_curated import RUBY_TRANSFORMATION
 
@@ -119,6 +125,10 @@ def canonical_document(
             # Keep gaps from excluded pairs; spreadsheet/paragraph positions do
             # not authorize joining prose across omitted source material.
             ordinal = item["source_ordinal"]
+        elif manifest["source"]["adapter"] == "wikimedia":
+            # Old caller-supplied records without positions retain their former
+            # behavior; only current extraction earns the context transformation.
+            ordinal = item.get("source_ordinal", ordinal)
         text = _normalized_text(item["text"])
         accepted, flags, reason = assess_sentence(text, raw["language"])
         quality_tags = []

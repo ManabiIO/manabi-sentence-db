@@ -36,11 +36,19 @@ are the authoritative native IDs. We omit profiles, speaker attributes, evaluati
 LLM conversations, and utterances containing masked personal data. Utterance offsets
 refer to the original dialogue turn numbers. Neighbor pointers refer to admitted
 units, which can skip excluded turns; they are not proof of original adjacency.
-For Wikimedia, extraction also omits material before canonical ordinals are
-assigned, so even consecutive ordinals do not establish adjacency in the source.
-Consumers must not present these pointers alone as uninterrupted original context.
+Older Wikimedia builds omitted material before canonical ordinals were assigned;
+their consecutive ordinals do not establish adjacency in the source. Current
+extraction records `wikimedia-context-gaps-v1` in work transformations and assigns
+ordinals before dropping quotes, incomplete units, lists and omitted markup.
+Headings, horizontal rules and reference sections reserve gaps too. Consumers
+must check consecutive ordinals as well as the transformation before displaying
+uninterrupted context. Gaps are positions, not counts of withheld sentences.
+Ordinary paragraph breaks, citation footnotes and ruby readings do not introduce
+gaps. Inline omissions still reject the affected sentence rather than admitting
+an orphan suffix. Existing artifacts are not retroactively relabeled.
 
-Wikimedia processor `wikimedia-prose-v3` rejects whole pages exceeding 1,000,000
+Wikimedia processor `wikimedia-prose-v4` retains the whole-page limit introduced
+in v3: it rejects pages exceeding 1,000,000
 Unicode characters before calling the wikitext parser. This fixed limit bounds
 parser input and subsequent whole-page prose/sentence lists; pages are never
 truncated into misleading excerpts. Build source and aggregate statistics report

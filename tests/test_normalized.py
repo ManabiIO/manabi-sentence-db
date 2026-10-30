@@ -35,6 +35,34 @@ def test_unique_identity_does_not_depend_on_work():
     assert sentence_identity("ja", "今日は雨です。") != sentence_identity("zh", "今日は雨です。")
 
 
+def test_wikimedia_extraction_gaps_survive_build_and_normalized_export(tmp_path):
+    from manabi_sentence_db.serialization import read_json, sha256_file, write_json
+    from manabi_sentence_db.snapshot import snapshot_identity
+    from manabi_sentence_db.wikimedia import WIKIMEDIA_CONTEXT_VERSION
+
+    snapshot = create_demo_snapshot(tmp_path / "snapshot")
+    raw = snapshot.parent / "synthetic.xml"
+    raw.write_text(raw.read_text().replace(
+        "今日は公園まで歩きました。小さな犬が木の下で休んでいます。",
+        "今日は公園まで歩きました。\n* 途中の一覧です。\n小さな犬が木の下で休んでいます。",
+    ))
+    manifest = read_json(snapshot)
+    manifest["files"][0].update(sha256=sha256_file(raw), size=raw.stat().st_size)
+    manifest["snapshot_id"] = snapshot_identity(manifest)
+    write_json(snapshot, manifest)
+    build_corpus([snapshot], tmp_path / "build")
+    result = export_normalized(tmp_path / "build", tmp_path / "corpus.zip")
+    with zipfile.ZipFile(result) as archive:
+        works = [json.loads(line) for line in archive.read("works.jsonl").splitlines()]
+        work = next(work for work in works if work["native_id"] == "1")
+        occurrences = [json.loads(line) for line in archive.read("occurrences.jsonl").splitlines()]
+    retained = [item for item in occurrences if item["work_id"] == work["id"]]
+    assert [item["ordinal"] for item in retained] == [0, 2]
+    assert WIKIMEDIA_CONTEXT_VERSION in work["transformations"]
+    assert work["license"] == manifest["source"]["license"]
+    assert work["revision"]["id"] == "11"
+
+
 def test_jsonl_build_and_package(tmp_path):
     from manabi_sentence_db.package import package_build
 
