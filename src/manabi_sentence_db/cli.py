@@ -59,6 +59,15 @@ def parser() -> argparse.ArgumentParser:
     )
     unpack.add_argument("--bundle", type=Path, required=True)
     unpack.add_argument("--output", type=Path, required=True)
+    select = commands.add_parser(
+        "select-wikimedia", help="Sample balanced Japanese article metadata from cached snapshots"
+    )
+    select.add_argument("--snapshot", type=Path, required=True)
+    select.add_argument("--output", type=Path, required=True)
+    select.add_argument("--per-topic", type=int, default=1000)
+    select.add_argument("--general", type=int, default=2000)
+    select.add_argument("--seed", default="")
+    select.add_argument("--progress", action="store_true")
     build = commands.add_parser(
         "build", help="Compile verified snapshots into canonical JSONL/YAML offline"
     )
@@ -297,6 +306,15 @@ def main(argv: list[str] | None = None) -> int:
                 print(snapshot_pack(args.snapshot, args.output, args.part_bytes))
             case "snapshot-unpack":
                 print(snapshot_unpack(args.bundle, args.output))
+            case "select-wikimedia":
+                from .wikimedia_selection import select_wikimedia_documents
+
+                print(select_wikimedia_documents(
+                    args.snapshot, args.output, per_topic=args.per_topic, general=args.general,
+                    seed=args.seed,
+                    progress=(lambda message: print(message, file=sys.stderr, flush=True))
+                    if args.progress else None,
+                ))
             case "build":
                 excluded = set(args.exclude_flag)
                 if not args.include_sexual_content:

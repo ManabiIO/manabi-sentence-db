@@ -1,5 +1,53 @@
 # Snapshots, offline builds, and releases
 
+## Balanced Wikimedia expansion from cached inputs
+
+Select a reproducible mixture before expensive extraction or linguistic indexing:
+
+```sh
+mise run select-wikimedia -- \
+  --snapshot data/snapshots/wikipedia-full-20261001/manifest.json \
+  --output data/wiki-selection --per-topic 1000 --general 2000 --progress
+mise run build -- \
+  --snapshot data/snapshots/wikipedia-full-20261001/manifest.json \
+  --document-selection data/wiki-selection/selection.json \
+  --output data/wiki-build --format jsonl --shard-compression zstd --progress
+```
+
+The selector verifies the cached snapshot and streams its content once, retaining
+at most the requested metadata in memory. It makes no network requests and does
+not create a plaintext corpus. XML holds one decoded page at a time; saved API
+responses are decoded as whole JSON files, as in the regular adapter. The same
+1,000,000-character page limit applies before category routing. Ten topic quotas
+plus a general quota have a combined ceiling of 50,000 pages. Existing output
+directories and symlink paths are refused; the output parent must already exist.
+
+`wikimedia-balanced-metadata-v1` routes biographies, named organizations and
+creative works to the general mixture instead of allowing incidental categories
+to dominate practical topics. It keeps separate science and history allocations;
+subject alone does not prove difficult, archaic or poor Japanese. Lists and
+disambiguation pages are excluded. All routing remains a heuristic, including
+category extraction from wikitext. The report includes bounded title/category
+evidence, counts, the exact implementation hash, seed and selection digest.
+Counts describe input page units, not an independently deduplicated article census.
+Repeated retained IDs do not consume quota; conflicting retained metadata fails.
+
+The smallest snapshot/seed/page-ID hashes win within each topic, independently
+of input order. Raising quotas with the same seed retains earlier selected IDs.
+Changing `--seed` creates another sample. Topics with insufficient pages remain
+underfilled; quotas are not silently reassigned. Default limits select at most
+12,000 pages, not 12,000 quality-approved works. The allowlist is bound to exactly
+one snapshot and is written last. An interrupted scan leaves no completed
+selection and must be retried in a fresh directory, using the same cached inputs.
+
+Run the normal extractor, license checks and sentence-quality gates afterward;
+metadata selection grants no human-review state or rights and does not activate
+serving data. Inspect retained and rejected examples and measure final compressed
+artifact growth before adding the selected works to an application. A serving
+budget may require a smaller or staged addition. Corpus processing jobs on Alex's
+development machine remain capped at 0.25 CPU and one worker; do not overlap a
+second heavy scan with an existing corpus refresh or increase its quota.
+
 The repository stores code, schemas, reviewed source configuration, and original test fixtures. Downloaded source archives, generated YAML, SQLite databases, and release packages stay outside Git. `data/`, `build/`, and `dist/` are ignored.
 
 ## The boundary between acquisition and processing

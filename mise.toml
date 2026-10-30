@@ -42,6 +42,10 @@ run = "uv run --locked sentence-db snapshot-unpack"
 description = "Build canonical YAML from existing snapshots; never downloads source data"
 run = "uv run --locked sentence-db build"
 
+[tasks.select-wikimedia]
+description = "Offline balanced article metadata selection from cached Japanese Wikimedia"
+run = "uv run --locked sentence-db select-wikimedia"
+
 [tasks.build-db]
 description = "Compile canonical YAML to SQLite offline"
 run = "uv run --locked sentence-db build-db"
