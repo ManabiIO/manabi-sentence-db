@@ -16,17 +16,35 @@ from pathlib import Path
 
 import zstandard
 
-from .serialization import DataError, canonical_json
+from .serialization import DataError, canonical_json, digest_json
 
 
 def sentence_identity(language: str, text: str) -> str:
     return "s_" + hashlib.sha256(canonical_json([language, text])).hexdigest()
 
 
-def export_normalized(build: Path, output: Path, *, source_id=None, catalog=None) -> Path:
+def export_normalized(build: Path, output: Path, *, source_id=None, catalog=None,
+                      work_selection=None) -> Path:
     from .build import iter_records, verify_build
 
     catalog = catalog or verify_build(build)
+    selected = None
+    if work_selection is not None:
+        if (not isinstance(work_selection, dict)
+                or set(work_selection) != {"schema_version", "build_id", "work_ids"}
+                or type(work_selection["schema_version"]) is not int
+                or work_selection["schema_version"] != 1
+                or work_selection["build_id"] != catalog["build_id"]):
+            raise DataError("Work selection must bind schema version 1 to this exact build")
+        identities = work_selection["work_ids"]
+        if (not isinstance(identities, list) or not identities
+                or any(not isinstance(value, str) or not value.strip() or len(value) > 256
+                       for value in identities)
+                or len(set(identities)) != len(identities)):
+            raise DataError("Work selection requires unique, nonempty work-ID strings")
+        selected = set(identities)
+        unmatched = set(identities)
+        work_selection = {**work_selection, "work_ids": sorted(identities)}
     if output.exists() or output.is_symlink():
         raise DataError(f"Output already exists: {output}")
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -55,6 +73,10 @@ def export_normalized(build: Path, output: Path, *, source_id=None, catalog=None
 
             try:
                 for record in iter_records(build, catalog, source_id):
+                    if selected is not None:
+                        if record["kind"] != "document" or record["id"] not in selected:
+                            continue
+                        unmatched.discard(record["id"])
                     if record["kind"] == "reference":
                         write("references", record)
                         continue
@@ -103,16 +125,22 @@ def export_normalized(build: Path, output: Path, *, source_id=None, catalog=None
             finally:
                 for handle in handles.values():
                     handle.close()
+            if selected is not None and unmatched:
+                raise DataError("Selected works absent from build/source: "
+                                + ", ".join(sorted(unmatched)[:5]))
         manifest = {
             "schema_version": 2,
             "kind": "normalized-corpus",
             "build_id": catalog["build_id"],
-            "scope": catalog["scope"],
+            "scope": "sample" if selected is not None else catalog["scope"],
             "source_id": source_id,
             "counts": counts,
             "identity": "sha256(canonical_json([language,NFC_text]))",
             "members": {f"{name}.jsonl": digests[name].hexdigest() for name in names},
         }
+        if selected is not None:
+            manifest.update(work_selection=work_selection,
+                            work_selection_sha256=digest_json(work_selection))
         _write_normalized_archive(root, build, catalog, source_id, manifest, compressed_tables=True)
         with zipfile.ZipFile(root / "corpus.zip") as archive:
             if archive.testzip() is not None:

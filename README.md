@@ -134,6 +134,20 @@ completed catalog path. Progress is optional and does not change build identity.
 Normalized export always compresses its temporary tables
 and produces the same ordinary JSONL members inside its portable ZIP download.
 
+To reuse a processed corpus for a reviewed whole-article subset, run
+`sentence-db export-normalized --build BUILD --output selected.zip
+--work-selection selection.json`. The selection JSON binds the exact build:
+
+```json
+{"schema_version":1,"build_id":"<catalog build_id>","work_ids":["<document ID>"]}
+```
+
+The export preserves complete works, sentences, attribution, licenses, ordinals
+and context links. It records the canonical selection and digest, labels the
+download `sample`, and fails on missing work IDs. It reads the verified processed
+shards without rescanning the raw snapshot. Omitting `--work-selection` exports
+the complete build; `--source` can select one existing source partition.
+
 Repeating the same local snapshot request reuses verified existing files without
 contacting upstream. `--refresh` downloads a complete candidate snapshot before
 comparing its identity; it does not use conditional HTTP requests or ETags. A

@@ -89,6 +89,14 @@ def parser() -> argparse.ArgumentParser:
     )
     normalized_db.add_argument("--archive", type=Path, required=True)
     normalized_db.add_argument("--output", type=Path, required=True)
+    normalized_export = commands.add_parser(
+        "export-normalized", help="Export all or explicitly selected complete works offline"
+    )
+    normalized_export.add_argument("--build", type=Path, required=True)
+    normalized_export.add_argument("--output", type=Path, required=True)
+    normalized_export.add_argument("--source")
+    normalized_export.add_argument("--work-selection", type=Path,
+                                   help="JSON work allowlist bound to the exact build ID")
     package = commands.add_parser(
         "package", help="Package YAML ZIPs and per-source SQLite.zst files offline"
     )
@@ -312,6 +320,17 @@ def main(argv: list[str] | None = None) -> int:
                 from .normalized_database import build_normalized_database
 
                 print(build_normalized_database(args.archive, args.output))
+            case "export-normalized":
+                from .normalized import export_normalized
+                from .serialization import read_json
+
+                selection = None
+                if args.work_selection is not None:
+                    if args.work_selection.stat().st_size > 16 * 1024**2:
+                        raise DataError("Work selection exceeds 16 MiB")
+                    selection = read_json(args.work_selection)
+                print(export_normalized(args.build, args.output, source_id=args.source,
+                                        work_selection=selection))
             case "build-db":
                 print(build_database(args.build, args.output, source_id=args.source))
             case "package":
