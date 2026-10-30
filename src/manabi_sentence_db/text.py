@@ -11,7 +11,7 @@ from __future__ import annotations
 import re
 import unicodedata
 
-TEXT_PROCESSOR_VERSION = "ja-conservative-v7"
+TEXT_PROCESSOR_VERSION = "ja-conservative-v8"
 PUBLISHER_SEGMENTER_VERSION = "publisher-unit-segmentation-v1"
 OMITTED_MARKUP = "\ufffc"
 
@@ -39,7 +39,10 @@ _ARCHAIC = re.compile(
 _MARKUP = re.compile(r"\ufffc|\{\{|\}\}|\[\[|\]\]|<[^>]+>|https?://|ISBN\s*[0-9]")
 _METADATA = re.compile(r"^(?:[*#;:|]|Category:|カテゴリ:|ファイル:|File:|出典[:：]|注釈[:：])", re.I)
 _FLAGS = {
-    "sexual-content": re.compile(r"性交|性行為|セックス|ポルノ|強姦|レイプ|性的虐待|児童ポルノ"),
+    "sexual-content": re.compile(
+        r"性交|性行為|セックス|ポルノ|強姦|レイプ|性的虐待|児童ポルノ"
+        r"|コック(?:リング|バンド)|ソープランド|デリヘル|性風俗|風俗店"
+    ),
     "violence": re.compile(r"殺人|殺害|虐殺|拷問|斬首|暴行|惨殺|銃殺"),
     "self-harm": re.compile(r"自殺|自傷|リストカット"),
     "profanity": re.compile(r"くそったれ|クソ野郎|死ね|くたばれ"),

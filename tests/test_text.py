@@ -118,6 +118,27 @@ def test_flags_are_annotations_instead_of_blanket_rejection():
     assert assess_sentence("性行為に関する説明が書かれていた。")[1] == ["sexual-content"]
 
 
+@pytest.mark.parametrize("text", [
+    "コックバンドを装着する。",
+    "コックリングが販売されている。",
+    "近隣にはソープランド街がある。",
+    "性風俗店について調査した。",
+    "デリヘルの広告が掲載された。",
+])
+def test_reviewed_explicit_sexual_terms_receive_existing_content_flag(text):
+    accepted, flags, reason = assess_sentence(text)
+    assert accepted and flags == ["sexual-content"] and reason is None
+
+
+@pytest.mark.parametrize("text", [
+    "農村の風俗について調べた。",
+    "コックがバンドの演奏を聞いた。",
+    "陰茎の構造について説明した。",
+])
+def test_cultural_customs_cooking_and_anatomy_alone_do_not_trigger_new_flags(text):
+    assert assess_sentence(text) == (True, [], None)
+
+
 def test_sentence_sources_can_have_unpunctuated_utterances():
     assert assess_sentence("どうもありがとう")[0]
     assert assess_sentence("あ。")[2] == "too-short"
