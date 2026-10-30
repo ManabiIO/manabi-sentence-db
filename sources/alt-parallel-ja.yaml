@@ -1,0 +1,94 @@
+schema_version: 1
+id: alt-parallel-ja
+title: NICT Asian Language Treebank Parallel Corpus 20191206 (Japanese translated
+  from English)
+language: ja
+adapter: alt-parallel
+homepage: https://www2.nict.go.jp/astrec-att/member/mutiyama/ALT/
+license:
+  id: CC-BY-4.0
+  url: https://creativecommons.org/licenses/by/4.0/
+attribution:
+  text: NICT Japanese translations; original English Wikinews contributors (CC BY
+    2.5). Riza et al. (2016), Introduction of the Asian Language Treebank, Oriental
+    COCOSDA. Per-article source URLs and history links retained.
+  url: https://www2.nict.go.jp/astrec-att/member/mutiyama/ALT/
+license_evidence:
+- https://www2.nict.go.jp/astrec-att/member/mutiyama/ALT/
+- https://www2.nict.go.jp/astrec-att/member/mutiyama/ALT/ALT-Parallel-Corpus-20191206/README.txt
+notes:
+- Import parallel text only; separate English/Japanese ALT treebanks are noncommercial
+  and excluded.
+- Japanese is translated from English; publisher establishes translation direction
+  but not human translation or native review, so authorship and language origin remain
+  unknown with explicit translation tags. English alignment is original source text,
+  not a translation from Japanese.
+- Preserve exact SNT identities including split suffixes, publisher row order, missing-row
+  gaps, and English article URLs. Corpus timestamps are not article publication dates.
+- Conservatively exclude quotation-bearing pairs and incomplete Japanese. Do not activate
+  automatically.
+acquisition:
+  version: '20191206'
+  url: https://www2.nict.go.jp/astrec-att/member/mutiyama/ALT/ALT-Parallel-Corpus-20191206.zip
+  sha256: 05f7b31b517d4c4e074bb7fb57277758c0e3e15d1ad9cfc5727e9bce79b07bbd
+  size: 21105607
+  article_count: 1893
+  pair_count: 20106
+  members:
+    ALT-Parallel-Corpus-20191206/:
+      size: 0
+      sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    ALT-Parallel-Corpus-20191206/ALT-O-COCOSDA.pdf:
+      size: 992318
+      sha256: c4edae57c493a7085f4696a4dc9a3d53e3e442a0fb97e368b9e83e8dc6743a24
+    ALT-Parallel-Corpus-20191206/URL.txt:
+      size: 180177
+      sha256: 62f3517e2f52d2afd5b9ad89a970848387af6e9bf963e56c3c73d1e464e48d6a
+    ALT-Parallel-Corpus-20191206/data_en.txt:
+      size: 3129072
+      sha256: 9d15a2ff0f702ed78a6f8c9681ec8c68067b168019462f2fd3c4b01694e0fa52
+    ALT-Parallel-Corpus-20191206/data_en_tok.txt:
+      size: 3212272
+      sha256: d6afbe7605f16817b72f37c91659926330cdd4264844a743c112fbf4d2581a93
+    ALT-Parallel-Corpus-20191206/data_fil.txt:
+      size: 3672459
+      sha256: cd7a9b552e4737854ccef1db31ab8f8580f6462762c03e590c2ccc54f3c34e6d
+    ALT-Parallel-Corpus-20191206/data_id.txt:
+      size: 3395565
+      sha256: 8b5467005198428b925f6b6aa0e6e233c2b2a5b6849884d6612987f46ed0d05b
+    ALT-Parallel-Corpus-20191206/data_khm.txt:
+      size: 8757251
+      sha256: 2510e1a9194af5021e866b84284764158996f02a8fb78758cd2a0499d2c4180c
+    ALT-Parallel-Corpus-20191206/data_lo.txt:
+      size: 7735384
+      sha256: a395b0790916f8400ee928d729abaf721ae6058b7d084dcfd2ee0d5a69ff3283
+    ALT-Parallel-Corpus-20191206/data_ms.txt:
+      size: 3435020
+      sha256: 0161eba74db989c01fc29b0ad5c279082480644bcd37812e58bec06ae038afca
+    ALT-Parallel-Corpus-20191206/data_my.txt:
+      size: 10917786
+      sha256: efcd7ef85af2c5460542e581c33b2df5d1dc1ecaa290fa28020de8fb2e67a587
+    ALT-Parallel-Corpus-20191206/data_th.txt:
+      size: 7528232
+      sha256: de3d5dd0e19ad6a925e135d011fbdfe7d9276ac9311425370f450353adf22bcf
+    ALT-Parallel-Corpus-20191206/data_vi.txt:
+      size: 4196346
+      sha256: 1b50da0b3a4ced90042a2b05fd2b87e9b298a664c09242e459ff926c5e7e8aab
+    ALT-Parallel-Corpus-20191206/data_bg.txt:
+      size: 7671448
+      sha256: 2ba9a53dbddf249fe2bbbc347e5633fb0495cfb9c68db56c3016263deb5f9581
+    ALT-Parallel-Corpus-20191206/data_zh.txt:
+      size: 2825676
+      sha256: b3af2d25daf9f260565f62b7fafd9cffb360a88275f8377b36f5e0c38d59eaf1
+    ALT-Parallel-Corpus-20191206/data_ja.txt:
+      size: 3858896
+      sha256: deb6c10d2f27b298df4ed857abdc09116b8fee742c35a5a8da0d54caac1ac3bd
+    ALT-Parallel-Corpus-20191206/ChangeLog.txt:
+      size: 77
+      sha256: d78a1b73dd90fb0b4f6530d07747a58b05d06895d395926259eddb046d73290d
+    ALT-Parallel-Corpus-20191206/data_hi.txt:
+      size: 7386461
+      sha256: 3ec33211f685f343b1f27d169b05711dbe7e73e6ed927cabd28e4387ff82a86e
+    ALT-Parallel-Corpus-20191206/README.txt:
+      size: 3466
+      sha256: 18e416a3f11b39de2f471015770ee27c00c0da78607d8cf9d331b7015def6fc6

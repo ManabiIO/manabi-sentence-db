@@ -22,7 +22,7 @@ def publisher_items(raw, manifest, stats, excluded_flags):
     the original text as context. Report segment_count before per-sentence
     quality filtering so consumers can see missing fragments explicitly.
     """
-    if manifest["source"]["adapter"] in {"wikimedia", "kyoto-wikipedia"}:
+    if manifest["source"]["adapter"] in {"wikimedia", "kyoto-wikipedia", "alt-parallel"}:
         yield from raw["sentences"]
         return
     repeats = Counter()

@@ -168,6 +168,7 @@ request reports which sources failed and preserves completed snapshots.
 | `stair-captions-ja` | CC BY 4.0 | Commit/hash-pinned v1.2 Japanese caption text; excludes images and tokenized duplicates |
 | `jec-basic-ja` | CC BY 3.0 | Hash-pinned Kyoto University / NICT Japanese-English-Chinese sentence patterns; excludes unresolved X and quotation placeholders |
 | `wikipedia-kyoto-ja` | CC BY-SA 3.0 | Hash-pinned NICT Kyoto parallel corpus v2.01; Japanese originals aligned only with final checked English translations; preserves Wikipedia/NICT attribution and filters excluded XML sections |
+| `alt-parallel-ja` | CC BY 4.0 Japanese; CC BY 2.5 English originals | Pinned NICT parallel news text; Japanese translated from English, with method/authorship unknown; excludes NC treebanks, ambiguous pairs and quotations |
 | `scp-jp-aptitude-ja` | CC BY-SA 3.0 | One reviewed contemporary Tale, revision/body-hash pinned; exact raw HTML and paragraph units retained |
 | `scp-jp-duck-merchant-ja`, `scp-jp-id-photo-ja`, `scp-jp-fixed-point-ja` | CC BY-SA 3.0 | Three additional individually reviewed contemporary Tales; direct prose only, exact credit/revision/body pins |
 | `scp-jp-shaving-ja` | CC BY-SA 3.0 | Individually reviewed psychological-horror Tale; 57 direct prose paragraphs with exact credit/revision/body pins |

@@ -10,7 +10,7 @@ and language origin must remain unknown; translations do not become Japanese ori
 
 Wikipedia, Kyoto Wikipedia pairs, Wikivoyage, Wikibooks, archived Japanese
 Wikinews, Tatoeba, RealPersonaChat, JMultiWOZ, STAIR Captions, JEC Basic
-Sentence Data, and four individually curated SCP-JP Tales
+Sentence Data, NICT ALT parallel news text, and individually curated SCP-JP Tales
 『適性』『カモと商人』『証明写真』『定点観測』.
 Wikimedia and Tatoeba provenance does not establish blanket human authorship or
 original Japanese. Their releases preserve that uncertainty. Machine generation
