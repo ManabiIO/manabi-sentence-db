@@ -121,6 +121,30 @@ absent from the snapshot fail the build. Present pages with no eligible prose
 may produce no documents; an entirely empty build fails. Selection avoids parsing
 unselected wikitext but still streams the compressed XML snapshot.
 
+To generate a mixed topic sample from a cached Japanese Wikimedia snapshot:
+
+```sh
+mise run select-wikimedia -- \
+  --snapshot data/snapshots/wikipedia-2026-10-01/manifest.json \
+  --output build/wikipedia-selection --per-topic 1000 --general 2000 \
+  --seed quality-expansion --progress
+
+mise run build -- \
+  --snapshot data/snapshots/wikipedia-2026-10-01/manifest.json \
+  --document-selection build/wikipedia-selection/selection.json \
+  --record-format jsonl --shard-compression zstd --output build/wikipedia-selected
+```
+
+Selection verifies and streams existing inputs without downloading them. Ten topic
+quotas plus the general quota cap this example at 12,000 articles; the combined
+ceiling is 50,000. `selection-report.json` records article metadata, routing counts,
+the producing implementation hash and selection checksum. Routing allocates
+variety; normal prose, rights and quality gates still determine admitted sentences.
+Conflicting page identities fail even after eviction from the bounded sample.
+The identity inventory stores hashes in a temporary SQLite database with a 1 MiB
+page-cache target; temporary disk use grows with unique page IDs, without storing
+article bodies. SQLite releases the inventory when selection ends or fails.
+
 For large builds, add `--shard-compression zstd` to write YAML or JSONL shards
 directly as compressed `.yaml.zst` or `.jsonl.zst` files. The catalog records their
 compressed sizes and checksums; document positions still refer to logical records.
@@ -177,8 +201,8 @@ request reports which sources failed and preserves completed snapshots.
 
 See [source research and admission decisions](docs/sources.md) for primary
 licensing evidence, source-specific exceptions, and approximately thirty
-researched source families. Priorities for future adapters include ALT's
-parallel corpus, ASDC, and Global Voices Japanese.
+researched source families. Priorities for future adapters include ASDC and
+Global Voices Japanese.
 They are researched candidates, not enabled downloads.
 
 Wikimedia's new export checksum manifest is the completion signal. The project

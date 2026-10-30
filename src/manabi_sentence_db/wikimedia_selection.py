@@ -9,7 +9,9 @@ from __future__ import annotations
 import hashlib
 import heapq
 import re
+import sqlite3
 from collections import Counter
+from contextlib import closing
 from pathlib import Path
 
 from .serialization import (
@@ -88,6 +90,19 @@ def sample_pages(pages, *, snapshot_id, per_topic, general, seed="", progress=No
     limits = _limits(per_topic, general)
     if not isinstance(seed, str) or len(seed) > 200:
         raise DataError("Selection seed must be at most 200 characters")
+    # An empty filename gives SQLite ownership of its temporary on-disk file.
+    # Keep the identity inventory off the Python heap, including evicted pages.
+    with closing(sqlite3.connect("")) as seen:
+        seen.execute("PRAGMA cache_size = -1024")
+        seen.execute("PRAGMA mmap_size = 0")
+        seen.execute("PRAGMA journal_mode = OFF")
+        seen.execute("PRAGMA synchronous = OFF")
+        seen.execute("CREATE TABLE seen (identity TEXT PRIMARY KEY, fingerprint BLOB) WITHOUT ROWID")
+        return _sample_pages(pages, snapshot_id=snapshot_id, limits=limits,
+                             seed=seed, progress=progress, seen=seen)
+
+
+def _sample_pages(pages, *, snapshot_id, limits, seed, progress, seen):
     heaps = {topic: [] for topic in limits}
     retained = {}
     counts = Counter()
@@ -102,10 +117,24 @@ def sample_pages(pages, *, snapshot_id, per_topic, general, seed="", progress=No
         if len(page["text"]) > MAX_WIKITEXT_CHARACTERS:
             counts["page-text-limit"] += 1
             continue
+        fingerprint = bytes.fromhex(digest_json(
+            [page["title"], page["revision_id"], page["text"]]
+        ))
+        previous = seen.execute("SELECT fingerprint FROM seen WHERE identity = ?",
+                                (identity,)).fetchone()
+        if previous is not None:
+            if previous[0] != fingerprint:
+                raise DataError("Conflicting retained Wikimedia page identity")
+        else:
+            seen.execute("INSERT INTO seen VALUES (?, ?)", (identity, fingerprint))
         priority = digest_json([POLICY, snapshot_id, seed, identity])
         categories = sorted({match.strip() for match in _CATEGORIES.findall(page["text"])})
         topic, evidence = classify(page["title"], categories, priority)
         counts["routed:" + topic] += 1
+        if previous is not None:
+            if identity in retained:
+                counts["duplicate-retained-page"] += 1
+            continue
         if topic not in limits or limits[topic] == 0:
             continue
         row = {
@@ -113,11 +142,6 @@ def sample_pages(pages, *, snapshot_id, per_topic, general, seed="", progress=No
             "title": page["title"][:500], "topic": topic,
             "category_evidence": evidence, "source_characters": len(page["text"]),
         }
-        if identity in retained:
-            if retained[identity] != row:
-                raise DataError("Conflicting retained Wikimedia page identity")
-            counts["duplicate-retained-page"] += 1
-            continue
         heap = heaps[topic]
         item = (-int(priority, 16), identity, row)
         if len(heap) < limits[topic]:
