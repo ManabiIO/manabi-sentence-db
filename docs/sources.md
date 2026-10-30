@@ -574,3 +574,23 @@ This changes future derived builds. Existing snapshots remain reusable, and
 existing artifacts retain their own processor fingerprint and ordinal layout.
 A source-specific rebuild/refresh is required to adopt the corrected boundaries;
 do not edit released occurrence metadata in place.
+
+### NICT ALT parallel Japanese (20191206)
+
+`alt-parallel-ja` imports only the CC BY 4.0 parallel-text ZIP, never the
+separate CC BY-NC-SA Japanese/English treebanks. Japanese is explicitly tagged
+as translated from English; translation method and authorship remain unknown.
+The paired English is original English Wikinews text, with its CC BY 2.5 license,
+article URL and history attribution retained. No native review is claimed.
+
+The pinned 21,105,607-byte archive contains 20,106 paired rows and 1,893 URL-map
+articles, of which 1,888 have rows. Preserve all split suffixes exactly. Five
+Japanese fields are empty, one Japanese ID is duplicated (the corresponding
+English second row instead has a different ID), and one ID has a trailing hyphen.
+Exclude both duplicate-ID rows and the malformed-ID row rather than repairing
+or inventing alignment. Missing/excluded rows reserve context gaps. Quotation
+spans and incomplete prose are conservatively excluded. Corpus release dates
+are never interpreted as publication dates. Offline qualification admits 14,772
+sentences in 1,883 documents before any optional content-flag exclusions.
+This source is available for explicit snapshot/build selection; it is not added
+to any active serving corpus.

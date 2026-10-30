@@ -110,12 +110,12 @@ def canonical_document(
     occurrences: Counter = Counter()
     for ordinal, item in enumerate(publisher_items(raw, manifest, stats, excluded_flags)):
         if item is None:
-            if manifest["source"]["adapter"] in {"wikimedia", "kyoto-wikipedia"}:
+            if manifest["source"]["adapter"] in {"wikimedia", "kyoto-wikipedia", "alt-parallel"}:
                 raise DataError("Unexpected context marker in presegmented source")
             if PUBLISHER_CONTEXT_VERSION not in record["transformations"]:
                 record["transformations"].append(PUBLISHER_CONTEXT_VERSION)
             continue
-        if manifest["source"]["adapter"] == "kyoto-wikipedia":
+        if manifest["source"]["adapter"] in {"kyoto-wikipedia", "alt-parallel"}:
             # Keep gaps from excluded pairs; spreadsheet/paragraph positions do
             # not authorize joining prose across omitted source material.
             ordinal = item["source_ordinal"]
@@ -466,6 +466,8 @@ def build_corpus(
                     from .scp_curated import iter_documents
                 elif source["adapter"] == "jec-basic":
                     from .jec_basic import iter_documents
+                elif source["adapter"] == "alt-parallel":
+                    from .alt_parallel import iter_documents
                 elif source["adapter"] == "kyoto-wikipedia":
                     from .kyoto_wikipedia import iter_documents
                 else:
@@ -489,7 +491,7 @@ def build_corpus(
                            and selection["source_id"] == source_id else {}),
                         **({"progress": progress} if source["adapter"] == "wikimedia" else {}),
                     )
-                    if source["adapter"] in {"wikimedia", "jec-basic", "kyoto-wikipedia"}
+                    if source["adapter"] in {"wikimedia", "jec-basic", "kyoto-wikipedia", "alt-parallel"}
                     else iter_documents(manifest, manifest_path.parent)
                 )
                 for raw in documents:

@@ -122,3 +122,11 @@ preserves paragraph context and records extraction and segmentation changes.
 The [publisher licensing guide](https://scp-jp.wikidot.com/licensing-guide)
 explains attribution and ShareAlike obligations. This admission applies only to
 the pinned work; it does not admit other SCP-JP pages, translations, or images.
+
+NICT ALT parallel Japanese (`alt-parallel-ja`, 20191206): NICT translations are
+CC BY 4.0; original English Wikinews text is CC BY 2.5. Preserve per-article URLs,
+history attribution, translation direction, and the requested citation: Riza et
+al. (2016), “Introduction of the Asian Language Treebank”, Oriental COCOSDA.
+Only parallel text is imported; separate noncommercial treebank annotations are
+excluded. Primary license evidence and every archive member hash are pinned in
+`sources/alt-parallel-ja.yaml`.

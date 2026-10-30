@@ -26,7 +26,8 @@
         "stair",
         "scp-curated",
         "jec-basic",
-        "kyoto-wikipedia"
+        "kyoto-wikipedia",
+        "alt-parallel"
       ]
     },
     "license": {
