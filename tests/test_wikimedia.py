@@ -119,6 +119,8 @@ def test_removed_unknown_inline_tags_do_not_create_false_sentence():
     assert not [text for text in sentences if assess_sentence(text)[0]]
     sentences, _ = extract_prose("彼は<q>引用された言葉</q>と言った。")
     assert not [text for text in sentences if assess_sentence(text)[0]]
+    sentences, _ = extract_prose("彼は<references />と言った。最後の文章です。")
+    assert [text for text in sentences if assess_sentence(text)[0]] == ["最後の文章です。"]
 
 
 def test_corner_quotes_and_hidden_styled_blocks_are_excluded():
@@ -141,6 +143,62 @@ def test_reference_sections_resume_only_at_same_or_higher_heading():
         "\n== 歴史 ==\n新しい本文の文章です。"
     )
     assert sentences == ["本文の文章です。", "新しい本文の文章です。"]
+
+
+@pytest.mark.parametrize("omission", [
+    "筆者は「遠い場所だ」と書いた。",
+    "* 箇条書きの文章です。",
+    "# 番号付きの文章です。",
+    "----",
+    "<hr />",
+    "== 新しい節 ==",
+    "== 参考文献 ==\n書籍の説明です。\n=== 補足 ===\nこれも出典です。\n== 本文 ==",
+    "<blockquote>引用の文章です。</blockquote>",
+    '<div style="display:none">隠れた文章です。</div>',
+    "{|\n| 表の文章です。\n|}",
+    "[[File:Example.jpg|thumb|写真の説明です。]]",
+    "<references />",
+    "未完の文章",
+])
+def test_extraction_gaps_survive_canonicalization_without_changing_provenance(tmp_path, omission):
+    from manabi_sentence_db.wikimedia import WIKIMEDIA_CONTEXT_VERSION
+
+    before, after = "朝は公園を散歩した。", "夕方は図書館で本を読んだ。"
+    text = f"{before}\n{omission}\n{after}"
+    payload = {"query": {"pages": [{
+        "pageid": 12, "ns": 0, "title": "架空", "revisions": [{
+            "revid": 35, "timestamp": "2026-01-02T03:04:05Z", "content": text,
+        }],
+    }]}}
+    (tmp_path / "sample.json").write_text(json.dumps(payload), encoding="utf-8")
+    snapshot = {
+        **manifest("sample.json", "mediawiki-api", source={**SOURCE, "adapter": "wikimedia"}),
+        "source_id": "wikipedia-ja", "snapshot_id": "synthetic",
+    }
+    raw = next(iter_documents(snapshot, tmp_path))
+    record = canonical_document(raw, snapshot, Counter(), set())
+    assert [item["text"] for item in record["sentences"]] == [before, after]
+    positions = [item["ordinal"] for item in record["sentences"]]
+    assert positions[1] > positions[0] + 1
+    assert record["revision"] == raw["revision"]
+    assert record["attribution"] == raw["attribution"]
+    assert record["license"] == SOURCE["license"]
+    assert WIKIMEDIA_CONTEXT_VERSION in record["transformations"]
+    assert extract_prose(text)[0] == [
+        item["text"] for item in raw["sentences"]
+    ]
+
+
+def test_ordinary_paragraphs_footnotes_and_ruby_keep_adjacent_ordinals():
+    from manabi_sentence_db.wikimedia import _extract_prose_items
+
+    text = (
+        "朝は公園を散歩した。<ref>参考文献です。</ref>\n\n"
+        "夕方は<ruby>図書館<rt>としょかん</rt></ruby>で本を読んだ。"
+    )
+    assert _extract_prose_items(text, "ja")[0] == [
+        (0, "朝は公園を散歩した。"), (1, "夕方は図書館で本を読んだ。"),
+    ]
 
 
 @pytest.mark.parametrize("notice", ["Copyvio", "削除依頼", "Template:即時削除", "subst:Template:Copyvio"])

@@ -26,7 +26,11 @@ from mwparserfromhell import nodes
 
 from .text import OMITTED_MARKUP, is_complete_sentence, split_sentences
 
-WIKIMEDIA_PROCESSOR_VERSION = "wikimedia-prose-v3"
+WIKIMEDIA_PROCESSOR_VERSION = "wikimedia-prose-v4"
+WIKIMEDIA_CONTEXT_VERSION = "wikimedia-context-gaps-v1"
+# A standalone unresolved unit reserves an ordinal without becoming source text.
+# Inline omissions must stay inline so an orphan suffix cannot become a sentence.
+_CONTEXT_SEPARATOR = "\n" + OMITTED_MARKUP + "\n"
 
 # Bound parser AST and subsequent whole-page prose/sentence materialization.
 # Count Unicode code points without allocating a second UTF-8 copy of the page.
@@ -199,7 +203,7 @@ def _render(code) -> str:
         elif isinstance(node, nodes.Template) or isinstance(node, nodes.Argument):
             parts.append(OMITTED_MARKUP)
         elif isinstance(node, nodes.Heading):
-            parts.append("\n\n")
+            parts.append(_CONTEXT_SEPARATOR)
         elif isinstance(node, nodes.Wikilink):
             target = str(node.title).strip()
             namespace = target.lstrip(":").partition(":")[0].lower()
@@ -222,7 +226,12 @@ def _render(code) -> str:
             parts.append(label if label.strip() else OMITTED_MARKUP)
         elif isinstance(node, nodes.Tag):
             tag = str(node.tag).strip().lower()
-            if tag in {"ref", "references", "rt", "rp"}:
+            if tag in {"ref", "rt", "rp"}:
+                continue
+            if tag == "references":
+                # A standalone marker reserves a gap naturally; keep an inline
+                # one inside its sentence so no orphan suffix can be admitted.
+                parts.append(OMITTED_MARKUP)
                 continue
             if any(str(attr.name).lower() in {"style", "hidden"} for attr in node.attributes):
                 parts.append(OMITTED_MARKUP)
@@ -234,7 +243,9 @@ def _render(code) -> str:
                 # Keep the marker inline: inserting a boundary here could
                 # admit an orphan suffix such as "と言った。" after a quote.
                 parts.append(OMITTED_MARKUP)
-            elif tag in {"br", "hr"}:
+            elif tag == "hr":
+                parts.append(_CONTEXT_SEPARATOR)
+            elif tag == "br":
                 parts.append("\n\n")
             elif tag in _INLINE_TAGS or tag == "ruby":
                 if node.contents is not None:
@@ -259,6 +270,12 @@ def extract_prose(wikitext: str, language: str = "ja") -> tuple[list[str], list[
     mentions). Unknown templates leave a sentinel which the shared quality
     filter rejects. These heuristics cannot identify every third-party passage.
     """
+    items, tags = _extract_prose_items(wikitext, language)
+    return [text for _, text in items], tags
+
+
+def _extract_prose_items(wikitext: str, language: str) -> tuple[list[tuple[int, str]], list[str]]:
+    """Assign source ordinals before dropping quotes, incomplete units or lists."""
     if len(wikitext) > MAX_WIKITEXT_CHARACTERS:
         raise PageTextLimitExceeded("Wikimedia page exceeds 1,000,000 Unicode characters")
     if re.match(r"\s*#(?:redirect|転送|リダイレクト)\b", wikitext, re.I):
@@ -281,14 +298,14 @@ def extract_prose(wikitext: str, language: str = "ja") -> tuple[list[str], list[
                 ignored_level = None
             if title in _EXCLUDED_SECTIONS:
                 ignored_level = node.level
-            selected.append("\n\n")
+            selected.append(_CONTEXT_SEPARATOR)
         elif ignored_level is None:
             selected.append(_render(mwparserfromhell.wikicode.Wikicode([node])))
     plain = "".join(selected)
-    lines = [line for line in plain.splitlines() if not _LIST_LINE.match(line)]
+    lines = [OMITTED_MARKUP if _LIST_LINE.match(line) else line for line in plain.splitlines()]
     sentences = [
-        sentence
-        for sentence in split_sentences("\n".join(lines), language)
+        (ordinal, sentence)
+        for ordinal, sentence in enumerate(split_sentences("\n".join(lines), language))
         if is_complete_sentence(sentence, language) and not any(mark in sentence for mark in "「」『』")
     ]
     return sentences, sorted(categories)
@@ -330,7 +347,7 @@ def iter_documents(
                 if stats is not None:
                     stats["wikimedia_pages_selected"] += 1
             try:
-                sentences, tags = extract_prose(page["text"], language)
+                sentences, tags = _extract_prose_items(page["text"], language)
             except PageTextLimitExceeded:
                 if stats is not None:
                     stats["rejected:page-text-limit"] += 1
@@ -360,8 +377,9 @@ def iter_documents(
                 "revision": revision,
                 "tags": tags,
                 "sentences": [
-                    {"text": text, "tags": [], "content_flags": [], "translations": []}
-                    for text in sentences
+                    {"text": text, "source_ordinal": ordinal,
+                     "tags": [], "content_flags": [], "translations": []}
+                    for ordinal, text in sentences
                 ],
             }
     if unmatched:
