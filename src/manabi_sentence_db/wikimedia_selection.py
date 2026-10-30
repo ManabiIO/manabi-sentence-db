@@ -79,6 +79,10 @@ def _limits(per_topic, general):
     return dict.fromkeys(TOPICS, per_topic) | {"general": general}
 
 
+def _implementation_sha256():
+    return hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+
+
 def sample_pages(pages, *, snapshot_id, per_topic, general, seed="", progress=None):
     """Retain only the requested top-k metadata, independent of scan order."""
     limits = _limits(per_topic, general)
@@ -146,6 +150,7 @@ def select_wikimedia_documents(snapshot, output, *, per_topic=1000, general=2000
         raise DataError("Use an output directory outside symlinks")
     if output.exists():
         raise DataError("Use a fresh selection output directory")
+    implementation = _implementation_sha256()
     manifest = verify_snapshot(snapshot)
     if (manifest["source"]["adapter"] != "wikimedia"
             or manifest["source"]["language"].split("-", 1)[0] != "ja"):
@@ -171,8 +176,10 @@ def select_wikimedia_documents(snapshot, output, *, per_topic=1000, general=2000
     selection = {"schema_version": 1, "source_id": manifest["source_id"],
                  "snapshot_id": manifest["snapshot_id"],
                  "page_ids": [row["native_id"] for row in rows]}
+    if _implementation_sha256() != implementation:
+        raise DataError("Wikimedia selection implementation changed during the scan")
     report = {
-        "policy": POLICY, "implementation_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+        "policy": POLICY, "implementation_sha256": implementation,
         "selection_sha256": digest_json(selection), "snapshot_scope": manifest["mode"],
         "quotas": limits, "seed": seed, "counts": counts,
         "selected_counts": dict(Counter(row["topic"] for row in rows)), "articles": rows,
