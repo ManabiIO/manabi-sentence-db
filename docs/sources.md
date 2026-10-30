@@ -206,10 +206,33 @@ fields are standalone reformulations or intentionally incorrect annotations.
 Do not flatten every string into a natural sentence or count every field as a
 distinct example.
 
-The [Multi-Relational Multi-Party Chat Corpus](https://github.com/nu-dialogue/multi-relational-multi-party-chat-corpus)
-is a further CC BY-SA 4.0 option: its current public tables total 960 dialogues
-and 100,680 utterances. It follows a similar JSON layout and contains additional
-participant metadata that should remain outside sentence outputs.
+The enabled [Multi-Relational Multi-Party Chat Corpus configuration](../sources/mrmp-ja.yaml)
+pins publisher revision `e6e39cb896df88781c7a2e0451226a527c5f1e2e`.
+The publisher's [README and license](https://github.com/nu-dialogue/multi-relational-multi-party-chat-corpus/tree/e6e39cb896df88781c7a2e0451226a527c5f1e2e)
+grant CC BY-SA 4.0 and report 960 dialogues / 100,680 utterances. The pinned Git
+tree independently contains 477 first-time and 483 family-included dialogue
+files totaling 20,447,851 bytes. These are upstream inventory counts, not an
+admitted-sentence or novel-text count. The older Hugging Face loader declares
+BY-ND for a different tag; the adapter never substitutes that tag or a mirror's
+license metadata for this reviewed primary revision.
+
+Before decoding any dialogue, the adapter checks the exact publisher README and
+LICENSE SHA-256 values inside the ZIP. Only dialogue turns are exported; profiles,
+personality/demographic attributes, relationship fields, participant identifiers
+and evaluations are not corpus metadata. Authored names and mentions within the
+turn text are preserved, not rewritten. Original file identity, Git revision,
+raw member hash, turn IDs and immutable citations remain available. Masked turns
+and missing source units reserve context gaps. Short utterances may depend on
+surrounding dialogue; human collection is not a project quality review.
+
+A bounded probe of two exact upstream Git blobs (214 turns) yielded 212 admitted
+occurrences / 206 distinct texts after splitting and minimum-length checks.
+It contains ordinary contemporary chat and some short, context-dependent
+fragments. This is an assistant-only adapter probe, not full-source or native
+quality certification; occurrence review state remains unreviewed. The complete
+snapshot, compressed normalization, deduplication/novelty and serving-size
+qualification remain required before a corpus addition. No full serving import
+is implied by enabling its source manifest.
 
 The [Japanese Movie Recommendation Dialogue dataset](https://github.com/ku-nlp/JMRD)
 offers roughly 5,000 human dialogues under CC BY-SA 4.0, but includes external

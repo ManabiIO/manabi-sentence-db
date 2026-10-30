@@ -9,9 +9,9 @@ and language origin must remain unknown; translations do not become Japanese ori
 ## Enabled adapters
 
 Wikipedia, Kyoto Wikipedia pairs, Wikivoyage, Wikibooks, archived Japanese
-Wikinews, Tatoeba, RealPersonaChat, JMultiWOZ, STAIR Captions, JEC Basic
+Wikinews, Tatoeba, RealPersonaChat, MRMP multi-party chat, JMultiWOZ, STAIR Captions, JEC Basic
 Sentence Data, NICT ALT parallel news text, and individually curated SCP-JP Tales
-『適性』『カモと商人』『証明写真』『定点観測』.
+『適性』『カモと商人』『証明写真』『定点観測』『髭を剃ったあとは気分がいい。』.
 Wikimedia and Tatoeba provenance does not establish blanket human authorship or
 original Japanese. Their releases preserve that uncertainty. Machine generation
 metadata explicitly excludes an item from the Japanese corpus. Heuristic era and
@@ -47,18 +47,18 @@ pairs from source rows and from text overlap with Wikipedia.
 | Yahoo VFD | [Publisher](https://github.com/yahoojapan/VFD-Dataset), reported CC BY 4.0 | Human imagined responses; keep modality/context flags. |
 | JMRD | [Publisher](https://github.com/ku-nlp/JMRD), reported CC BY-SA 4.0 | Conversation, not copyrighted movie scripts. |
 | JMultiWOZ (enabled) | [Publisher](https://github.com/nu-dialogue/jmultiwoz), verified CC BY-SA 4.0 | Human role-play, preserve speaker/turn context without profiles. |
-| Multi-Party Chat | [Publisher](https://github.com/nu-dialogue/multi-relational-multi-party-chat-corpus), reported CC BY-SA 4.0 | Human conversation. |
+| Multi-Party Chat / MRMP (enabled) | [Pinned publisher](https://github.com/nu-dialogue/multi-relational-multi-party-chat-corpus/tree/e6e39cb896df88781c7a2e0451226a527c5f1e2e), verified CC BY-SA 4.0 | Human conversation; only dialogue turns, exact README/LICENSE pins, no profiles/evaluations. |
 | ASDC | [Publisher](https://github.com/megagonlabs/asdc), reported CC BY 4.0 | Accommodation dialogues. |
 | JGLUE questions | [Publisher](https://github.com/yahoojapan/JGLUE), reported CC BY-SA 4.0 | Audit component and underlying passage rights separately. |
 | JaQuAD | [Publisher](https://github.com/SkelterLabsInc/JaQuAD), reported CC BY-SA 3.0 | Questions versus reused Wikipedia passages. |
 
-Except STAIR, RealPersonaChat, and JMultiWOZ, these are candidate claims supplied in the research
+Except the rows explicitly marked enabled, these are candidate claims supplied in the research
 shortlist, not newly verified admission grants. Do not enable downloads until the
 specific release and underlying content rights are reviewed.
 
 ## Fiction and longer writing
 
-Four original SCP-JP Tales are admitted with per-work credit, CC BY-SA 3.0, and
+Five original SCP-JP Tales are admitted with per-work credit, CC BY-SA 3.0, and
 revision/body-hash pins; see the [individual review notes](sources.md#three-additional-curated-contemporary-tales).
 Further original SCP-JP Tales and Backrooms JP require per-work exception checks,
 separating translated international fiction from original Japanese. Preserve mixed
