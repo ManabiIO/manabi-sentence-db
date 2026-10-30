@@ -170,3 +170,51 @@ def test_invalid_zip(tmp_path):
     (tmp_path / 'invalid.zip').write_bytes(b'not zip')
     with pytest.raises(DataError, match='ZIP archive'):
         next(asdc.iter_documents({'source': source, 'files': [{'role': asdc.ROLE, 'path': 'invalid.zip'}]}, tmp_path))
+
+
+SUMMARY = '・日付は9月10日。\n・宿泊日数は2泊。\n・宿泊地は大分県。\n・人数は大人2名。\n・予算は2万円。\n・朝食付き。'
+
+
+@pytest.mark.parametrize('text', [SUMMARY, asdc._SUMMARY_PREAMBLE + '\n' + SUMMARY])
+def test_booking_summary_shapes(text):
+    assert asdc._is_booking_summary(text)
+
+
+@pytest.mark.parametrize('text', [
+    '伊勢・志摩地方でございますね。',
+    '夕食・朝食の両方になさいますか?',
+    '・日付は9月10日。',  # No single-line summary occurs in the reviewed snapshot.
+    SUMMARY.replace('\n', ''),
+    'こちらの条件をご希望でしょうか?\n' + SUMMARY,
+    '・今日は海を見ました。\n' * 6,
+])
+def test_middle_dot_prose_and_other_lists_preserved(text):
+    assert not asdc._is_booking_summary(text)
+
+
+@pytest.mark.parametrize('position', [0, 1, 2])
+def test_summary_withheld_as_whole_unit_with_context_gap(tmp_path, monkeypatch, position):
+    def change(dialogue):
+        identity = 'asdc.v4.001'
+        dialogue['utterances'] = [
+            {'id': {'id': f'{identity}.{i}'}, 'name': 'operator_1',
+             'text': SUMMARY if i == position else '今日は公園を散歩しました。川の水がきれいですね。'}
+            for i in range(3)
+        ]
+    manifest = fixture(tmp_path, monkeypatch, change)
+    document = next(asdc.iter_documents(manifest, tmp_path))
+    assert document['sentences'][position] is asdc.CONTEXT_BREAK
+    assert len(document['sentences']) == 3
+    record = canonical_document(document, manifest, Counter(), set())
+    assert SUMMARY not in json.dumps(record, ensure_ascii=False)
+    # Two fragments for each kept turn, with one missing ordinal at the exclusion.
+    assert [s['ordinal'] for s in record['sentences']] == {
+        0: [1, 2, 3, 4], 1: [0, 1, 3, 4], 2: [0, 1, 2, 3],
+    }[position]
+
+
+def test_customer_list_is_not_operator_summary(tmp_path, monkeypatch):
+    def change(dialogue):
+        dialogue['utterances'][0].update(text=SUMMARY, name='customer_1')
+    manifest = fixture(tmp_path, monkeypatch, change)
+    assert next(asdc.iter_documents(manifest, tmp_path))['sentences'][0]['text'] == SUMMARY

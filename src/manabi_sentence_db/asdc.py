@@ -19,6 +19,23 @@ EVIDENCE = {
     "docs/dialog/format.md": "daf61eff83c2bb035872c234d8114c1e87e2c20e8bfbf8c833bfd1c2972643ba",
 }
 
+_BOOKING_SLOT = re.compile(
+    r"^・(?:日付|時期|日程|宿泊日数|宿泊数|泊数|人数|場所|宿泊地|行先|予算|ご予算)は"
+)
+_SUMMARY_PREAMBLE = (
+    "ご希望をお聞かせくださり、ありがとうございました。それでは以下の条件で"
+    "お調べしますので、よろしくお願いいたします。"
+)
+
+
+def _is_booking_summary(text):
+    """Recognize the pinned main corpus's operator booking checklists only."""
+    lines = [line.strip() for line in text.splitlines() if line.strip()]
+    if lines and lines[0] == _SUMMARY_PREAMBLE:
+        lines = lines[1:]
+    return (len(lines) >= 6 and all(line.startswith("・") for line in lines)
+            and sum(bool(_BOOKING_SLOT.match(line)) for line in lines) >= 2)
+
 
 def iter_documents(manifest, snapshot_dir):
     source = manifest["source"]
@@ -101,6 +118,10 @@ def iter_documents(manifest, snapshot_dir):
                     if index != previous + 1:
                         sentences.append(CONTEXT_BREAK)
                     previous = index
+                    if role[1] == "operator" and _is_booking_summary(turn["text"]):
+                        # Withhold the whole turn before segmentation/source_unit creation.
+                        sentences.append(CONTEXT_BREAK)
+                        continue
                     sentences.append({"native_id": native["id"], "text": turn["text"],
                                       "source_range": {"unit": "utterance", "start": index, "end": index + 1},
                                       "tags": ["speaker:" + role[1]], "content_flags": [], "translations": []})
