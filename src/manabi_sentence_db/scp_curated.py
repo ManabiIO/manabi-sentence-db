@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from html.parser import HTMLParser
 
+from .segments import CONTEXT_BREAK
 from .serialization import DataError, safe_relative
 
 URL = "https://scp-jp.wikidot.com/aptitude"
@@ -16,6 +17,13 @@ REVIEWED = {
     "scp-jp-duck-merchant-ja": ("a-duck-and-a-merchant", "direct-paragraphs"),
     "scp-jp-id-photo-ja": ("id-photo", "direct-paragraphs"),
     "scp-jp-fixed-point-ja": ("fixed-point-observation", "direct-paragraphs"),
+    "scp-jp-shaving-ja": ("feeling-good-after-shaving", "direct-paragraphs"),
+}
+# Legacy cached manifests predate the optional scene pin. Bind those sources to
+# their reviewed layout too, rather than accepting a newly inserted rule.
+REVIEWED_SCENE_BREAKS = {
+    "scp-jp-duck-merchant-ja": [4, 9, 59],
+    "scp-jp-shaving-ja": [38],
 }
 ROLE = "scp-curated-html"
 RUBY_TRANSFORMATION = "publisher-ruby-base-text-v1"
@@ -104,6 +112,11 @@ def _one(nodes, description):
 
 def extract(data, source, *, check_hash=True):
     """Return reviewed paragraph units; no scripts, links, or media are fetched."""
+    paragraphs, digest, _ = _extract(data, source, check_hash=check_hash)
+    return paragraphs, digest
+
+
+def _extract(data, source, *, check_hash=True):
     pin = source["acquisition"]
     _, _, boundary = reviewed_page(source)
     if (
@@ -161,12 +174,18 @@ def extract(data, source, *, check_hash=True):
     else:
         # Reviewed pages put prose directly under page-content. Deliberately do
         # not descend into credit, rating, navigation, media or other modules.
-        children = [n for n in content.children if isinstance(n, Node) and n.tag == "p"]
+        children = [n for n in content.children if isinstance(n, Node) and n.tag in {"p", "hr"}]
     paragraphs, reviewed_paragraphs = [], []
+    scene_breaks, pending_break = [], False
     for child in children:
         if isinstance(child, str):
             if child.strip():
                 raise DataError("Unexpected text outside narrative paragraphs")
+            continue
+        if child.tag == "hr":
+            # Consecutive rules represent one boundary. Leading/trailing rules
+            # do not create a break between narrative paragraphs.
+            pending_break = bool(paragraphs)
             continue
         if child.tag != "p" or any(n.tag not in INLINE for n in child.walk()):
             raise DataError("Unexpected narrative media or content structure")
@@ -216,6 +235,9 @@ def extract(data, source, *, check_hash=True):
             continue  # Publisher spacing-only paragraphs are not sentence units.
         if not text or len(text) > 20_000:
             raise DataError("Invalid curated narrative paragraph")
+        if pending_break:
+            scene_breaks.append(len(paragraphs))
+            pending_break = False
         paragraphs.append(text)
         # Keep the existing reviewed-body pin over complete source inline text,
         # including readings. The derived surface text has its own digest below;
@@ -229,7 +251,10 @@ def extract(data, source, *, check_hash=True):
     reviewed_digest = hashlib.sha256("\n\n".join(reviewed_paragraphs).encode()).hexdigest()
     if not 1 <= len(paragraphs) <= 100 or (check_hash and reviewed_digest != pin["body_sha256"]):
         raise DataError("Curated narrative body changed; review and pin a new snapshot")
-    return paragraphs, digest
+    expected_breaks = pin.get("scene_breaks", REVIEWED_SCENE_BREAKS.get(source["id"], []))
+    if check_hash and scene_breaks != expected_breaks:
+        raise DataError("Curated narrative scene breaks changed; review and pin a new snapshot")
+    return paragraphs, digest, scene_breaks
 
 
 def iter_documents(manifest, snapshot_dir):
@@ -239,10 +264,12 @@ def iter_documents(manifest, snapshot_dir):
     path = safe_relative(snapshot_dir, entry["path"])
     if path.stat().st_size > MAX_HTML_BYTES:
         raise DataError("Oversized curated narrative HTML")
-    paragraphs, digest = extract(path.read_bytes(), source)
+    paragraphs, digest, scene_breaks = _extract(path.read_bytes(), source)
     slug, url, _ = reviewed_page(source)
     pin, position, sentences = source["acquisition"], 0, []
     for ordinal, paragraph in enumerate(paragraphs):
+        if ordinal in scene_breaks:
+            sentences.append(CONTEXT_BREAK)
         sentences.append(
             {
                 "native_id": f"paragraph:{ordinal}",

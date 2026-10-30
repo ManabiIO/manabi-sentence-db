@@ -496,3 +496,81 @@ The inspected candidate `before-date` is excluded from this expansion because of
 explicit sexual content. `the-kitten-couldn-t-get-down` and `last-holiday` remain
 deferred because the inspected pages did not provide the required individual
 credit module. These exclusions are not a site-wide rights determination.
+
+
+### One additional curated Tale: 髭を剃ったあとは気分がいい。
+
+Reviewed the complete work and its body boundary on **2026-10-30**. The publisher
+[page](https://scp-jp.wikidot.com/feeling-good-after-shaving) credits
+**©︎aisurakuto (2020)** and links CC BY-SA 3.0 in its individual credit module.
+The [licensing guide](https://scp-jp.wikidot.com/licensing-guide) permits commercial
+reuse and adaptations under its attribution and ShareAlike terms, subject to its
+exceptions. This work's reviewed prose contains no identified imported quotation
+collection or narrative media, and no separate restriction was identified for it.
+The exact title, author, source and license remain attached with an extraction
+and sentence-splitting modification notice. The creation year is not a confirmed
+publication date. Publisher `jp` / `tale` tags and the FAQ support the
+`original_japanese` classification; human authorship remains `unknown`.
+
+The source `scp-jp-shaving-ja` pins revision **12**, revision timestamp
+`2026-09-24T23:08:35Z`, and reviewed inline body SHA-256
+`62006a02867311fa3c1cf12d15860ce62d38c75b57e8906da61d5d5fa4ebc57b`.
+The 2026-10-30 verification returned the same revision and complete body as the
+prior discovery cache. The only raw HTML difference was the request timestamp in
+the publisher's script; the new 55,694-byte HTML SHA-256 is
+`c7800bdceff2c6d809d83fc58bac9baf4ff6360b00c72e4c5173e5caf4114512`.
+This request-specific HTML value does not replace the semantic body/revision pin;
+immutable snapshots independently hash the exact raw bytes actually captured.
+
+The direct `page-content` boundary contains 65 `p` children, of which 57 are
+nonblank prose units (6,501 codepoints before inter-paragraph separators).
+All prose markup is `p` and authored `br`; there is no ruby or inline link in
+this work. The reviewed omitted siblings are credit/rating modules, clearing
+and empty layout divs, and an empty `hr` at the change of narrator. The scene
+boundary reserves a context gap before paragraph 38; prose from the two scenes
+is not presented as adjacent context. All 57 prose units are retained for ordinary
+splitting/filtering. No nested narrative prose was silently skipped. Title,
+credit, license, body/revision and fixed-URL checks remain strict, with an explicit
+scene-layout pin added for this work.
+
+This is psychological horror about a shaving product that severs unwanted
+relationships, followed by dependence on the product and its sales cycle. It
+includes contemporary domestic actions and sales conversation, emotional distress,
+supernatural imagery and short fragments. There is no identified explicit sexual
+passage or graphic injury, but the absence of heuristic content flags does not
+make it child-suitable. No sentence was rewritten or corrected. Whole-work
+admission review is not a native-speaker sentence-quality review: all admitted
+occurrences remain `unreviewed`, with no invented reviewer or translation data.
+
+A network-forbidden offline build with processor 5 and compressed JSONL shards
+produced **1 work, 291 occurrences, 286 distinct exact Japanese texts, and no
+translations**. Of 295 candidate fragments, four were rejected as too short:
+`宗教。`, `髭。`, `泡。`, and `俺だ。`. Forty-two original units were split, retaining
+exact source-unit context and offsets. Snapshot/build hashes, normalized ZIP CRC
+and member hashes, normalized database validation, SQLite integrity and foreign
+keys all passed. This is one additional work by an existing author; it adds no
+author diversity and these counts do not measure novelty against existing sources
+or marginal vocabulary coverage. Further works remain subject to their own rights,
+complete-text and boundary reviews.
+
+
+### Publisher context barriers
+
+`publisher-context-barriers-v1` preserves missing ordinals when a complete
+publisher unit is withheld before splitting (for example masked text,
+machine-generated text, malformed or oversized units). Later units must not
+be renumbered as if they were adjacent to earlier retained text. No text or
+metadata from the withheld unit is serialized as the barrier.
+
+Curated narrative extraction also reserves a gap at a publisher `<hr>` scene
+boundary, preserving the body text and its character offsets. Consecutive rules
+form one boundary; leading/trailing rules do not invent an empty scene. Optional
+`scene_breaks` pins list the zero-based nonblank paragraph positions following
+these rules and fail closed on drift. The reviewed shaving work has a boundary
+before paragraph 38; カモと商人 has boundaries before paragraphs 4, 9 and 59.
+These are extraction boundaries, not sentences or translated source units.
+
+This changes future derived builds. Existing snapshots remain reusable, and
+existing artifacts retain their own processor fingerprint and ordinal layout.
+A source-specific rebuild/refresh is required to adopt the corrected boundaries;
+do not edit released occurrence metadata in place.

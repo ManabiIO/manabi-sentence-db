@@ -187,7 +187,7 @@ or replace a live corpus automatically.
 
 
 The curated narrative allowlist also includes `scp-jp-duck-merchant-ja`,
-`scp-jp-id-photo-ja`, and `scp-jp-fixed-point-ja`; snapshot each separately with
+`scp-jp-id-photo-ja`, `scp-jp-fixed-point-ja`, and `scp-jp-shaving-ja`; snapshot each separately with
 `--mode full`. Cached raw snapshots remain immutable. The STAIR adapter accepts
 the legacy `stair-captions` role as well as the current `stair-tar` role so earlier
 verified snapshot manifests can be rebuilt without modifying their identities or

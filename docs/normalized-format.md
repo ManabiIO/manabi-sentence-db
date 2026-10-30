@@ -173,3 +173,25 @@ by one part instead of nearly a second full ZIP. Split assets require the comple
 archive inventory; the legacy exception only applies to unsplit releases.
 GitHub's total asset-count limit still
 applies and is checked before publication.
+
+
+### Publisher context barriers
+
+`publisher-context-barriers-v1` preserves missing ordinals when a complete
+publisher unit is withheld before splitting (for example masked text,
+machine-generated text, malformed or oversized units). Later units must not
+be renumbered as if they were adjacent to earlier retained text. No text or
+metadata from the withheld unit is serialized as the barrier.
+
+Curated narrative extraction also reserves a gap at a publisher `<hr>` scene
+boundary, preserving the body text and its character offsets. Consecutive rules
+form one boundary; leading/trailing rules do not invent an empty scene. Optional
+`scene_breaks` pins list the zero-based nonblank paragraph positions following
+these rules and fail closed on drift. The reviewed shaving work has a boundary
+before paragraph 38; カモと商人 has boundaries before paragraphs 4, 9 and 59.
+These are extraction boundaries, not sentences or translated source units.
+
+This changes future derived builds. Existing snapshots remain reusable, and
+existing artifacts retain their own processor fingerprint and ordinal layout.
+A source-specific rebuild/refresh is required to adopt the corrected boundaries;
+do not edit released occurrence metadata in place.

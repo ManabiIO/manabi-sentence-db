@@ -33,3 +33,4 @@ acquisition:
   timestamp: '2026-09-25T05:15:53Z'
   body_sha256: 4e85ec9b7e8cef50f8ec2c587bed7600f4c45a5ff8bf3fb801f714ac2ca2103d
   credit_author: ©︎aisurakuto
+  scene_breaks: [4, 9, 59]

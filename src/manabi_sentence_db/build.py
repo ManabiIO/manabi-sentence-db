@@ -19,7 +19,7 @@ import yaml
 import zstandard
 
 from . import PROCESSOR_VERSION, SCHEMA_VERSION
-from .segments import publisher_items
+from .segments import PUBLISHER_CONTEXT_VERSION, publisher_items
 from .serialization import (
     DataError,
     StrictLoader,
@@ -109,6 +109,12 @@ def canonical_document(
             record[field] = raw[field]
     occurrences: Counter = Counter()
     for ordinal, item in enumerate(publisher_items(raw, manifest, stats, excluded_flags)):
+        if item is None:
+            if manifest["source"]["adapter"] in {"wikimedia", "kyoto-wikipedia"}:
+                raise DataError("Unexpected context marker in presegmented source")
+            if PUBLISHER_CONTEXT_VERSION not in record["transformations"]:
+                record["transformations"].append(PUBLISHER_CONTEXT_VERSION)
+            continue
         if manifest["source"]["adapter"] == "kyoto-wikipedia":
             # Keep gaps from excluded pairs; spreadsheet/paragraph positions do
             # not authorize joining prose across omitted source material.
