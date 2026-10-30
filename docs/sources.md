@@ -234,6 +234,34 @@ snapshot, compressed normalization, deduplication/novelty and serving-size
 qualification remain required before a corpus addition. No full serving import
 is implied by enabling its source manifest.
 
+The enabled [ASDC main configuration](../sources/asdc-main-ja.yaml) pins
+Megagon Labs revision `f37d6575c73602adcb8ae3687520726793baa672`. Its
+[README](https://github.com/megagonlabs/asdc/blob/f37d6575c73602adcb8ae3687520726793baa672/README.md)
+explicitly licenses corpus text, annotations and documentation under CC BY 4.0;
+programs have a separate Apache license. The
+[collection documentation](https://github.com/megagonlabs/asdc/blob/f37d6575c73602adcb8ae3687520726793baa672/docs/dialog/collection.md)
+describes typed Slack role-play by 35 customers and two operators, all native
+Japanese speakers. This supports human original-Japanese dialogue provenance,
+without establishing sentence-level review or error-free learner examples.
+
+Only `data/main/dialog/json/001.json` through `210.json` are decoded. Archive
+root, exact inventory, member bounds and four publisher-evidence hashes are
+checked before turn decoding. Utterance identities, original turn ranges, role
+tags, source-member hashes and immutable citations survive; missing turn numbers
+and filtered units reserve context gaps. Scenario requirements, timestamps,
+pseudonym identifiers and all SCUD descriptions, original/supplemental/vanilla
+material are excluded. Project sentence segmentation uses the original published
+utterance text, without interpreting `text_sbs` against another string.
+
+The publisher documents NFKC/tab transformations and typo edits. The optional
+`text_fixed` field requires further schema qualification; the adapter fails
+closed if it appears rather than silently selecting a corrected or uncorrected
+version. A one-dialogue primary probe contains ordinary travel requests, polite
+service language and context-dependent replies. All 210 dialogues and their
+deduplicated usable-sentence count still need full compressed build, correction
+schema, quality, novelty and storage qualification before serving admission.
+Occurrences remain unreviewed. A configured adapter is not an activated corpus.
+
 The [Japanese Movie Recommendation Dialogue dataset](https://github.com/ku-nlp/JMRD)
 offers roughly 5,000 human dialogues under CC BY-SA 4.0, but includes external
 movie reviews, synopses, and other knowledge fields. Review the provenance and

@@ -1,0 +1,37 @@
+schema_version: 1
+id: asdc-main-ja
+title: Accommodation Search Dialog Corpus — main dialogues
+language: ja
+adapter: asdc
+homepage: https://github.com/megagonlabs/asdc
+license:
+  id: CC-BY-4.0
+  url: https://creativecommons.org/licenses/by/4.0/
+attribution:
+  text: Megagon Labs; Yuta Hayashibe. Accommodation Search Dialog Corpus; Self-Contained
+    Utterance Description Corpus for Japanese Dialog (LREC 2022), pp.1249–1255.
+  url: https://github.com/megagonlabs/asdc
+license_evidence:
+- https://github.com/megagonlabs/asdc/blob/f37d6575c73602adcb8ae3687520726793baa672/README.md
+- https://github.com/megagonlabs/asdc/blob/f37d6575c73602adcb8ae3687520726793baa672/LICENSE.txt
+- https://github.com/megagonlabs/asdc/blob/f37d6575c73602adcb8ae3687520726793baa672/docs/dialog/collection.md
+- https://github.com/megagonlabs/asdc/blob/f37d6575c73602adcb8ae3687520726793baa672/docs/dialog/format.md
+notes:
+- Main human Slack role-play utterances only; all participants were native Japanese
+  speakers according to collection documentation. No sentence-level native review
+  is claimed.
+- Exclude SCUDs, supplemental/vanilla examples, scenario requirements, profiles and
+  timestamps.
+- Publisher NFKC/tab transformations and typo edits predate ingestion. Any text_fixed
+  field fails closed pending review. text_sbs is not used; project splitting retains
+  source utterance provenance.
+- 210 dialogues is an inventory count, not a usable sentence or novelty count.
+acquisition:
+  revision: f37d6575c73602adcb8ae3687520726793baa672
+  url: https://codeload.github.com/megagonlabs/asdc/zip/f37d6575c73602adcb8ae3687520726793baa672
+  dialogue_count: 210
+  evidence_sha256:
+    README.md: 9a60f1c822e5a1c88c45fb81bf4983e71af9b7998b46a4514cd9e61695755244
+    LICENSE.txt: 9ba9550ad48438d0836ddab3da480b3b69ffa0aac7b7878b5a0039e7ab429411
+    docs/dialog/collection.md: 9fa48321d51afb5c2e6209832216e30b818c953245a1d0df976896c6c50c82e3
+    docs/dialog/format.md: daf61eff83c2bb035872c234d8114c1e87e2c20e8bfbf8c833bfd1c2972643ba
