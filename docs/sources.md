@@ -239,8 +239,10 @@ remain required before a corpus addition. No serving import is implied by
 enabling its source manifest. Processor source fingerprints identify the changed
 extraction; existing builds require a new output to apply it.
 
-The enabled [ASDC main configuration](../sources/asdc-main-ja.yaml) pins
-Megagon Labs revision `f37d6575c73602adcb8ae3687520726793baa672`. Its
+The enabled [Accommodation Search Dialog Corpus (ASDC) main
+configuration](../sources/asdc-main-ja.yaml) contains Japanese customer/operator
+role-play about finding accommodation. It pins Megagon Labs revision
+`f37d6575c73602adcb8ae3687520726793baa672`. Its
 [README](https://github.com/megagonlabs/asdc/blob/f37d6575c73602adcb8ae3687520726793baa672/README.md)
 explicitly licenses corpus text, annotations and documentation under CC BY 4.0;
 programs have a separate Apache license. The
@@ -273,11 +275,20 @@ output to apply it.
 The publisher documents NFKC/tab transformations and typo edits. The optional
 `text_fixed` field requires further schema qualification; the adapter fails
 closed if it appears rather than silently selecting a corrected or uncorrected
-version. A one-dialogue primary probe contains ordinary travel requests, polite
-service language and context-dependent replies. All 210 dialogues and their
-deduplicated usable-sentence count still need full compressed build, correction
-schema, quality, novelty and storage qualification before serving admission.
-Occurrences remain unreviewed. A configured adapter is not an activated corpus.
+version. A complete scan of all 210 pinned dialogues (4,270 turns) found no
+`text_fixed` fields, so adding correction-field support is not a prerequisite
+for this snapshot. A different snapshot containing those fields still requires
+separate schema qualification.
+
+After the 210 operator summaries are excluded, an in-memory run of the canonical
+admission gates retains 8,622 occurrences and 5,039 within-source distinct texts.
+These are source-only counts, not novelty against the serving corpus. An
+assistant-only sample found practical travel requests and polite service language,
+alongside short replies that require dialogue context. It establishes neither
+native quality review nor serving approval. Compressed normalization, native
+analysis, corpus novelty, final ranked-text/context review and storage qualification
+remain required before serving admission. Occurrences remain unreviewed. A
+configured adapter is not an activated corpus.
 
 The [Japanese Movie Recommendation Dialogue dataset](https://github.com/ku-nlp/JMRD)
 offers roughly 5,000 human dialogues under CC BY-SA 4.0, but includes external
