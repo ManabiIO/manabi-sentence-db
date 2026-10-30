@@ -127,3 +127,18 @@ def test_failed_scan_never_leaves_a_completed_selection(tmp_path):
     assert not (output / "selection.json").exists()
     with pytest.raises(DataError, match="fresh"):
         selection.select_wikimedia_documents(snapshot, output)
+
+
+def test_interrupted_allowlist_write_never_publishes_a_partial_selection(tmp_path, monkeypatch):
+    snapshot = create_demo_snapshot(tmp_path / "snapshot")
+    output = tmp_path / "out"
+    original = selection.write_json
+    def fail(path, value):
+        if path.name == ".selection.json.part":
+            path.write_text('{"schema_version":')
+            raise OSError("disk interrupted")
+        return original(path, value)
+    monkeypatch.setattr(selection, "write_json", fail)
+    with pytest.raises(OSError, match="interrupted"):
+        selection.select_wikimedia_documents(snapshot, output)
+    assert not (output / "selection.json").exists()

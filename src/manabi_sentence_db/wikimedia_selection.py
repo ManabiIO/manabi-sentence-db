@@ -12,7 +12,13 @@ import re
 from collections import Counter
 from pathlib import Path
 
-from .serialization import DataError, digest_json, require_new_directory, write_json
+from .serialization import (
+    DataError,
+    atomic_replace_file,
+    digest_json,
+    require_new_directory,
+    write_json,
+)
 from .snapshot import verify_snapshot
 from .wikimedia import (
     MAX_WIKITEXT_CHARACTERS,
@@ -173,5 +179,7 @@ def select_wikimedia_documents(snapshot, output, *, per_topic=1000, general=2000
         "note": "Metadata routing is a sampling heuristic, not sentence quality, human review or licensing approval. Build the selection through normal extraction and rights/quality gates. No topics certify contemporary language. Title/category metadata is retained; article-body and sentence text is not copied.",
     }
     write_json(output / "selection-report.json", report)
-    write_json(output / "selection.json", selection)
+    staged = output / ".selection.json.part"
+    write_json(staged, selection)
+    atomic_replace_file(staged, output / "selection.json")
     return output / "selection.json"
