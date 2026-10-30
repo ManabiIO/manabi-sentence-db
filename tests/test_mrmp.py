@@ -30,7 +30,7 @@ def dialogue():
                 {"utterance_id": 0, "text": "今日は公園を散歩しました。", "interlocutor_id": "private-person"},
                 {"utterance_id": 1, "text": "＊＊で働いています。"},
                 {"utterance_id": 2, "text": "川の水がきれいですね。"},
-                {"utterance_id": 5, "text": "@うさぎ 明日は図書館に行きます。"},
+                {"utterance_id": 5, "text": "明日は図書館に行きます。"},
             ]}
 
 
@@ -74,7 +74,7 @@ def test_human_turns_keep_text_identity_credit_and_context_without_private_field
     assert record["attribution"] == manifest["source"]["attribution"]
     assert PUBLISHER_CONTEXT_VERSION in record["transformations"]
     assert [row["text"] for row in record["sentences"]] == [
-        "今日は公園を散歩しました。", "川の水がきれいですね。", "@うさぎ 明日は図書館に行きます。",
+        "今日は公園を散歩しました。", "川の水がきれいですね。", "明日は図書館に行きます。",
     ]
     assert [row["ordinal"] for row in record["sentences"]] == [0, 2, 4]
     assert [row["source_range"]["start"] for row in record["sentences"]] == [0, 2, 5]
@@ -220,3 +220,62 @@ def test_corrupt_zip_is_a_displayable_corpus_error(tmp_path):
     (tmp_path / "mrmp.zip").write_bytes(b"bad ZIP")
     with pytest.raises(DataError, match="Invalid MRMP ZIP"):
         list(iter_documents(manifest, tmp_path))
+
+
+@pytest.mark.parametrize("addressed", [
+    "@たまねぎ 長野なんですね。",
+    "  @たまご 多分仲良くできそうですよ。",
+    "＠うどん それより西です。",
+    "今は猫でいいや！ @つくね",
+    "そうだぞ@つくね",
+    "今日は図書館へ行きます。\n@うさぎ 明日は公園へ行きます。",
+])
+@pytest.mark.parametrize("position", [0, 1, 2])
+def test_addressed_turn_is_withheld_before_segmentation_and_reserves_gap(
+    tmp_path, addressed, position
+):
+    from manabi_sentence_db.segments import CONTEXT_BREAK
+
+    value = dialogue()
+    value["utterances"] = [
+        {"utterance_id": i, "text": addressed if i == position else
+         "今日は公園を散歩しました。川の水がきれいですね。"}
+        for i in range(3)
+    ]
+    manifest, _ = fixture(tmp_path, value)
+    document = next(iter_documents(manifest, tmp_path))
+    assert document["sentences"][position] is CONTEXT_BREAK
+    record = canonical_document(document, manifest, Counter(), set())
+    assert addressed not in json.dumps(record, ensure_ascii=False)
+    assert all("@" not in s["text"] and "＠" not in s["text"] for s in record["sentences"])
+    assert [s["ordinal"] for s in record["sentences"]] == {
+        0: [1, 2, 3, 4], 1: [0, 1, 3, 4], 2: [0, 1, 2, 3],
+    }[position]
+
+
+def test_food_words_in_authored_prose_are_unchanged(tmp_path):
+    value = dialogue()
+    text = "たまねぎと卵を使って料理しました。"
+    value["utterances"] = [{"utterance_id": 0, "text": text}]
+    manifest, _ = fixture(tmp_path, value)
+    document = next(iter_documents(manifest, tmp_path))
+    assert document["sentences"][0]["text"] == text
+    record = canonical_document(document, manifest, Counter(), set())
+    assert [s["text"] for s in record["sentences"]] == [text]
+
+
+def test_addressed_turn_stays_out_of_compressed_normalized_export(tmp_path):
+    value = dialogue()
+    withheld = "今日は料理をしました。\n@たまねぎ 長野なんですね。"
+    value["utterances"][-1]["text"] = withheld
+    value["utterances"].append({"utterance_id": 6, "text": "明日は図書館に行きます。"})
+    manifest, _ = fixture(tmp_path, value)
+    path = tmp_path / "manifest.json"
+    write_json(path, manifest)
+    build_corpus([path], tmp_path / "build", record_format="jsonl", shard_compression="zstd")
+    result = export_normalized(tmp_path / "build", tmp_path / "normalized.zip")
+    with zipfile.ZipFile(result) as archive:
+        occurrences = [json.loads(line) for line in archive.read("occurrences.jsonl").splitlines()]
+        sentences = archive.read("sentences.jsonl").decode()
+    assert [row["ordinal"] for row in occurrences] == [0, 2, 5]
+    assert "@" not in sentences and "料理をしました" not in sentences

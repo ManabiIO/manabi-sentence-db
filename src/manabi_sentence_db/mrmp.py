@@ -89,6 +89,11 @@ def iter_documents(manifest, snapshot_dir):
                 if number != previous + 1:
                     sentences.append(CONTEXT_BREAK)
                 previous = number
+                if "@" in text or "＠" in text:
+                    # Pseudonym addresses can be ordinary dictionary words.
+                    # Withhold the whole turn before segmentation or unit context.
+                    sentences.append(CONTEXT_BREAK)
+                    continue
                 sentences.append({
                     "native_id": str(number), "text": text,
                     "source_range": {"unit": "utterance", "start": number, "end": number + 1},
