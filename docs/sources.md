@@ -253,6 +253,18 @@ pseudonym identifiers and all SCUD descriptions, original/supplemental/vanilla
 material are excluded. Project sentence segmentation uses the original published
 utterance text, without interpreting `text_sbs` against another string.
 
+The adapter excludes whole operator booking-summary checklists before sentence
+segmentation, reserving a context gap so their text cannot enter `source_unit`.
+The pinned 4,270-turn snapshot has 210 such turns: 209 consist entirely of
+middle-dot bullet lines; dialogue 033 has one exact publisher closing preamble
+before its bullets. Each has 6–14 bullet lines and at least two explicit booking
+slots (`日付は`, `人数は`, `行先は`, etc.). The narrow filter requires this
+structure and operator role; it preserves ordinary middle-dot prose, customer
+lists, short lists and unmatched preambles. No single-line checklist was found,
+so these are not excluded. Text is never rewritten. The processor source
+fingerprint identifies this changed extraction; existing builds require a new
+output to apply it.
+
 The publisher documents NFKC/tab transformations and typo edits. The optional
 `text_fixed` field requires further schema qualification; the adapter fails
 closed if it appears rather than silently selecting a corrected or uncorrected
