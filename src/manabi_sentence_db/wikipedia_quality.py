@@ -8,7 +8,7 @@ this is neither a readability model nor a calibrated JLPT assessment.
 import re
 import unicodedata
 
-WIKIPEDIA_QUALITY_VERSION = "wikipedia-example-quality-v3"
+WIKIPEDIA_QUALITY_VERSION = "wikipedia-example-quality-v4"
 
 _NUMBERS = re.compile(r"[0-9０-９]+(?:[.,．][0-9０-９]+)*")
 _KANJI = re.compile(r"[\u3400-\u4dbf\u4e00-\u9fff]")
@@ -24,6 +24,14 @@ _FOLLOWING_MATERIAL = re.compile(
     r"(?:の(?:とおり|通り|よう)|(?:に|を)(?:示|掲げ|参照)|参照)"
 )
 _ORPHAN = re.compile(r"^(?:は(?!虫類|虫|行)|を)(?=[一-鿿A-Za-z0-9])")
+_DANGLING_LIST = re.compile(
+    # A terminal introduction has no components/reasons in this sentence.
+    # Do not match 以下 as a numerical bound or a quoted expression.
+    r"(?:以下|下記)(?:から構成され(?:る|ている)|の理由による)[。．.!！?？]?\Z"
+    # This particle-led classification is left over after an omitted list.
+    r"|^と[、，,][0-9０-９一二三四五六七八九十]+(?:種類|種|つ)に"
+    r"(?:区分|分類|大別)され(?:る|ている)[。．.!！?？]?\Z"
+)
 # Require several distinct terms plus structural density. A single term, or
 # repeated mentions of one term, never establishes specialist density.
 _SPECIALIST = (
@@ -49,7 +57,8 @@ def assess_wikipedia_sentence(text: str) -> tuple[str | None, list[str]]:
     length = len(text)
     if length > 180:
         return "wikipedia-long-sentence", []
-    if _FOLLOWING_MATERIAL.search(text) or _ORPHAN.search(text):
+    if (_FOLLOWING_MATERIAL.search(text) or _ORPHAN.search(text)
+            or _DANGLING_LIST.search(text)):
         return "wikipedia-dependent-fragment", []
     symbols = sum(unicodedata.category(char) == "Sm" for char in text)
     if symbols >= 3 or (
