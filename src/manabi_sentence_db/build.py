@@ -470,6 +470,8 @@ def build_corpus(
                     from .realpersonachat import iter_documents
                 elif source["adapter"] == "mrmp":
                     from .mrmp import iter_documents
+                elif source["adapter"] == "asdc":
+                    from .asdc import iter_documents
                 elif source["adapter"] == "jmultiwoz":
                     from .jmultiwoz import iter_documents
                 elif source["adapter"] == "stair":

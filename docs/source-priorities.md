@@ -10,7 +10,8 @@ and language origin must remain unknown; translations do not become Japanese ori
 
 Wikipedia, Kyoto Wikipedia pairs, Wikivoyage, Wikibooks, archived Japanese
 Wikinews, Tatoeba, RealPersonaChat, MRMP multi-party chat, JMultiWOZ, STAIR Captions, JEC Basic
-Sentence Data, NICT ALT parallel news text, and individually curated SCP-JP Tales
+Sentence Data, NICT ALT parallel news text, ASDC main accommodation dialogues,
+and individually curated SCP-JP Tales
 『適性』『カモと商人』『証明写真』『定点観測』『髭を剃ったあとは気分がいい。』.
 Wikimedia and Tatoeba provenance does not establish blanket human authorship or
 original Japanese. Their releases preserve that uncertainty. Machine generation
@@ -48,7 +49,7 @@ pairs from source rows and from text overlap with Wikipedia.
 | JMRD | [Publisher](https://github.com/ku-nlp/JMRD), reported CC BY-SA 4.0 | Conversation, not copyrighted movie scripts. |
 | JMultiWOZ (enabled) | [Publisher](https://github.com/nu-dialogue/jmultiwoz), verified CC BY-SA 4.0 | Human role-play, preserve speaker/turn context without profiles. |
 | Multi-Party Chat / MRMP (enabled) | [Pinned publisher](https://github.com/nu-dialogue/multi-relational-multi-party-chat-corpus/tree/e6e39cb896df88781c7a2e0451226a527c5f1e2e), verified CC BY-SA 4.0 | Human conversation; only dialogue turns, exact README/LICENSE pins, no profiles/evaluations. |
-| ASDC | [Publisher](https://github.com/megagonlabs/asdc), reported CC BY 4.0 | Accommodation dialogues. |
+| ASDC main (enabled) | [Pinned publisher](https://github.com/megagonlabs/asdc/tree/f37d6575c73602adcb8ae3687520726793baa672), verified corpus CC BY 4.0 | 210 main human role-play dialogues; no SCUD descriptions, supplemental or vanilla material. |
 | JGLUE questions | [Publisher](https://github.com/yahoojapan/JGLUE), reported CC BY-SA 4.0 | Audit component and underlying passage rights separately. |
 | JaQuAD | [Publisher](https://github.com/SkelterLabsInc/JaQuAD), reported CC BY-SA 3.0 | Questions versus reused Wikipedia passages. |
 
