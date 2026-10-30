@@ -142,3 +142,14 @@ def test_interrupted_allowlist_write_never_publishes_a_partial_selection(tmp_pat
     with pytest.raises(OSError, match="interrupted"):
         selection.select_wikimedia_documents(snapshot, output)
     assert not (output / "selection.json").exists()
+
+
+def test_changed_selector_code_cannot_publish_a_mislabeled_plan(tmp_path, monkeypatch):
+    snapshot = create_demo_snapshot(tmp_path / "snapshot")
+    output = tmp_path / "out"
+    identities = iter(("a" * 64, "b" * 64))
+    monkeypatch.setattr(selection, "_implementation_sha256", lambda: next(identities))
+    with pytest.raises(DataError, match="implementation changed"):
+        selection.select_wikimedia_documents(snapshot, output)
+    assert not (output / "selection.json").exists()
+    assert not (output / "selection-report.json").exists()
