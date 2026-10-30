@@ -219,20 +219,25 @@ license metadata for this reviewed primary revision.
 Before decoding any dialogue, the adapter checks the exact publisher README and
 LICENSE SHA-256 values inside the ZIP. Only dialogue turns are exported; profiles,
 personality/demographic attributes, relationship fields, participant identifiers
-and evaluations are not corpus metadata. Authored names and mentions within the
-turn text are preserved, not rewritten. Original file identity, Git revision,
-raw member hash, turn IDs and immutable citations remain available. Masked turns
-and missing source units reserve context gaps. Short utterances may depend on
+and evaluations are not corpus metadata. Retained authored text is never rewritten.
+Turns containing ASCII or fullwidth at-sign address markers are withheld whole,
+before segmentation and original-unit context creation. Pseudonyms such as
+`@たまねぎ` otherwise make a food-word query match an address to another person.
+The reviewed archive has 20,524 turns containing `@` and 12 containing `＠`,
+including trailing and inline addresses. This is a conservative source-specific
+quality gate; the raw snapshot is retained, and no handle is stripped to create
+an invented sentence. Original file identity, Git revision,
+raw member hash, turn IDs and immutable citations remain available. Masked and
+addressed turns and missing source units reserve context gaps. Short utterances may depend on
 surrounding dialogue; human collection is not a project quality review.
 
-A bounded probe of two exact upstream Git blobs (214 turns) yielded 212 admitted
-occurrences / 206 distinct texts after splitting and minimum-length checks.
-It contains ordinary contemporary chat and some short, context-dependent
-fragments. This is an assistant-only adapter probe, not full-source or native
-quality certification; occurrence review state remains unreviewed. The complete
-snapshot, compressed normalization, deduplication/novelty and serving-size
-qualification remain required before a corpus addition. No full serving import
-is implied by enabling its source manifest.
+The full pinned snapshot and an assistant-only sample show ordinary contemporary
+chat alongside short, context-dependent fragments. Human collection is not native
+quality certification; occurrence review state remains unreviewed. Compressed
+normalization, novelty against the serving corpus, and serving-size qualification
+remain required before a corpus addition. No serving import is implied by
+enabling its source manifest. Processor source fingerprints identify the changed
+extraction; existing builds require a new output to apply it.
 
 The enabled [ASDC main configuration](../sources/asdc-main-ja.yaml) pins
 Megagon Labs revision `f37d6575c73602adcb8ae3687520726793baa672`. Its
