@@ -100,7 +100,7 @@ def sentence_spans(text: str, language: str = "ja") -> list[tuple[int, int]]:
             if (
                 japanese and line[i] in "!?！？" and i > 0
                 and line[i - 1].isascii() and line[i - 1].isalnum()
-                and line[i + 1:].startswith(("の", "は", "が", "を", "に", "で", "と", "も", "へ", "から", "まで"))
+                and line.startswith(("の", "は", "が", "を", "に", "で", "と", "も", "へ", "から", "まで"), i + 1)
             ):
                 i += 1
                 continue
@@ -118,15 +118,18 @@ def sentence_spans(text: str, language: str = "ja") -> list[tuple[int, int]]:
                 i = end
                 continue
             # Reporting clauses attach to the preceding quoted utterance.
-            if (
-                japanese
-                and end > before_closers
-                and line[end:].lstrip().startswith(
-                    ("と", "って", "など", "や", "を", "は", "が", "に", "の", "で", "も", "から", "まで")
-                )
-            ):
-                i = end
-                continue
+            if japanese and end > before_closers:
+                # Probe in place: copying the remaining paragraph at every
+                # quotation makes long, dialogue-rich lines quadratic.
+                following = end
+                while following < len(line) and line[following].isspace():
+                    following += 1
+                if line.startswith(
+                    ("と", "って", "など", "や", "を", "は", "が", "に", "の", "で", "も", "から", "まで"),
+                    following,
+                ):
+                    i = end
+                    continue
             left = start + len(line[start:end]) - len(line[start:end].lstrip())
             right = end - (len(line[start:end]) - len(line[start:end].rstrip()))
             if left < right:
