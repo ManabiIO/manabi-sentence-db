@@ -902,10 +902,56 @@ def _record_encoding(catalog, path=None):
     return record_format, compression
 
 
+def _zstd_shard_chunks(source):
+    """Feed one Zstandard block at a time, bounding each decoded allocation.
+
+    Standard blocks decode to at most 128 KiB, including one-byte RLE blocks.
+    Parsing only their envelope lets the native decoder check compressed data
+    and checksums without thousands of tiny calls or unbounded expansion bursts.
+    """
+    prefix = source.peek(18)[:18]
+    if not prefix.startswith(b"\x28\xb5\x2f\xfd"):
+        raise DataError("Invalid canonical zstd frame magic")
+    header_size = zstandard.frame_header_size(prefix)
+    header = source.read(header_size)
+    if len(header) != header_size:
+        raise DataError("Truncated canonical zstd frame header")
+    parameters = zstandard.get_frame_parameters(header)
+    decoder = zstandard.ZstdDecompressor(max_window_size=64 * 1024 * 1024).decompressobj()
+    decoder.decompress(header)
+    while True:
+        block = source.read(3)
+        if len(block) != 3:
+            raise DataError("Truncated canonical zstd block header")
+        descriptor = int.from_bytes(block, "little")
+        kind, size = (descriptor >> 1) & 3, descriptor >> 3
+        if kind == 3 or size > min(parameters.window_size, 128 * 1024):
+            raise DataError("Invalid or oversized canonical zstd block")
+        encoded_size = 1 if kind == 1 else size
+        payload = source.read(encoded_size)
+        if len(payload) != encoded_size:
+            raise DataError("Truncated canonical zstd block")
+        chunk = decoder.decompress(block + payload)
+        if len(chunk) > 128 * 1024 or decoder.unused_data:
+            raise DataError("Invalid canonical zstd block output")
+        yield chunk
+        if descriptor & 1:
+            break
+    if parameters.has_checksum:
+        checksum = source.read(4)
+        if len(checksum) != 4:
+            raise DataError("Truncated canonical zstd checksum")
+        if decoder.decompress(checksum):
+            raise DataError("Invalid canonical zstd checksum output")
+    if not decoder.eof or decoder.unused_data:
+        raise DataError("Truncated canonical zstd frame")
+    if source.read(1):
+        raise DataError("Trailing bytes after canonical zstd frame")
+
+
 def _shard_records(build, catalog, entry):
     """Decode one checked frame and bound each canonical record before parsing."""
     record_format, compression = _record_encoding(catalog, entry["path"])
-    decoder = zstandard.ZstdDecompressor(max_window_size=64 * 1024 * 1024).decompressobj() if compression == "zstd" else None
     limit = 32 * 1024 * 1024
     pending = bytearray()
     search_from = 0
@@ -919,13 +965,9 @@ def _shard_records(build, catalog, entry):
             raise DataError("Malformed canonical shard record") from exc
     try:
         with safe_relative(build, entry["path"]).open("rb") as source:
-            for chunk in iter(lambda: source.read(128 if decoder else 65536), b""):
-                if decoder:
-                    if decoder.eof:
-                        raise DataError("Trailing bytes after canonical zstd frame")
-                    chunk = decoder.decompress(chunk)
-                    if decoder.unused_data:
-                        raise DataError("Trailing bytes after canonical zstd frame")
+            chunks = (_zstd_shard_chunks(source) if compression == "zstd"
+                      else iter(lambda: source.read(65536), b""))
+            for chunk in chunks:
                 total += len(chunk)
                 if total > entry["documents"] * limit:
                     raise DataError("Canonical shard exceeds decompressed record bound")
@@ -947,8 +989,6 @@ def _shard_records(build, catalog, entry):
                 search_from = max(0, len(pending) - len(separator) + 1)
                 if len(pending) > limit:
                     raise DataError("Canonical record exceeds 32 MiB bound")
-            if decoder and not decoder.eof:
-                raise DataError("Truncated canonical zstd frame")
             if pending:
                 yield parse(pending)
     except zstandard.ZstdError as exc:

@@ -7,6 +7,7 @@ import zstandard
 from manabi_sentence_db.build import (
     ShardWriter,
     _shard_records,
+    _zstd_shard_chunks,
     build_corpus,
     iter_records,
     verify_build,
@@ -14,6 +15,95 @@ from manabi_sentence_db.build import (
 from manabi_sentence_db.demo import create_demo_snapshot
 from manabi_sentence_db.package import package_build, verify_package
 from manabi_sentence_db.serialization import DataError, sha256_file
+
+
+@pytest.mark.parametrize("checksum", [False, True])
+@pytest.mark.parametrize("content_size", [False, True])
+@pytest.mark.parametrize("kind", ["empty", "raw", "rle", "compressed"])
+def test_zstd_block_decoding_bounds_output_and_preserves_bytes(
+    tmp_path, checksum, content_size, kind
+):
+    data = {
+        "empty": b"", "raw": random.Random(20261031).randbytes(400_000),
+        "rle": b"x" * (1024 * 1024),
+        "compressed": "今日は公園に行きました。明日は家で本を読みます。".encode() * 6000,
+    }[kind]
+    frame = zstandard.ZstdCompressor(write_checksum=checksum, write_content_size=content_size).compress(data)
+    path = tmp_path / "blocks.zst"
+    path.write_bytes(frame)
+    with path.open("rb") as source:
+        chunks = list(_zstd_shard_chunks(source))
+    assert b"".join(chunks) == data
+    assert all(len(chunk) <= 128 * 1024 for chunk in chunks)
+    if kind in {"raw", "rle", "compressed"}:
+        assert len(chunks) >= 3
+
+
+@pytest.mark.parametrize("damage", [
+    "frame-header", "block-header", "raw-payload", "rle-payload", "checksum",
+    "checksum-value", "missing-last-block", "reserved-block", "oversized-block",
+    "small-window", "skippable", "skippable-prefix", "skippable-suffix",
+])
+def test_zstd_block_envelope_rejects_malformed_or_trailing_data(tmp_path, damage):
+    # Standard frame, omitted content size, 128 KiB window, one raw JSONL block.
+    header = b"\x28\xb5\x2f\xfd\x00\x38"
+    body = ((3 << 3) | 1).to_bytes(3, "little") + b"{}\n"
+    frame = header + body
+    skippable = b"\x50\x2a\x4d\x18\x00\x00\x00\x00"
+    if damage == "frame-header":
+        frame = header[:-1]
+    elif damage == "block-header":
+        frame = header + body[:2]
+    elif damage == "raw-payload":
+        frame = frame[:-1]
+    elif damage == "rle-payload":
+        frame = header + ((16 << 3) | 3).to_bytes(3, "little")
+    elif damage in {"checksum", "checksum-value"}:
+        frame = zstandard.ZstdCompressor(write_checksum=True).compress(b"{}\n")
+        frame = frame[:-1] if damage == "checksum" else frame[:-1] + bytes([frame[-1] ^ 1])
+    elif damage == "missing-last-block":
+        frame = header + (3 << 3).to_bytes(3, "little") + b"{}\n"
+    elif damage == "reserved-block":
+        frame = header + b"\x07\x00\x00"
+    elif damage == "oversized-block":
+        frame = header + ((131073 << 3) | 1).to_bytes(3, "little")
+    elif damage == "small-window":
+        frame = header[:-1] + b"\x00" + ((1025 << 3) | 1).to_bytes(3, "little")
+    elif damage == "skippable":
+        frame = skippable
+    elif damage == "skippable-prefix":
+        frame = skippable + frame
+    elif damage == "skippable-suffix":
+        frame += skippable
+    path = tmp_path / "bad.jsonl.zst"
+    path.write_bytes(frame)
+    catalog = {"options": {"record_format": "jsonl", "shard_compression": "zstd"}}
+    with pytest.raises(DataError, match="zstd"):
+        list(_shard_records(tmp_path, catalog, {"path": path.name, "documents": 1}))
+
+
+def test_zstd_block_reader_keeps_decoded_record_size_guard(tmp_path):
+    path = tmp_path / "oversized.jsonl.zst"
+    data = b'{"text":"' + b"x" * (32 * 1024**2) + b'"}\n'
+    path.write_bytes(zstandard.ZstdCompressor().compress(data))
+    catalog = {"options": {"record_format": "jsonl", "shard_compression": "zstd"}}
+    # Declared two documents keep the overall shard bound above this single
+    # oversized record, so the individual-record guard must still reject it.
+    with pytest.raises(DataError, match="Canonical record exceeds 32 MiB"):
+        list(_shard_records(tmp_path, catalog, {"path": path.name, "documents": 2}))
+
+
+def test_zstd_block_reader_accepts_small_window_and_rejects_wrong_content_size(tmp_path):
+    path = tmp_path / "small.jsonl.zst"
+    body = b"\x19\x00\x00{}\n"  # Last raw block, three payload bytes.
+    catalog = {"options": {"record_format": "jsonl", "shard_compression": "zstd"}}
+    entry = {"path": path.name, "documents": 1}
+    for header in (b"\x28\xb5\x2f\xfd\x00\x00", b"\x28\xb5\x2f\xfd\x20\x03"):
+        path.write_bytes(header + body)
+        assert list(_shard_records(tmp_path, catalog, entry)) == [{}]
+    path.write_bytes(b"\x28\xb5\x2f\xfd\x20\x04" + body)
+    with pytest.raises(DataError, match="zstd"):
+        list(_shard_records(tmp_path, catalog, entry))
 
 
 @pytest.mark.parametrize("record_format", ["yaml", "jsonl"])
