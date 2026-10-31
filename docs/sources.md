@@ -504,8 +504,15 @@ This supports human translation metadata and a source-level workflow description
 it does not establish per-record native review or a project quality certification.
 Japanese authorship remains unknown. Each row is a separate example-sentence work,
 with publisher ID, pinned revision, independent CC BY 4.0 attribution and no
-neighboring dialogue links. Deliberate Japanese bunsetsu spaces remain intact;
-the usual NFC and edge-whitespace normalization is disclosed. Publisher pairs
+neighboring dialogue links. The publisher paper identifies the Japanese ASCII
+spaces as bunsetsu annotation. Derived sentence text removes only those spaces
+under `talpco-bunsetsu-unspacing-v1`, restoring ordinary Japanese phrase searching
+and exact-text deduplication. English and other internal whitespace are unchanged.
+The raw pinned snapshot, row IDs, revision, paired-text source hash and citation
+remain available for reconstruction and audit; the work's transformation list
+discloses the derived spelling. Native analysis and offsets must be generated
+from the derived text, never reused from spaced text. The usual NFC and
+edge-whitespace normalization also applies. Publisher pairs
 remain whole, so splitting never falsely attaches a full English translation to
 a Japanese fragment. No full-source qualification, measured marginal growth or
 serving activation is implied by the adapter or upstream row count.

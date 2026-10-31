@@ -15,6 +15,8 @@ from manabi_sentence_db.snapshot import snapshot_identity
 from manabi_sentence_db.talpco import iter_documents, validate_source
 from manabi_sentence_db.validation import load_source, validate_record
 
+TRANSFORMATION = "talpco-bunsetsu-unspacing-v1"
+
 
 def fixture(tmp_path, *, ja=None, en=None):
     blobs = {
@@ -40,7 +42,7 @@ def fixture(tmp_path, *, ja=None, en=None):
     return manifest
 
 
-def test_pairs_join_by_id_preserve_spaces_and_publisher_provenance(tmp_path):
+def test_pairs_join_by_id_remove_annotation_spaces_and_preserve_publisher_provenance(tmp_path):
     manifest = fixture(tmp_path)
     stats = Counter()
     documents = list(iter_documents(manifest, tmp_path, stats=stats))
@@ -54,6 +56,7 @@ def test_pairs_join_by_id_preserve_spaces_and_publisher_provenance(tmp_path):
         assert record["authorship"] == "unknown"
         assert record["license"]["id"] == "CC-BY-4.0"
         assert "published_at" not in record
+        assert TRANSFORMATION in record["transformations"]
         translation = record["sentences"][0]["translations"][0]
         assert translation["generation"] == {"kind": "human"}
         assert translation["alignment"] == "human"
@@ -62,8 +65,41 @@ def test_pairs_join_by_id_preserve_spaces_and_publisher_provenance(tmp_path):
         assert "Nomoto" in translation["attribution"]["text"]
         assert "/eng/data_eng.txt" in translation["source_url"]
     sentence = records[0]["sentences"][0]
-    assert sentence["text"] == "公園には 大きな 池が あります。"
+    assert sentence["text"] == "公園には大きな池があります。"
     assert sentence["translations"][0]["text"] == "There is a large pond in the park."
+    assert records[0]["source_text_hash"] == hashlib.sha256(canonical_json({
+        "id": "101", "ja": "公園には 大きな 池が あります。",
+        "en": "There is a large pond in the park.",
+    })).hexdigest()
+
+
+def test_only_japanese_ascii_annotation_spaces_are_removed(tmp_path):
+    manifest = fixture(tmp_path, ja="101\t公園には\u00a0池が あります。\n205\t今日は 晴れです。\n".encode(),
+                       en=b"101\tThere is a pond.\n205\tIt is sunny.\n")
+    documents = list(iter_documents(manifest, tmp_path, stats=Counter()))
+    assert documents[0]["sentences"][0]["text"] == "公園には\u00a0池があります。"
+    assert documents[0]["sentences"][0]["translations"][0]["text"] == "There is a pond."
+
+
+def test_annotation_removal_deduplicates_text_without_merging_provenance(tmp_path):
+    manifest = fixture(tmp_path, ja="101\t公園には 大きな 池が あります。\n205\t公園には大きな池があります。\n".encode(),
+                       en=b"101\tThere is a large pond in the park.\n205\tThe park has a large pond.\n")
+    path = tmp_path / "manifest.json"
+    path.write_text(json.dumps(manifest))
+    build = tmp_path / "build"
+    build_corpus([path], build, record_format="jsonl")
+    normalized = export_normalized(build, tmp_path / "normalized.zip")
+    with zipfile.ZipFile(normalized) as archive:
+        sentences = [json.loads(line) for line in archive.read("sentences.jsonl").splitlines()]
+        works = [json.loads(line) for line in archive.read("works.jsonl").splitlines()]
+        occurrences = [json.loads(line) for line in archive.read("occurrences.jsonl").splitlines()]
+        translations = [json.loads(line) for line in archive.read("translations.jsonl").splitlines()]
+    assert len(sentences) == 1 and sentences[0]["text"] == "公園には大きな池があります。"
+    assert len(works) == len(occurrences) == len(translations) == 2
+    assert len({work["source_text_hash"] for work in works}) == 2
+    assert {work["native_id"] for work in works} == {"101", "205"}
+    assert all(TRANSFORMATION in work["transformations"] for work in works)
+    assert all(o["previous_id"] is None and o["next_id"] is None for o in occurrences)
 
 
 @pytest.mark.parametrize("ja,en", [
