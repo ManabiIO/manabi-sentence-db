@@ -415,7 +415,8 @@ recompile the consumer index to apply this change to existing records.
 [The interchange contract](docs/normalized-format.md#publisher-unit-segmentation)
 explains offsets, identity changes, context limits, and compatibility.
 
-Use `vocabulary-coverage` to compare unique analyzed lemmas and their marginal
+Use `vocabulary-coverage` to compare exact sentence overlap, new sentence text,
+unique analyzed lemmas and their marginal
 coverage against a fixed set of existing sources. Analysis has an explicit
 version and missing analysis is reported as unknown. This public pipeline does
 not include a proprietary tokenizer or treat substring counts as vocabulary.

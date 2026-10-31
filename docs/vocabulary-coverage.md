@@ -4,6 +4,9 @@ Sentence counts do not measure how much new vocabulary a source adds. This
 offline report compares distinct analyzed lemmas per source and new lemmas
 against a fixed baseline union. Exact normalized sentence IDs deduplicate
 repeated text across sources while preserving each source's membership.
+The same report measures exact sentence overlap against the baseline, even
+when token analysis is absent. Use this before native indexing to distinguish
+additional text from repeated occurrences or extra translations of existing text.
 
 The public corpus pipeline does not contain a Japanese tokenizer. Supply an
 analysis export produced by one explicitly identified tokenizer, lexicon, and
@@ -49,6 +52,8 @@ For each source, inspect:
 | Field | Meaning |
 | --- | --- |
 | `unique_sentences` | Exact distinct text identities represented in that source |
+| `sentences_shared_with_baseline` | Distinct sentence identities also present in any baseline source |
+| `novel_sentences_vs_baseline` | Distinct sentence identities absent from every baseline source, regardless of analysis availability |
 | `analyzed_sentences`, `missing_analysis`, `analysis_coverage` | Completeness of supplied analysis; missing is unknown |
 | `unique_lemmas` | Distinct lemmas in analyzed sentences |
 | `novel_lemmas_vs_baseline` | Lemmas absent from the fixed union of `--baseline-source` sources |
@@ -67,7 +72,11 @@ sentences or lemma sets in memory. Input archive and analysis digests make the
 comparison repeatable.
 
 Marginal counts overlap between candidate sources; they are not additive.
-Incomplete baseline analysis inflates apparent novelty, so compare completeness
-alongside novelty before selecting sources. Corpus breadth also needs register,
+With no baseline sources, all sentence identities are new relative to the empty
+baseline. Repeated occurrences never increase these sentence counts; different
+spellings remain different exact identities. Text overlap does not measure
+semantic novelty, quality, translation coverage or the eventual index size.
+Incomplete baseline analysis inflates apparent **vocabulary** novelty, so compare completeness
+alongside vocabulary novelty before selecting sources. Corpus breadth also needs register,
 construction, source-context and licensed-origin variety. These measurements
 do not establish naturalness, learner difficulty, or first-result quality.
