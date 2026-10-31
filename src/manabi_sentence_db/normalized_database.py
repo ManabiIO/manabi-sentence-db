@@ -96,6 +96,56 @@ def _check_text(row: dict, *, sentence: bool = False) -> None:
         raise DataError("Normalized sentence identity mismatch")
 
 
+def _provenance(archive, manifest, db):
+    """Preserve optional canonical provenance, verifying refinement bindings.
+
+    Standalone normalized archives predate embedded canonical catalogs. Keep
+    supporting those, but never discard or accept an incomplete refinement.
+    """
+    from .refinement import PARENT_PATH, verify_refinement
+
+    names = set(archive.namelist())
+
+    def read_member(name):
+        if name not in names:
+            raise DataError("Missing normalized provenance: " + name)
+        if archive.getinfo(name).file_size > MAX_RECORD_BYTES:
+            raise DataError("Oversized normalized provenance: " + name)
+        with archive.open(name) as stream:
+            value = stream.read(MAX_RECORD_BYTES + 1)
+        if len(value) > MAX_RECORD_BYTES:
+            raise DataError("Oversized normalized provenance: " + name)
+        return value
+
+    if "catalog.json" not in names:
+        if PARENT_PATH in names:
+            raise DataError("Refinement parent requires its canonical catalog")
+        return
+    catalog = _object(read_member("catalog.json"))
+    if catalog.get("build_id") != manifest.get("build_id"):
+        raise DataError("Normalized manifest/catalog build identity differs")
+    options = catalog.get("options", {})
+    if not isinstance(options, dict):
+        raise DataError("Invalid normalized canonical options")
+    parent_records = []
+
+    def checked_parent(entry):
+        raw = read_member(entry["path"])
+        if hashlib.sha256(raw).hexdigest() != entry["sha256"]:
+            raise DataError("Normalized refinement parent checksum differs")
+        parent_records.append(_object(raw))
+        return zipfile.Path(archive, entry["path"])
+
+    if ("refinement" in options or "refinement_parent" in catalog or PARENT_PATH in names):
+        if "refinement" not in options or "refinement_parent" not in catalog:
+            raise DataError("Incomplete normalized refinement receipt")
+        verify_refinement(catalog, checked_parent)
+    db.execute("INSERT INTO metadata VALUES (?,?)", ("catalog", canonical_json(catalog).decode()))
+    if parent_records:
+        db.execute("INSERT INTO metadata VALUES (?,?)",
+                   ("refinement_parent_catalog", canonical_json(parent_records[0]).decode()))
+
+
 def build_normalized_database(archive_path: Path, output: Path):
     if output.exists() or output.is_symlink():
         raise DataError("Choose a fresh SQLite output path")
@@ -108,6 +158,7 @@ def build_normalized_database(archive_path: Path, output: Path):
             db.execute(
                 "INSERT INTO metadata VALUES (?,?)", ("manifest", canonical_json(manifest).decode())
             )
+            _provenance(archive, manifest, db)
             for table in TABLES:
                 for row in _rows(archive, table, manifest):
                     # Sentence rows store their text/hash in typed columns;

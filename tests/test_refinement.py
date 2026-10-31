@@ -7,6 +7,7 @@ from collections import Counter
 from pathlib import Path
 
 import pytest
+import zstandard
 
 from manabi_sentence_db import build as builder
 from manabi_sentence_db import wikipedia_quality
@@ -15,6 +16,7 @@ from manabi_sentence_db.cli import main
 from manabi_sentence_db.database import build_database
 from manabi_sentence_db.demo import create_demo_snapshot
 from manabi_sentence_db.normalized import export_normalized
+from manabi_sentence_db.normalized_database import build_normalized_database
 from manabi_sentence_db.package import package_build, verify_package
 from manabi_sentence_db.refinement import PARENT_PATH, refine_wikipedia
 from manabi_sentence_db.serialization import (
@@ -237,7 +239,7 @@ def test_refined_lineage_survives_sqlite_and_every_release_transport(tmp_path, m
         embedded = json.loads(db.execute("SELECT value FROM metadata WHERE key='refinement_parent_catalog'").fetchone()[0])
         assert embedded == read_json(parent / "catalog.json")
     packaged = tmp_path / "release"
-    package_build(refined, packaged, include_sqlite=False)
+    package_build(refined, packaged, include_sqlite=True)
     verify_package(packaged)
     parent_bytes = (parent / "catalog.json").read_bytes()
     release = read_json(packaged / "release.json")
@@ -245,3 +247,46 @@ def test_refined_lineage_survives_sqlite_and_every_release_transport(tmp_path, m
         if asset["kind"] in {"jsonl-zip", "metadata-zip", "normalized-jsonl-zip"}:
             with zipfile.ZipFile(packaged / asset["path"]) as zipped:
                 assert zipped.read(PARENT_PATH) == parent_bytes
+    assert len(release["databases"]) == 1
+    database = release["databases"][0]
+    # Inspect the actual compressed release database, not the separate legacy
+    # canonical SQLite compiler exercised above.
+    restored = tmp_path / "restored-release.sqlite"
+    compressed = b"".join((packaged / name).read_bytes() for name in database["parts"])
+    restored.write_bytes(zstandard.ZstdDecompressor().decompress(compressed, max_output_size=1024**2))
+    assert sha256_file(restored) == database["uncompressed_sha256"]
+    with sqlite3.connect(restored) as db:
+        assert db.execute("PRAGMA user_version").fetchone()[0] == 2
+        embedded = dict(db.execute("SELECT key,value FROM metadata"))
+        assert json.loads(embedded["catalog"]) == verify_build(refined)
+        assert json.loads(embedded["refinement_parent_catalog"]) == read_json(parent / "catalog.json")
+
+
+@pytest.mark.parametrize("corruption", ["missing-parent", "changed-parent", "missing-catalog", "wrong-build", "missing-receipt"])
+def test_normalized_sqlite_refuses_incomplete_or_changed_refinement_before_publication(
+        tmp_path, monkeypatch, corruption):
+    parent = _parent(tmp_path, monkeypatch)
+    refined = tmp_path / "refined"
+    refine_wikipedia(parent, refined)
+    source = export_normalized(refined, tmp_path / "original.zip")
+    invalid = tmp_path / "invalid.zip"
+    with zipfile.ZipFile(source) as incoming, zipfile.ZipFile(invalid, "w", compression=zipfile.ZIP_DEFLATED) as out:
+        for name in incoming.namelist():
+            if (corruption == "missing-parent" and name == PARENT_PATH
+                    or corruption == "missing-catalog" and name == "catalog.json"):
+                continue
+            raw = incoming.read(name)
+            if corruption == "changed-parent" and name == PARENT_PATH:
+                raw += b"\n"
+            if name == "catalog.json":
+                catalog = json.loads(raw)
+                if corruption == "wrong-build":
+                    catalog["build_id"] = "different"
+                if corruption == "missing-receipt":
+                    catalog["options"].pop("refinement")
+                raw = json.dumps(catalog).encode()
+            out.writestr(name, raw)
+    output = tmp_path / "unpublished.sqlite"
+    with pytest.raises(DataError, match="provenance|Refinement|refinement|identity"):
+        build_normalized_database(invalid, output)
+    assert not output.exists()

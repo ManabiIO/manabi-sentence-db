@@ -19,6 +19,21 @@ or translation's `metadata_json`; deduplicating sentence text does not assign a
 new license or erase any originating work. These are metadata safeguards, not
 proof that a publisher owns every embedded passage or a legal clearance service.
 
+## Canonical refinement provenance in normalized SQLite
+
+When a normalized archive embeds `catalog.json`, the compiler preserves it in
+SQLite metadata and checks that its build ID matches the normalized manifest.
+Standalone v2 archives without a canonical catalog remain supported.
+
+For a refined Wikipedia build, the optional canonical catalog is accompanied by
+`lineage/parent.catalog.json`. Before publishing SQLite, the compiler checks the
+parent's exact hash, the refinement policy/parent identity, and unchanged source,
+snapshot, selection and license bindings. Missing or inconsistent refinement
+members fail closed. Both catalogs are retained in SQLite metadata, including
+when packaging takes the JSONL-to-normalized-SQLite route. This is provenance
+binding, not an independent replay of the original extraction or permission to
+redistribute unlicensed content. Text and attribution checks remain mandatory.
+
 ## Applying the fiction-source research
 
 The existing [source priorities](source-priorities.md) remain the source shortlist.
