@@ -558,7 +558,7 @@ available, and keep administrative/technical register labels.
 | [JSUT](https://sites.google.com/site/shinnosuketakamichi/publication/jsut) | Defer bulk import: text has mixed source licenses described in the archive; audio has separate use/redistribution restrictions. A future text-only subset needs file-level license review. |
 | [Aozora Bunko](https://www.aozora.gr.jp/guide/kijyunn.html) | Defer for the first contemporary-language corpus. Rights vary by work; public-domain works can be reused, while some in-copyright works have limited permission. Modern kana/kanji formatting alone does not establish contemporary vocabulary/style. |
 | Wikisource, Wikiquote, Wiktionary quotations | Defer generic extraction. A Wikimedia footer does not automatically license every quoted or transcribed third-party work, and much material is historical or not complete natural sentences. |
-| [SNOW T15](https://www.jnlp.org/GengoHouse/snow/t15) / [T23](https://www.jnlp.org/GengoHouse/snow/t23) | Indexed publisher pages specify CC BY 4.0 and manual Japanese simplification. Defer acquisition until the corrected primary XLSX links and inherited Tanaka/Tatoeba attribution are verified; direct pages still failed on recheck. English is inherited, not established as wholly human-translated. The simplified Japanese is the main potential addition; measure overlap rather than counting all source rows as novel. |
+| [SNOW T15](https://www.jnlp.org/GengoHouse/snow/t15) / [T23](https://www.jnlp.org/GengoHouse/snow/t23) | Corrected XLSX download locations are now verified through archived primary publisher pages and redirect handlers, and the files respond successfully. Keep admission on hold for inherited rights/attribution and observed rewrite-quality issues; see the [bounded recheck](#snow-simplified-japanese-acquisition-recheck-2026-10-31). English generation remains unknown. Measure exact novelty against Tanaka/Tatoeba rather than treating all rows as new sentences. |
 | [FLORES+](https://huggingface.co/datasets/openlanguagedata/flores_plus) | Eligible CC BY-SA 4.0 but lower priority: 2,009 public sentences per language, designed as an evaluation benchmark. Keep benchmark provenance/split labels; do not silently fold it into an unlabeled training corpus. |
 | [JSICK](https://github.com/verypluming/JSICK) | Defer pending rights-chain verification: publisher README says BY 4.0 but the repository LICENSE is BY-SA 4.0, and the original SICK sentence rights require separate verification. A translation repository license does not resolve its underlying English-source rights. Stress-test permutations/deleted particles are also unsuitable as blanket learner examples. |
 | [OPUS](https://opus.nlpl.eu/) as a whole | Not one licensable source. Review each component and its original sources. Human text mined into an automatic alignment must not be relabeled as machine-translated text. |
@@ -880,3 +880,56 @@ and size measurements remain required before activation. The publisher count
 is not a measured corpus increase.
 
 For the opt-in Global Voices source, raw HTML is local rights evidence, not a public snapshot asset: it still includes withheld third-party quotations and caption text. The adapter is absent from the raw snapshot workflow and `snapshot-pack` rejects its pages. Public corpus exports contain only the reviewed eligible Japanese paragraphs.
+
+
+## SNOW simplified Japanese acquisition recheck (2026-10-31)
+
+The original publisher landing domain remained unavailable at this recheck, but
+archived primary pages preserve the stated CC BY 4.0 grant, collection workflow,
+and January 7, 2020 alignment-correction notice. The linked publisher download
+handlers name the exact currently downloadable corrected workbooks:
+
+| Release | Archived primary evidence | Current corrected input | HTTP size and bounded structure |
+|---|---|---|---|
+| T15 | [Publisher page](https://web.archive.org/web/20230530064705id_/https://www.jnlp.org/GengoHouse/snow/t15), [download handler](https://web.archive.org/web/20211020153039id_/https://www.jnlp.org/cgi-priv/download.cgi?id=SNOW/T15) | [T15-2020.1.7.xlsx](https://filedn.com/lit4DCIlHwxfS1gj9zcYuDJ/SNOW/T15-2020.1.7.xlsx) | 3,634,132 bytes; `Sheet1`, `A1:D50001` |
+| T23 | [Publisher page](https://web.archive.org/web/20240416231728id_/https://www.jnlp.org/GengoHouse/snow/t23), [download handler](https://web.archive.org/web/20220529113914id_/https://www.jnlp.org/cgi-priv/download.cgi?id=SNOW/T23) | [T23-2020.1.7.xlsx](https://filedn.com/lit4DCIlHwxfS1gj9zcYuDJ/SNOW/T23-2020.1.7.xlsx) | 3,641,507 bytes; `平易化コーパス`, `A1:E34301`; separate `評価用`, `A1:Q101` |
+
+Both exact file URLs returned HTTP 200; bounded byte-range reads returned 206 and
+verified XLSX ZIP/workbook structure. These are observed availability/structure
+results, not complete-file integrity pins, admitted row counts or unique-text
+counts. No complete workbook was acquired or imported for this recheck.
+
+T15's publisher describes five laboratory students manually simplifying Japanese.
+T23's publisher describes seven crowdsourced simplifiers. This is evidence of
+human Japanese adaptation, not a claim that every rewrite is correct, independent
+of its original, or originally written in Japanese. T15 inherits its paired
+Japanese/English from [odashi/small_parallel_enja](https://github.com/odashi/small_parallel_enja),
+which identifies Tanaka as its source. T23 samples Tanaka outside T15. Retain
+original sentence identities, simplifier variants, any source correction, upstream
+attribution and an explicit adaptation notice. Do not attach a whole English pair
+to smaller Japanese fragments or count T23's seven evaluation variants as distinct
+source sentences.
+
+The [EDRDG Tanaka history](https://www.edrdg.org/wiki/Tanaka_Corpus.html) records the
+original public-domain declaration, later Tatoeba maintenance and CC-BY licensing;
+[Tatoeba's attribution FAQ](https://en.wiki.tatoeba.org/articles/show/faq) specifies
+CC BY 2.0 FR, Tatoeba credit and a link. Preserve inherited conditions alongside
+SNOW's CC BY 4.0 adaptation grant rather than relabeling the whole chain as a
+single newly authored work. Tanaka's documented textbook, book, song and other
+third-party origins remain an admission concern; a simplifier's license cannot
+authorize underlying copyrighted quotations. Publisher metadata does not resolve
+individual rows' underlying rights.
+
+Keep inherited English generation unknown. The [T23 paper](https://aclanthology.org/L18-1072.pdf)
+describes student translation, while EDRDG describes collection of sentence pairs;
+neither establishes the translation workflow of every inherited English row.
+T15 also retains lowercase, space-separated English tokenizer output; displaying
+it would require a separately reviewed transformation with exact raw provenance.
+
+Quality and exact novelty remain unqualified. Even a bounded T23 prefix exposes
+malformed Japanese (`Ab_1`) and meaning-changing substitutions (`Ab_3`, `Ab_7`).
+Fluency heuristics alone cannot validate preservation of meaning. The next useful
+step is a compressed, hash-pinned acquisition and a stratified source/variant
+review with exact overlap against the current corpus, before enabling an adapter
+or producing a serving candidate. No SNOW text is enabled or activated by this
+research update.

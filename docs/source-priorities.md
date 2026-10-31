@@ -10,7 +10,7 @@ and language origin must remain unknown; translations do not become Japanese ori
 
 Wikipedia, Kyoto Wikipedia pairs, Wikivoyage, Wikibooks, archived Japanese
 Wikinews, Tatoeba, RealPersonaChat, MRMP multi-party chat, JMultiWOZ, STAIR Captions, YJ Captions, JEC Basic
-Sentence Data, NICT ALT parallel news text, ASDC main accommodation dialogues,
+Sentence Data, NICT ALT parallel news text, ASDC main accommodation dialogues, TALPCo teaching examples,
 one opt-in Global Voices translated-news work (`globalvoices-65906-ja`),
 and individually curated SCP-JP Tales
 『適性』『カモと商人』『証明写真』『定点観測』『髭を剃ったあとは気分がいい。』.
@@ -114,12 +114,15 @@ apply the serving predicate filter before activation. Measure deduplicated overl
 with STAIR and existing text, actual result quality, and compressed/index growth
 before selecting how much to publish.
 
-SNOW T15/T23 remain candidates: the indexed primary pages specify CC BY 4.0 and
-manual Japanese simplification, but live landing-page downloads were unavailable
-on recheck. Verify the corrected XLSX download links and upstream Tanaka/Tatoeba
-attribution before enabling an adapter. Human simplification does not prove that
-all inherited English translations are human-created; leave their generation
-unknown unless more specific evidence is available.
+SNOW T15/T23 remain candidates. Archived publisher pages and download handlers
+now establish the exact live January 7, 2020 corrected XLSX URLs; see the
+[acquisition and rights-chain review](sources.md#snow-simplified-japanese-acquisition-recheck-2026-10-31).
+The publisher grants CC BY 4.0 and describes manual Japanese simplification, but
+inherited Tanaka/Tatoeba attribution and third-party origins require separate
+handling. A bounded T23 prefix also contains malformed or meaning-changing
+rewrites. Keep admission on hold pending source-specific provenance, quality and
+exact-overlap review. Do not label inherited English as human-translated merely
+because the Japanese was simplified by people.
 
 
 ### Parallel-text quality diagnostics
@@ -130,7 +133,7 @@ errors. Parallel provenance and open licensing do not certify translation accura
 bounded compressed review packet from existing builds. Numeric differences are
 review signals only; magnitude/date/identifier notation is skipped conservatively.
 The diagnostic rejects or corrects no pair automatically. A separate assistant
-review now withholds seven exact ALT pairs with conflicting quantities/years or
+review now withholds eight exact ALT pairs with conflicting quantities/years or
 unrelated content. Their paired-text hashes and article URLs are pinned in
 `alt_reviewed_exclusions.json`; changed text fails closed for fresh review.
 Publisher ordinals retain gaps, and no side is rewritten or certified correct.
