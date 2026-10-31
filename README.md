@@ -1,5 +1,9 @@
 # Manabi Sentence DB
 
+See the [current corpus progress and resume checkpoint](docs/corpus-progress.md)
+before starting another acquisition or build. It distinguishes reusable completed
+artifacts from pending quality and integration checks.
+
 Optional [TUBELEX Japanese external citations](docs/tubelex-external-citations.md)
 can be built privately beside a downloaded corpus release. This separate opt-in
 step indexes manual captions for literal substring searches and emits only timed
