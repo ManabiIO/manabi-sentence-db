@@ -120,3 +120,19 @@ on recheck. Verify the corrected XLSX download links and upstream Tanaka/Tatoeba
 attribution before enabling an adapter. Human simplification does not prove that
 all inherited English translations are human-created; leave their generation
 unknown unless more specific evidence is available.
+
+
+### Parallel-text quality diagnostics
+
+ALT's method-unknown Japanese/English pairs can contain source numeric or wording
+errors. Parallel provenance and open licensing do not certify translation accuracy.
+`audit-parallel-numbers` now prepares a text-free count report and an optional
+bounded compressed review packet from existing builds. Numeric differences are
+review signals only; magnitude/date/identifier notation is skipped conservatively.
+The diagnostic rejects or corrects no pair automatically. A separate assistant
+review now withholds seven exact ALT pairs with conflicting quantities/years or
+unrelated content. Their paired-text hashes and article URLs are pinned in
+`alt_reviewed_exclusions.json`; changed text fails closed for fresh review.
+Publisher ordinals retain gaps, and no side is rewritten or certified correct.
+This does not turn the remaining pairs into reviewed translations. See the
+operations guide.

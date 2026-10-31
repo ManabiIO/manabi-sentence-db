@@ -1,0 +1,60 @@
+{
+  "archive_sha256": "05f7b31b517d4c4e074bb7fb57277758c0e3e15d1ad9cfc5727e9bce79b07bbd",
+  "claim": "Exact paired-text conflicts reviewed by an assistant. Neither side is rewritten or certified correct; no human/native review is claimed.",
+  "pairs": [
+    {
+      "english_sha256": "e1c0d4246de77964d149005649104722c011c8f37292230b3cbc078e91b96e28",
+      "japanese_sha256": "906d969d3bc948661671726f036c004e7cfdcd1f3ff9697dfb3ba6bba0f94d78",
+      "native_id": "SNT.140237.6185",
+      "original_url": "http://en.wikinews.org/wiki/Wikinews_interviews_Rich_Mann_and_Kevin_Smith_of_the_United_States_Australian_Football_League_about_the_upcoming_National_Championship",
+      "reason": "conflicting-field-dimension"
+    },
+    {
+      "english_sha256": "b1f5f63b83d68138b681983a93ad044c5dff50a700630aac2f7eb132a2461af3",
+      "japanese_sha256": "0f6b127d6af75e4cc2cf407cdfaf5f7fa750d85a1eb2a27c7898c61dd929b947",
+      "native_id": "SNT.150749.14690",
+      "original_url": "http://en.wikinews.org/wiki/Building_collapses,_leaving_four_dead_in_Hong_Kong",
+      "reason": "unrelated-source-translation-pair"
+    },
+    {
+      "english_sha256": "3c0986e4a346bfc6aa074e3c7787baadd890f43af592e8b4f0cd832fb3151519",
+      "japanese_sha256": "989764ff4e42618e17f2b174375fae90cf7407dfa0c2df9e167d83e3817e7b5e",
+      "native_id": "SNT.187876.2053",
+      "original_url": "http://en.wikinews.org/wiki/Canada_keeping_eye_on_Deepwater_Horizon_spill",
+      "reason": "conflicting-speed-value"
+    },
+    {
+      "english_sha256": "1678067c7c834dd6b6f781af477e3bac382d458543f4a3ce76e1f65634b339c5",
+      "japanese_sha256": "378f014dd129d5f5c757439cbe5909cdfdb582695945d821101f6b41b9cc919b",
+      "native_id": "SNT.34871.18284",
+      "original_url": "http://en.wikinews.org/wiki/No_hotel_previously_on_site_of_proposed_Buffalo,_N.Y._hotel_location",
+      "reason": "conflicting-year"
+    },
+    {
+      "english_sha256": "a387a7bf156c5b58f4ff00e931adcd75df95c3bef12935f6081144080e356bf3",
+      "japanese_sha256": "b57af57ca3b8ca6432988faff974a53c64f83a60fd2604161d1ef57064a5ed2b",
+      "native_id": "SNT.4994.5024",
+      "original_url": "http://en.wikinews.org/wiki/Romanian_leu_continues_to_surge",
+      "reason": "conflicting-exchange-rate"
+    },
+    {
+      "english_sha256": "2705d535d3d6ed0c6c37e0fa6c28817032f6ab6e726791ff3dc00bf6011d2674",
+      "japanese_sha256": "90553669190dfd022be7afa214ae97e935fc325a301861fffca3cfb5d4c87570",
+      "native_id": "SNT.51653.8348",
+      "original_url": "http://en.wikinews.org/wiki/US_Nationwide_Pollution_Permit_Restrictions_Upheld",
+      "reason": "conflicting-year"
+    },
+    {
+      "english_sha256": "c255ef8d65276c6c97c46b5ab5a699289dfac057474dce22fb312fe86475665e",
+      "japanese_sha256": "c395a5f759fdcaa968b1bda07b84578c5fb3d81d2fbd78d1a1820a12ec798bc1",
+      "native_id": "SNT.998779.5020",
+      "original_url": "http://en.wikinews.org/wiki/Local_government_elections_held_in_Balochistan,_Pakistan",
+      "reason": "conflicting-turnout-value"
+    }
+  ],
+  "policy": "alt-reviewed-pair-exclusions-v1",
+  "release": "20191206",
+  "reviewed_at": "2026-10-31",
+  "reviewer": "assistant",
+  "schema_version": 1
+}

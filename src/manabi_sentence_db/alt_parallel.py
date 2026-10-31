@@ -2,11 +2,13 @@
 
 import hashlib
 import re
+import unicodedata
 import zipfile
 from collections import Counter, defaultdict
+from pathlib import Path
 from urllib.parse import unquote
 
-from .serialization import DataError, safe_relative
+from .serialization import DataError, parse_json, safe_relative
 from .text import is_complete_sentence
 
 ROLE = "alt-parallel-zip"
@@ -14,6 +16,46 @@ PREFIX = "ALT-Parallel-Corpus-20191206/"
 MAX_MEMBER_BYTES = 16 * 1024**2
 MAX_TOTAL_BYTES = 100 * 1024**2
 EN_LICENSE = {"id": "CC-BY-2.5", "url": "https://creativecommons.org/licenses/by/2.5/"}
+
+
+_REVIEW_DATA = Path(__file__).with_name("alt_reviewed_exclusions.json").read_bytes()
+_REVIEW = parse_json(_REVIEW_DATA.decode())
+if (not isinstance(_REVIEW, dict) or _REVIEW.get("schema_version") != 1
+        or _REVIEW.get("policy") != "alt-reviewed-pair-exclusions-v1"
+        or type(_REVIEW.get("schema_version")) is not int
+        or _REVIEW.get("release") != "20191206" or _REVIEW.get("reviewer") != "assistant"
+        or not isinstance(_REVIEW.get("archive_sha256"), str)
+        or not re.fullmatch(r"[0-9a-f]{64}", _REVIEW["archive_sha256"])
+        or not isinstance(_REVIEW.get("pairs"), list) or not 1 <= len(_REVIEW["pairs"]) <= 1000):
+    raise DataError("Invalid reviewed ALT pair inventory")
+REVIEW_EXCLUSIONS = {}
+for _pair in _REVIEW["pairs"]:
+    if (not isinstance(_pair, dict) or set(_pair) != {"native_id", "japanese_sha256", "english_sha256", "reason", "original_url"}
+            or not isinstance(_pair["native_id"], str)
+            or not re.fullmatch(r"SNT\.[1-9][0-9]*\.[1-9][0-9]*(?:-[0-9]+)?", _pair["native_id"])
+            or _pair["native_id"] in REVIEW_EXCLUSIONS
+            or any(not isinstance(_pair.get(k), str) or not re.fullmatch(r"[0-9a-f]{64}", _pair[k])
+                   for k in ("japanese_sha256", "english_sha256"))
+            or _pair.get("reason") not in {"conflicting-speed-value", "conflicting-turnout-value", "conflicting-exchange-rate",
+                                          "conflicting-field-dimension", "conflicting-year", "unrelated-source-translation-pair"}
+            or not isinstance(_pair["original_url"], str)
+            or not re.fullmatch(r"https?://en\.wikinews\.org/wiki/[^\s]+", _pair["original_url"])):
+        raise DataError("Invalid reviewed ALT pair entry")
+    REVIEW_EXCLUSIONS[_pair["native_id"]] = _pair
+REVIEW_TRANSFORMATION = "alt-reviewed-pair-exclusions-v1:" + hashlib.sha256(_REVIEW_DATA).hexdigest()
+
+
+def reviewed_pair_reason(identity, text, original, url):
+    """Withhold only the independently reviewed, exact hash-pinned pair."""
+    pair = REVIEW_EXCLUSIONS.get(identity)
+    if pair is None:
+        return None
+    def digest(value):
+        return hashlib.sha256(unicodedata.normalize("NFC", value.strip()).encode()).hexdigest()
+    if (digest(text) != pair["japanese_sha256"] or digest(original) != pair["english_sha256"]
+            or url != pair["original_url"]):
+        raise DataError("Reviewed ALT pair changed; review new source text before admission")
+    return pair["reason"]
 
 
 def _rows(data, pattern, *, pairs=False):
@@ -91,6 +133,9 @@ def iter_documents(manifest, snapshot_dir, *, stats):
                   or english_id in english_duplicates or identity.endswith("-"))
         grouped[article].append((identity, text, original, defect))
     stats["url-map-articles-without-pairs"] += len(urls) - len(grouped)
+    if (acquisition.get("sha256") == _REVIEW["archive_sha256"]
+            and not set(REVIEW_EXCLUSIONS).issubset(identity for identity, _ in japanese)):
+        raise DataError("Reviewed ALT pair inventory is missing from its pinned release")
     for article, rows in grouped.items():
         url = urls["URL." + article]
         if not re.fullmatch(r"https?://en\.wikinews\.org/wiki/[^\s]+", url):
@@ -116,6 +161,11 @@ def iter_documents(manifest, snapshot_dir, *, stats):
                 reason = "quotation-or-title"
             elif not is_complete_sentence(text):
                 reason = "incomplete-prose"
+            reviewed = reviewed_pair_reason(identity, text, original, url)
+            if reviewed:
+                stats["rejected:alt-reviewed-pair"] += 1
+                stats["reviewed-pair-exclusion:" + reviewed] += 1
+                continue
             if reason:
                 stats["rejected:alt-" + reason] += 1
                 continue
