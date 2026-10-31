@@ -206,15 +206,51 @@ crawl delay; acquisition must use one worker, persistent snapshots, explicit
 opt-in refreshes and at least that spacing, including retries. Do not request
 disallowed paths or fetch embedded media.
 
-A future pilot should select a small, explicit article inventory, retain raw
-responses and per-work exception evidence, and verify full author/translator
-metadata rather than relying on the API's numeric author alone. Separate prose
-from captions, external quotations, embedded posts and partner republications.
-Retain ordinal gaps across omissions. Article-level language links do not
-establish sentence alignment: no bilingual pairs should be inferred from matching
-paragraph positions. No Global Voices adapter, snapshot or corpus admission is
-enabled by these checks. Existing Kyoto/ALT additions and the queued Wikipedia
-and dialogue expansion remain ahead of this pilot.
+A subsequent bounded pilot captured the four most recent Japanese article pages
+listed below, one discovery response, and the publisher policy/robots responses.
+Every request used one worker with at least ten seconds between attempts; no
+media or linked original articles were fetched. These are acquisition and rights
+findings, not admitted article or sentence counts.
+
+| Japanese article | Publisher bylines | Original / Japanese publication dates | Admission finding |
+| --- | --- | --- | --- |
+| [65749: ロシアの朝鮮人の困難な歩みを振り返る](https://jp.globalvoices.org/2026/10/26/65749/) | Daria Dergacheva, writer (English); Mitsuo Sugano, translator (Japanese); Miyu Yamamoto, proofreader | 2024-06-24 / 2026-10-26 | Candidate editorial prose; the recent translation date does not make the reporting current. Caption blocks include fair-use and separately licensed media notices. |
+| [65906: 太平洋で緊張が高まるなか、日本の若者が平和運動の新しいかたちを模索](https://jp.globalvoices.org/2026/10/23/65906/) | Jo Carter, writer (English) and translator (Japanese) | 2026-09-25 / 2026-10-23 | Candidate editorial prose; six direct quote blocks, a translation-tabs block and additional quotations inside ordinary paragraphs require exclusions. The same writer/translator name does not establish Japanese-original text. |
+| [65764: 2026年8月27日、ネパール土石流災害翌日の記者の記録](https://jp.globalvoices.org/2026/10/15/65764/) | Nepali Times, writer (English); Miyu Yamamoto, translator (Japanese); introduction credits Suman Nepali | 2026-08-31 / 2026-10-15 | Exclude pending independent rights evidence: the introduction expressly describes edited republication under a content-sharing agreement with Nepali Times. This is not evidence of a downstream commercial/adaptation grant from that partner. |
+| [65886: 沖縄の米軍基地が阻む、琉球先住民族の認知と権利の訴え](https://jp.globalvoices.org/2026/10/09/65886/) | Jo Carter, writer (English) and translator (Japanese) | 2026-08-10 / 2026-10-09 | Candidate editorial prose; includes external quoted text and its Japanese translation in separate blockquotes, plus inline quotations and captions. |
+
+All four explicitly label Japanese as a translation and name English as the
+writer's language. Preserve both article-level dates, the original article URL,
+and every credited contributor/role. The API's single numeric `author` field is
+insufficient: the rendered Japanese pages supply translator and proofreading
+credits, and the partner introduction supplies an additional original writer.
+Publisher AI policy and a proofreading byline do not certify native-speaker
+review or the translation method for each sentence. Keep those claims unknown;
+retain the observed translation direction separately.
+
+The precise remaining admission work is a reviewed, hash-pinned inventory of
+eligible editorial paragraphs for each selected work. A generic `entry p`
+selector would include photo captions, partner text and quotations; discarding
+only `blockquote` misses quotes within otherwise ordinary paragraphs. Withhold
+entire affected paragraphs, promotional/translator notes and credit modules,
+and reserve context gaps across every omitted block. Fail closed on changed
+body text, bylines, dates, original links, exceptions or unfamiliar body markup.
+The general footer license cannot override a per-work exception.
+
+The next bounded step can use the already captured 65906 page **offline** to
+review and pin narrative-only paragraph ordinals/hashes, its two Jo Carter
+bylines, English original URL, both publication dates and CC BY 3.0 evidence.
+Before admission, a separately bounded acquisition must also check the
+[linked English original](https://globalvoices.org/2026/09/25/young-japanese-find-new-outlets-for-peace-activism-amid-rising-tensions-in-the-pacific/)
+for work-specific notices; this pilot did not capture or verify that version.
+Keep 65764 out of that inventory. An eventual explicitly selected inventory
+adapter needs synthetic fixtures covering partner notices, inline and block
+quotes, missing credits, date/direction drift and context gaps before acquisition
+or corpus admission. Article-level language links do not establish sentence
+alignment: no bilingual pairs should be inferred from matching paragraph
+positions. No Global Voices adapter or source manifest is enabled by this pilot.
+Existing Kyoto/ALT additions and the queued Wikipedia and dialogue expansion
+remain ahead of it.
 
 ### Conversational corpora
 
