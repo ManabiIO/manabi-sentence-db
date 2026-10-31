@@ -142,6 +142,8 @@ def test_flags_are_annotations_instead_of_blanket_rejection():
     "身体的虐待を受けた。",
     "彼は顔を殴られた。",
     "男が通行人を殴った。",
+    "船は魚雷に撃たれた。",
+    "船が機雷に撃たれた。",
     "クリッチフィールドは更に、子供達に、食べ物を食べ、飲み続けたうえで、自分達の吐物を食べるように強いた。",
     "嘔吐物を飲むよう強要された。",
 ])
@@ -152,6 +154,9 @@ def test_reviewed_assault_abuse_and_forced_ingestion_receive_violence_flag(text)
 @pytest.mark.parametrize("text", [
     "射撃競技で優勝した。",
     "射撃場で標的を撃った。",
+    "落雷に撃たれる方が確率は高い。",
+    "雷に撃たれた木が倒れた。",
+    "稲妻に撃たれたことがある。",
     "メモを殴り書きしてから出かけた。",
     "電話番号を殴り書いた。",
     "患者の嘔吐物を検査した。",
@@ -164,6 +169,19 @@ def test_reviewed_assault_abuse_and_forced_ingestion_receive_violence_flag(text)
 ])
 def test_sport_shooting_and_vomiting_without_ingestion_coercion_are_unflagged(text):
     assert assess_sentence(text) == (True, [], None)
+
+
+def test_lightning_exception_does_not_hide_a_separate_shooting_mention():
+    assert assess_sentence("雷に撃たれた兵士が、その後に銃で撃たれた。") == (True, ["violence"], None)
+
+
+def test_whole_unit_flags_are_independent_of_sentence_admission():
+    from manabi_sentence_db.text import content_flags
+
+    text = "学校襲撃についての長い説明。" * 60
+    assert content_flags(text) == ["violence"]
+    accepted, flags, reason = assess_sentence(text)
+    assert not accepted and reason == "too-long" and flags == content_flags(text)
 
 
 @pytest.mark.parametrize("text", [

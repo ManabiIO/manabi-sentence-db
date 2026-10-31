@@ -11,7 +11,7 @@ from __future__ import annotations
 import re
 import unicodedata
 
-TEXT_PROCESSOR_VERSION = "ja-conservative-v9"
+TEXT_PROCESSOR_VERSION = "ja-conservative-v10"
 PUBLISHER_SEGMENTER_VERSION = "publisher-unit-segmentation-v1"
 OMITTED_MARKUP = "\ufffc"
 
@@ -45,7 +45,10 @@ _FLAGS = {
     ),
     "violence": re.compile(
         r"殺人|殺害|虐殺|拷問|斬首|暴行|惨殺|銃殺"
-        r"|襲撃|家庭内暴力|児童虐待|身体的虐待|殴(?:[らるれろっ]|り(?!書))|撃たれ"
+        r"|襲撃|家庭内暴力|児童虐待|身体的虐待|殴(?:[らるれろっ]|り(?!書))"
+        # Struck by lightning is not a shooting. Scope the exception to this
+        # occurrence, so a separate shooting in the same unit still flags it.
+        r"|[魚機地爆]雷に撃たれ|(?<!雷に)(?<!稲妻に)撃たれ"
         # Vomiting alone is not a trigger. Require ingestion plus explicit
         # coercion in the same short clause; do not cross sentence boundaries.
         r"|(?:嘔吐物|吐瀉物|吐物)を(?:食べ|飲)[^。｡！？!?\n]{0,24}(?:強い|強要)"
@@ -166,6 +169,16 @@ def is_complete_sentence(text: str, language: str = "ja") -> bool:
     return bool(stripped) and stripped[-1] in endings
 
 
+def content_flags(text: str) -> list[str]:
+    """Annotate a whole publisher unit independently of sentence admission.
+
+    Offline consumers can refresh inherited annotations without interpreting a
+    source unit's length or form as a new admission decision. These lexical
+    heuristics do not certify safety, intent or human review.
+    """
+    return sorted(name for name, pattern in _FLAGS.items() if pattern.search(text))
+
+
 def assess_sentence(
     text: str, language: str = "ja", *, max_length: int = 500
 ) -> tuple[bool, list[str], str | None]:
@@ -175,7 +188,7 @@ def assess_sentence(
     can be flagged too, and unrecognized harmful text can pass. Do not advertise
     this output as child-safe or as human-reviewed.
     """
-    flags = sorted(name for name, pattern in _FLAGS.items() if pattern.search(text))
+    flags = content_flags(text)
     if len(text.strip()) < 4:
         return False, flags, "too-short"
     if len(text) > max_length:

@@ -77,7 +77,7 @@ posting index and compressed payload store without changing this interchange mod
 
 ## Publisher-unit segmentation
 
-The current Japanese text processor `ja-conservative-v9` recognizes the
+The current Japanese text processor `ja-conservative-v10` recognizes the
 half-width Japanese full stop `｡` as a boundary alongside `。`. Source spelling
 and Unicode-codepoint ranges are preserved; quotations and parentheses retain
 the same boundary protection. This does not infer new unpunctuated boundaries
@@ -97,6 +97,14 @@ child/physical abuse, being shot, and explicitly coerced ingestion of vomit.
 Ordinary sport shooting and medical mentions of vomiting are not added triggers.
 Public annotations and private occurrence/context exclusions require rebuilt
 source artifacts to incorporate these rules; existing releases are unchanged.
+
+Version 10 excludes `雷に撃たれ` / `稲妻に撃たれ` from the passive-shooting
+trigger. This exception applies only to that match, leaving separate violence
+mentions in the same publisher unit detectable. The public `content_flags()`
+helper annotates whole publisher units independently of sentence admission, so
+offline consumers can refresh inherited annotations without rejecting a long
+unit as though it were a single sentence. It does not relabel existing archives
+or an active serving corpus merely by installing the code.
 
 Japanese Wikipedia quality policy v4 additionally rejects terminal
 `以下から構成される` / `以下の理由による` list introductions and detached
