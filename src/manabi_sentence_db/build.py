@@ -80,7 +80,7 @@ def canonical_document(
             ]
             if manifest["source"]["adapter"] == "wikimedia"
             else ["publisher-html-narrative-extraction", "publisher-paragraph-unit"]
-            if manifest["source"]["adapter"] == "scp-curated"
+            if manifest["source"]["adapter"] in {"scp-curated", "globalvoices"}
             else ["publisher-sentence-unit"]
         )
         + ["NFC", "edge-whitespace-trim"],
@@ -98,6 +98,10 @@ def canonical_document(
         from .scp_curated import RUBY_TRANSFORMATION
 
         record["transformations"].append(RUBY_TRANSFORMATION)
+    if manifest["source"]["adapter"] == "globalvoices":
+        from .globalvoices import TRANSFORMATION
+
+        record["transformations"].append(TRANSFORMATION)
     if wikipedia_quality:
         from .wikipedia_quality import WIKIPEDIA_QUALITY_VERSION
 
@@ -480,6 +484,8 @@ def build_corpus(
                     from .stair import iter_documents
                 elif source["adapter"] == "scp-curated":
                     from .scp_curated import iter_documents
+                elif source["adapter"] == "globalvoices":
+                    from .globalvoices import iter_documents
                 elif source["adapter"] == "jec-basic":
                     from .jec_basic import iter_documents
                 elif source["adapter"] == "alt-parallel":
@@ -507,7 +513,7 @@ def build_corpus(
                            and selection["source_id"] == source_id else {}),
                         **({"progress": progress} if source["adapter"] == "wikimedia" else {}),
                     )
-                    if source["adapter"] in {"wikimedia", "jec-basic", "kyoto-wikipedia", "alt-parallel", "yj-captions"}
+                    if source["adapter"] in {"wikimedia", "jec-basic", "kyoto-wikipedia", "alt-parallel", "yj-captions", "globalvoices"}
                     else iter_documents(manifest, manifest_path.parent)
                 )
                 for raw in documents:

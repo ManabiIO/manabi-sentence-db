@@ -1,0 +1,350 @@
+{
+  "japanese_metadata": {
+    "url": "https://jp.globalvoices.org/2026/10/23/65906/",
+    "title": "太平洋で緊張が高まるなか、日本の若者が平和運動の新しいかたちを模索",
+    "credits": [
+      {
+        "display": "記者 (English)Jo Carter",
+        "name": "Jo Carter",
+        "url": "https://globalvoices.org/author/jo-carter/"
+      },
+      {
+        "display": "翻訳 (日本語)Jo Carter",
+        "name": "Jo Carter",
+        "url": "https://jp.globalvoices.org/author/jo-carter/"
+      }
+    ],
+    "display_dates": [
+      "元記事掲載 2026/09/25",
+      "翻訳掲載 2026/10/23"
+    ],
+    "publisher_datetimes": {
+      "article:published_time": "2026-10-23T06:25:15+0000",
+      "article:modified_time": "2026-10-23T06:25:15+0000"
+    },
+    "english_original_links": [
+      "https://globalvoices.org/2026/09/25/young-japanese-find-new-outlets-for-peace-activism-amid-rising-tensions-in-the-pacific/"
+    ],
+    "article_license_sha256": "93be2f79ff0364e96f1d47bd826c2370eb2e9d0a74c9fb85aa260f32478be62d",
+    "footer_license_sha256": "f3a876bb90d6dde1524aed5e3a3466ef1243b2dae9305af9d3c6f8d7e9ab8e0d",
+    "entry_attrs": {
+      "class": "entry"
+    }
+  },
+  "original_metadata": {
+    "url": "https://globalvoices.org/2026/09/25/young-japanese-find-new-outlets-for-peace-activism-amid-rising-tensions-in-the-pacific/",
+    "title": "Young Japanese find new outlets for peace activism amid rising tensions in the Pacific",
+    "credits": [
+      {
+        "display": "Written byJo Carter",
+        "name": "Jo Carter",
+        "url": "https://globalvoices.org/author/jo-carter/"
+      }
+    ],
+    "display_dates": [
+      "Posted 25 September 2026"
+    ],
+    "publisher_datetimes": {
+      "article:published_time": "2026-09-25T06:52:28+0000",
+      "article:modified_time": "2026-10-01T11:55:56+0000"
+    },
+    "english_original_links": [],
+    "article_license_sha256": "047aca91d86209aca1c4abfb1bb8633de023aa5b47855884045ed6ec36c4346d",
+    "footer_license_sha256": "553ca93cb502a272467bb196396bb39ceb445a9e1b41c873890cecfdf39e450e",
+    "entry_attrs": {
+      "class": "entry"
+    }
+  },
+  "japanese_response_sha256": "e2d8965358bd496ebe9abb08218e76284f4a6c8a4970e3b9d7d6602887b6f56e",
+  "original_response_sha256": "0dbb5cd090398eb122e467af50db7cfab9183012e6bd23f218d7c40afd6a29af",
+  "original_body_sha256": "fc22013231d2f892f50d7f336209f98e4f79c5fee870406806e8f00ac38d77ff",
+  "blocks": [
+    {
+      "ordinal": 0,
+      "tag": "div",
+      "reason": "media-caption-separate-permission",
+      "text_sha256": "2d2885a06caaa87154e023830d23b3880b28791a5ebec8198012b41bdfed4f0c",
+      "html_tree_sha256": "168fe4211d1d9d8d1f9b042fa0c356aee668ad1da58f54ee2523cfa1e3802d37"
+    },
+    {
+      "ordinal": 1,
+      "tag": "p",
+      "reason": "spotlight-promotion-and-donation",
+      "text_sha256": "587831a0cc73ab71a405cc593ba2d9d48a360082e6b92d1d2036b4a67e30fa27",
+      "html_tree_sha256": "fd11e13e144dedd314b9c84ba6bdb23b6df71e201231f9f7413ae3f3eb5b7b21"
+    },
+    {
+      "ordinal": 2,
+      "tag": "p",
+      "reason": null,
+      "text_sha256": "4094ef6bbf969f6b3febea3f7178031ae70d2e63d5eac805e689346974b4453f",
+      "html_tree_sha256": "27beb5b34c2650ee97583bd078249926c37a7bfea1d6bdbac2f342ec8ce146bb"
+    },
+    {
+      "ordinal": 3,
+      "tag": "p",
+      "reason": null,
+      "text_sha256": "8d18cb7d83d9e2c7ad30b4e9e7ea118534d79aba0ecd170a93e1af5938f063f3",
+      "html_tree_sha256": "b472dc19524848459668466faa16f062bade4de983efa4f82eb59dc7e453eacf"
+    },
+    {
+      "ordinal": 4,
+      "tag": "p",
+      "reason": null,
+      "text_sha256": "595c549d0204b76cf5f8743ff93c91ef25dccc3325e90fc1ab244fcf1ef36fbb",
+      "html_tree_sha256": "249a7196c48ecd1b8b4637221211ab6d1d8d4c14586fa87913a8d8a4e683044d"
+    },
+    {
+      "ordinal": 5,
+      "tag": "h3",
+      "reason": "section-heading",
+      "text_sha256": "14621f13e27574f5f4cb7c35daeadd1e367951ab857bdc0309c7dbc853277402",
+      "html_tree_sha256": "34307010978f4c17c259b37e79b204483bf03d7a39c0e5063808a8763f7b21c9"
+    },
+    {
+      "ordinal": 6,
+      "tag": "p",
+      "reason": "inline-quoted-event-title",
+      "text_sha256": "c47b2a761c18cd89bd6d2fd0773610176c9e73c22335ec5cc6945aac5c1d7d5c",
+      "html_tree_sha256": "27b5a6a64ac43d67a8e91da93d94c1fcecf9be096f932dbade77eada157ad094"
+    },
+    {
+      "ordinal": 7,
+      "tag": "p",
+      "reason": null,
+      "text_sha256": "1b46794d593a6eba2ed4eec4d3c17e9c0c2e15eb8730af361bbf28599adae105",
+      "html_tree_sha256": "6d5650a5fd474edebaa72e974788b82f303a7eff7eaf3fb0e2352bd334a4af8b"
+    },
+    {
+      "ordinal": 8,
+      "tag": "p",
+      "reason": "inline-quoted-third-party-wording",
+      "text_sha256": "6a0c3bbc887c4e17e39700376bcda19a09791eb70e6ed373f35999d26eb80dd9",
+      "html_tree_sha256": "bf130c355a337c98e16c0d5d2d43dc3855e7c10f3d8c6bf80793eb13c2f42647"
+    },
+    {
+      "ordinal": 9,
+      "tag": "p",
+      "reason": null,
+      "text_sha256": "25f72ea5241a7530f829b05a7750b366b58a9dacbff72317ce542823746e9c45",
+      "html_tree_sha256": "a0516c5abf0b4c054a153c476afbe8d335416c7cd13da7846234f03eee9866ef"
+    },
+    {
+      "ordinal": 10,
+      "tag": "div",
+      "reason": "media-caption-separate-permission",
+      "text_sha256": "e1e9d67cee8c0f443f7e980d91061c661e9582453f7e3522b9c7fc21da7c629a",
+      "html_tree_sha256": "74846b8244aab3ab047e36b97000493bafb6a2a2edc6e15f21de316a444dc93a"
+    },
+    {
+      "ordinal": 11,
+      "tag": "p",
+      "reason": null,
+      "text_sha256": "2cd5b86771692319de548812784856102799ae0ec562705b74ea368d59ab310b",
+      "html_tree_sha256": "037500184246aa58a7ed4f3432cc25bd39cc332a4474732bbd23a00b14c5b48f"
+    },
+    {
+      "ordinal": 12,
+      "tag": "blockquote",
+      "reason": "third-party-blockquote",
+      "text_sha256": "87c559210c8d0d913d6cc32d944b1004fe22e6508b04364819f0fdcc11493b1b",
+      "html_tree_sha256": "73c4b8c7b71a7a799ef7e8414f102b1a0ab140b5b4cd895825ba0c612467a2c3"
+    },
+    {
+      "ordinal": 13,
+      "tag": "h3",
+      "reason": "section-heading",
+      "text_sha256": "bd3605c1e9c31b6541bf6dc33259eef6a00b9829a1af2e0fdc36f76d990706b9",
+      "html_tree_sha256": "0a5c005aacb37519cd7fce5d04f0ca24a6755afdfc95a08ebcbd22a1adef997a"
+    },
+    {
+      "ordinal": 14,
+      "tag": "p",
+      "reason": "inline-quoted-slogans",
+      "text_sha256": "d40dcfd6d80e3512e5d469b96f9eff13eebed6ed366afda6079fde59bbae31d1",
+      "html_tree_sha256": "45ebbc53e12501dfedbef36753a5a18aa8ace9718529b14cab3110851076bd89"
+    },
+    {
+      "ordinal": 15,
+      "tag": "p",
+      "reason": "inline-quoted-person-description",
+      "text_sha256": "535053521907761a533280eee3d6c7904cb8b65c3bd390f689fbe1f0f9295e62",
+      "html_tree_sha256": "e211b6c873a7e3ce62249051b108fc9b5ce1708ccc6a528ffa932c183efa14cb"
+    },
+    {
+      "ordinal": 16,
+      "tag": "p",
+      "reason": null,
+      "text_sha256": "e70e40afe3215f7166c3b31f3701dd95e5c3c41d85c0b337ca8650768c939952",
+      "html_tree_sha256": "6e2197ff33ec8623327318a935c99d4c9d424c8cb18bf5ae525c4333fccea7bd"
+    },
+    {
+      "ordinal": 17,
+      "tag": "div",
+      "reason": "media-caption-separate-permission",
+      "text_sha256": "74fc09527d9a272c9e4055ffd71c28986956d3bdf0132026575a99dc7dc3c305",
+      "html_tree_sha256": "78a5a334fec32dce563e34820a461527f87dc1dddd345292402f92f9df03dbcd"
+    },
+    {
+      "ordinal": 18,
+      "tag": "p",
+      "reason": "quoted-event-title-and-quote-introduction",
+      "text_sha256": "079223a1359ccbe7b3dd324ff86e947e28749de4d7f9ea31ef240a8e62c68a7b",
+      "html_tree_sha256": "5d271d48d114ea1fe3193d2d83b8b049026c9f6d9f7806719c2642a4d6114c77"
+    },
+    {
+      "ordinal": 19,
+      "tag": "blockquote",
+      "reason": "third-party-blockquote",
+      "text_sha256": "5bbe0b68cb89c8cc65774a3e0f11855c806681ef3ca6abb24663acfe7c97a96c",
+      "html_tree_sha256": "9285b0e03e63a0bc8fb4eccd964160d99aa25e02f5a1019466f97bba7285fe2c"
+    },
+    {
+      "ordinal": 20,
+      "tag": "p",
+      "reason": "inline-quoted-third-party-statement",
+      "text_sha256": "dbaec14b621aed1ce9c60aa797a1ac2985376617425500b7f54d3d51653c1941",
+      "html_tree_sha256": "3ab37b23bf984572b7693758c5b7bbc3501ccb94ec547684afd5bc93df81b11f"
+    },
+    {
+      "ordinal": 21,
+      "tag": "p",
+      "reason": null,
+      "text_sha256": "e08b9b9f2285456daf3672fea70e0ef2dd08345545f687896eb274f68b4b9626",
+      "html_tree_sha256": "1f1050e748203778bd7f2dcff7daf21db00213050d5ee1283e763016188fa8a2"
+    },
+    {
+      "ordinal": 22,
+      "tag": "p",
+      "reason": "inline-quoted-discriminatory-slurs",
+      "text_sha256": "20132a51f4d3201bc86faba45a9e08f2dc3cdf670032a5eec95e8831be757500",
+      "html_tree_sha256": "3a8135f7f081aea7ff5e3bec00eebe8cd3e0cc4c0f9ddf0b623b2ce086a5e365"
+    },
+    {
+      "ordinal": 23,
+      "tag": "div",
+      "reason": "media-caption-separate-permission",
+      "text_sha256": "ea44b2eedff9a2e197f65f61b3eecb3020528071db1c501684b086ed98c596ed",
+      "html_tree_sha256": "3fd85065f4a85df900cbf3cbe36c38fa2e6b7ec049ba7d2353abcedb324bc6df"
+    },
+    {
+      "ordinal": 24,
+      "tag": "h3",
+      "reason": "section-heading",
+      "text_sha256": "8c9aa6a25df8a787c147b98e60941be18c668ef26d0f6dc8c6272d1bebd05391",
+      "html_tree_sha256": "da2f6efb18555dc99039fbbbc262b7f3f47cbc78e58fc1ea9332b76eb37650d0"
+    },
+    {
+      "ordinal": 25,
+      "tag": "p",
+      "reason": null,
+      "text_sha256": "d83a4ed02ca8e5f32f3915f7136f8daf2ff9b9f84bf658179c9df3e13fb35dc1",
+      "html_tree_sha256": "e9fb5c8d232d880ea45a311c26ed290d9659ee7147a085c4d6a04d0480638c6e"
+    },
+    {
+      "ordinal": 26,
+      "tag": "p",
+      "reason": "inline-quoted-activism-name",
+      "text_sha256": "4bf2e81593a01a67b62b493d7962ab6dbff5eb64fd03ca7f10b8828291314be3",
+      "html_tree_sha256": "ddb217022e805de9b3b109c1dd05a2cfc46e05a1e002b2773d355e5276a9e5e2"
+    },
+    {
+      "ordinal": 27,
+      "tag": "p",
+      "reason": "context-dependent-introduction-to-omitted-quote",
+      "text_sha256": "66cb8b9a4e0e50fed244d9226ee8377d71d9f813868d3f8a70d4650734c43f83",
+      "html_tree_sha256": "1c39221c652dea22ac15c80538faa89e410f45b65259487eff932cffe81170ce"
+    },
+    {
+      "ordinal": 28,
+      "tag": "blockquote",
+      "reason": "third-party-blockquote",
+      "text_sha256": "55da05ddcc05a088fc8dc4088697032e81990fb751893598986f452413df35b7",
+      "html_tree_sha256": "7da55b6b234f99585731b0adb532aacdd392b5b034bb7a67476dfe11eb2b0b73"
+    },
+    {
+      "ordinal": 29,
+      "tag": "p",
+      "reason": "context-dependent-description-of-omitted-placard-wording",
+      "text_sha256": "1ef665d15e70dc5a9fc240aad782b7b7146faffef27b8630dd7cceda7706055a",
+      "html_tree_sha256": "858afdeca688e02d4bcb61cb82d9fbb792904d4b52e972ceed8ba07d56f38f83"
+    },
+    {
+      "ordinal": 30,
+      "tag": "blockquote",
+      "reason": "third-party-blockquote",
+      "text_sha256": "1bb9ec290320ce2f482287122d77f3cdb63470bb0fa18981e86604199dd12911",
+      "html_tree_sha256": "c8709f2897628dc866d8a368f26c6ad730af06e02ecdd41b35d4c6cc0457829e"
+    },
+    {
+      "ordinal": 31,
+      "tag": "div",
+      "reason": "third-party-translation-tabs",
+      "text_sha256": "10c2de8a735609b3ec0dd8c3fd613d3d8c9a70476fa46987f9381f88c8aca010",
+      "html_tree_sha256": "d94c312019852a6ed9f59cd42f57490826d077e8e2c85935f5d0ed7da342c277"
+    },
+    {
+      "ordinal": 32,
+      "tag": "p",
+      "reason": "context-dependent-introduction-to-omitted-quote",
+      "text_sha256": "c6058dd56958408c2a4fc1902f83c42ca1b84e2e7c7dafdb406661727092fe5e",
+      "html_tree_sha256": "4bcdcb5a20b697205e1b4e3ed9e400e03de39fe9cd28b47316b4d4a2968e7474"
+    },
+    {
+      "ordinal": 33,
+      "tag": "blockquote",
+      "reason": "third-party-blockquote",
+      "text_sha256": "3661b0fb6c3e09f3eded6f581fe9e4aea80d8b85b21d7ccc9a6ab56c03331e41",
+      "html_tree_sha256": "770204dcec7446c7a38e0f80126031d0fd0bc2e733ed65c599fed5a4fb6030e6"
+    },
+    {
+      "ordinal": 34,
+      "tag": "div",
+      "reason": "media-caption-separate-permission",
+      "text_sha256": "46a7aa42ba08f88b2ea6f2719c02141262eda8a530d7481f245b89bd8f976271",
+      "html_tree_sha256": "5c7d9eda868025a102598cefed577a6c705c5cf613756a1d4c6b6bbd0e30848d"
+    },
+    {
+      "ordinal": 35,
+      "tag": "p",
+      "reason": null,
+      "text_sha256": "b5b9fa284d3f3e26fcfca314aa39c44898957829f4a6ea3987e406ef8b9ecf46",
+      "html_tree_sha256": "240fe0ec00d112a5e68bf7dad763865e7336393211d25815024971622d62be23"
+    },
+    {
+      "ordinal": 36,
+      "tag": "div",
+      "reason": "media-caption-separate-permission",
+      "text_sha256": "282bc3233ee902aebc5ae82c0083b3f5bca0bce9f9fd845a30d770cb846efd18",
+      "html_tree_sha256": "854109f2f50a2e4803b5dc10a7cb3ec0519f2657bcbb57a43a382f483b9a3ad9"
+    },
+    {
+      "ordinal": 37,
+      "tag": "p",
+      "reason": "inline-quoted-placard-and-speeches",
+      "text_sha256": "c1e1f7948d0a3dcf53174450a803a4b4d817dde4c139b60263c8e02a6074b52f",
+      "html_tree_sha256": "ec4f9a9bf92c8421aa99f416b5a33afda0f38ca207a7d558f621c1091711a871"
+    },
+    {
+      "ordinal": 38,
+      "tag": "p",
+      "reason": null,
+      "text_sha256": "7a610a7090349a8ede9a07a1a62a6eecbd52245fe2c9de5c5e82d37f8ed0fe0c",
+      "html_tree_sha256": "e5bcc558f8497b6d66e86179b32e3bcf28ab0d5943a202e1fc9e6cc3b4a5ce76"
+    },
+    {
+      "ordinal": 39,
+      "tag": "p",
+      "reason": "context-dependent-introduction-to-omitted-quote",
+      "text_sha256": "68bcc1fe1b19b399be62e088c6faac7908857094b354daf2e28a5089cd413323",
+      "html_tree_sha256": "52d936f68b94742b1a3e6557ee0a93220bcae973bbe0f30fe9a3b64a71baaabe"
+    },
+    {
+      "ordinal": 40,
+      "tag": "blockquote",
+      "reason": "third-party-blockquote",
+      "text_sha256": "ac3e47a06e2d9c22c59997b5d3cc545e865dc79ea24612232ec7a85a72875fe4",
+      "html_tree_sha256": "6ec1e9e0b47658f63a8024667f9c13951d313c5f3a3501020f00d1f7b2ec67f0"
+    }
+  ]
+}

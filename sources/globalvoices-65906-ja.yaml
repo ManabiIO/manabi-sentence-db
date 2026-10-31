@@ -1,0 +1,37 @@
+schema_version: 1
+id: globalvoices-65906-ja
+title: 'Global Voices: Japanese peace activism (65906)'
+language: ja
+adapter: globalvoices
+homepage: https://jp.globalvoices.org/2026/10/23/65906/
+license:
+  id: CC-BY-3.0
+  url: https://creativecommons.org/licenses/by/3.0/
+attribution:
+  text: Jo Carter, original English author and Japanese translator. Global Voices.
+    Japanese narrative paragraphs selected and HTML inline markup removed; sentence
+    segmentation may follow. CC BY 3.0. Original English published 2026-09-25; Japanese
+    translation published 2026-10-23.
+  url: https://jp.globalvoices.org/2026/10/23/65906/
+license_evidence:
+- https://jp.globalvoices.org/2026/10/23/65906/
+- https://globalvoices.org/2026/09/25/young-japanese-find-new-outlets-for-peace-activism-amid-rising-tensions-in-the-pacific/
+- https://globalvoices.org/about/global-voices-attribution-policy/
+notes:
+- Raw HTML is local rights evidence with excluded third-party material; raw snapshot release packaging is blocked. Publish only processed corpus exports.
+- Opt-in single reviewed work only; snapshot --source all skips this source.
+- 'English writer and Japanese translator: Jo Carter. Translation direction is observed;
+  authorship, translation method and native review remain unknown.'
+- Only 11 reviewed narrative paragraphs; every omitted body block reserves a context
+  gap. No media or direct quotation is imported.
+- The English original is rights/provenance evidence only, with no English text or
+  aligned translation emitted.
+- Pinned body/markup, credit, dates, original URL, article and footer license hashes
+  are revalidated at acquisition and build. Changes require review.
+- Use a canonical persistent URL-keyed article cache outside snapshot/build outputs.
+  Cache hits require no network; misses use one worker and at least 10 seconds between
+  all attempts including retries and robots.
+acquisition:
+  url: https://jp.globalvoices.org/2026/10/23/65906/
+  original_url: https://globalvoices.org/2026/09/25/young-japanese-find-new-outlets-for-peace-activism-amid-rising-tensions-in-the-pacific/
+  inventory_sha256: 202adf4f35183541f4ad0ef996aaf87921ba68b72684542efac42514b73c62c8

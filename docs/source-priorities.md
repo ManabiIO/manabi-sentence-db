@@ -11,6 +11,7 @@ and language origin must remain unknown; translations do not become Japanese ori
 Wikipedia, Kyoto Wikipedia pairs, Wikivoyage, Wikibooks, archived Japanese
 Wikinews, Tatoeba, RealPersonaChat, MRMP multi-party chat, JMultiWOZ, STAIR Captions, YJ Captions, JEC Basic
 Sentence Data, NICT ALT parallel news text, ASDC main accommodation dialogues,
+one opt-in Global Voices translated-news work (`globalvoices-65906-ja`),
 and individually curated SCP-JP Tales
 『適性』『カモと商人』『証明写真』『定点観測』『髭を剃ったあとは気分がいい。』.
 Wikimedia and Tatoeba provenance does not establish blanket human authorship or

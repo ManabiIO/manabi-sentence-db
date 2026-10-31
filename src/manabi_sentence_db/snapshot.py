@@ -455,6 +455,7 @@ def create_snapshot(
     refresh: bool = False,
     user_agent: str | None = None,
     translations: list[str] | None = None,
+    article_cache: Path | None = None,
 ) -> Path:
     """Create an immutable snapshot; unchanged repeated requests make zero HTTP calls.
 
@@ -469,6 +470,17 @@ def create_snapshot(
         raise SnapshotError("--title applies only to Wikimedia API samples")
     if translations and adapter != "tatoeba":
         raise SnapshotError("--translations applies only to Tatoeba acquisition")
+    if article_cache is not None and adapter != "globalvoices":
+        raise SnapshotError("--article-cache applies only to the opt-in Global Voices article")
+    if adapter == "globalvoices" and article_cache is None:
+        raise SnapshotError("Global Voices requires an explicit persistent --article-cache")
+    if adapter == "globalvoices" and refresh:
+        raise SnapshotError("Global Voices uses immutable reviewed page pins; --refresh is unsupported")
+    if adapter == "globalvoices" and (
+        Path(article_cache).resolve().is_relative_to(output.resolve())
+        or output.resolve().is_relative_to(Path(article_cache).resolve())
+    ):
+        raise SnapshotError("Global Voices article cache and snapshot must be separate directories")
     if max_files is not None and (type(max_files) is not int or max_files < 1):
         raise SnapshotError("max_files must be a positive integer")
     if max_files is not None and mode != "full":
@@ -502,6 +514,10 @@ def create_snapshot(
                 raise SnapshotError(
                     "Existing snapshot has a different request; use a new output or --refresh"
                 )
+            if adapter == "globalvoices":
+                from .globalvoices import iter_documents
+
+                list(iter_documents(existing, output))
             return existing_manifest
     elif output.exists():
         raise SnapshotError(f"Snapshot destination exists without a manifest: {output}")
@@ -540,6 +556,27 @@ def create_snapshot(
             data = _metadata(url, agent)
             extract(data, source)
             files = [_save_metadata(staging, f"{slug}.html", ROLE, url, data)]
+        elif adapter == "globalvoices":
+            from .globalvoices import (
+                EN_ROLE,
+                EN_URL,
+                JA_ROLE,
+                JA_URL,
+                cached_article,
+                extract,
+                reviewed_source,
+            )
+
+            if mode != "full" or date or max_files or titles or translations:
+                raise SnapshotError("Global Voices uses only its explicit reviewed single-work inventory")
+            reviewed_source(source)
+            japanese = cached_article(JA_URL, article_cache, agent)
+            original = cached_article(EN_URL, article_cache, agent)
+            extract(japanese, original, source)
+            files = [
+                _save_metadata(staging, "65906-ja.html", JA_ROLE, JA_URL, japanese),
+                _save_metadata(staging, "65906-en-original.html", EN_ROLE, EN_URL, original),
+            ]
         elif adapter in {"realpersonachat", "mrmp", "asdc", "jmultiwoz", "yj-captions", "stair", "jec-basic", "kyoto-wikipedia", "alt-parallel"}:
             if mode != "full" or date or max_files or titles:
                 raise SnapshotError(

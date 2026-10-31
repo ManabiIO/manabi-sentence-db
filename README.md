@@ -97,8 +97,8 @@ no date selector: the snapshot pins their downloaded bytes. The first adapter
 supports optional English translations; the schema permits any language and
 multiple translations per sentence.
 
-Use `--source all --mode full --date YYYY-MM-DD` to acquire all configured
-sources, with the date applied to Wikimedia. This includes a multi-gigabyte
+Use `--source all --mode full --date YYYY-MM-DD` to acquire configured
+sources other than explicitly selected Global Voices works, with the date applied to Wikimedia. This includes a multi-gigabyte
 Wikipedia download. For development, `--max-files` limits Wikimedia export chunks
 and labels the snapshot `partial`; `build --max-documents` limits processing
 without any source request. A single Wikipedia chunk can still be several GB.
@@ -196,6 +196,7 @@ request reports which sources failed and preserves completed snapshots.
 | `jec-basic-ja` | CC BY 3.0 | Hash-pinned Kyoto University / NICT Japanese-English-Chinese sentence patterns; excludes unresolved X and quotation placeholders |
 | `wikipedia-kyoto-ja` | CC BY-SA 3.0 | Hash-pinned NICT Kyoto parallel corpus v2.01; Japanese originals aligned only with final checked English translations; preserves Wikipedia/NICT attribution and filters excluded XML sections |
 | `alt-parallel-ja` | CC BY 4.0 Japanese; CC BY 2.5 English originals | Pinned NICT parallel news text; Japanese translated from English, with method/authorship unknown; excludes NC treebanks, ambiguous pairs and quotations |
+| `globalvoices-65906-ja` | CC BY 3.0 | Opt-in single reviewed news article: 11 Japanese narrative paragraphs; exact page/metadata/body pins, original English retained only as rights evidence, all omissions preserve context gaps |
 | `scp-jp-aptitude-ja` | CC BY-SA 3.0 | One reviewed contemporary Tale, revision/body-hash pinned; exact raw HTML and paragraph units retained |
 | `scp-jp-duck-merchant-ja`, `scp-jp-id-photo-ja`, `scp-jp-fixed-point-ja` | CC BY-SA 3.0 | Three additional individually reviewed contemporary Tales; direct prose only, exact credit/revision/body pins |
 | `scp-jp-shaving-ja` | CC BY-SA 3.0 | Individually reviewed psychological-horror Tale; 57 direct prose paragraphs with exact credit/revision/body pins |
@@ -203,9 +204,35 @@ request reports which sources failed and preserves completed snapshots.
 
 See [source research and admission decisions](docs/sources.md) for primary
 licensing evidence, source-specific exceptions, and approximately thirty
-researched source families. Global Voices Japanese remains a candidate for a
-future adapter.
-They are researched candidates, not enabled downloads.
+researched source families. The Global Voices adapter covers only article 65906;
+the wider site remains unadmitted.
+
+### One explicitly reviewed Global Voices article
+
+```sh
+mise run snapshot -- --source globalvoices-65906-ja --mode full \
+  --article-cache /absolute/canonical/cache/globalvoices \
+  --output data/snapshots/globalvoices-65906
+```
+
+`--source all` skips this source in every mode. Use a persistent canonical cache
+outside snapshot/build directories. Cached responses are hash-verified and reused
+without network access; absent responses fetch only the two fixed article URLs
+and their primary robots policies, with one cache lock and at least ten seconds
+between all attempts across both hosts, including retries. No media is fetched.
+Raw article pages remain local rights evidence because they contain the excluded
+quotations and caption text. This source has no raw snapshot workflow/release
+route; `snapshot-pack` rejects its raw pages. Publish the processed corpus, which
+contains only the reviewed Japanese paragraphs.
+
+Both exact raw-page hashes and reviewed metadata/body pins must match, including
+the English original's exceptions, Jo Carter's writer/translator roles, both
+publication dates and article/footer license notices. Even an unrelated page
+wrapper change requires re-review. `--refresh` is rejected for this immutable
+single-work pin; changed upstream text requires a separately reviewed inventory.
+English is evidence only:
+the corpus emits no English text or aligned pairs. Authorship, translation method
+and native-speaker review remain unknown, and every sentence is unreviewed.
 
 Wikimedia's new export checksum manifest is the completion signal. The project
 does not silently fall back to a different dump format when an export is absent.
