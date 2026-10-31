@@ -12,7 +12,7 @@ for new consumers. It contains UTF-8 JSONL tables:
 - `works`: documents, original URLs, independent license/attribution, revision,
   snapshot identity, optional actual publication date and authorship/origin.
 - `occurrences`: source identity, sentence/work foreign keys, original ordinal,
-  review/content flags, source range where available, previous/next admitted occurrence.
+  review/content flags, source range where available, previous/next consecutive admitted occurrence.
 - `translations`: independent provenance, license, optional human/machine generation,
   sentence and occurrence foreign keys. Alignment does not establish authorship.
 - `references`: text-free future external citations; never treated as licensed text.
@@ -34,8 +34,10 @@ RealPersonaChat records human/original-Japanese/dialogue explicitly. Its upstrea
 `dialogue_id` contains two collisions in the reviewed release; immutable file names
 are the authoritative native IDs. We omit profiles, speaker attributes, evaluations,
 LLM conversations, and utterances containing masked personal data. Utterance offsets
-refer to the original dialogue turn numbers. Neighbor pointers refer to admitted
-units, which can skip excluded turns; they are not proof of original adjacency.
+refer to the original dialogue turn numbers. New normalized exports set neighbor
+pointers only between consecutive source ordinals; both sides of a gap are null.
+Older exports can link across excluded units, so consumers must also check
+ordinals and the source transformation before treating pointers as context.
 Older Wikimedia builds omitted material before canonical ordinals were assigned;
 their consecutive ordinals do not establish adjacency in the source. Current
 extraction records `wikimedia-context-gaps-v1` in work transformations and assigns

@@ -132,7 +132,7 @@ mise run select-wikimedia -- \
 mise run build -- \
   --snapshot data/snapshots/wikipedia-2026-10-01/manifest.json \
   --document-selection build/wikipedia-selection/selection.json \
-  --record-format jsonl --shard-compression zstd --output build/wikipedia-selected
+  --format jsonl --shard-compression zstd --output build/wikipedia-selected
 ```
 
 Selection verifies and streams existing inputs without downloading them. Ten topic

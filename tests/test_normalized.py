@@ -2,9 +2,10 @@ import hashlib
 import json
 import zipfile
 
+import pytest
 import zstandard
 
-from manabi_sentence_db.build import build_corpus
+from manabi_sentence_db.build import build_corpus, iter_records, verify_build
 from manabi_sentence_db.demo import create_demo_snapshot
 from manabi_sentence_db.normalized import export_normalized
 
@@ -35,7 +36,8 @@ def test_unique_identity_does_not_depend_on_work():
     assert sentence_identity("ja", "今日は雨です。") != sentence_identity("zh", "今日は雨です。")
 
 
-def test_wikimedia_extraction_gaps_survive_build_and_normalized_export(tmp_path):
+@pytest.mark.parametrize("selected", [False, True])
+def test_wikimedia_extraction_gaps_survive_build_and_normalized_export(tmp_path, selected):
     from manabi_sentence_db.serialization import read_json, sha256_file, write_json
     from manabi_sentence_db.snapshot import snapshot_identity
     from manabi_sentence_db.wikimedia import WIKIMEDIA_CONTEXT_VERSION
@@ -44,20 +46,31 @@ def test_wikimedia_extraction_gaps_survive_build_and_normalized_export(tmp_path)
     raw = snapshot.parent / "synthetic.xml"
     raw.write_text(raw.read_text().replace(
         "今日は公園まで歩きました。小さな犬が木の下で休んでいます。",
-        "今日は公園まで歩きました。\n* 途中の一覧です。\n小さな犬が木の下で休んでいます。",
+        "今日は公園まで歩きました。そこで友達と会いました。\n"
+        "* 途中の一覧です。\n小さな犬が木の下で休んでいます。",
     ))
     manifest = read_json(snapshot)
     manifest["files"][0].update(sha256=sha256_file(raw), size=raw.stat().st_size)
     manifest["snapshot_id"] = snapshot_identity(manifest)
     write_json(snapshot, manifest)
     build_corpus([snapshot], tmp_path / "build")
-    result = export_normalized(tmp_path / "build", tmp_path / "corpus.zip")
+    catalog = verify_build(tmp_path / "build")
+    record = next(record for record in iter_records(tmp_path / "build", catalog)
+                  if record["native_id"] == "1")
+    options = ({"work_selection": {"schema_version": 1, "build_id": catalog["build_id"],
+                                   "work_ids": [record["id"]]}} if selected else {})
+    result = export_normalized(tmp_path / "build", tmp_path / "corpus.zip", **options)
     with zipfile.ZipFile(result) as archive:
         works = [json.loads(line) for line in archive.read("works.jsonl").splitlines()]
         work = next(work for work in works if work["native_id"] == "1")
         occurrences = [json.loads(line) for line in archive.read("occurrences.jsonl").splitlines()]
     retained = [item for item in occurrences if item["work_id"] == work["id"]]
-    assert [item["ordinal"] for item in retained] == [0, 2]
+    assert [item["ordinal"] for item in retained] == [0, 1, 3]
+    assert [(item["previous_id"], item["next_id"]) for item in retained] == [
+        (None, retained[1]["id"]),
+        (retained[0]["id"], None),
+        (None, None),
+    ]
     assert WIKIMEDIA_CONTEXT_VERSION in work["transformations"]
     assert work["license"] == manifest["source"]["license"]
     assert work["revision"]["id"] == "11"

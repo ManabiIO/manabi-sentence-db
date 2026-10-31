@@ -113,8 +113,17 @@ def export_normalized(build: Path, output: Path, *, source_id=None, catalog=None
                         occurrence.update(
                             sentence_id=identity,
                             work_id=record["id"],
-                            previous_id=items[index - 1]["id"] if index else None,
-                            next_id=items[index + 1]["id"] if index + 1 < len(items) else None,
+                            previous_id=(
+                                items[index - 1]["id"]
+                                if index and items[index - 1]["ordinal"] == item["ordinal"] - 1
+                                else None
+                            ),
+                            next_id=(
+                                items[index + 1]["id"]
+                                if index + 1 < len(items)
+                                and items[index + 1]["ordinal"] == item["ordinal"] + 1
+                                else None
+                            ),
                         )
                         write("occurrences", occurrence)
                         for translation in item["translations"]:
