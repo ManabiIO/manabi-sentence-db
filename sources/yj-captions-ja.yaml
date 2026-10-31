@@ -1,0 +1,25 @@
+schema_version: 1
+id: yj-captions-ja
+title: YJ Captions
+language: ja
+adapter: yj-captions
+homepage: https://github.com/yahoojapan/YJCaptions
+license:
+  id: CC-BY-4.0
+  url: https://creativecommons.org/licenses/by/4.0/
+attribution:
+  text: Takashi Miyazaki and Nobuyuki Shimizu. Cross-Lingual Image Caption Generation (ACL 2016). YJ Captions.
+  url: https://aclanthology.org/P16-1168/
+license_evidence:
+  - https://github.com/yahoojapan/YJCaptions/blob/2f2d6de87ce90b7ff1fd318efef17b1ce0e127db/README.md
+  - https://aclanthology.org/P16-1168.pdf
+notes:
+  - Human original Japanese crowdsourced and cleaned captions, not translations or parallel English.
+  - Each caption is an independent work, including captions sharing an image ID.
+  - Only captions with terminal sentence punctuation are retained; source text is not rewritten.
+  - Visual context is unavailable. No image metadata, URLs, images, or image-license data are imported; image rights are separate.
+acquisition:
+  revision: 2f2d6de87ce90b7ff1fd318efef17b1ce0e127db
+  sha256: e2978ac2770f571a012d280ffe9c69f3612be9c104d3cd5cf7116249a4006503
+  size: 4257429
+  url: https://raw.githubusercontent.com/yahoojapan/YJCaptions/2f2d6de87ce90b7ff1fd318efef17b1ce0e127db/yjcaptions26k.zip

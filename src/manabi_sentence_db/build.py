@@ -474,6 +474,8 @@ def build_corpus(
                     from .asdc import iter_documents
                 elif source["adapter"] == "jmultiwoz":
                     from .jmultiwoz import iter_documents
+                elif source["adapter"] == "yj-captions":
+                    from .yj_captions import iter_documents
                 elif source["adapter"] == "stair":
                     from .stair import iter_documents
                 elif source["adapter"] == "scp-curated":
@@ -505,7 +507,7 @@ def build_corpus(
                            and selection["source_id"] == source_id else {}),
                         **({"progress": progress} if source["adapter"] == "wikimedia" else {}),
                     )
-                    if source["adapter"] in {"wikimedia", "jec-basic", "kyoto-wikipedia", "alt-parallel"}
+                    if source["adapter"] in {"wikimedia", "jec-basic", "kyoto-wikipedia", "alt-parallel", "yj-captions"}
                     else iter_documents(manifest, manifest_path.parent)
                 )
                 for raw in documents:

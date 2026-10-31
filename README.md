@@ -191,6 +191,7 @@ request reports which sources failed and preserves completed snapshots.
 | `mrmp-ja` | CC BY-SA 4.0 | Pinned human multi-party chat; verifies exact publisher license/README, excludes profiles/evaluations, preserves utterance gaps |
 | `asdc-main-ja` | CC BY 4.0 | Pinned human accommodation role-play; 210 main dialogue files only, verified corpus/collection evidence, no SCUD descriptions or scenarios |
 | `jmultiwoz-ja` | CC BY-SA 4.0 | Commit/hash-pinned human task dialogue turns; excludes goals, worker metadata, backend data, and model outputs |
+| `yj-captions-ja` | CC BY 4.0 | Commit/hash-pinned human original Japanese captions; independent complete-caption works, no translations or images; image rights are separate |
 | `stair-captions-ja` | CC BY 4.0 | Commit/hash-pinned v1.2 Japanese caption text; excludes images and tokenized duplicates |
 | `jec-basic-ja` | CC BY 3.0 | Hash-pinned Kyoto University / NICT Japanese-English-Chinese sentence patterns; excludes unresolved X and quotation placeholders |
 | `wikipedia-kyoto-ja` | CC BY-SA 3.0 | Hash-pinned NICT Kyoto parallel corpus v2.01; Japanese originals aligned only with final checked English translations; preserves Wikipedia/NICT attribution and filters excluded XML sections |
