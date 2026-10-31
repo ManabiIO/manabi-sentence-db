@@ -226,3 +226,50 @@ def test_split_parts_require_the_complete_archive_identity(corpus, tmp_path):
     write_json(output / "release.json", release)
     with pytest.raises(DataError, match="normalized archive inventory"):
         verify_package(output)
+
+
+@pytest.mark.parametrize("part_bytes", [1024, 1024 * 1024])
+@pytest.mark.parametrize("damage", ["omit-one", "omit-all", "invent-partition", "duplicate-partition"])
+def test_normalized_inventory_must_cover_every_canonical_partition(tmp_path, part_bytes, damage):
+    from manabi_sentence_db.serialization import digest_json
+    from manabi_sentence_db.snapshot import snapshot_identity
+
+    first = create_demo_snapshot(tmp_path / "first")
+    second = create_demo_snapshot(tmp_path / "second")
+    manifest = read_json(second)
+    manifest["source_id"] = manifest["source"]["id"] = "demo-second-ja"
+    manifest["source_config_sha256"] = digest_json(manifest["source"])
+    manifest["snapshot_id"] = snapshot_identity(manifest)
+    write_json(second, manifest)
+    build = tmp_path / "build"
+    build_corpus([first, second], build)
+    output = tmp_path / "release"
+    package_build(build, output, part_bytes=part_bytes, include_sqlite=False)
+    release = read_json(output / "release.json")
+    assert len(release["normalized_archives"]) == 2
+    assert verify_package(output) == release
+    normalized = release["normalized_archives"][0]
+    if damage in {"omit-one", "omit-all"}:
+        removed = release["normalized_archives"][:1] if damage == "omit-one" else release["normalized_archives"][:]
+        names = {name for archive in removed for name in archive["parts"]}
+        release["normalized_archives"] = [archive for archive in release["normalized_archives"] if archive not in removed]
+        release["assets"] = [asset for asset in release["assets"] if asset["path"] not in names]
+    elif damage == "invent-partition":
+        normalized["source_id"] = "unrelated-source"
+        for asset in release["assets"]:
+            if asset["path"] in normalized["parts"]:
+                asset["source_id"] = normalized["source_id"]
+    else:
+        # Repeated logical partitions must fail even when all byte assets are
+        # distinct, correctly hashed and assigned to exactly one archive.
+        duplicate = dict(normalized, path="extra.normalized.zip", parts=[])
+        for name in normalized["parts"]:
+            copy = "extra-" + name
+            (output / copy).write_bytes((output / name).read_bytes())
+            asset = next(asset for asset in release["assets"] if asset["path"] == name)
+            release["assets"].append(dict(asset, path=copy))
+            duplicate["parts"].append(copy)
+        release["normalized_archives"].append(duplicate)
+    write_json(output / "release.json", release)
+    with pytest.raises(DataError, match="normalized.*partition"):
+        verify_package(output)

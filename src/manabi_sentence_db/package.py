@@ -158,7 +158,14 @@ def verify_package(output: Path, *, catalog: dict | None = None) -> dict:
         ):
             raise DataError("Split release is missing its normalized archive inventory")
         normalized_parts = set()
+        expected_partitions = {(shard["source_id"], shard["language"])
+                               for shard in catalog["shards"]}
+        normalized_partitions = set()
         for normalized in release.get("normalized_archives", []):
+            partition = (normalized["source_id"], normalized["language"])
+            if partition not in expected_partitions or partition in normalized_partitions:
+                raise DataError("Package normalized archive has an invalid or repeated partition")
+            normalized_partitions.add(partition)
             names = normalized["parts"]
             if not names:
                 raise DataError("Package normalized archive has no parts")
@@ -177,6 +184,11 @@ def verify_package(output: Path, *, catalog: dict | None = None) -> dict:
                 _verify_stream(source, normalized["size"], normalized["sha256"], normalized["path"])
             finally:
                 source.close()
+        # New inventories promise one normalized export per canonical source
+        # and language, not merely agreement among the entries that remain.
+        # Unsplit legacy releases predate this additive inventory field.
+        if "normalized_archives" in release and normalized_partitions != expected_partitions:
+            raise DataError("Package normalized archives do not cover every canonical partition")
         if "normalized_archives" in release and normalized_parts != {
             name for name, asset in assets.items()
             if asset["kind"] in {"normalized-jsonl-zip", "normalized-jsonl-zip-part"}
