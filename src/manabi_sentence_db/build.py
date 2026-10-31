@@ -106,6 +106,10 @@ def canonical_document(
         from .alt_parallel import REVIEW_TRANSFORMATION
 
         record["transformations"].append(REVIEW_TRANSFORMATION)
+    if manifest["source"]["adapter"] == "talpco":
+        from .talpco import TRANSFORMATION
+
+        record["transformations"].append(TRANSFORMATION)
     if wikipedia_quality:
         from .wikipedia_quality import WIKIPEDIA_QUALITY_VERSION
 

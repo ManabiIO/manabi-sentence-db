@@ -8,6 +8,7 @@ from .serialization import DataError, canonical_json, safe_relative
 
 FILES = {"ja": "jpn/data_jpn.txt", "en": "eng/data_eng.txt"}
 MAX_FILE_BYTES = 1024 * 1024
+TRANSFORMATION = "talpco-bunsetsu-unspacing-v1"
 
 
 def validate_source(source):
@@ -87,9 +88,12 @@ def iter_documents(manifest, snapshot_dir, *, stats):
             "revision": {"id": commit, "url": f"https://github.com/matbahasa/TALPCo/tree/{commit}"},
             "source_text_hash": hashlib.sha256(canonical_json({"id": identity, "ja": japanese, "en": english})).hexdigest(),
             "authorship": "unknown", "language_origin": "original_japanese",
-            "content_type": "example-sentence", "tags": ["basic-sentence", "independent-example", "japanese:bunsetsu-spaces-preserved"],
+            "content_type": "example-sentence", "tags": ["basic-sentence", "independent-example"],
             "sentences": [{
-                "native_id": identity, "source_ordinal": 0, "text": japanese,
+                # The publisher documents ASCII spaces as bunsetsu annotation,
+                # not authorial spacing. Keep raw bytes/hashes in the snapshot
+                # and source_text_hash; derive searchable text only here.
+                "native_id": identity, "source_ordinal": 0, "text": japanese.replace(" ", ""),
                 "tags": [], "content_flags": [],
                 "translations": [{
                     "native_id": identity + ":en", "language": "en", "text": english,

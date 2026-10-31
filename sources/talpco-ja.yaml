@@ -15,7 +15,7 @@ license_evidence:
   - https://www.anlp.jp/proceedings/annual_meeting/2018/pdf_dir/C3-5.pdf
 notes:
   - Japanese originals and human English translations; the paper describes translation by a Japanese undergraduate and checking by a native British English speaker. This is publisher workflow evidence, not per-record native review or project quality certification.
-  - Preserve deliberate Japanese bunsetsu spaces and explicit publisher sentence IDs. Each row is an independent work, never neighboring dialogue context. Ordinary sentence and content-quality gates apply.
+  - Preserve raw Japanese bunsetsu annotation in the pinned snapshot and source-text hash. Derived sentence text removes only ASCII annotation spaces under talpco-bunsetsu-unspacing-v1; English text and publisher sentence IDs stay intact. Each row is an independent work, never neighboring dialogue context. Ordinary sentence and content-quality gates apply.
   - Import only raw Japanese and original British English files; exclude the US adaptation, audio, tokenizations and annotations. No serving activation is implied.
 acquisition:
   version: eb4746249830e2c0a8b192a464a74616da3e0453
