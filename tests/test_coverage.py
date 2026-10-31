@@ -12,10 +12,13 @@ from manabi_sentence_db.serialization import DataError, canonical_json, sha256_f
 def _archive(tmp_path, source, texts):
     rows = {"works": [{"id": source + "-work", "source_id": source}],
             "sentences": [], "occurrences": [], "translations": [], "references": []}
+    seen = set()
     for index, text in enumerate(texts):
         identity = sentence_identity("ja", text)
-        rows["sentences"].append({"id": identity, "language": "ja", "text": text,
-                                  "text_sha256": hashlib.sha256(text.encode()).hexdigest()})
+        if identity not in seen:
+            rows["sentences"].append({"id": identity, "language": "ja", "text": text,
+                                      "text_sha256": hashlib.sha256(text.encode()).hexdigest()})
+            seen.add(identity)
         rows["occurrences"].append({"id": f"{source}-{index}", "work_id": source+"-work",
                                     "sentence_id": identity, "ordinal": index})
     members = {name + ".jsonl": b"".join(canonical_json(row)+b"\n" for row in values)
@@ -49,6 +52,10 @@ def test_marginal_vocabulary_deduplicates_texts_and_exposes_unknown_analysis(tmp
     report = json.loads(result.read_text())
     assert report["unique_sentences"] == 3
     base, added = report["sources"]
+    assert base["sentences_shared_with_baseline"] == 1
+    assert base["novel_sentences_vs_baseline"] == 0
+    assert added["sentences_shared_with_baseline"] == 1
+    assert added["novel_sentences_vs_baseline"] == 2
     assert base["unique_lemmas"] == 2 and base["novel_lemmas_vs_baseline"] == 0
     assert added["unique_lemmas"] == 4 and added["novel_lemmas_vs_baseline"] == 2
     assert added["analysis_coverage"] == 2/3 and added["missing_analysis"] == 1
@@ -90,3 +97,25 @@ def test_coverage_without_target_list_is_not_a_percentage_claim(tmp_path):
     assert report["sources"][0]["analyzed_sentences"] == 1
     assert report["sources"][0]["unique_lemmas"] == 0
     assert report["sources"][0]["target_vocabulary_coverage"] is None
+
+
+def test_sentence_novelty_uses_union_of_baseline_texts_without_analysis(tmp_path):
+    common, shared, novel = "犬が走っています。", "猫が眠っています。", "鳥が飛んでいます。"
+    archives = [
+        _archive(tmp_path, "base-a", [common]),
+        _archive(tmp_path, "base-b", [common, shared]),
+        _archive(tmp_path, "candidate", [common, common, shared, novel]),
+    ]
+    # Multiple occurrences of one text must not count as novel sentences, and
+    # absence of token analysis must not make shared sentence text look new.
+    analysis = _analysis(tmp_path, [])
+    for baselines in (["base-a", "base-b"], []):
+        output = tmp_path / ("with-baseline.json" if baselines else "without-baseline.json")
+        report = json.loads(vocabulary_coverage(archives, analysis, output,
+                            analyzer="fixture-v1", baseline_sources=baselines).read_text())
+        candidate = report["sources"][-1]
+        assert candidate["source_id"] == "candidate"
+        assert candidate["unique_sentences"] == 3
+        assert candidate["analyzed_sentences"] == 0
+        assert candidate["sentences_shared_with_baseline"] == (2 if baselines else 0)
+        assert candidate["novel_sentences_vs_baseline"] == (1 if baselines else 3)

@@ -150,6 +150,11 @@ def vocabulary_coverage(
                 total = scalar("SELECT COUNT(*) FROM source_sentences WHERE source=?", (source,))
                 analyzed = scalar("SELECT COUNT(*) FROM source_sentences s JOIN analyzed a "
                                   "ON a.sentence=s.sentence WHERE s.source=?", (source,))
+                shared = scalar(
+                    "SELECT COUNT(*) FROM source_sentences s WHERE s.source=? AND EXISTS "
+                    "(SELECT 1 FROM source_sentences b JOIN baseline_sources bs "
+                    "ON bs.source=b.source WHERE b.sentence=s.sentence)", (source,)
+                )
                 lexical_join = (" FROM lemmas l JOIN source_sentences s "
                                 "ON s.sentence=l.sentence WHERE s.source=?")
                 unique = scalar("SELECT COUNT(DISTINCT l.lemma)" + lexical_join, (source,))
@@ -164,6 +169,8 @@ def vocabulary_coverage(
                                       + " AND NOT EXISTS (SELECT 1 FROM baseline_lemmas b WHERE b.lemma=l.lemma)",
                                       (source,)) if targets else None
                 comparisons.append({"source_id": source, "unique_sentences": total,
+                                    "sentences_shared_with_baseline": shared,
+                                    "novel_sentences_vs_baseline": total-shared,
                                     "analyzed_sentences": analyzed, "missing_analysis": total-analyzed,
                                     "analysis_coverage": analyzed/total if total else None,
                                     "unique_lemmas": unique, "novel_lemmas_vs_baseline": novel,
@@ -194,6 +201,8 @@ def vocabulary_coverage(
                 "baseline_target_vocabulary_coverage": baseline_target/len(targets) if targets else None,
                 "sources": comparisons,
                 "interpretation": "Coverage uses supplied analysis only; missing analysis is unknown. "
+                                  "Sentence novelty is exact normalized text identity, independent "
+                                  "of analysis availability; it does not establish semantic novelty. "
                                   "Marginal vocabulary is against the fixed union of baseline sources, "
                                   "not a sentence-count ranking or proof of independent, natural examples.",
             }
