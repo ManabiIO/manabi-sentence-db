@@ -36,6 +36,43 @@ def test_routing_avoids_incidental_subjects_without_excluding_science_history_or
     assert selection.classify(title, categories, "0" * 64)[0] == expected
 
 
+@pytest.mark.parametrize("prefix", ["", "公立", "私立", "国立", "市立", "県立", "都立",
+                                    "府立", "村立", "町立", "官立"])
+@pytest.mark.parametrize("school", ["小学校", "中学校", "高等学校", "大学"])
+def test_named_school_categories_stay_in_general_despite_education_categories(prefix, school):
+    assert selection.classify("架空学園", [f"日本の{prefix}{school}", "教育"], "0" * 64) == (
+        "general", [])
+
+
+def test_school_article_marker_routes_entities_without_rejecting_school_subjects():
+    assert selection.classify("架空学園", ["学校記事", "学校教育"], "0" * 64) == ("general", [])
+    assert selection.classify("学校制度", ["学校教育", "公立学校"], "0" * 64) == (
+        "learning", ["公立学校", "学校教育"])
+
+
+@pytest.mark.parametrize("category", [
+    "プログラミング言語", "教育用プログラミング言語", "プログラミング言語の構文",
+    "オブジェクト指向言語", "関数型言語", "スクリプト言語", "C言語", "C言語の構文", "形式言語",
+    "形式言語理論", "コンピュータ言語", "マークアップ言語", "問い合わせ言語",
+])
+def test_computing_language_categories_do_not_fill_language_learning_quota(category):
+    assert selection.classify("架空の言語", [category], "0" * 64) == ("general", [])
+
+
+@pytest.mark.parametrize("category", [
+    "自然言語", "言語学", "応用言語学", "言語教育", "外国語教育", "学校教育",
+    "教育", "学習", "図書館", "読書", "人工言語", "SOV型言語",
+])
+def test_natural_language_and_education_evidence_survives_computing_language_labels(category):
+    assert selection.classify("架空の学習記事", ["教育用プログラミング言語", category],
+                              "0" * 64) == ("learning", [category])
+
+
+def test_computing_categories_can_still_supply_other_topic_evidence():
+    assert selection.classify("形式言語理論", ["形式言語", "数学に関する記事"], "0" * 64) == (
+        "science", ["数学に関する記事"])
+
+
 def test_top_k_is_bounded_order_independent_and_seeded():
     pages = [page(i, "健康") for i in range(1, 51)]
     pages += [page(i, "菓子") for i in range(51, 101)]

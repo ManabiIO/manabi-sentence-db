@@ -29,7 +29,7 @@ from .wikimedia import (
     _xml_pages,
 )
 
-POLICY = "wikimedia-balanced-metadata-v1"
+POLICY = "wikimedia-balanced-metadata-v2"
 MAX_SELECTED = 50_000
 TOPICS = {
     "food": r"料理|食文化|食品|食材|調理|食事|飲料|菓子",
@@ -50,10 +50,16 @@ _VARIETY = re.compile(
     r"人物|[0-9]+年生|[0-9]+年没|存命|生年|没年|の選手|選手$|の俳優|の女優|の歌手|の政治家"
     r"|漫画作品|映画作品|の漫画$|楽曲$|アルバム$|小説$|テレビドラマ|テレビ番組|ラジオ番組"
     r"|アニメ作品|ゲーム作品|年のコンピュータゲーム|コマーシャルソング"
-    r"|の鉄道駅|の駅$|の鉄道路線|の企業|の会社|の小学校|の中学校|の高等学校"
+    r"|の鉄道駅|の駅$|の鉄道路線|の企業|の会社|^学校記事$"
+    r"|の(?:公立|私立|国立|市立|県立|都立|府立|村立|町立|官立)?(?:小学校|中学校|高等学校)"
     r"|の(?:公立|私立|国立|市立|県立|都立|府立|村立|町立|官立)?大学$|NGC天体|IC天体"
 )
 _INDIRECT = re.compile(r"出身|所属|を題材|コマーシャルソング|東京俳優生活協同組合|主婦と生活社")
+_COMPUTING_LANGUAGE = re.compile(
+    r"プログラミング言語|形式言語"
+    r"|(?:コンピュータ|スクリプト|オブジェクト指向|関数型|手続き型|宣言型|アセンブリ"
+    r"|マークアップ|問い合わせ|クエリ)言語|(?:^|の)C言語(?:$|の)"
+)
 
 
 def classify(title: str, categories: list[str], priority: str) -> tuple[str, list[str]]:
@@ -63,12 +69,18 @@ def classify(title: str, categories: list[str], priority: str) -> tuple[str, lis
     if any(_VARIETY.search(category) for category in categories):
         return "general", []
     direct = [category for category in categories if not _INDIRECT.search(category)]
+    # Computing/formal language labels do not establish language learning, even
+    # when a label says 教育用プログラミング言語. Independent education or natural
+    # language categories still qualify; this is routing, never text rejection.
+    learning = [category for category in direct if not _COMPUTING_LANGUAGE.search(category)]
     matches = [topic for topic, pattern in _TOPICS.items()
-               if any(pattern.search(category) for category in direct)]
+               if any(pattern.search(category) for category in
+                      (learning if topic == "learning" else direct))]
     if not matches:
         return "general", []
     topic = matches[int(priority[:8], 16) % len(matches)]
-    evidence = sorted({category for category in direct if _TOPICS[topic].search(category)})
+    evidence = sorted({category for category in (learning if topic == "learning" else direct)
+                       if _TOPICS[topic].search(category)})
     return topic, [category[:160] for category in evidence[:8]]
 
 
