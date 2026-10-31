@@ -134,3 +134,49 @@ def test_wikipedia_policy_is_not_applied_to_other_languages():
     }, Counter(), set())
     assert len(record["sentences"]) == 1
     assert WIKIPEDIA_QUALITY_VERSION not in record["transformations"]
+
+
+@pytest.mark.parametrize('text', [
+    'であることを意味する。', 'ではないことを示す。', 'でないことがわかる。',
+    '詳しくは国道19号を参照。', '詳細については別の記事を参照のこと。',
+    'くわしくは公式資料を参照されたい。',
+    '適法な業務請負の要件について、以下4つの全てを満たすものであることを求めている。',
+    '申請者は下記の三つの条件を満たす必要がある。',
+    '応募者は以下２項目を満たす。',
+])
+def test_formula_remnants_cross_references_and_missing_numbered_requirements_are_rejected(text):
+    assert assess_wikipedia_sentence(text) == ('wikipedia-dependent-fragment', [])
+
+
+@pytest.mark.parametrize('text', [
+    'この記号は、入口が右側にあることを意味する。',
+    'である調は、説明文などで使われる文体である。',
+    '「であることを意味する」という文が残っていた。',
+    '詳しくは先生に聞いてください。',
+    '詳しく書いた説明書を参照した。',
+    '彼は国道19号の地図を参照してから出発した。',
+    '参加費は千円以下であることを求めている。',
+    '三つの条件を満たす必要がある。',
+    '要件は以下の三つで、年齢、住所、本人確認である。',
+    '申請者は年齢、住所、本人確認の三つの条件を満たす必要がある。',
+    '「以下の三つ」という表現を例に挙げている。',
+])
+def test_fragment_rules_preserve_complete_explanations_instructions_and_inline_requirements(text):
+    assert assess_wikipedia_sentence(text) == (None, [])
+
+
+def test_refined_fragment_gate_keeps_other_article_sentences_and_original_ordinals():
+    source = yaml.safe_load((Path(__file__).parents[1] / 'sources/wikipedia-ja.yaml').read_text())
+    texts = ['公園の入口には案内板がある。', 'であることを意味する。',
+             '詳しくは公式資料を参照。', '申請者は以下4つを満たす必要がある。',
+             '毎年多くの人が公園を訪れる。']
+    raw = dict(native_id='refined-gap', language='ja', title='架空の公園記事',
+               url='https://example.invalid/park', license=source['license'],
+               attribution=source['attribution'],
+               sentences=[{'text': text, 'source_ordinal': i * 2} for i, text in enumerate(texts)])
+    stats = Counter()
+    record = canonical_document(raw, dict(source_id='wikipedia-ja', snapshot_id='fixture', source=source), stats, set())
+    assert [(s['ordinal'], s['text']) for s in record['sentences']] == [(0, texts[0]), (8, texts[4])]
+    assert record['license'] == source['license'] and record['attribution'] == source['attribution']
+    assert 'wikipedia-example-quality-v5' in record['transformations']
+    assert stats['rejected:wikipedia-dependent-fragment'] == 3

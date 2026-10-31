@@ -191,6 +191,8 @@ def _write_normalized_archive(root, build, catalog, source_id, manifest, *, comp
         archive.writestr(info("manifest.json"), canonical_json(manifest), compresslevel=6)
         for name in ("licenses.json", "catalog.json"):
             write_file(build / name, name)
+        if parent := catalog.get("refinement_parent"):
+            write_file(build / parent["path"], parent["path"], expected_hash=parent["sha256"])
         for snapshot in catalog["snapshots"]:
             if source_id is None or snapshot["source_id"] == source_id:
                 write_file(build / snapshot["manifest"], snapshot["manifest"])
