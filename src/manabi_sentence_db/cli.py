@@ -44,6 +44,10 @@ def parser() -> argparse.ArgumentParser:
         help="Check upstream again, preserving the existing snapshot",
     )
     snapshot.add_argument("--user-agent", default=os.getenv("SENTENCE_DB_USER_AGENT"))
+    snapshot.add_argument(
+        "--article-cache", type=Path,
+        help="Persistent URL-keyed cache for the explicitly selected Global Voices article",
+    )
     verify = commands.add_parser(
         "verify-snapshot", help="Verify a snapshot's metadata and every raw file offline"
     )
@@ -261,6 +265,12 @@ def main(argv: list[str] | None = None) -> int:
                 )
                 failures = []
                 for source in selected:
+                    if args.source == "all" and source["adapter"] == "globalvoices":
+                        print(
+                            f"Skipping {source['id']}: requires explicit single-source selection",
+                            file=sys.stderr,
+                        )
+                        continue
                     if (
                         args.source == "all"
                         and args.mode == "sample"
@@ -276,6 +286,7 @@ def main(argv: list[str] | None = None) -> int:
                             source,
                             args.output / source["id"] if args.source == "all" else args.output,
                             mode=args.mode,
+                            article_cache=args.article_cache,
                             date=args.date
                             if args.source != "all" or source["adapter"] == "wikimedia"
                             else None,

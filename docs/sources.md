@@ -182,7 +182,7 @@ unpaired encyclopedia prose; the implemented Kyoto adapter is described below.
 | --- | --- | --- |
 | [NICT ALT Parallel Corpus](https://www2.nict.go.jp/astrec-att/member/mutiyama/ALT/) (adapter enabled) | 20,106 aligned sentences from 1,893 English Wikinews articles, 13 languages including Japanese | CC BY 4.0 parallel ZIP only. Same page's treebank/annotation downloads are NC and excluded. Japanese is translated; translation method remains unknown. |
 | [Accommodation Search Dialog Corpus](https://github.com/megagonlabs/asdc) (adapter enabled) | 210 main dialogues; additional crowdwritten vanilla and supplemental material | Corpus/annotations/docs CC BY 4.0; code Apache 2.0. Only main dialogue text is admitted, with booking summaries excluded; correction fields require separate review. |
-| [Global Voices Japanese](https://jp.globalvoices.org/) | Ongoing translated reporting across many countries and topics | CC BY 3.0 for covered editorial content; per-post author/translator and exceptions. Needs a bounded, polite snapshot crawler or verified export. |
+| [Global Voices Japanese](https://jp.globalvoices.org/) | Translated reporting across many countries and topics | Only the opt-in, hash-pinned 65906 editorial subset is enabled below. Wider acquisition still needs per-work rights/attribution review; no blanket crawl. |
 | [MDN Japanese documentation](https://github.com/mdn/translated-content) | Substantial technical prose with source files in Git | CC BY-SA 2.5 or later for documentation; pin commit, skip code, retain document/contributor credit. |
 | [Japanese Wikiversity](https://ja.wikiversity.org/wiki/Wikiversity:著作権) | Educational prose; natural reuse of the Wikimedia adapter | General Wikimedia CC BY-SA 4.0 framework, subject to local/imported exceptions. Tag register and exclude classical-language exercises/quotations. Wikibooks is already enabled. |
 
@@ -237,20 +237,67 @@ and reserve context gaps across every omitted block. Fail closed on changed
 body text, bylines, dates, original links, exceptions or unfamiliar body markup.
 The general footer license cannot override a per-work exception.
 
-The next bounded step can use the already captured 65906 page **offline** to
-review and pin narrative-only paragraph ordinals/hashes, its two Jo Carter
-bylines, English original URL, both publication dates and CC BY 3.0 evidence.
-Before admission, a separately bounded acquisition must also check the
-[linked English original](https://globalvoices.org/2026/09/25/young-japanese-find-new-outlets-for-peace-activism-amid-rising-tensions-in-the-pacific/)
-for work-specific notices; this pilot did not capture or verify that version.
-Keep 65764 out of that inventory. An eventual explicitly selected inventory
-adapter needs synthetic fixtures covering partner notices, inline and block
-quotes, missing credits, date/direction drift and context gaps before acquisition
-or corpus admission. Article-level language links do not establish sentence
-alignment: no bilingual pairs should be inferred from matching paragraph
-positions. No Global Voices adapter or source manifest is enabled by this pilot.
-Existing Kyoto/ALT additions and the queued Wikipedia and dialogue expansion
-remain ahead of it.
+#### Single-work importer: 65906
+
+The follow-up captured the
+[English original](https://globalvoices.org/2026/09/25/young-japanese-find-new-outlets-for-peace-activism-amid-rising-tensions-in-the-pacific/)
+in one bounded request, without media. Both versions carry article-level and
+footer CC BY 3.0 links. The original credits Jo Carter and contains no observed
+partner-republication or alternate text-license notice. Its photo captions say
+“used with permission”; those captions and all media remain excluded. The
+original also reproduces Japanese source quotations with English translations;
+those quotations do not make the Japanese narrative original writing or create
+article-level sentence alignment.
+
+The opt-in [source configuration](../sources/globalvoices-65906-ja.yaml) covers
+only this work. The
+[reviewed inventory](../src/manabi_sentence_db/globalvoices_65906.json) commits
+metadata and hashes, never article bodies. It retains direct body-block ordinals
+**2, 3, 4, 7, 9, 11, 16, 21, 25, 35, 38** (zero-based), totaling **11 narrative
+paragraphs / 1,232 characters** before sentence filtering. Every one of the other
+30 blocks has a pinned text/markup hash, an exclusion reason and a context break:
+six quote blocks, translated-quote tabs, captions, headings, promotional text,
+inline quotations and dependent introductions to omitted quotations. Retained
+paragraph 11 contains reporter narration and indirect paraphrase; it excludes
+the following direct speaker quotation.
+
+The Japanese publication/modified timestamp is `2026-10-23T06:25:15+0000`;
+the English original was published `2026-09-25T06:52:28+0000` and modified
+`2026-10-01T11:55:56+0000`. Exact publisher timestamps, date labels, both URLs
+and Jo Carter's separate writer (English) / translator (Japanese) credits remain
+in the inventory and record attribution/tags. Japanese `published_at` refers to
+translation publication. Authorship and language origin remain `unknown`; tags
+record observed translation direction and unknown translation method. No
+English text, translations, human certification or native-review flag is emitted.
+
+Acquisition requires explicit single-source selection and a canonical persistent
+article cache outside snapshots/builds. `--source all` skips the work in every
+mode. Cached response hashes/sizes are checked without HTTP; misses use one
+cache lock, primary robots checks, a 1.5 MB response bound, a 30-second timeout,
+at most three attempts and at least ten seconds between all attempts across
+hosts and retries. Redirects are rejected and linked assets are never fetched.
+Both raw pages, metadata, body blocks, all omissions and license markup are
+revalidated at acquisition/reuse and build. Even changed wrapper text requires
+explicit re-review; a footer license cannot override a newly inserted exception.
+
+Each retained paragraph is a separate publisher unit. Character ranges refer to
+decoded text of **all** direct body blocks joined with two newlines; omitted
+text is never emitted, and each omitted block reserves a context ordinal.
+`source_text_hash` hashes this same complete decoded block stream, including
+omitted material only in the digest. No native-review metadata is emitted.
+Sentence splitting retains exact paragraph fragments and never joins prose
+across those gaps. Attribution preserves title, both contributor roles, article
+links, license and a selection/markup-removal/segmentation modification notice.
+Synthetic regressions cover partner/quote/media insertion, missing credits,
+date/direction/license/body/markup drift, omissions, cache-only reuse and retry
+spacing. A tiny offline build from the captured pages retained **25 occurrences /
+25 within-source distinct Japanese sentences**, with **30 context breaks** and
+**zero translations**; normalized SQLite integrity, foreign keys and provenance
+round-trip checks passed. These are source-only counts, not serving-corpus novelty.
+`--refresh` is rejected for this immutable page pin.
+These checks establish a bounded importer, not blanket site permission,
+novelty against the serving corpus, native qualification or production activation.
+The separate Nepali Times article 65764 remains excluded.
 
 ### Conversational corpora
 
@@ -760,3 +807,5 @@ counters. Synthetic tests cover ingestion and compressed normalized export;
 full source admission, overlap, serving predicate checks, representative review
 and size measurements remain required before activation. The publisher count
 is not a measured corpus increase.
+
+For the opt-in Global Voices source, raw HTML is local rights evidence, not a public snapshot asset: it still includes withheld third-party quotations and caption text. The adapter is absent from the raw snapshot workflow and `snapshot-pack` rejects its pages. Public corpus exports contain only the reviewed eligible Japanese paragraphs.

@@ -123,6 +123,11 @@ def snapshot_pack(
         raise SnapshotError("max_part_bytes must be positive and less than 2 GiB")
     manifest_path, output = Path(manifest_path), Path(output)
     snapshot = verify_snapshot(manifest_path)
+    if snapshot["source"].get("adapter") == "globalvoices":
+        raise SnapshotError(
+            "Global Voices raw pages are local rights evidence, including excluded third-party "
+            "material; publish only the processed corpus, not raw snapshot release assets"
+        )
     output.parent.mkdir(parents=True, exist_ok=True)
     staging = Path(tempfile.mkdtemp(prefix=f".{output.name}-", dir=output.parent))
     try:

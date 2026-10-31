@@ -48,6 +48,27 @@ source review, an explicit allowlist entry, and tests; a dataset card or an
 open-source scraping script alone is insufficient evidence. See the
 [source review](docs/sources.md) for decisions and deferred sources.
 
+## Global Voices: one reviewed work
+
+`globalvoices-65906-ja` contains only reviewed Japanese narrative paragraphs from
+[article 65906](https://jp.globalvoices.org/2026/10/23/65906/), under
+[CC BY 3.0](https://creativecommons.org/licenses/by/3.0/). Credit **Jo Carter as
+writer (English) and translator (Japanese)**, Global Voices, both the Japanese
+article and its
+[English original](https://globalvoices.org/2026/09/25/young-japanese-find-new-outlets-for-peace-activism-amid-rising-tensions-in-the-pacific/),
+and indicate paragraph selection, HTML markup removal and sentence segmentation.
+The [publisher policy](https://globalvoices.org/about/global-voices-attribution-policy/)
+requires the original story link and author credit at the top of a republished
+work. Keep attribution and the license link alongside displayed examples.
+The original was published on 2026-09-25; the Japanese translation on 2026-10-23.
+
+Media, photo captions, direct quotations and dependent quote introductions are
+excluded. The English original is retained in the immutable snapshot only as
+rights/provenance evidence; it contributes no English corpus text or aligned
+sentence pairs. The wider site and partner republications are not admitted.
+Exact page/metadata/inventory pins fail on changes, including new rights notices.
+This source review makes no sentence-level human/native-speaker certification.
+
 ## RealPersonaChat
 
 The pinned human dialogue corpus is CC BY-SA 4.0. Credit Sanae Yamashita,
@@ -130,3 +151,5 @@ al. (2016), “Introduction of the Asian Language Treebank”, Oriental COCOSDA.
 Only parallel text is imported; separate noncommercial treebank annotations are
 excluded. Primary license evidence and every archive member hash are pinned in
 `sources/alt-parallel-ja.yaml`.
+
+Global Voices raw HTML snapshots are local evidence and include the withheld third-party material; they are excluded from raw snapshot release packaging. Only the processed, reviewed Japanese subset belongs in public corpus exports.
