@@ -31,7 +31,8 @@
         "scp-curated",
         "jec-basic",
         "kyoto-wikipedia",
-        "alt-parallel"
+        "alt-parallel",
+        "talpco"
       ]
     },
     "license": {
