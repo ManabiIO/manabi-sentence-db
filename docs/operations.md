@@ -322,3 +322,12 @@ transformations and rejection counters, while preserving ordinal/context gaps.
 The inventory contains no article/sentence bodies and makes no human/native
 review claim. General numeric signals remain diagnostic. Existing releases and
 the running corpus are unaffected until explicitly rebuilt and qualified.
+
+The 2026-10-31 offline qualification completed with all seven exclusions applied:
+14,697 occurrences, 14,694 distinct Japanese texts, 14,697 translations and 1,882
+works under the default content policy. The normalized ZIP is 6,949,302 bytes,
+SHA-256 `e2167ab7921afa57e3939a6c9c97c010cd71acf04769bb7d763bd3ba12ea1829`.
+SQLite integrity/foreign-key checks and checks of all 14 occurrence links adjacent
+to the excluded pairs passed. Processing used no network access and did not
+activate a serving replacement. Four remaining numeric-disagreement signals
+remain diagnostic rather than evidence of confirmed errors.

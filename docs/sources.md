@@ -783,10 +783,19 @@ English second row instead has a different ID), and one ID has a trailing hyphen
 Exclude both duplicate-ID rows and the malformed-ID row rather than repairing
 or inventing alignment. Missing/excluded rows reserve context gaps. Quotation
 spans and incomplete prose are conservatively excluded. Corpus release dates
-are never interpreted as publication dates. Offline qualification admits 14,772
-sentences in 1,883 documents before any optional content-flag exclusions.
-This source is available for explicit snapshot/build selection; it is not added
-to any active serving corpus.
+are never interpreted as publication dates. Initial offline qualification admitted
+14,772 occurrences in 1,883 documents before content-flag exclusions and the
+subsequent reviewed-pair policy.
+
+The 2026-10-31 offline rebuild with the default content policy and seven exact
+reviewed-pair exclusions retains **14,697 occurrences, 14,694 distinct Japanese
+texts, 14,697 paired English records and 1,882 works**. Its normalized ZIP occupies
+6,949,302 bytes. SQLite integrity and foreign-key checks pass; all seven withheld
+identities are absent, and 14 adjacent occurrence links preserve their context
+barriers. The source texts are not rewritten. The paired-text audit still raises
+four numeric-disagreement signals; those signals alone establish no translation
+error or review status. This qualifies the source build, not a serving refresh,
+native review or accuracy certification of the remaining translations.
 
 
 ### YJ Captions: pinned caption-only adapter
