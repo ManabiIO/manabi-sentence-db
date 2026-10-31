@@ -117,6 +117,16 @@ def _provenance(archive, manifest, db):
             raise DataError("Oversized normalized provenance: " + name)
         return value
 
+    promised = manifest.get("refinement_provenance")
+    if promised is not None:
+        if (not isinstance(promised, dict) or set(promised) != {"catalog.json", PARENT_PATH}
+                or any(not isinstance(value, str) or len(value) != 64
+                       or any(char not in "0123456789abcdef" for char in value)
+                       for value in promised.values())):
+            raise DataError("Invalid normalized refinement provenance inventory")
+        for name, expected in promised.items():
+            if hashlib.sha256(read_member(name)).hexdigest() != expected:
+                raise DataError("Normalized refinement provenance checksum differs")
     if "catalog.json" not in names:
         if PARENT_PATH in names:
             raise DataError("Refinement parent requires its canonical catalog")
@@ -140,6 +150,8 @@ def _provenance(archive, manifest, db):
         if "refinement" not in options or "refinement_parent" not in catalog:
             raise DataError("Incomplete normalized refinement receipt")
         verify_refinement(catalog, checked_parent)
+    elif promised is not None:
+        raise DataError("Promised normalized refinement receipt is missing")
     db.execute("INSERT INTO metadata VALUES (?,?)", ("catalog", canonical_json(catalog).decode()))
     if parent_records:
         db.execute("INSERT INTO metadata VALUES (?,?)",

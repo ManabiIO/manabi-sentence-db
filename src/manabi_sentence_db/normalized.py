@@ -16,7 +16,7 @@ from pathlib import Path
 
 import zstandard
 
-from .serialization import DataError, canonical_json, digest_json
+from .serialization import DataError, canonical_json, digest_json, sha256_file
 
 
 def sentence_identity(language: str, text: str) -> str:
@@ -150,6 +150,11 @@ def export_normalized(build: Path, output: Path, *, source_id=None, catalog=None
         if selected is not None:
             manifest.update(work_selection=work_selection,
                             work_selection_sha256=digest_json(work_selection))
+        if parent := catalog.get("refinement_parent"):
+            manifest["refinement_provenance"] = {
+                "catalog.json": sha256_file(build / "catalog.json"),
+                parent["path"]: parent["sha256"],
+            }
         _write_normalized_archive(root, build, catalog, source_id, manifest, compressed_tables=True)
         with zipfile.ZipFile(root / "corpus.zip") as archive:
             if archive.testzip() is not None:
@@ -190,7 +195,8 @@ def _write_normalized_archive(root, build, catalog, source_id, manifest, *, comp
                        compressed=compressed_tables, expected_hash=manifest["members"][member])
         archive.writestr(info("manifest.json"), canonical_json(manifest), compresslevel=6)
         for name in ("licenses.json", "catalog.json"):
-            write_file(build / name, name)
+            write_file(build / name, name,
+                       expected_hash=manifest.get("refinement_provenance", {}).get(name))
         if parent := catalog.get("refinement_parent"):
             write_file(build / parent["path"], parent["path"], expected_hash=parent["sha256"])
         for snapshot in catalog["snapshots"]:

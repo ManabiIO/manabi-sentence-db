@@ -262,7 +262,7 @@ def test_refined_lineage_survives_sqlite_and_every_release_transport(tmp_path, m
         assert json.loads(embedded["refinement_parent_catalog"]) == read_json(parent / "catalog.json")
 
 
-@pytest.mark.parametrize("corruption", ["missing-parent", "changed-parent", "missing-catalog", "wrong-build", "missing-receipt"])
+@pytest.mark.parametrize("corruption", ["missing-parent", "changed-parent", "missing-catalog", "wrong-build", "missing-receipt", "missing-both"])
 def test_normalized_sqlite_refuses_incomplete_or_changed_refinement_before_publication(
         tmp_path, monkeypatch, corruption):
     parent = _parent(tmp_path, monkeypatch)
@@ -273,7 +273,8 @@ def test_normalized_sqlite_refuses_incomplete_or_changed_refinement_before_publi
     with zipfile.ZipFile(source) as incoming, zipfile.ZipFile(invalid, "w", compression=zipfile.ZIP_DEFLATED) as out:
         for name in incoming.namelist():
             if (corruption == "missing-parent" and name == PARENT_PATH
-                    or corruption == "missing-catalog" and name == "catalog.json"):
+                    or corruption == "missing-catalog" and name == "catalog.json"
+                    or corruption == "missing-both" and name in {PARENT_PATH, "catalog.json"}):
                 continue
             raw = incoming.read(name)
             if corruption == "changed-parent" and name == PARENT_PATH:

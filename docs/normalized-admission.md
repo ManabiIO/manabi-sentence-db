@@ -29,7 +29,10 @@ For a refined Wikipedia build, the optional canonical catalog is accompanied by
 `lineage/parent.catalog.json`. Before publishing SQLite, the compiler checks the
 parent's exact hash, the refinement policy/parent identity, and unchanged source,
 snapshot, selection and license bindings. Missing or inconsistent refinement
-members fail closed. Both catalogs are retained in SQLite metadata, including
+members fail closed. New refined exports also bind both metadata members in the
+normalized manifest, so losing both catalogs cannot silently become a standalone
+archive. Older standalone v2 downloads remain supported. Both catalogs are
+retained in SQLite metadata, including
 when packaging takes the JSONL-to-normalized-SQLite route. This is provenance
 binding, not an independent replay of the original extraction or permission to
 redistribute unlicensed content. Text and attribution checks remain mandatory.
