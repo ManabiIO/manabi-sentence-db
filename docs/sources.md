@@ -173,18 +173,48 @@ observed in the pinned Japanese export used for implementation verification.
 
 ## High-priority additions
 
-These sources have useful primary licensing evidence but need their own reviewed
-adapters and fixtures before being enabled. Prioritize human-translated Wikipedia
-pairs before expanding unpaired encyclopedia prose; the implemented Kyoto adapter
-is described below.
+ALT and ASDC have reviewed adapters; their admitted subsets and qualification
+status are described below. The other candidates still need reviewed adapters
+and fixtures. Prioritize human-translated Wikipedia pairs before expanding
+unpaired encyclopedia prose; the implemented Kyoto adapter is described below.
 
 | Candidate | Upstream scale and character | License / implementation decision |
 | --- | --- | --- |
-| [NICT ALT Parallel Corpus](https://www2.nict.go.jp/astrec-att/member/mutiyama/ALT/) | 20,106 aligned sentences from 1,893 English Wikinews articles, 13 languages including Japanese | CC BY 4.0 parallel ZIP only. Same page's treebank/annotation downloads are NC and excluded. |
-| [Accommodation Search Dialog Corpus](https://github.com/megagonlabs/asdc) | 210 main dialogues; additional crowdwritten vanilla and supplemental material | Corpus/annotations/docs CC BY 4.0; code Apache 2.0. Admit only selected text fields and record the subset. |
+| [NICT ALT Parallel Corpus](https://www2.nict.go.jp/astrec-att/member/mutiyama/ALT/) (adapter enabled) | 20,106 aligned sentences from 1,893 English Wikinews articles, 13 languages including Japanese | CC BY 4.0 parallel ZIP only. Same page's treebank/annotation downloads are NC and excluded. Japanese is translated; translation method remains unknown. |
+| [Accommodation Search Dialog Corpus](https://github.com/megagonlabs/asdc) (adapter enabled) | 210 main dialogues; additional crowdwritten vanilla and supplemental material | Corpus/annotations/docs CC BY 4.0; code Apache 2.0. Only main dialogue text is admitted, with booking summaries excluded; correction fields require separate review. |
 | [Global Voices Japanese](https://jp.globalvoices.org/) | Ongoing translated reporting across many countries and topics | CC BY 3.0 for covered editorial content; per-post author/translator and exceptions. Needs a bounded, polite snapshot crawler or verified export. |
 | [MDN Japanese documentation](https://github.com/mdn/translated-content) | Substantial technical prose with source files in Git | CC BY-SA 2.5 or later for documentation; pin commit, skip code, retain document/contributor credit. |
 | [Japanese Wikiversity](https://ja.wikiversity.org/wiki/Wikiversity:著作権) | Educational prose; natural reuse of the Wikimedia adapter | General Wikimedia CC BY-SA 4.0 framework, subject to local/imported exceptions. Tag register and exclude classical-language exercises/quotations. Wikibooks is already enabled. |
+
+### Global Voices acquisition evidence — 2026-10-31
+
+The [Japanese site](https://jp.globalvoices.org/) states CC BY 3.0. Its
+[republishing guidelines](https://globalvoices.org/about/global-voices-attribution-policy/)
+permit commercial adaptation of covered editorial material, require original
+article links and author credit, and retain exceptions. Media rights are separate.
+The [AI policy](https://globalvoices.org/about/global-voices-policy-on-ai/) rejects
+automatically generated writing and translations while allowing reference tools.
+This is publisher workflow evidence, not proof of native-speaker review for every
+sentence. Preserve individual author and translator credit and translation
+direction; never label translated Japanese as Japanese original writing.
+
+Bounded primary checks found a usable WordPress metadata endpoint,
+`https://jp.globalvoices.org/wp-json/wp/v2/posts`, reporting 2,903 posts. That is
+a discovery count, not an admitted article or sentence count. The
+[robots policy](https://jp.globalvoices.org/robots.txt) specifies a ten-second
+crawl delay; acquisition must use one worker, persistent snapshots, explicit
+opt-in refreshes and at least that spacing, including retries. Do not request
+disallowed paths or fetch embedded media.
+
+A future pilot should select a small, explicit article inventory, retain raw
+responses and per-work exception evidence, and verify full author/translator
+metadata rather than relying on the API's numeric author alone. Separate prose
+from captions, external quotations, embedded posts and partner republications.
+Retain ordinal gaps across omissions. Article-level language links do not
+establish sentence alignment: no bilingual pairs should be inferred from matching
+paragraph positions. No Global Voices adapter, snapshot or corpus admission is
+enabled by these checks. Existing Kyoto/ALT additions and the queued Wikipedia
+and dialogue expansion remain ahead of this pilot.
 
 ### Conversational corpora
 
