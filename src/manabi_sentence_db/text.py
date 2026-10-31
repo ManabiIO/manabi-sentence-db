@@ -11,7 +11,7 @@ from __future__ import annotations
 import re
 import unicodedata
 
-TEXT_PROCESSOR_VERSION = "ja-conservative-v8"
+TEXT_PROCESSOR_VERSION = "ja-conservative-v9"
 PUBLISHER_SEGMENTER_VERSION = "publisher-unit-segmentation-v1"
 OMITTED_MARKUP = "\ufffc"
 
@@ -43,7 +43,13 @@ _FLAGS = {
         r"性交|性行為|セックス|ポルノ|強姦|レイプ|性的虐待|児童ポルノ"
         r"|コック(?:リング|バンド)|ソープランド|デリヘル|性風俗|風俗店"
     ),
-    "violence": re.compile(r"殺人|殺害|虐殺|拷問|斬首|暴行|惨殺|銃殺"),
+    "violence": re.compile(
+        r"殺人|殺害|虐殺|拷問|斬首|暴行|惨殺|銃殺"
+        r"|襲撃|家庭内暴力|児童虐待|身体的虐待|殴(?:[らるれろっ]|り(?!書))|撃たれ"
+        # Vomiting alone is not a trigger. Require ingestion plus explicit
+        # coercion in the same short clause; do not cross sentence boundaries.
+        r"|(?:嘔吐物|吐瀉物|吐物)を(?:食べ|飲)[^。｡！？!?\n]{0,24}(?:強い|強要)"
+    ),
     "self-harm": re.compile(r"自殺|自傷|リストカット"),
     "profanity": re.compile(r"くそったれ|クソ野郎|死ね|くたばれ"),
 }

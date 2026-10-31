@@ -135,6 +135,38 @@ def test_flags_are_annotations_instead_of_blanket_rejection():
 
 
 @pytest.mark.parametrize("text", [
+    "学校の体育館で撃たれた。",
+    "学校襲撃時の様子を伝えた。",
+    "家庭内暴力について相談した。",
+    "児童虐待の相談窓口を案内した。",
+    "身体的虐待を受けた。",
+    "彼は顔を殴られた。",
+    "男が通行人を殴った。",
+    "クリッチフィールドは更に、子供達に、食べ物を食べ、飲み続けたうえで、自分達の吐物を食べるように強いた。",
+    "嘔吐物を飲むよう強要された。",
+])
+def test_reviewed_assault_abuse_and_forced_ingestion_receive_violence_flag(text):
+    assert assess_sentence(text) == (True, ["violence"], None)
+
+
+@pytest.mark.parametrize("text", [
+    "射撃競技で優勝した。",
+    "射撃場で標的を撃った。",
+    "メモを殴り書きしてから出かけた。",
+    "電話番号を殴り書いた。",
+    "患者の嘔吐物を検査した。",
+    "吐物を取り除いて気道を確保した。",
+    "吐瀉物を片付けるように指示された。",
+    "吐物を食べることがある。",
+    "嘔吐物を飲み込まないように注意した。",
+    "吐物を食べることがある。彼は帰宅を強いた。",
+    "圧力を強いたが、吐物を食べることはなかった。",
+])
+def test_sport_shooting_and_vomiting_without_ingestion_coercion_are_unflagged(text):
+    assert assess_sentence(text) == (True, [], None)
+
+
+@pytest.mark.parametrize("text", [
     "コックバンドを装着する。",
     "コックリングが販売されている。",
     "近隣にはソープランド街がある。",

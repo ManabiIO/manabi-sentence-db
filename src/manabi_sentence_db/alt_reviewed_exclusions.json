@@ -24,6 +24,13 @@
       "reason": "conflicting-speed-value"
     },
     {
+      "native_id": "SNT.253499.10122",
+      "japanese_sha256": "2c7d84b4b7d875dd3614f527528fb506a7ad4437c8f48d98e3af62a793620654",
+      "english_sha256": "aa801d8279490a174cab481a705355e743354a6dd512d274678f1575cce5ce19",
+      "original_url": "http://en.wikinews.org/wiki/India's_population_increases_by_181_million_in_ten_years",
+      "reason": "conflicting-year"
+    },
+    {
       "english_sha256": "1678067c7c834dd6b6f781af477e3bac382d458543f4a3ce76e1f65634b339c5",
       "japanese_sha256": "378f014dd129d5f5c757439cbe5909cdfdb582695945d821101f6b41b9cc919b",
       "native_id": "SNT.34871.18284",

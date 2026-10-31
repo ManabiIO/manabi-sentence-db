@@ -186,7 +186,8 @@ def test_pinned_release_cannot_silently_lose_a_reviewed_identity(tmp_path):
 
 def test_review_inventory_is_text_free_and_bound_by_processor_fingerprint():
     from manabi_sentence_db import alt_parallel as module
-    assert len(module.REVIEW_EXCLUSIONS) == 7
+    assert len(module.REVIEW_EXCLUSIONS) == 8
+    assert module.REVIEW_EXCLUSIONS["SNT.253499.10122"]["reason"] == "conflicting-year"
     assert module._REVIEW['reviewer'] == 'assistant'
     assert set(module._REVIEW['pairs'][0]) == {'native_id','japanese_sha256','english_sha256','reason','original_url'}
     assert module.REVIEW_TRANSFORMATION.endswith(hashlib.sha256(module._REVIEW_DATA).hexdigest())

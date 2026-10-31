@@ -77,7 +77,7 @@ posting index and compressed payload store without changing this interchange mod
 
 ## Publisher-unit segmentation
 
-The current Japanese text processor `ja-conservative-v8` recognizes the
+The current Japanese text processor `ja-conservative-v9` recognizes the
 half-width Japanese full stop `｡` as a boundary alongside `。`. Source spelling
 and Unicode-codepoint ranges are preserved; quotations and parentheses retain
 the same boundary protection. This does not infer new unpunctuated boundaries
@@ -91,6 +91,12 @@ explicit references such as 下記の通り and 下図に示す when the referen
 is omitted. These are narrow heuristic extensions, not a complete safety or
 readability classifier; exclusion still depends on the configured flags.
 These policy changes apply to new builds and do not relabel existing releases.
+
+Version 9 adds narrow `violence` triggers for assault, domestic violence,
+child/physical abuse, being shot, and explicitly coerced ingestion of vomit.
+Ordinary sport shooting and medical mentions of vomiting are not added triggers.
+Public annotations and private occurrence/context exclusions require rebuilt
+source artifacts to incorporate these rules; existing releases are unchanged.
 
 Japanese Wikipedia quality policy v4 additionally rejects terminal
 `以下から構成される` / `以下の理由による` list introductions and detached

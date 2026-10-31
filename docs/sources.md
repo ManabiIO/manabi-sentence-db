@@ -813,15 +813,26 @@ are never interpreted as publication dates. Initial offline qualification admitt
 14,772 occurrences in 1,883 documents before content-flag exclusions and the
 subsequent reviewed-pair policy.
 
-The 2026-10-31 offline rebuild with the default content policy and seven exact
-reviewed-pair exclusions retains **14,697 occurrences, 14,694 distinct Japanese
-texts, 14,697 paired English records and 1,882 works**. Its normalized ZIP occupies
-6,949,302 bytes. SQLite integrity and foreign-key checks pass; all seven withheld
-identities are absent, and 14 adjacent occurrence links preserve their context
-barriers. The source texts are not rewritten. The paired-text audit still raises
-four numeric-disagreement signals; those signals alone establish no translation
-error or review status. This qualifies the source build, not a serving refresh,
-native review or accuracy certification of the remaining translations.
+The 2026-10-31 offline rebuild with text processor v9 and eight exact
+reviewed-pair exclusions retains **14,696 occurrences, 14,693 distinct Japanese
+texts, 14,696 paired English records and 1,882 works**. Its normalized ZIP has
+SHA-256 `699278e599948b3870a7ed68ca1c242876fd1d62eda9458c978e63fb72a21148`.
+All eight withheld identities are absent. The latest exact exclusion,
+`SNT.253499.10122`, conflicts on a period's end year (2001 versus 2011).
+Comparison with the prior build confirms this is the only removed pair and
+that surviving text is unchanged. Its neighbors remain unlinked; the source
+has 2,154 gaps between surviving occurrences, preserving missing context.
+
+The numeric diagnostic v2 pass inspected six remaining disagreement signals
+before that exclusion. The other five signals involve omitted numerals or
+numbers written as words and do not establish a mistranslation. These are
+assistant-only findings, and source text is never repaired. The rebuild also
+annotates 351 violence mentions, including all four disturbing snippet classes
+found in the result review. Public annotations are retained; the private serving
+pipeline excludes flagged occurrences and prevents context from crossing them.
+Rights and translation direction remain independently licensed and labeled;
+no human/native review or generation evidence is inferred. This qualifies the
+source build, not a serving activation or accuracy certification of all pairs.
 
 
 ### YJ Captions: pinned caption-only adapter
