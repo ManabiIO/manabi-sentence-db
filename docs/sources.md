@@ -398,10 +398,36 @@ admission gates retains 8,622 occurrences and 5,039 within-source distinct texts
 These are source-only counts, not novelty against the serving corpus. An
 assistant-only sample found practical travel requests and polite service language,
 alongside short replies that require dialogue context. It establishes neither
-native quality review nor serving approval. Compressed normalization, native
-analysis, corpus novelty, final ranked-text/context review and storage qualification
-remain required before serving admission. Occurrences remain unreviewed. A
-configured adapter is not an activated corpus.
+native quality review nor serving approval.
+
+The 2026-10-31 offline compressed-build and normalized-SQLite qualification
+reproduced all 210 works, 8,622 occurrences and 5,039 distinct texts, with no
+translations. All 210 summary context breaks survive canonical admission. SQLite
+integrity and foreign-key checks pass. The normalized ZIP is 1,628,504 bytes and
+SQLite is 13,508,608 bytes; these are source-only artifacts, not native serving
+index growth. Build identity is `build_cb31a897449c8945e037cc14df97e670`; normalized
+ZIP SHA-256 is `d84c72e1a0aa6d63d2c4e887df9604ee41dbbfc05b016e4d6b4ef4daf037fa0a`.
+This reused the pinned local snapshot under the producer lock, with no downloads,
+native jobs or serving activation.
+
+A subsequent bounded native compilation against the frozen active v9 runtime
+retained all 5,039 distinct texts in a 16,695,296-byte compact index. Against the
+read-only current corpus of 1,848,842 texts, 4,916 are novel and 123 shared. This
+is a small standalone index, not measured merged-corpus growth. Native index
+validation, 5,933 citation checks and 48 internal missing-ordinal context checks
+passed; all work rights, origin and transformation fields match the normalized
+input. Vocabulary-estimated JLPT levels are N1 785, N2 1,298, N3 1,800, N4 820,
+N5 295 and unknown 41. An assistant inspected 62 ranked results across eight
+queries with two sentences of dialogue context per side. Practical travel/service
+examples predominate, with some awkward role-play language and source numeric
+shorthand. A broad `食べる` query also matches an analyzed `食べ` component in
+`食べ歩き`. The full-word query policy is asymmetric: a query for `食べ歩く`
+must retain the whole compound rather than admit bare eating, bare walking or
+separated eating/walking clauses. Native regressions cover these cases; a broad
+base-verb match alone does not establish a compound-query defect. No source text
+was rewritten, current corpus changed or serving activation performed.
+Merged growth and final combined-corpus review remain required. Occurrences remain
+unreviewed. A configured adapter is not an activated corpus.
 
 The [Japanese Movie Recommendation Dialogue dataset](https://github.com/ku-nlp/JMRD)
 offers roughly 5,000 human dialogues under CC BY-SA 4.0, but includes external

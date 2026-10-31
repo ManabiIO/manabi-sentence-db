@@ -296,10 +296,14 @@ translation. Case selection takes the first eligible examples in canonical order
 within both case and decoded-byte limits; it is not a representative sample.
 All comparable pairs are counted even when the review packet is full.
 
-The `parallel-number-review-v1` signal compares exact decimal values and numeral
+The `parallel-number-review-v2` signal compares exact decimal values and numeral
 multiplicities after fullwidth normalization and unambiguous comma grouping. It
 skips magnitudes (`4万人` / `40,000`, `million`), dates, times, ranges, identifiers,
 written/ambiguous Unicode signs and missing numerals rather than treating them as translation errors.
+Version 2 recognizes a single trailing comma as prose punctuation, including
+after a grouped numeral (`1,234, including tax`); malformed internal grouping
+and repeated trailing commas remain unsupported. Earlier version-1 audit counts
+remain historical measurements and are not silently relabeled.
 Different numeral counts are skipped unless both sides have the same nonzero
 number of large anchors (absolute value at least 1,000) and those anchors disagree;
 this catches `1 euro / one euro` alongside conflicting exchange rates without

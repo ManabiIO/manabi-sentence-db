@@ -17,10 +17,12 @@ import zstandard
 from .build import iter_records, verify_build
 from .serialization import DataError, canonical_json, sha256_file
 
-VERSION = "parallel-number-review-v1"
+VERSION = "parallel-number-review-v2"
 MAX_UNIT_CHARS = 32768
 MAX_PACKET_BYTES = 8 * 1024**2
-_NUMBER = re.compile(r"[+\-]?[0-9][0-9,]*(?:\.[0-9]+)?")
+# Internal commas stay in the token for grouping validation. A trailing comma
+# belongs to ordinary prose punctuation, not to the numeral itself.
+_NUMBER = re.compile(r"[+\-]?[0-9](?:[0-9,]*[0-9])?(?:\.[0-9]+)?")
 _VALID = re.compile(r"[+\-]?(?:[0-9]+|[0-9]{1,3}(?:,[0-9]{3})+)(?:\.[0-9]+)?\Z")
 _SCALE = re.compile(r"[0-9][\s]*(?:十|百|千|万|億|兆)|\b(?:hundred|thousand|million|billion|trillion)\b", re.I)
 _STRUCTURED = re.compile(r"[0-9]%?\s*[-–—/:]\s*[0-9]|[0-9]\s*(?:月|日|時|分|秒)|マイナス|\bminus\b"
@@ -47,6 +49,8 @@ def _numbers(text):
             return None, "identifier-or-ordinal"
         if before in {"+", "-"} or after in {"+", "-"}:
             return None, "unsupported-sign-or-operator"
+        if after == "," and text[match.end() + 1:match.end() + 2] == ",":
+            return None, "unsupported-grouping"
         if before in {".", ","} or (after in {".", ","} and text[match.end() + 1:match.end() + 2].isdigit()):
             return None, "unsupported-decimal"
         if not _VALID.fullmatch(raw):
