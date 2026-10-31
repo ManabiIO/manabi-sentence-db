@@ -274,3 +274,51 @@ reduced median file decode/parse time from 0.249 s to 0.0112 s with identical ro
 The input chunk size, frame/record limits and corruption checks are unchanged.
 This synthetic long-record comparison is separate from full-corpus timing;
 reproduction functions and results are in `compressed-reader-buffering-pjpex1i3`.
+
+
+## Numeric review of existing parallel text
+
+Use this offline diagnostic before expanding translated material:
+
+```sh
+mise run audit-parallel-numbers -- \
+  --build data/builds/parallel-corpus \
+  --output data/reviews/numbers.json \
+  --review-output data/reviews/numbers.json.zst \
+  --max-cases 100
+```
+
+Create the output parent first. The report contains counts and input identities,
+without sentence text or extracted numerals. The optional `.zst` packet contains
+exact source/translation text with separate rights, original-unit scope, and
+citations. Source units repeated across split sentences are reviewed once per
+translation. Case selection takes the first eligible examples in canonical order,
+within both case and decoded-byte limits; it is not a representative sample.
+All comparable pairs are counted even when the review packet is full.
+
+The `parallel-number-review-v1` signal compares exact decimal values and numeral
+multiplicities after fullwidth normalization and unambiguous comma grouping. It
+skips magnitudes (`4万人` / `40,000`, `million`), dates, times, ranges, identifiers,
+written/ambiguous Unicode signs and missing numerals rather than treating them as translation errors.
+Different numeral counts are skipped unless both sides have the same nonzero
+number of large anchors (absolute value at least 1,000) and those anchors disagree;
+this catches `1 euro / one euro` alongside conflicting exchange rates without
+assuming that every small quantity was written with digits. A flagged disagreement requires review; this is not
+translation verification, native-speaker review, or an admission filter. It does
+not catch every numeric mismatch, and detects no other translation errors. No
+source, translation, generation claim, license, or corpus admission is changed.
+
+Both input checksums and canonical records are checked. The build's artifact
+checksums are checked again before output publication. Review outputs must be
+fresh, outside input builds and symlink parents. Source text is never staged
+uncompressed. These small reports are separate from the serving corpus.
+
+
+For the pinned ALT 20191206 adapter, a separate assistant review withholds seven
+specific conflicting pairs. Both canonical text hashes, the publisher SNT ID,
+and original article URL must match the reviewed inventory; changed evidence
+fails closed. The build records the review-policy inventory hash in its
+transformations and rejection counters, while preserving ordinal/context gaps.
+The inventory contains no article/sentence bodies and makes no human/native
+review claim. General numeric signals remain diagnostic. Existing releases and
+the running corpus are unaffected until explicitly rebuilt and qualified.

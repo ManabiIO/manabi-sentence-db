@@ -118,3 +118,7 @@ run = "uv run --locked python benchmarks/tubelex_pipeline.py"
 [tasks.benchmark-tubelex-filter-cache]
 description = "Stress default bounded filter-cache working sets with synthetic byte fixtures"
 run = "uv run --locked python benchmarks/tubelex_filter_cache.py"
+
+[tasks.audit-parallel-numbers]
+description = "Review numeric disagreements in existing parallel text without changing corpus admission"
+run = "uv run --locked sentence-db audit-parallel-numbers"

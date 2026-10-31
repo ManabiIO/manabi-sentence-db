@@ -40,6 +40,7 @@ def fixture(tmp_path, *, ja=None, en=None):
     with zipfile.ZipFile(path, "w") as z:
         for n, b in blobs.items():
             z.writestr(PREFIX + n, b)
+    source["acquisition"].update(size=path.stat().st_size, sha256=hashlib.sha256(path.read_bytes()).hexdigest())
     return {
         "source": source,
         "source_id": source["id"],
@@ -146,3 +147,46 @@ def test_verified_fixture_build_and_normalized_export(tmp_path):
     assert [o["ordinal"] for o in occurrences] == [0, 3]
     assert len(translations) == 2
     assert all(t["license"]["id"] == "CC-BY-2.5" and "generation" not in t for t in translations)
+
+
+
+def test_reviewed_exact_pair_exclusion_preserves_ordinal_context_barriers(tmp_path, monkeypatch):
+    from manabi_sentence_db import alt_parallel as module
+    texts = [("SNT.1.1", "公園には大きな池がある。"), ("SNT.1.2", "値段は1234円だった。"), ("SNT.1.3", "毎年多くの人が訪れる。")]
+    english = [("SNT.1.1", "There is a pond."), ("SNT.1.2", "The price was 1,334 yen."), ("SNT.1.3", "People visit every year.")]
+    m = fixture(tmp_path, ja=texts, en=english)
+    pin = dict(native_id="SNT.1.2", japanese_sha256=hashlib.sha256(texts[1][1].encode()).hexdigest(),
+               english_sha256=hashlib.sha256(english[1][1].encode()).hexdigest(),
+               original_url="http://en.wikinews.org/wiki/Example", reason="conflicting-exchange-rate")
+    monkeypatch.setattr(module, "REVIEW_EXCLUSIONS", {pin["native_id"]: pin})
+    stats = Counter()
+    raw = list(iter_documents(m, tmp_path, stats=stats))[0]
+    record = canonical_document(raw, m, stats, set())
+    assert [row["ordinal"] for row in record["sentences"]] == [0, 2]
+    assert stats["rejected:alt-reviewed-pair"] == 1
+    assert stats["reviewed-pair-exclusion:conflicting-exchange-rate"] == 1
+    assert module.REVIEW_TRANSFORMATION in record["transformations"]
+    assert record["sentences"][0]["translations"][0]["text"] == english[0][1]
+    assert all("generation" not in row["translations"][0] for row in record["sentences"])
+    for text, original, url in [(texts[1][1]+"変更",english[1][1],pin['original_url']),
+                                 (texts[1][1],english[1][1]+" changed",pin['original_url']),
+                                 (texts[1][1],english[1][1],pin['original_url']+'changed')]:
+        with pytest.raises(DataError, match="Reviewed ALT pair changed"):
+            module.reviewed_pair_reason("SNT.1.2",text,original,url)
+    assert module.reviewed_pair_reason("SNT.1.999",texts[1][1],english[1][1],pin['original_url']) is None
+
+
+def test_pinned_release_cannot_silently_lose_a_reviewed_identity(tmp_path):
+    from manabi_sentence_db import alt_parallel as module
+    m = fixture(tmp_path)
+    m['source']['acquisition']['sha256'] = module._REVIEW['archive_sha256']
+    with pytest.raises(DataError, match='inventory is missing'):
+        list(iter_documents(m,tmp_path,stats=Counter()))
+
+
+def test_review_inventory_is_text_free_and_bound_by_processor_fingerprint():
+    from manabi_sentence_db import alt_parallel as module
+    assert len(module.REVIEW_EXCLUSIONS) == 7
+    assert module._REVIEW['reviewer'] == 'assistant'
+    assert set(module._REVIEW['pairs'][0]) == {'native_id','japanese_sha256','english_sha256','reason','original_url'}
+    assert module.REVIEW_TRANSFORMATION.endswith(hashlib.sha256(module._REVIEW_DATA).hexdigest())

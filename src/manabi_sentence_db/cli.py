@@ -122,6 +122,12 @@ def parser() -> argparse.ArgumentParser:
         "verify-build", help="Verify all artifacts and validate canonical records offline"
     )
     check.add_argument("--build", type=Path, required=True)
+    parallel = commands.add_parser("audit-parallel-numbers", help="Review conservative numeric differences in existing sentence pairs offline")
+    parallel.add_argument("--build", type=Path, required=True)
+    parallel.add_argument("--output", type=Path, required=True, help="Text-free JSON summary")
+    parallel.add_argument("--review-output", type=Path, help="Optional bounded .zst review packet")
+    parallel.add_argument("--source")
+    parallel.add_argument("--max-cases", type=int, default=100)
     coverage = commands.add_parser(
         "vocabulary-coverage", help="Compare analyzed vocabulary breadth and marginal source coverage offline"
     )
@@ -360,6 +366,11 @@ def main(argv: list[str] | None = None) -> int:
                     selection = read_json(args.work_selection)
                 print(export_normalized(args.build, args.output, source_id=args.source,
                                         work_selection=selection))
+            case "audit-parallel-numbers":
+                from .parallel_review import audit_parallel_numbers
+
+                print(audit_parallel_numbers(args.build, args.output, review_output=args.review_output,
+                                             source_id=args.source, max_cases=args.max_cases))
             case "build-db":
                 print(build_database(args.build, args.output, source_id=args.source))
             case "package":

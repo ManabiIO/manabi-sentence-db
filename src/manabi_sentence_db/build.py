@@ -102,6 +102,10 @@ def canonical_document(
         from .globalvoices import TRANSFORMATION
 
         record["transformations"].append(TRANSFORMATION)
+    if manifest["source"]["adapter"] == "alt-parallel":
+        from .alt_parallel import REVIEW_TRANSFORMATION
+
+        record["transformations"].append(REVIEW_TRANSFORMATION)
     if wikipedia_quality:
         from .wikipedia_quality import WIKIPEDIA_QUALITY_VERSION
 
