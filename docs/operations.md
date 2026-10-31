@@ -22,9 +22,14 @@ responses are decoded as whole JSON files, as in the regular adapter. The same
 plus a general quota have a combined ceiling of 50,000 pages. Existing output
 directories and symlink paths are refused; the output parent must already exist.
 
-`wikimedia-balanced-metadata-v1` routes biographies, named organizations and
+`wikimedia-balanced-metadata-v2` routes biographies, named organizations and
 creative works to the general mixture instead of allowing incidental categories
-to dominate practical topics. It keeps separate science and history allocations;
+to dominate practical topics. School entities include public/private school-type
+categories and the `学校記事` marker. Computing/formal-language categories do not
+count as learning evidence; independent natural-language or education categories
+still qualify. Existing snapshot-bound selections remain valid build inputs;
+the new policy changes future sampling hashes and allocations only.
+It keeps separate science and history allocations;
 subject alone does not prove difficult, archaic or poor Japanese. Lists and
 disambiguation pages are excluded. All routing remains a heuristic, including
 category extraction from wikitext. The report includes bounded title/category
