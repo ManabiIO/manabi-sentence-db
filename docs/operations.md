@@ -246,8 +246,12 @@ redownloading the pinned archive. Both roles run identical member/identity check
 
 Use `build --format jsonl --shard-compression zstd` for bulk work. Shard budgets
 still limit the uncompressed logical input, while catalogs record the stored
-compressed sizes/hashes. The reader checks a single complete frame, rejects
-trailing data, and bounds the decompression window and each canonical record.
+compressed sizes/hashes. The reader checks a single complete standard frame,
+rejects trailing data and skippable frames, and bounds the decompression window
+and each canonical record. It feeds one block at a time using the
+[Zstandard format's block bound](https://github.com/facebook/zstd/blob/v1.5.7/doc/zstd_compression_format.md#blocks),
+so each decoder call emits at most 128 KiB; the record buffer still has its
+separate 32 MiB bound. Native Zstandard validates compressed blocks and checksums.
 Release ZIPs preserve `.jsonl.zst`/`.yaml.zst` member names; `documents.jsonl`
 continues to locate logical document positions within those shards.
 
