@@ -9,7 +9,7 @@ and language origin must remain unknown; translations do not become Japanese ori
 ## Enabled adapters
 
 Wikipedia, Kyoto Wikipedia pairs, Wikivoyage, Wikibooks, archived Japanese
-Wikinews, Tatoeba, RealPersonaChat, MRMP multi-party chat, JMultiWOZ, STAIR Captions, JEC Basic
+Wikinews, Tatoeba, RealPersonaChat, MRMP multi-party chat, JMultiWOZ, STAIR Captions, YJ Captions, JEC Basic
 Sentence Data, NICT ALT parallel news text, ASDC main accommodation dialogues,
 and individually curated SCP-JP Tales
 『適性』『カモと商人』『証明写真』『定点観測』『髭を剃ったあとは気分がいい。』.
@@ -44,7 +44,7 @@ pairs from source rows and from text overlap with Wikipedia.
 |---|---|---|
 | STAIR Captions (enabled) | [Publisher](https://github.com/STAIR-Lab-CIT/STAIR-captions), CC BY 4.0 | README rechecked; Japanese image captions. Images require separate rights. |
 | Japanese Visual Genome VQA | [Publisher](https://github.com/yahoojapan/ja-vg-vqa), reported CC BY 4.0 | Verify downloadable text license; many answers are fragments. |
-| YJ Captions | [Publisher](https://github.com/yahoojapan/yjcaptions), reported CC BY 4.0 | Caption text only; deduplicate with other image corpora. |
+| YJ Captions (adapter enabled) | [Pinned publisher](https://github.com/yahoojapan/YJCaptions/blob/2f2d6de87ce90b7ff1fd318efef17b1ce0e127db/README.md), verified CC BY 4.0 | Human original Japanese caption text only; complete-caption gate and separate works; no English alignment inferred from image IDs. Full admission, overlap and serving growth remain to be measured. |
 | Yahoo VFD | [Publisher](https://github.com/yahoojapan/VFD-Dataset), reported CC BY 4.0 | Human imagined responses; keep modality/context flags. |
 | JMRD | [Publisher](https://github.com/ku-nlp/JMRD), reported CC BY-SA 4.0 | Conversation, not copyrighted movie scripts. |
 | JMultiWOZ (enabled) | [Publisher](https://github.com/nu-dialogue/jmultiwoz), verified CC BY-SA 4.0 | Human role-play, preserve speaker/turn context without profiles. |
@@ -96,3 +96,26 @@ Source counts are separate from admitted fragments, deduplicated texts, vocabula
 coverage, and independence from visual/dialogue context. Beyond the one reviewed
 Tale, narrative candidates remain subject to per-work rights and original-language checks; no Narou or
 unverified fiction has been imported merely to increase sentence totals.
+
+
+### Caption expansion follow-up
+
+YJ Captions is pinned to publisher commit `2f2d6de87ce90b7ff1fd318efef17b1ce0e127db`.
+Its [paper](https://aclanthology.org/P16-1168.pdf), sections 3–3.1, describes
+human Japanese descriptions and a subsequent cleaning task. Its published
+131,740-caption count is not an admitted or novel-sentence count. The adapter
+checks the archive checksum, accepts only `yjcaptions26k_clean.json`, streams
+annotations, rejects incomplete captions, and never follows image URLs. Each
+caption is a separate work so other descriptions of the same picture cannot
+be mistaken for preceding/following context. English COCO captions are independent
+descriptions, not sentence translations. Preserve image-dependency flags and
+apply the serving predicate filter before activation. Measure deduplicated overlap
+with STAIR and existing text, actual result quality, and compressed/index growth
+before selecting how much to publish.
+
+SNOW T15/T23 remain candidates: the indexed primary pages specify CC BY 4.0 and
+manual Japanese simplification, but live landing-page downloads were unavailable
+on recheck. Verify the corrected XLSX download links and upstream Tanaka/Tatoeba
+attribution before enabling an adapter. Human simplification does not prove that
+all inherited English translations are human-created; leave their generation
+unknown unless more specific evidence is available.

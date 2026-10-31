@@ -394,8 +394,9 @@ available, and keep administrative/technical register labels.
 | [JSUT](https://sites.google.com/site/shinnosuketakamichi/publication/jsut) | Defer bulk import: text has mixed source licenses described in the archive; audio has separate use/redistribution restrictions. A future text-only subset needs file-level license review. |
 | [Aozora Bunko](https://www.aozora.gr.jp/guide/kijyunn.html) | Defer for the first contemporary-language corpus. Rights vary by work; public-domain works can be reused, while some in-copyright works have limited permission. Modern kana/kanji formatting alone does not establish contemporary vocabulary/style. |
 | Wikisource, Wikiquote, Wiktionary quotations | Defer generic extraction. A Wikimedia footer does not automatically license every quoted or transcribed third-party work, and much material is historical or not complete natural sentences. |
-| [SNOW T15/T23](https://www.jnlp.org/GengoHouse/snow/t15) | Promising easy-Japanese simplification pairs; defer until the current primary license and original-text attribution can be captured. The primary site was unavailable during review. Do not substitute a mirror's CC tag for this verification or confuse them with differently restricted SNOW resources. |
+| [SNOW T15](https://www.jnlp.org/GengoHouse/snow/t15) / [T23](https://www.jnlp.org/GengoHouse/snow/t23) | Indexed publisher pages specify CC BY 4.0 and manual Japanese simplification. Defer acquisition until the corrected primary XLSX links and inherited Tanaka/Tatoeba attribution are verified; direct pages still failed on recheck. English is inherited, not established as wholly human-translated. The simplified Japanese is the main potential addition; measure overlap rather than counting all source rows as novel. |
 | [FLORES+](https://huggingface.co/datasets/openlanguagedata/flores_plus) | Eligible CC BY-SA 4.0 but lower priority: 2,009 public sentences per language, designed as an evaluation benchmark. Keep benchmark provenance/split labels; do not silently fold it into an unlabeled training corpus. |
+| [JSICK](https://github.com/verypluming/JSICK) | Defer pending rights-chain verification: publisher README says BY 4.0 but the repository LICENSE is BY-SA 4.0, and the original SICK sentence rights require separate verification. A translation repository license does not resolve its underlying English-source rights. Stress-test permutations/deleted particles are also unsuitable as blanket learner examples. |
 | [OPUS](https://opus.nlpl.eu/) as a whole | Not one licensable source. Review each component and its original sources. Human text mined into an automatic alignment must not be relabeled as machine-translated text. |
 
 ## Quality and content filtering
@@ -673,3 +674,23 @@ are never interpreted as publication dates. Offline qualification admits 14,772
 sentences in 1,883 documents before any optional content-flag exclusions.
 This source is available for explicit snapshot/build selection; it is not added
 to any active serving corpus.
+
+
+### YJ Captions: pinned caption-only adapter
+
+The [publisher README](https://github.com/yahoojapan/YJCaptions/blob/2f2d6de87ce90b7ff1fd318efef17b1ce0e127db/README.md)
+licenses captions under CC BY 4.0. The accompanying
+[paper](https://aclanthology.org/P16-1168.pdf) establishes human Japanese creation
+and cleaning; its machine caption-generation experiments are separate from the
+released annotations. `yj-captions-ja` reads only `yjcaptions26k_clean.json` from
+the pinned 4,257,429-byte ZIP (SHA-256
+`e2978ac2770f571a012d280ffe9c69f3612be9c104d3cd5cf7116249a4006503`).
+
+No images, image URLs, image-license fields, or inferred translations enter the
+corpus. Each complete caption is its own work with caption/image identity,
+source-row hash, publisher revision and attribution; captions sharing an image
+are independent examples. Rejected incomplete captions have separate acquisition
+counters. Synthetic tests cover ingestion and compressed normalized export;
+full source admission, overlap, serving predicate checks, representative review
+and size measurements remain required before activation. The publisher count
+is not a measured corpus increase.
