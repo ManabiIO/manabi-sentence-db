@@ -110,7 +110,9 @@ def build_normalized_database(archive_path: Path, output: Path):
             )
             for table in TABLES:
                 for row in _rows(archive, table, manifest):
-                    metadata = canonical_json(row).decode()
+                    # Sentence rows store their text/hash in typed columns;
+                    # serializing the complete row would be discarded below.
+                    metadata = canonical_json(row).decode() if table != "sentences" else None
                     if table == "works":
                         validate_rights(row, source_url_key="url")
                         db.execute(

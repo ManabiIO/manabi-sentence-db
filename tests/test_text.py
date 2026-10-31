@@ -31,6 +31,22 @@ def test_japanese_punctuation_closers_and_reporting_clause():
     ]
 
 
+@pytest.mark.parametrize("space", ["", " ", "\t", "\u3000", "\u00a0", "\u2009"])
+def test_reporting_clause_whitespace_preserves_exact_source_spans(space):
+    first = f"𠮷田さんは「明日は晴れです。」{space}と言った。"
+    second = "「雨ですか？」次の話を始めた。"
+    text = (first + second) * 40
+    expected = [part for _ in range(40) for part in (first, "「雨ですか？」", "次の話を始めた。")]
+    assert [text[start:end] for start, end in sentence_spans(text)] == expected
+
+
+def test_reporting_clause_does_not_skip_bom_or_line_boundaries():
+    text = "「晴れです。」\ufeffと言った。\n「雨です。」\t\nと書いた。"
+    assert [text[start:end] for start, end in sentence_spans(text)] == [
+        "「晴れです。」", "\ufeffと言った。", "「雨です。」", "と書いた。",
+    ]
+
+
 def test_paragraph_fragments_are_never_joined():
     assert split_sentences("ひとつの断片\n\n別の文章です。") == ["ひとつの断片", "別の文章です。"]
     assert not is_complete_sentence("ひとつの断片")
