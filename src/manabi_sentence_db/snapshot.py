@@ -577,6 +577,18 @@ def create_snapshot(
                 _save_metadata(staging, "65906-ja.html", JA_ROLE, JA_URL, japanese),
                 _save_metadata(staging, "65906-en-original.html", EN_ROLE, EN_URL, original),
             ]
+        elif adapter == "talpco":
+            from .talpco import validate_source
+
+            if mode != "full" or date or max_files or titles or translations:
+                raise SnapshotError("TALPCo uses only its pinned Japanese and original English file inventory")
+            validate_source(source)
+            files = []
+            for language, pin in source["acquisition"]["files"].items():
+                files.append(_download(
+                    staging, f"talpco-{language}.txt", f"talpco-{language}", pin["url"], agent,
+                    expected_sha256=pin["sha256"], expected_size=pin["size"],
+                ))
         elif adapter in {"realpersonachat", "mrmp", "asdc", "jmultiwoz", "yj-captions", "stair", "jec-basic", "kyoto-wikipedia", "alt-parallel"}:
             if mode != "full" or date or max_files or titles:
                 raise SnapshotError(

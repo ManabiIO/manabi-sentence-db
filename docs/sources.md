@@ -486,11 +486,29 @@ for Japanese and NICT authorship for translations. The NICT page provides v1.2;
 the [Kyoto publisher page](https://nlp.ist.i.kyoto-u.ac.jp/?日英中基本文データ)
 announces a later English-correction release. Pin and document the chosen version.
 
-[TALPCo](https://github.com/matbahasa/TALPCo) is a smaller CC BY 4.0 Japanese-first
-teaching corpus with several Asian-language translations. Its TSV sentence IDs
-are convenient for provenance and alignment. It is useful after the larger
-sources, especially for language coverage. Associated audio links require their
-own review; third-party audio adaptations can have different conditions.
+[TALPCo](https://github.com/matbahasa/TALPCo) is enabled as `talpco-ja`, a CC BY 4.0
+Japanese-first teaching corpus. The pinned publisher commit
+`eb4746249830e2c0a8b192a464a74616da3e0453` supplies 1,372 raw Japanese rows
+(80,569 bytes) and 1,372 original British English rows (62,051 bytes), before
+ordinary content-quality filtering. Exact sizes and SHA-256 values are in the
+source configuration. Acquisition downloads only these two files; audio,
+annotations, tokenized variants, other languages and the US adaptation are excluded.
+Both complete files are verified before any document is yielded, and malformed,
+empty, duplicate, missing or mismatched IDs fail closed. Rows join by explicit
+publisher sentence ID, not by coincidentally matching line positions.
+
+The [publisher paper, section 2](https://www.anlp.jp/proceedings/annual_meeting/2018/pdf_dir/C3-5.pdf)
+establishes Japanese-to-English human translation: a Japanese undergraduate
+prepared the English, subsequently checked by a native British English speaker.
+This supports human translation metadata and a source-level workflow description;
+it does not establish per-record native review or a project quality certification.
+Japanese authorship remains unknown. Each row is a separate example-sentence work,
+with publisher ID, pinned revision, independent CC BY 4.0 attribution and no
+neighboring dialogue links. Deliberate Japanese bunsetsu spaces remain intact;
+the usual NFC and edge-whitespace normalization is disclosed. Publisher pairs
+remain whole, so splitting never falsely attaches a full English translation to
+a Japanese fragment. No full-source qualification, measured marginal growth or
+serving activation is implied by the adapter or upstream row count.
 
 ### Web prose and public-sector text
 

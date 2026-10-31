@@ -492,6 +492,8 @@ def build_corpus(
                     from .globalvoices import iter_documents
                 elif source["adapter"] == "jec-basic":
                     from .jec_basic import iter_documents
+                elif source["adapter"] == "talpco":
+                    from .talpco import iter_documents
                 elif source["adapter"] == "alt-parallel":
                     from .alt_parallel import iter_documents
                 elif source["adapter"] == "kyoto-wikipedia":
@@ -517,7 +519,7 @@ def build_corpus(
                            and selection["source_id"] == source_id else {}),
                         **({"progress": progress} if source["adapter"] == "wikimedia" else {}),
                     )
-                    if source["adapter"] in {"wikimedia", "jec-basic", "kyoto-wikipedia", "alt-parallel", "yj-captions", "globalvoices"}
+                    if source["adapter"] in {"wikimedia", "jec-basic", "talpco", "kyoto-wikipedia", "alt-parallel", "yj-captions", "globalvoices"}
                     else iter_documents(manifest, manifest_path.parent)
                 )
                 for raw in documents:

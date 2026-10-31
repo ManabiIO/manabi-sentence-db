@@ -194,6 +194,7 @@ request reports which sources failed and preserves completed snapshots.
 | `yj-captions-ja` | CC BY 4.0 | Commit/hash-pinned human original Japanese captions; independent complete-caption works, no translations or images; image rights are separate |
 | `stair-captions-ja` | CC BY 4.0 | Commit/hash-pinned v1.2 Japanese caption text; excludes images and tokenized duplicates |
 | `jec-basic-ja` | CC BY 3.0 | Hash-pinned Kyoto University / NICT Japanese-English-Chinese sentence patterns; excludes unresolved X and quotation placeholders |
+| `talpco-ja` | CC BY 4.0 | Commit/hash-pinned 1,372 Japanese teaching examples with human British English translations; preserves bunsetsu spaces and independent example boundaries; no audio or US adaptation |
 | `wikipedia-kyoto-ja` | CC BY-SA 3.0 | Hash-pinned NICT Kyoto parallel corpus v2.01; Japanese originals aligned only with final checked English translations; preserves Wikipedia/NICT attribution and filters excluded XML sections |
 | `alt-parallel-ja` | CC BY 4.0 Japanese; CC BY 2.5 English originals | Pinned NICT parallel news text; Japanese translated from English, with method/authorship unknown; excludes NC treebanks, ambiguous pairs and quotations |
 | `globalvoices-65906-ja` | CC BY 3.0 | Opt-in single reviewed news article: 11 Japanese narrative paragraphs; exact page/metadata/body pins, original English retained only as rights evidence, all omissions preserve context gaps |

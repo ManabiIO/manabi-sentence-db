@@ -1,0 +1,31 @@
+schema_version: 1
+id: talpco-ja
+title: TUFS Asian Language Parallel Corpus (Japanese and original British English)
+language: ja
+adapter: talpco
+homepage: https://github.com/matbahasa/TALPCo
+license:
+  id: CC-BY-4.0
+  url: https://creativecommons.org/licenses/by/4.0/
+attribution:
+  text: 'TUFS Asian Language Parallel Corpus (TALPCo): Hiroki Nomoto, Kenji Okano, David Moeljadi and Hideo Sawada (2018). Japanese examples and English translations, CC BY 4.0; extracted into independent paired examples with NFC normalization and edge whitespace trimming.'
+  url: https://github.com/matbahasa/TALPCo
+license_evidence:
+  - https://github.com/matbahasa/TALPCo/blob/eb4746249830e2c0a8b192a464a74616da3e0453/readme.md
+  - https://www.anlp.jp/proceedings/annual_meeting/2018/pdf_dir/C3-5.pdf
+notes:
+  - Japanese originals and human English translations; the paper describes translation by a Japanese undergraduate and checking by a native British English speaker. This is publisher workflow evidence, not per-record native review or project quality certification.
+  - Preserve deliberate Japanese bunsetsu spaces and explicit publisher sentence IDs. Each row is an independent work, never neighboring dialogue context. Ordinary sentence and content-quality gates apply.
+  - Import only raw Japanese and original British English files; exclude the US adaptation, audio, tokenizations and annotations. No serving activation is implied.
+acquisition:
+  version: eb4746249830e2c0a8b192a464a74616da3e0453
+  pair_count: 1372
+  files:
+    ja:
+      url: https://raw.githubusercontent.com/matbahasa/TALPCo/eb4746249830e2c0a8b192a464a74616da3e0453/jpn/data_jpn.txt
+      size: 80569
+      sha256: 8d8cda0ec259bd94c5b7aa7e1b590dadbf6491969a3e7d65ccb9f6fd8888d26c
+    en:
+      url: https://raw.githubusercontent.com/matbahasa/TALPCo/eb4746249830e2c0a8b192a464a74616da3e0453/eng/data_eng.txt
+      size: 62051
+      sha256: 11b6d7820b7a1fa36c19578a0f4bc3ab3baa46392c6c2d5b2e0488e81a1cd5cc

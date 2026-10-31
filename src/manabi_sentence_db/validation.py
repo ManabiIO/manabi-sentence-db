@@ -35,6 +35,10 @@ def load_source(path: Path) -> dict:
     source = load_yaml(path)
     validate(source, "source")
     validate_license(source["license"])
+    if source["adapter"] == "talpco":
+        from .talpco import validate_source
+
+        validate_source(source)
     if source["language"] == "jp":
         raise DataError("Use the language code ja, not jp")
     if path.stem != source["id"]:
