@@ -55,6 +55,42 @@ second heavy scan with an existing corpus refresh or increase its quota.
 
 The repository stores code, schemas, reviewed source configuration, and original test fixtures. Downloaded source archives, generated YAML, SQLite databases, and release packages stay outside Git. `data/`, `build/`, and `dist/` are ignored.
 
+## Tightening Wikipedia quality without rescanning raw dumps
+
+A completed canonical build can be filtered again with the current Wikipedia
+sentence-quality policy. This reads the verified compressed records, not the raw
+Wikimedia dump, and makes no source requests:
+
+```sh
+mise run refine-wikipedia -- --build data/wiki-build \
+  --output data/wiki-build-refined --progress
+mise run export-normalized -- --build data/wiki-build-refined \
+  --output data/wiki-refined.zip
+```
+
+Use a fresh output with an existing parent directory. Both JSONL and YAML input
+builds are supported; output shards are JSONL compressed with Zstandard. The
+operation holds one canonical record at a time and stages no plaintext sentence
+database. It preserves retained Japanese/translation text, IDs, attribution,
+licenses, source ranges and ordinals. Omitting an example leaves its original gap;
+normalized export does not connect neighbors across that gap. Empty works are
+omitted. Other sources and languages are preserved without this Wikipedia gate.
+
+The new build identity binds the current processor/runtime and a refinement
+receipt containing the policy version, exact parent build ID and parent-catalog
+hash. `lineage/parent.catalog.json` travels in canonical/normalized ZIPs, metadata
+ZIPs and the canonical SQLite metadata. Verification checks the parent receipt
+and unchanged snapshot/source/selection/license bindings. The input build remains
+unchanged. Failed staging moves to Trash when available, otherwise its isolated
+path is preserved and logged.
+
+This is a one-way tightening step: it cannot recover text rejected by an older
+extractor or policy. Re-extraction from the cached raw snapshot is required when
+changing segmentation, extraction, rights handling or relaxing an earlier gate.
+Parent admission counts remain historical; new rejections and checked counts
+are added, while retained document/sentence/translation totals are updated. A
+successful refinement is not a human quality review or serving activation.
+
 ## The boundary between acquisition and processing
 
 `snapshot` is the only command that requests upstream content. It creates an immutable manifest recording the entire source configuration, acquisition time, upstream date, request scope, original URLs, byte lengths, and SHA-256 hashes. The snapshot identity depends on the requested inputs and their bytes, not the local directory or acquisition clock.

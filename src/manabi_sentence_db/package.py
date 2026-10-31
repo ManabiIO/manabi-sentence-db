@@ -137,12 +137,16 @@ def verify_package(output: Path, *, catalog: dict | None = None) -> dict:
             snapshot = snapshots[asset["source_id"]]
             expected["licenses.json"] = catalog["licenses"]
             expected[snapshot["manifest"]] = {"sha256": snapshot["manifest_sha256"]}
+            if parent := catalog.get("refinement_parent"):
+                expected[parent["path"]] = parent
             _verify_zip(safe_relative(output, asset["path"]), expected)
         if seen != set(shards):
             raise DataError("Package is missing canonical YAML shards")
         provenance = {
             item["manifest"]: {"sha256": item["manifest_sha256"]} for item in catalog["snapshots"]
         }
+        if parent := catalog.get("refinement_parent"):
+            provenance[parent["path"]] = parent
         provenance.update(
             {
                 "schemas/" + schema.name: {
@@ -153,6 +157,10 @@ def verify_package(output: Path, *, catalog: dict | None = None) -> dict:
             }
         )
         _verify_zip(output / "provenance-and-schemas.zip", provenance)
+        from .refinement import verify_refinement
+
+        with zipfile.ZipFile(output / "provenance-and-schemas.zip") as archive:
+            verify_refinement(catalog, lambda entry: zipfile.Path(archive, entry["path"]))
         if "normalized_archives" not in release and any(
             asset["kind"] == "normalized-jsonl-zip-part" for asset in assets.values()
         ):
@@ -398,6 +406,8 @@ def package_build(
                     _zip_member(
                         archive, safe_relative(build, snapshot["manifest"]), snapshot["manifest"]
                     )
+                    if parent := catalog.get("refinement_parent"):
+                        _zip_member(archive, safe_relative(build, parent["path"]), parent["path"])
                 assets.append(
                     _entry(
                         staging,
@@ -475,6 +485,8 @@ def package_build(
         with zipfile.ZipFile(
             staging / "provenance-and-schemas.zip", "w", compression=zipfile.ZIP_DEFLATED
         ) as archive:
+            if parent := catalog.get("refinement_parent"):
+                _zip_member(archive, safe_relative(build, parent["path"]), parent["path"])
             for snapshot in catalog["snapshots"]:
                 _zip_member(
                     archive, safe_relative(build, snapshot["manifest"]), snapshot["manifest"]

@@ -46,6 +46,10 @@ run = "uv run --locked sentence-db build"
 description = "Offline balanced article metadata selection from cached Japanese Wikimedia"
 run = "uv run --locked sentence-db select-wikimedia"
 
+[tasks.refine-wikipedia]
+description = "Tighten Wikipedia sentence admission from compressed builds without raw dump scans"
+run = "uv run --locked sentence-db refine-wikipedia"
+
 [tasks.build-db]
 description = "Compile canonical YAML to SQLite offline"
 run = "uv run --locked sentence-db build-db"

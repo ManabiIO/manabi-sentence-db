@@ -8,7 +8,7 @@ this is neither a readability model nor a calibrated JLPT assessment.
 import re
 import unicodedata
 
-WIKIPEDIA_QUALITY_VERSION = "wikipedia-example-quality-v4"
+WIKIPEDIA_QUALITY_VERSION = "wikipedia-example-quality-v5"
 
 _NUMBERS = re.compile(r"[0-9０-９]+(?:[.,．][0-9０-９]+)*")
 _KANJI = re.compile(r"[\u3400-\u4dbf\u4e00-\u9fff]")
@@ -31,6 +31,23 @@ _DANGLING_LIST = re.compile(
     # This particle-led classification is left over after an omitted list.
     r"|^と[、，,][0-9０-９一二三四五六七八九十]+(?:種類|種|つ)に"
     r"(?:区分|分類|大別)され(?:る|ている)[。．.!！?？]?\Z"
+)
+# These are complete references to other material, not independent examples.
+# Ordinary uses of 参照 and instructions to ask someone remain valid prose.
+_CROSS_REFERENCE_ONLY = re.compile(
+    r"^(?:詳しく|くわしく|詳細(?:について)?|詳しい内容)は"
+    r"[^。｡！？!?]{1,100}を参照(?:のこと|されたい|すること)?[。．.!！?？]?\Z"
+)
+# Removed display formulas can leave only this terminal explanation. Require
+# the entire copula-led remnant; a sentence naming what has that meaning stays.
+_FORMULA_REMNANT = re.compile(
+    r"^(?:である|ではない|でない)こと(?:を(?:意味する|示す|表す)|が(?:分か|わか)る)"
+    r"[。．.!！?？]?\Z"
+)
+_NUMBERED_REQUIREMENTS = re.compile(
+    r"(?:以下|下記)の?[0-9０-９一二三四五六七八九十]+"
+    r"(?:つ(?:の(?:条件|要件|事項))?|項目|条件|要件)(?:の?(?:全て|すべて))?を満たす"
+    r"(?:必要がある|ことが必要である|ものであることを求めている)?[。．.!！?？]?\Z"
 )
 # Require several distinct terms plus structural density. A single term, or
 # repeated mentions of one term, never establishes specialist density.
@@ -58,7 +75,8 @@ def assess_wikipedia_sentence(text: str) -> tuple[str | None, list[str]]:
     if length > 180:
         return "wikipedia-long-sentence", []
     if (_FOLLOWING_MATERIAL.search(text) or _ORPHAN.search(text)
-            or _DANGLING_LIST.search(text)):
+            or _DANGLING_LIST.search(text) or _CROSS_REFERENCE_ONLY.search(text)
+            or _FORMULA_REMNANT.search(text) or _NUMBERED_REQUIREMENTS.search(text)):
         return "wikipedia-dependent-fragment", []
     symbols = sum(unicodedata.category(char) == "Sm" for char in text)
     if symbols >= 3 or (

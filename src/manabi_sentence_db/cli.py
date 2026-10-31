@@ -72,6 +72,12 @@ def parser() -> argparse.ArgumentParser:
     select.add_argument("--general", type=int, default=2000)
     select.add_argument("--seed", default="")
     select.add_argument("--progress", action="store_true")
+    refine = commands.add_parser(
+        "refine-wikipedia", help="Tighten Wikipedia admission from a canonical build without raw dumps"
+    )
+    refine.add_argument("--build", type=Path, required=True)
+    refine.add_argument("--output", type=Path, required=True)
+    refine.add_argument("--progress", action="store_true")
     build = commands.add_parser(
         "build", help="Compile verified snapshots into canonical JSONL/YAML offline"
     )
@@ -332,6 +338,12 @@ def main(argv: list[str] | None = None) -> int:
                     progress=(lambda message: print(message, file=sys.stderr, flush=True))
                     if args.progress else None,
                 ))
+            case "refine-wikipedia":
+                from .refinement import refine_wikipedia
+
+                print(refine_wikipedia(args.build, args.output,
+                    progress=(lambda message: print(message, file=sys.stderr, flush=True))
+                    if args.progress else None))
             case "build":
                 excluded = set(args.exclude_flag)
                 if not args.include_sexual_content:

@@ -868,6 +868,10 @@ def verify_build(build: Path) -> dict:
     if catalog.get("build_id") != expected_id:
         raise DataError("Catalog build identity mismatch")
 
+    from .refinement import verify_refinement
+
+    verify_refinement(catalog, artifact)
+
     shard_totals: Counter = Counter()
     for entry in catalog["shards"]:
         if (

@@ -107,6 +107,9 @@ def build_database(
         connection = sqlite3.connect(staging)
         connection.executescript(DDL)
         connection.execute("INSERT INTO metadata VALUES ('catalog',?)", (_json(catalog),))
+        if parent := catalog.get("refinement_parent"):
+            connection.execute("INSERT INTO metadata VALUES ('refinement_parent_catalog',?)",
+                               (_json(read_json(safe_relative(build, parent["path"]))),))
         connection.execute(
             "INSERT INTO metadata VALUES ('sqlite_version',?)", (sqlite3.sqlite_version,)
         )
