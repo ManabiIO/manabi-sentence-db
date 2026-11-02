@@ -598,6 +598,11 @@ context dependence and specialist material outside the small lexicon remain
 separate review questions. The caption predicate policy is not applied wholesale
 to Wikipedia.
 
+Admission v7 additionally rejects whole missing-condition remnants such as
+`の下に考える。` and parenthetical references with no target, such as
+`（例えば 参照）。`. Full sentences naming the condition, references that retain
+their target, and quotations of the broken fragment have retention controls.
+
 Use `mise run refine-wikipedia -- --build BUILD --output FRESH_OUTPUT` to tighten
 an existing compressed canonical build without reacquiring or rescanning the raw
 dump. Refinement only removes previously admitted sentences or adds heuristic
