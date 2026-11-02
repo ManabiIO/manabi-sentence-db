@@ -244,3 +244,23 @@ def test_v6_filters_keep_original_positions_and_rights_in_other_sentences():
     assert record['license'] == source['license'] and record['attribution'] == source['attribution']
     assert WIKIPEDIA_QUALITY_VERSION in record['transformations']
     assert stats['rejected:wikipedia-dependent-fragment'] == 3
+
+
+@pytest.mark.parametrize('text', [
+    'の下に考える。', 'のもとに考えられる。',
+    '（例えば 参照）。', '(たとえば 参照)。', '（参照）。',
+])
+def test_missing_condition_and_parenthetical_reference_targets_are_rejected(text):
+    assert assess_wikipedia_sentence(text) == ('wikipedia-dependent-fragment', [])
+
+
+@pytest.mark.parametrize('text', [
+    'この条件の下に考える。', '一定の条件のもとに考えられる。',
+    'のどの調子について考える。',
+    '詳しい方法（例えば参考文献を参照）について説明する。',
+    '「の下に考える」という断片が残っていた。',
+    '記号の意味を説明した（例えば図を参照）。',
+    '（例えば）別の方法も考えられる。',
+])
+def test_named_conditions_references_and_quoted_remnants_are_retained(text):
+    assert assess_wikipedia_sentence(text) == (None, [])

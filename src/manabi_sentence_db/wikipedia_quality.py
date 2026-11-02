@@ -8,7 +8,7 @@ this is neither a readability model nor a calibrated JLPT assessment.
 import re
 import unicodedata
 
-WIKIPEDIA_QUALITY_VERSION = "wikipedia-example-quality-v6"
+WIKIPEDIA_QUALITY_VERSION = "wikipedia-example-quality-v7"
 
 _NUMBERS = re.compile(r"[0-9０-９]+(?:[.,．][0-9０-９]+)*")
 _KANJI = re.compile(r"[\u3400-\u4dbf\u4e00-\u9fff]")
@@ -52,6 +52,9 @@ _FORMULA_REMNANT = re.compile(
     r"|が成り立つ(?:ことである)?)"
     r"[。．.!！?？]?\Z"
     r"|^という形で与えられる[^。｡！？!?]{0,60}[。．.!！?？]?\Z"
+    # No condition/reference target remains after the omitted display/link.
+    r"|^の(?:下|もと)に考え(?:る|られる)[。．.!！?？]?\Z"
+    r"|^[（(]\s*(?:例えば|たとえば)?\s*参照\s*[）)][。．.!！?？]?\Z"
 )
 _MISSING_LIST = re.compile(
     # Require a literal forward reference and a list-introducing predicate.

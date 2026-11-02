@@ -47,6 +47,15 @@ private resume index below to inspect the running job before launching anything.
 No new corpus/runtime has been activated. The v5 input below is historical
 reusable evidence; no raw dump was reacquired.
 
+A further 75-example assistant development inspection identified two residual
+whole fragments: `の下に考える。` and `（例えば 参照）。`. Admission v7 in
+[PR #57](https://github.com/ManabiIO/manabi-sentence-db/pull/57) rejects these
+shapes with controls for complete named conditions, references and quotations.
+All 1,203 tests and Ruff passed. The frozen v6 artifacts above retain their
+original policy: apply one-way v7 refinement before final admission, reusing
+compatible exact-text analyses. Consumer-index qualification on the v6 input
+does not certify that the newer admission policy has already been applied.
+
 ## Wikipedia: reuse the completed inputs
 
 | Stage | Completed result | Still required |
