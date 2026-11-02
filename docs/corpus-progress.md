@@ -1,9 +1,45 @@
-# Corpus expansion checkpoint — 2026-10-31
+# Corpus expansion checkpoint — 2026-11-02
 
 This is the current corpus-pipeline checkpoint. It supersedes earlier dated
 notes describing these completed stages as running or queued. Generated source
-text and evidence remain outside Git. Work is paused at Alex's request; reading
-this checkpoint is not authorization to resume processing.
+text and evidence remain outside Git. Alex resumed work on 2026-11-02.
+
+## Current pass: Wikipedia admission v6
+
+[PR #54](https://github.com/ManabiIO/manabi-sentence-db/pull/54) is merged at
+`c528c363a4f81f8a11c20cf5f9a17eeaf1878be2`. All 1,191 tests, Ruff and PR CI
+passed. It tightens demonstrated formula/list remnants and the existing
+multi-term specialist screen, with retention controls for valid parenthetical
+copulas, simple scientific prose, named relations and inline lists.
+
+An assistant-only development review inspected 274 distinct prepared examples.
+It separates nominal prose, context dependence and specialist detail; it is not
+a human/native review, an untouched holdout or a population quality estimate.
+The whole v5 input comparison removes 285 of 187,722 occurrences: 281 dependent
+fragments and four specialist-density cases. Every draft removal was inspected;
+the final 66 additional removals are exact bare-copula remnants. Broader nominal,
+context and specialist admission questions remain. Do not apply the caption
+predicate wholesale to Wikipedia.
+
+The v6 compressed refinement **completed**: 11,502 works / 187,437 occurrences.
+Every retained record was compared exactly with its expected parent record,
+including text, identifiers, rights, translations and original ordinal gaps.
+The new-work export contains **11,489 works / 187,315 occurrences / 185,939 distinct
+texts**. These are incoming texts, not necessarily novel eligible additions.
+
+- Canonical build: `build_36f0353495a0eafa791094b59d0b8b78`.
+- New-work ZIP: **43,646,049 bytes**, SHA-256
+  `ab10e808b3702e089e833f675468903d97a33a1c281ec56623bd1195678c2a13`.
+- Frozen implementation: `64a001c8c4fcef2039b50fd1208edd5aea51dde6`.
+
+Resumable native analysis is now running against this exact ZIP after a 32→64
+record check proved that the first 32 were reused. The cache keeps sentence
+records individually Zstandard-compressed; it is offline analysis evidence,
+not a second serving engine. Serving remains compact SQLite v11. Postings,
+actual queries, combined deduplication and the complete serving-size budget
+remain gates. No new corpus/runtime has been activated. Use the private resume
+index below for the exact running job before launching anything. The completed
+v5 input below is historical reusable evidence; no raw dump was reacquired.
 
 ## Wikipedia: reuse the completed inputs
 
