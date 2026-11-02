@@ -32,14 +32,20 @@ texts**. These are incoming texts, not necessarily novel eligible additions.
   `ab10e808b3702e089e833f675468903d97a33a1c281ec56623bd1195678c2a13`.
 - Frozen implementation: `64a001c8c4fcef2039b50fd1208edd5aea51dde6`.
 
-Resumable native analysis is now running against this exact ZIP after a 32→64
-record check proved that the first 32 were reused. The cache keeps sentence
-records individually Zstandard-compressed; it is offline analysis evidence,
-not a second serving engine. Serving remains compact SQLite v11. Postings,
-actual queries, combined deduplication and the complete serving-size budget
-remain gates. No new corpus/runtime has been activated. Use the private resume
-index below for the exact running job before launching anything. The completed
-v5 input below is historical reusable evidence; no raw dump was reacquired.
+Native analysis **completed** for all **185,939** distinct input texts, with
+sentence records individually Zstandard-compressed in a **284,975,104-byte**
+offline cache. It reused 779 exact texts from the pinned active parent and
+72 compatible prior-pilot analyses. There are therefore **185,160 incoming texts
+absent from that parent**, before warning eligibility and final admission.
+This replaces the historical v5 novelty counts below for the current input.
+
+The offline cache is not a serving database or a second serving engine. A compact
+SQLite v11 Wikipedia import index is now being built from it, without repeating
+native sentence analysis. Complete postings, actual ranked queries, context,
+combined deduplication and the full serving-size budget remain gates. Use the
+private resume index below to inspect the running job before launching anything.
+No new corpus/runtime has been activated. The v5 input below is historical
+reusable evidence; no raw dump was reacquired.
 
 ## Wikipedia: reuse the completed inputs
 
@@ -104,7 +110,7 @@ evidence, or an uncovered requirement. A successful extraction or checksum does
 not establish learner quality, human review, retrieval correctness or serving
 size. Preserve those remaining gates.
 
-When resumed, the next work is remaining Wikipedia quality review, targeted
-admission improvements with controls, native qualification of the resulting
-selection, and one combined serving candidate. No newly prepared source above
-has been activated.
+Next work is completion of the running consumer-index qualification, actual
+ranked-query review and remaining quality/admission decisions, followed by one
+combined serving candidate. Reuse the completed native analyses. No newly
+prepared source above has been activated.
