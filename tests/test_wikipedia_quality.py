@@ -178,5 +178,69 @@ def test_refined_fragment_gate_keeps_other_article_sentences_and_original_ordina
     record = canonical_document(raw, dict(source_id='wikipedia-ja', snapshot_id='fixture', source=source), stats, set())
     assert [(s['ordinal'], s['text']) for s in record['sentences']] == [(0, texts[0]), (8, texts[4])]
     assert record['license'] == source['license'] and record['attribution'] == source['attribution']
-    assert 'wikipedia-example-quality-v5' in record['transformations']
+    assert WIKIPEDIA_QUALITY_VERSION in record['transformations']
+    assert stats['rejected:wikipedia-dependent-fragment'] == 3
+
+
+@pytest.mark.parametrize('text', [
+    'である。', 'であった。', 'です。',
+    'で与えられる。', 'で定義される。', 'と表される。', 'となる。',
+    'が成り立つことである。', 'がゼロ切断の外側で完全であることを言う。',
+    'という形で与えられる1次元写像である。',
+    '以下、主に原材料として使われる素材を挙げる。',
+    '園内には以下の施設が存在する。', 'ここでは次の例を示す。',
+])
+def test_missing_display_and_list_remnants_are_not_standalone_examples(text):
+    assert assess_wikipedia_sentence(text) == ('wikipedia-dependent-fragment', [])
+
+
+@pytest.mark.parametrize('text', [
+    'α と σ はパラメータ（定数係数）である。',
+    '値は測定結果で与えられる。', 'この量は距離と時間の比で定義される。',
+    '記号は丸で表される。', '水を冷やすと氷となる。',
+    '二つの数が等しいとき、この関係が成り立つ。',
+    'この式は単純な形という形で与えられる写像である。',
+    'がん患者を支える活動が行われている。',
+    'がま口は、小銭などを入れる袋である。',
+    '園内には図書館と運動施設が存在する。',
+    '園内には以下の施設、図書館と体育館がある。',
+    '以下、図書館の中では静かにしてください。',
+    '五歳以下の子供に遊び方を紹介する。',
+    '「以下の施設が存在する」という説明がある。',
+    '彼は次の例を示す前に、前の問題を復習した。',
+    '内積について、先生に質問した。',
+    'フェレドキシンは植物の中にあるタンパク質である。',
+])
+def test_structural_tightening_keeps_named_relations_inline_lists_and_copulas(text):
+    assert assess_wikipedia_sentence(text) == (None, [])
+
+
+@pytest.mark.parametrize('text', [
+    '次元が3以上のノルム空間において、内積とスカラー倍の条件を満たすためには、その空間がヒルベルト空間であることが必要である。',
+    'この反応では、リンゴ酸脱水素酵素、アルギナーゼ、シキミ酸経路のフェニルアラニンアンモニア分解酵素がそれぞれ異なる働きを持つ。',
+])
+def test_multiple_specialist_math_or_biochemical_terms_need_structural_density(text):
+    assert assess_wikipedia_sentence(text)[0] == 'wikipedia-specialist-density'
+
+
+def test_single_new_specialist_term_and_repetition_are_not_density():
+    assert assess_wikipedia_sentence('内積について調べ、内積を計算し、内積の意味を説明した。') == (None, [])
+    assert assess_wikipedia_sentence('ノルム空間と内積の関係を調べる。') == (
+        None, ['style:specialist-vocabulary'])
+
+
+def test_v6_filters_keep_original_positions_and_rights_in_other_sentences():
+    source = yaml.safe_load((Path(__file__).parents[1] / 'sources/wikipedia-ja.yaml').read_text())
+    texts = ['公園の入口には案内板がある。', '園内には以下の施設が存在する。',
+             'で与えられる。', 'がゼロ切断の外側で完全であることを言う。',
+             'α と σ はパラメータ（定数係数）である。']
+    raw = dict(native_id='v6-gap', language='ja', title='架空の記事',
+               url='https://example.invalid/v6', license=source['license'],
+               attribution=source['attribution'],
+               sentences=[{'text': text, 'source_ordinal': i * 2} for i, text in enumerate(texts)])
+    stats = Counter()
+    record = canonical_document(raw, dict(source_id='wikipedia-ja', snapshot_id='fixture', source=source), stats, set())
+    assert [(s['ordinal'], s['text']) for s in record['sentences']] == [(0, texts[0]), (8, texts[4])]
+    assert record['license'] == source['license'] and record['attribution'] == source['attribution']
+    assert WIKIPEDIA_QUALITY_VERSION in record['transformations']
     assert stats['rejected:wikipedia-dependent-fragment'] == 3

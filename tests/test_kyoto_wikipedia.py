@@ -259,7 +259,9 @@ def test_canonical_pairs_preserve_translation_alignment_and_source_gaps():
         set(),
     )
     assert [s["ordinal"] for s in record["sentences"]] == [0, 5]
-    assert "wikipedia-example-quality-v5" in record["transformations"]
+    from manabi_sentence_db.wikipedia_quality import WIKIPEDIA_QUALITY_VERSION
+
+    assert WIKIPEDIA_QUALITY_VERSION in record["transformations"]
     assert "kyoto-final-checked-pairs-v1" in record["transformations"]
     translations = [s["translations"][0] for s in record["sentences"]]
     assert [t["text"] for t in translations] == [

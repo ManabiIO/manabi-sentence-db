@@ -586,6 +586,24 @@ claimed perfect archaic-language detector. Modern prose can discuss old events;
 old orthography can be normalized without becoming modern prose. Preserve original
 text where admitted, document normalization, and make uncertainty explicit.
 
+Japanese Wikipedia admission v6 also rejects complete missing-display remnants
+such as `で与えられる。`, a bare `である。`, missing-subject fragments beginning
+with `が` before kanji/katakana/Latin/Greek text, and explicit introductions to
+omitted lists. Named relations, ordinary copulas after parentheses, numerical
+uses of `以下`, and inline enumerations have retention controls. Specialist
+screening still requires several distinct terms together with length or kanji
+density; mentioning one scientific term is insufficient. These are transparent
+source-specific heuristics, not human readability ratings. Terse nominal prose,
+context dependence and specialist material outside the small lexicon remain
+separate review questions. The caption predicate policy is not applied wholesale
+to Wikipedia.
+
+Use `mise run refine-wikipedia -- --build BUILD --output FRESH_OUTPUT` to tighten
+an existing compressed canonical build without reacquiring or rescanning the raw
+dump. Refinement only removes previously admitted sentences or adds heuristic
+tags. Retained text, identifiers, rights, translations and original ordinal gaps
+must remain intact; it does not rewrite or simplify the source.
+
 ## Adding a source
 
 An adapter proposal should supply:

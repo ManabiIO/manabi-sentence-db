@@ -8,7 +8,7 @@ this is neither a readability model nor a calibrated JLPT assessment.
 import re
 import unicodedata
 
-WIKIPEDIA_QUALITY_VERSION = "wikipedia-example-quality-v5"
+WIKIPEDIA_QUALITY_VERSION = "wikipedia-example-quality-v6"
 
 _NUMBERS = re.compile(r"[0-9０-９]+(?:[.,．][0-9０-９]+)*")
 _KANJI = re.compile(r"[\u3400-\u4dbf\u4e00-\u9fff]")
@@ -23,7 +23,10 @@ _FOLLOWING_MATERIAL = re.compile(
     r"|(?:下記|下表|次表|上表|右表|左表|上図|下図)"
     r"(?:の(?:とおり|通り|よう)|(?:に|を)(?:示|掲げ|参照)|参照)"
 )
-_ORPHAN = re.compile(r"^(?:は(?!虫類|虫|行)|を)(?=[一-鿿A-Za-z0-9])")
+_ORPHAN = re.compile(
+    r"^(?:(?:は(?!虫類|虫|行)|を)(?=[一-鿿A-Za-z0-9α-ωΑ-Ω])"
+    r"|が(?=[一-鿿ァ-ヺA-Za-z0-9α-ωΑ-Ω]))"
+)
 _DANGLING_LIST = re.compile(
     # A terminal introduction has no components/reasons in this sentence.
     # Do not match 以下 as a numerical bound or a quoted expression.
@@ -43,6 +46,21 @@ _CROSS_REFERENCE_ONLY = re.compile(
 _FORMULA_REMNANT = re.compile(
     r"^(?:である|ではない|でない)こと(?:を(?:意味する|示す|表す)|が(?:分か|わか)る)"
     r"[。．.!！?？]?\Z"
+    # An omitted display can also leave only its relation or result. Match
+    # whole remnants, not complete prose that names the value or expression.
+    r"|^(?:である|であった|です|で与えられる|で定義される|と表される|となる"
+    r"|が成り立つ(?:ことである)?)"
+    r"[。．.!！?？]?\Z"
+    r"|^という形で与えられる[^。｡！？!?]{0,60}[。．.!！?？]?\Z"
+)
+_MISSING_LIST = re.compile(
+    # Require a literal forward reference and a list-introducing predicate.
+    # Keep inline lists, numerical 以下, and ordinary mentions of facilities.
+    r"^(?:以下|下記)[、，,][^。｡！？!?]{0,80}"
+    r"(?:挙げる|列挙する|示す|紹介する|記載する)[。．.!！?？]?\Z"
+    r"|(?:以下|下記|次)の(?:施設|項目|種類|条件|要件|特徴|例|もの)"
+    r"(?:が(?:ある|存在する)|を(?:挙げる|列挙する|示す|紹介する|記載する))"
+    r"[。．.!！?？]?\Z"
 )
 _NUMBERED_REQUIREMENTS = re.compile(
     r"(?:以下|下記)の?[0-9０-９一二三四五六七八九十]+"
@@ -61,6 +79,10 @@ _SPECIALIST = (
     "格子欠陥", "不対電子", "共有結合", "物性", "表面再構成", "ダングリングボンド",
     "直観論理", "結合子", "双対", "線形含意", "シークエント", "部分構造論理", "カット規則",
     "棘条", "軟条", "小離鰭", "臀鰭", "背鰭", "腹鰭", "側線鱗", "尾叉長", "黒色素胞",
+    "バナッハ空間", "ノルム空間", "ヒルベルト空間", "内積", "スカラー倍",
+    "共形場理論", "弦理論", "ヴィラソロ代数",
+    "フェレドキシン", "リンゴ酸脱水素酵素", "イソクエン酸脱水素酵素",
+    "アルギナーゼ", "シキミ酸経路", "フェニルアラニンアンモニア分解酵素", "ペルオキシダーゼ",
 )
 _SPECIALIST_PATTERN = re.compile("|".join(sorted(_SPECIALIST, key=len, reverse=True)))
 
@@ -76,7 +98,8 @@ def assess_wikipedia_sentence(text: str) -> tuple[str | None, list[str]]:
         return "wikipedia-long-sentence", []
     if (_FOLLOWING_MATERIAL.search(text) or _ORPHAN.search(text)
             or _DANGLING_LIST.search(text) or _CROSS_REFERENCE_ONLY.search(text)
-            or _FORMULA_REMNANT.search(text) or _NUMBERED_REQUIREMENTS.search(text)):
+            or _FORMULA_REMNANT.search(text) or _NUMBERED_REQUIREMENTS.search(text)
+            or _MISSING_LIST.search(text)):
         return "wikipedia-dependent-fragment", []
     symbols = sum(unicodedata.category(char) == "Sm" for char in text)
     if symbols >= 3 or (
