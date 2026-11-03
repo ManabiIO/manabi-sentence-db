@@ -981,10 +981,18 @@ The importer reads only each primary Japanese page column, once. It ignores the
 duplicated language column, page titles, navigation, artwork and media controls.
 Page text is a publisher unit and may contain several sentences; normal source-
 unit segmentation and context checks apply. An omitted page reserves a gap.
-Two demonstrated malformed units are hash-bound exclusions: page 8 of `0004`
-and page 7 of `0110`. No Japanese is silently corrected. An assistant-only
+Demonstrated malformed units are hash-bound exclusions: page 8 of `0004`,
+page 7 of `0110`, page 2 of `0294`, page 16 of `0315` and page 11 of `0324`.
+Page 2 of `0156`, which ends with a standalone connector fragment, is also
+withheld. Whole-page exclusion removes otherwise valid neighboring sentences
+in that unit rather than carrying the faulty passage as source-unit context.
+No Japanese is silently corrected. An assistant-only
 29-work middle-page inspection identified the latter duplicated phrase; this
 is development evidence, not independent native review or an error-rate estimate.
+A subsequent 77-occurrence edge/length diagnostic, with additional original-page
+inspection, identified the four later exclusions. These selections can overlap
+the earlier review. Ordinary dialogue, quoted speech, purposeful ellipsis and
+context-dependent narration are not automatically discarded.
 
 Use these exact HTML versions. The newer Global ASP Markdown repository and
 older slideshow pages differ in wording and can advertise different license
@@ -996,14 +1004,19 @@ credits, page counts, raw bytes and
 omission hashes fail closed on drift. Snapshot creation validates every story's
 rights before publishing a manifest; missing/NC/ND/mismatched grants fail.
 
-Offline canonical qualification of all 29 eligible works produced **817
-occurrences / 811 distinct Japanese texts**, with 24,406 Japanese characters
-across occurrences. Of 339 publisher pages, two are withheld and 337 retained;
-222 retained units split into multiple sentences. Eleven occurrences carry
+Current offline canonical qualification of all 29 eligible works produced **806
+occurrences / 800 distinct Japanese texts**, with 24,102 Japanese characters
+across occurrences. Of 339 publisher pages, six are withheld and 333 retained;
+218 retained units split into multiple sentences. Eleven occurrences carry
 violence flags. There are no paired translations. These counts follow the
 normal build policy and are not unique additions to the existing corpus.
-The normalized transport ZIP is **241,178 bytes**, not a serving-size estimate.
+The normalized transport ZIP is **238,687 bytes**, not a serving-size estimate.
 Qualification reused the cached immutable Git blobs with zero network requests.
-The stricter colophon guard preserved every canonical field across all 29 works.
+The initial colophon guard preserved every canonical field across all 29 works.
+The later page exclusions remove eleven additional occurrences. Version 2 of
+the page-unit transformation reserves all 16 original fragment positions across
+the six withheld pages; reserving just one position per page would renumber later
+sentences. Every field of all 806 retained occurrences matches the unomitted
+source build, including original ordinals, IDs, offsets and source-unit context.
 Exact novelty, native analysis, final serving growth and ranked-query review
 remain separate gates before activation.
