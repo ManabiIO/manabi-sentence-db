@@ -12,6 +12,7 @@ Wikipedia, Kyoto Wikipedia pairs, Wikivoyage, Wikibooks, archived Japanese
 Wikinews, Tatoeba, RealPersonaChat, MRMP multi-party chat, JMultiWOZ, STAIR Captions, YJ Captions, JEC Basic
 Sentence Data, NICT ALT parallel news text, ASDC main accommodation dialogues, TALPCo teaching examples,
 one opt-in Global Voices translated-news work (`globalvoices-65906-ja`),
+the license-separated Storybooks Japan Japanese narrative subsets,
 and individually curated SCP-JP Tales
 『適性』『カモと商人』『証明写真』『定点観測』『髭を剃ったあとは気分がいい。』.
 Wikimedia and Tatoeba provenance does not establish blanket human authorship or
@@ -139,3 +140,14 @@ unrelated content. Their paired-text hashes and article URLs are pinned in
 Publisher ordinals retain gaps, and no side is rewritten or certified correct.
 This does not turn the remaining pairs into reviewed translations. See the
 operations guide.
+
+
+### Storybooks Japan narrative supplement
+
+The two pinned sources admit only 29 explicitly CC BY 3.0/4.0 works from a
+40-story Japanese catalog; eleven NC works, illustrations and audio are excluded.
+Per-work translator/original-work credits, primary page units and omission gaps
+survive. Japanese translation origin is explicit, while method/native review
+remain unknown. See the [source decision](sources.md#storybooks-japan-narrative--2026-11-03).
+These smaller narrative additions complement the large Wikipedia expansion;
+they are not a ceiling on later corpus growth or already active serving content.

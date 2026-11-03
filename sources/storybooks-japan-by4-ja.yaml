@@ -1,0 +1,169 @@
+schema_version: 1
+id: storybooks-japan-by4-ja
+title: Storybooks Japan — Japanese narrative (CC-BY-4.0)
+language: ja
+adapter: storybook-japan
+homepage: https://global-asp.github.io/storybooks-japan/stories/ja/
+license:
+  id: CC-BY-4.0
+  url: https://creativecommons.org/licenses/by/4.0/
+attribution:
+  text: Storybooks Japan / Global African Storybook Project / African Storybook contributors.
+    Preserve each work’s named writer, Japanese translator, illustrator credit and
+    original work URL. Japanese text extracted into sentences; no images or audio.
+  url: https://global-asp.github.io/storybooks-japan/stories/ja/
+license_evidence:
+- https://global-asp.github.io/storybooks-japan/about/
+- https://github.com/global-asp/storybooks-japan/blob/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0027/index.html
+- https://github.com/global-asp/storybooks-japan/blob/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0089/index.html
+- https://github.com/global-asp/storybooks-japan/blob/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0110/index.html
+- https://github.com/global-asp/storybooks-japan/blob/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0201/index.html
+- https://github.com/global-asp/storybooks-japan/blob/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0243/index.html
+- https://github.com/global-asp/storybooks-japan/blob/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0262/index.html
+- https://github.com/global-asp/storybooks-japan/blob/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0296/index.html
+- https://github.com/global-asp/storybooks-japan/blob/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0315/index.html
+- https://github.com/global-asp/storybooks-japan/blob/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0324/index.html
+notes:
+- Explicitly selected, commit/hash-pinned Japanese story HTML only; per-work license
+  is read from that exact page, not inferred from repository software licensing.
+- The two source manifests separate CC BY 3.0 and CC BY 4.0 works. Eleven noncommercial
+  works in the 40-story catalog are excluded.
+- Text is Japanese translation/adaptation; original source language, generation method
+  and native-speaker review remain unknown. Contributor names and publisher editorial
+  workflow do not establish per-record review.
+- Reading levels are publisher labels, not JLPT estimates. Sentence review_state remains
+  unreviewed; publication dates are not inferred from Git timestamps.
+- Only primary Japanese page columns are read; duplicate language columns, navigation,
+  titles, images and audio are excluded. Original page units and gaps survive sentence
+  segmentation.
+- The website wrapper is MIT-licensed; its pinned LICENSE is retained separately as
+  snapshot evidence and never emitted as sentence text.
+- The mixed-license research ZIP is not a redistributable snapshot. Acquisition downloads
+  only the explicitly eligible HTML files and the site MIT license.
+acquisition:
+  version: 812deb4d7089a6f616363c92c21750e077aac4d2
+  site_license:
+    url: https://raw.githubusercontent.com/global-asp/storybooks-japan/812deb4d7089a6f616363c92c21750e077aac4d2/LICENSE
+    size: 1083
+    sha256: a08e8a9da5d701495a9029008728b0a39ead7a38e6e2c873be16c9bf4e5e9fa7
+  files:
+    '0027':
+      url: https://raw.githubusercontent.com/global-asp/storybooks-japan/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0027/index.html
+      size: 32120
+      sha256: 3291d3256ff3885de4c024fa6af2f41017093423b8867926fa9db0dfe7a24f7e
+      metadata:
+        title: 決意
+        author: Ursula Nafula
+        illustrator: Vusi Malindi
+        translator: Naoko Tanaka
+        source_url: https://africanstorybook.org/reader.php?id=13304
+        level: 2
+        pages: 16
+      omitted_pages: {}
+    0089:
+      url: https://raw.githubusercontent.com/global-asp/storybooks-japan/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0089/index.html
+      size: 22424
+      sha256: 3a3d7bfeba0ddffab009e7e1956842e76d0ecec888811076cc66c9fd0d28bc20
+      metadata:
+        title: 草木に話しかけるカライ
+        author: Ursula Nafula
+        illustrator: Jesse Pietersen
+        translator: Aiko Komatsu
+        source_url: https://africanstorybook.org/reader.php?id=13545
+        level: 2
+        pages: 8
+      omitted_pages: {}
+    '0110':
+      url: https://raw.githubusercontent.com/global-asp/storybooks-japan/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0110/index.html
+      size: 31370
+      sha256: 9af6821759f993ed0a6417be5e725de42004aefd89e99fd4e98e3218148c62e3
+      metadata:
+        title: 小さな種：ワンガリ・マータイの物語
+        author: Nicola Rijsdijk
+        illustrator: Maya Marshak
+        translator: Kei Fukumoto, Konomi Nakagawa, Sayaka Yamamoto, Saari Yoshida
+        source_url: https://africanstorybook.org/reader.php?id=9809
+        level: 3
+        pages: 12
+      omitted_pages:
+        '7':
+          sha256: 2a22bc7136fcd6ff3ef51e4903443c15ec69acaea5959c9ff94ea76414137495
+          reason: demonstrated-source-typo
+    '0201':
+      url: https://raw.githubusercontent.com/global-asp/storybooks-japan/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0201/index.html
+      size: 41715
+      sha256: c2fdacd297ff1148d6f49b99fff5477f3001d1a9e44b56ba84d74833c93e6be8
+      metadata:
+        title: ロバの子
+        author: Lindiwe Matshikiza
+        illustrator: Meghan Judge
+        translator: Yuka Makari
+        source_url: https://africanstorybook.org/reader.php?id=15028
+        level: 3
+        pages: 20
+      omitted_pages: {}
+    '0243':
+      url: https://raw.githubusercontent.com/global-asp/storybooks-japan/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0243/index.html
+      size: 41631
+      sha256: 4c0c93e6bf4b90acd0847588341c29d9129a0a8c63335bb026f9c1321a8d3e7f
+      metadata:
+        title: おばあさんとの休日
+        author: Violet Otieno
+        illustrator: Catherine Groenewald
+        translator: Maaya UCHIMURA
+        source_url: https://africanstorybook.org/reader.php?id=12084
+        level: 4
+        pages: 20
+      omitted_pages: {}
+    '0262':
+      url: https://raw.githubusercontent.com/global-asp/storybooks-japan/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0262/index.html
+      size: 41066
+      sha256: 42c2a84b60b90c2298213b2bfa45b2f584afcbb9cce84de0b660dd6e87153866
+      metadata:
+        title: マゴズウェ
+        author: Lesley Koyi
+        illustrator: Wiehan de Jager
+        translator: Rie TAKANUMA
+        source_url: https://africanstorybook.org/reader.php?id=13213
+        level: 5
+        pages: 16
+      omitted_pages: {}
+    0296:
+      url: https://raw.githubusercontent.com/global-asp/storybooks-japan/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0296/index.html
+      size: 26924
+      sha256: e5158a7e8b3256baa73d1155dbe242086a19ad8711252ec12a963332545f5f28
+      metadata:
+        title: バナナ売りのトム
+        author: Humphreys Odunga
+        illustrator: Zablon Alex Nguku
+        translator: Yuko Ari
+        source_url: https://africanstorybook.org/reader.php?id=13627
+        level: 2
+        pages: 12
+      omitted_pages: {}
+    '0315':
+      url: https://raw.githubusercontent.com/global-asp/storybooks-japan/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0315/index.html
+      size: 38400
+      sha256: e0e3eaed2a3c3e42cf910ee4b0adb356cdf7d3aa473e0fabe12467b814ae11c7
+      metadata:
+        title: サキマの歌
+        author: Ursula Nafula
+        illustrator: Peris Wachuka
+        translator: Miho Irie
+        source_url: https://africanstorybook.org/reader.php?id=13244
+        level: 3
+        pages: 18
+      omitted_pages: {}
+    '0324':
+      url: https://raw.githubusercontent.com/global-asp/storybooks-japan/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0324/index.html
+      size: 34597
+      sha256: 48b99ef91172c2f52adf5923e35783b0bd1c58cc94ca05827ec619c86deaa11a
+      metadata:
+        title: 僕が街に向けて家を出た日
+        author: Lesley Koyi, Ursula Nafula
+        illustrator: Brian Wambi
+        translator: Eri Souda
+        source_url: https://africanstorybook.org/reader.php?id=15029
+        level: 3
+        pages: 16
+      omitted_pages: {}

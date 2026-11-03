@@ -956,3 +956,54 @@ step is a compressed, hash-pinned acquisition and a stratified source/variant
 review with exact overlap against the current corpus, before enabling an adapter
 or producing a serving candidate. No SNOW text is enabled or activated by this
 research update.
+
+
+## Storybooks Japan narrative — 2026-11-03
+
+The [publisher's Japanese project description](https://global-asp.github.io/storybooks-japan/about/)
+describes selected African Storybook adaptations, a translation coordinator,
+editor and contributors. The [source site at commit
+`812deb4d7089a6f616363c92c21750e077aac4d2`](https://github.com/global-asp/storybooks-japan/tree/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja)
+contains 40 Japanese works. Exact per-work HTML grants identify **20 CC BY 3.0,
+nine CC BY 4.0 and eleven CC BY-NC 3.0**. The two commercial subsets have separate
+source manifests; NC works are never snapshotted or emitted.
+
+This provides short narrative, everyday actions, conversation, animal fables and
+some serious material about family, hardship and conflict. Illustrations/audio
+are not fetched. Publisher reading levels 1–5 are descriptive labels, **not JLPT
+levels**. Exact writer, translator and illustrator credits and the original
+African Storybook URL are retained for each work. Japanese is labeled translated;
+source language, generation method, native review and publication date remain
+unknown. Contributor names and general editorial workflow do not establish those
+per-record facts. Corpus sentence review states remain unreviewed.
+
+The importer reads only each primary Japanese page column, once. It ignores the
+duplicated language column, page titles, navigation, artwork and media controls.
+Page text is a publisher unit and may contain several sentences; normal source-
+unit segmentation and context checks apply. An omitted page reserves a gap.
+Two demonstrated malformed units are hash-bound exclusions: page 8 of `0004`
+and page 7 of `0110`. No Japanese is silently corrected. An assistant-only
+29-work middle-page inspection identified the latter duplicated phrase; this
+is development evidence, not independent native review or an error-rate estimate.
+
+Use these exact HTML versions. The newer Global ASP Markdown repository and
+older slideshow pages differ in wording and can advertise different license
+versions. Its mixed-license ZIP is private research evidence, not a public
+snapshot. Production acquisition uses only pinned eligible HTML files plus the
+site's MIT LICENSE for the wrapper. That software license does not license story
+content. Source pins, explicit colophon license links, matching cover/colophon
+credits, page counts, raw bytes and
+omission hashes fail closed on drift. Snapshot creation validates every story's
+rights before publishing a manifest; missing/NC/ND/mismatched grants fail.
+
+Offline canonical qualification of all 29 eligible works produced **817
+occurrences / 811 distinct Japanese texts**, with 24,406 Japanese characters
+across occurrences. Of 339 publisher pages, two are withheld and 337 retained;
+222 retained units split into multiple sentences. Eleven occurrences carry
+violence flags. There are no paired translations. These counts follow the
+normal build policy and are not unique additions to the existing corpus.
+The normalized transport ZIP is **241,178 bytes**, not a serving-size estimate.
+Qualification reused the cached immutable Git blobs with zero network requests.
+The stricter colophon guard preserved every canonical field across all 29 works.
+Exact novelty, native analysis, final serving growth and ranked-query review
+remain separate gates before activation.
