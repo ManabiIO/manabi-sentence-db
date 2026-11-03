@@ -39,13 +39,22 @@ offline cache. It reused 779 exact texts from the pinned active parent and
 absent from that parent**, before warning eligibility and final admission.
 This replaces the historical v5 novelty counts below for the current input.
 
-The offline cache is not a serving database or a second serving engine. A compact
-SQLite v11 Wikipedia import index is now being built from it, without repeating
-native sentence analysis. Complete postings, actual ranked queries, context,
-combined deduplication and the full serving-size budget remain gates. Use the
-private resume index below to inspect the running job before launching anything.
-No new corpus/runtime has been activated. The v5 input below is historical
-reusable evidence; no raw dump was reacquired.
+The compact SQLite v11 Wikipedia import index **completed**, at **681,820,160
+bytes including indexes and metadata**. It reused all 185,939 analyses and the
+pinned serving parent's record dictionaries, with zero repeated native sentence
+analyses or record-dictionary training calls. Full record, rights, membership,
+ranked/literal-posting and projection verification passed, alongside four exact
+phrase controls and **141,285 missing/ineligible-context-neighbor checks**.
+These are standalone-addition size/integrity results, not the combined serving
+size or a semantic quality certification. Eighteen real queries were captured;
+their review found remaining parser ambiguities and nominal/dense prose.
+
+Use the private resume index below for exact artifact/report identities and
+query-correction evidence. Reuse completed verification rather than rebuilding
+this index to establish the same facts. Combined deduplication, final admission,
+ranked quality and the full serving-size budget remain gates. No new corpus or
+runtime has been activated. The offline analysis cache is not a second serving
+engine. The v5 input below is historical evidence; no raw dump was reacquired.
 
 A further 75-example assistant development inspection identified two residual
 whole fragments: `の下に考える。` and `（例えば 参照）。`. Admission v7 in
@@ -119,7 +128,6 @@ evidence, or an uncovered requirement. A successful extraction or checksum does
 not establish learner quality, human review, retrieval correctness or serving
 size. Preserve those remaining gates.
 
-Next work is completion of the running consumer-index qualification, actual
-ranked-query review and remaining quality/admission decisions, followed by one
-combined serving candidate. Reuse the completed native analyses. No newly
-prepared source above has been activated.
+Next work is applying v7 admission with compatible analysis reuse, the remaining
+query/quality decisions, and one combined serving candidate. Consumer integrity
+qualification is complete. No newly prepared source above has been activated.
