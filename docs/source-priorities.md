@@ -47,17 +47,41 @@ pairs from source rows and from text overlap with Wikipedia.
 | STAIR Captions (enabled) | [Publisher](https://github.com/STAIR-Lab-CIT/STAIR-captions), CC BY 4.0 | README rechecked; Japanese image captions. Images require separate rights. |
 | Japanese Visual Genome VQA | [Publisher](https://github.com/yahoojapan/ja-vg-vqa), reported CC BY 4.0 | Verify downloadable text license; many answers are fragments. |
 | YJ Captions (adapter enabled) | [Pinned publisher](https://github.com/yahoojapan/YJCaptions/blob/2f2d6de87ce90b7ff1fd318efef17b1ce0e127db/README.md), verified CC BY 4.0 | Human original Japanese caption text only; complete-caption gate and separate works; no English alignment inferred from image IDs. Full admission, overlap and serving growth remain to be measured. |
-| Yahoo VFD | [Publisher](https://github.com/yahoojapan/VFD-Dataset), reported CC BY 4.0 | Human imagined responses; keep modality/context flags. |
-| JMRD | [Publisher](https://github.com/ku-nlp/JMRD), reported CC BY-SA 4.0 | Conversation, not copyrighted movie scripts. |
+| Yahoo VFD | [Publisher](https://github.com/yahoojapan/VFD-Dataset), CC BY 4.0 notice rechecked 2026-11-02 | Manually annotated visual dialogue; separate verbal text from non-verbal action annotations and measure dependence on missing images before admission. |
+| JMRD | [Publisher](https://github.com/ku-nlp/JMRD), CC BY-SA 4.0 notice rechecked 2026-11-02 | Human recommendation dialogue, not movie scripts. External Wikipedia knowledge needs its own attribution; inspect knowledge reuse in dialogue before admission. |
 | JMultiWOZ (enabled) | [Publisher](https://github.com/nu-dialogue/jmultiwoz), verified CC BY-SA 4.0 | Human role-play, preserve speaker/turn context without profiles. |
 | Multi-Party Chat / MRMP (enabled) | [Pinned publisher](https://github.com/nu-dialogue/multi-relational-multi-party-chat-corpus/tree/e6e39cb896df88781c7a2e0451226a527c5f1e2e), verified CC BY-SA 4.0 | Human conversation; only dialogue turns, exact README/LICENSE pins, no profiles/evaluations. |
 | ASDC main (enabled) | [Pinned publisher](https://github.com/megagonlabs/asdc/tree/f37d6575c73602adcb8ae3687520726793baa672), verified corpus CC BY 4.0 | 210 main human role-play dialogues; no SCUD descriptions, supplemental or vanilla material. |
 | JGLUE questions | [Publisher](https://github.com/yahoojapan/JGLUE), reported CC BY-SA 4.0 | Audit component and underlying passage rights separately. |
 | JaQuAD | [Publisher](https://github.com/SkelterLabsInc/JaQuAD), reported CC BY-SA 3.0 | Questions versus reused Wikipedia passages. |
 
-Except the rows explicitly marked enabled, these are candidate claims supplied in the research
-shortlist, not newly verified admission grants. Do not enable downloads until the
-specific release and underlying content rights are reviewed.
+Except the rows explicitly marked enabled, these remain candidates. Dated
+publisher-notice checks do not qualify a particular release, its underlying
+third-party text or its sentence quality. Other undated rows retain the supplied
+shortlist's unverified claims. Do not enable downloads until the specific release
+and underlying content rights are reviewed.
+
+### JMRD and VFD primary-evidence follow-up — 2026-11-02
+
+JMRD's current README lists 4,575 training, 200 validation and 300 test dialogues;
+these are published split counts, not measured usable/novel sentences. The
+[construction paper](https://aclanthology.org/2022.dialdoc-1.9.pdf), sections
+3.1–3.2, distinguishes crowdwritten reviews from Wikipedia-derived plots and
+person descriptions. Its reviews are **not described as scraped Yahoo reviews**;
+Yahoo Movies supplies genre classifications. Recommenders see the knowledge and
+are instructed to use it; seekers do not have that interface. A future adapter
+must separate utterances from `knowledge`, `checked_knowledge` and questionnaires,
+preserve turn gaps, and review copied knowledge/attribution rather than assuming
+that excluding the knowledge fields resolves every reused passage. No JMRD
+archive, native analysis or serving import was produced in this follow-up.
+
+VFD's [publisher format](https://github.com/yahoojapan/VFD-Dataset#annotation-format)
+and [paper](https://aclanthology.org/2020.emnlp-main.267/) distinguish utterances,
+verbal replies and non-verbal responses grounded in images and gaze. Non-verbal
+action descriptions are not interchangeable with spoken examples. Keep image
+rights separate and require a text-only usefulness sample before investing in an
+adapter; an open license alone does not establish independent sentence quality.
+No VFD corpus download or admission was performed.
 
 ## Fiction and longer writing
 
