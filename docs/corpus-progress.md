@@ -1,10 +1,10 @@
-# Corpus expansion checkpoint — 2026-11-02
+# Corpus expansion checkpoint — 2026-11-03
 
 This is the current corpus-pipeline checkpoint. It supersedes earlier dated
 notes describing these completed stages as running or queued. Generated source
 text and evidence remain outside Git. Alex resumed work on 2026-11-02.
 
-## Current pass: v7 applied; combined serving candidate in progress
+## Current pass: v7 applied; combined candidate verified, query review pending
 
 Admission v7 refinement **completed**. It checked every v6 occurrence, removed
 exactly the two demonstrated condition/reference fragments, and verified all
@@ -25,20 +25,35 @@ analyses, record-dictionary training calls or per-source search-index builds.
 Full logical-record verification passed. This intermediate is deliberately
 unserveable; actual postings are verified in the final combined candidate.
 
-One combined compact SQLite v11 candidate is now building with the qualified
-Wikipedia, corrected ALT/Global Voices and ASDC/TALPCo inputs. It selects 13,072
-added works and 1,882 ALT replacements; these are work counts, not novel text
-counts. The first preflight stopped on a caption-policy hash mismatch without
-creating a candidate. The corrected consumer verifies actual imported works
-are outside every caption scope, preserves the parent's caption-policy identity,
-and still rejects mismatched caption imports. All 330 relevant consumer tests
-passed. No source acquisition or native import was repeated.
+The downstream combined compact SQLite v11 candidate **completed full
+verification** with the qualified Wikipedia, corrected ALT/Global Voices and
+ASDC/TALPCo inputs. It contains **2,038,328 distinct texts from 19 sources** and
+occupies **7,367,065,600 bytes including indexes and metadata**, below the 8 GB
+target / 10 GB ceiling. All logical records, expected/actual postings and ranks
+were checked. Reuse this verification; do not repeat extraction or native
+analysis for unchanged inputs. The private resume index binds the exact
+terminal job, producer/runtime identities and complete receipt.
 
-The combined build uses one worker / 0.25 CPU, with an **8 GB target and 10 GB
-ceiling for content, indexes and metadata together**. Content remains compressed.
-Its final size, deduplicated growth, full posting/context/rights verification and
-ranked-result quality are not yet established. No new corpus/runtime is active.
-Use the private resume index below for the exact running job and pinned evidence.
+The combined import selected 13,072 added works and 1,882 ALT replacements;
+these are work counts, not novel text counts. Its caption-policy preflight fix
+preserves the parent's identity for verified non-caption additions and rejects
+mismatched caption imports. All 330 compatibility tests passed before the build.
+
+**Not yet active or published.** Ranked-query review found dictionary-boundary
+false positives and competing causative/name interpretations; request-side fixes
+are being qualified. Source quality still varies: specialist prose, directory
+fragments and publisher typos are not resolved by integrity verification.
+Assistant-only development checks are not human/native-speaker certification.
+The latest public source download remains `corpus-2026-10-24-prose`; updated
+canonical assets with licenses and refinement lineage remain to be packaged and
+published. Do not distribute private serving artifacts as public source data.
+
+Storybooks Japan's canonical v2 supplement is also qualified: **29 works / 806
+occurrences / 800 distinct texts**, with licenses separated into CC BY 3.0 and
+4.0 subsets. Eleven NC works and six exact malformed pages are excluded. Its
+compressed consumer import has **788 novel eligible texts** relative to the
+combined candidate. Retain its reusable native analyses for the next worthwhile
+source batch; a full serving rebuild just for this small supplement is deferred.
 
 ## Earlier completed pass: Wikipedia admission v6
 
@@ -164,7 +179,8 @@ evidence, or an uncovered requirement. A successful extraction or checksum does
 not establish learner quality, human review, retrieval correctness or serving
 size. Preserve those remaining gates.
 
-V7 admission and compatible native reuse are complete. Next work is completing
-the one combined serving candidate, its final integrity/size verification and
-ranked query/quality review before atomic local activation. No newly prepared
-source above has been activated.
+V7 admission, compatible native reuse and the combined candidate's full
+integrity/size verification are complete. Next work is request-side query
+qualification, ranked quality review, atomic local activation and publication of
+updated canonical source assets. No newly prepared source above has been
+activated. Do not repeat completed corpus verification.
