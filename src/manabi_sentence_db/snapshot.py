@@ -577,6 +577,26 @@ def create_snapshot(
                 _save_metadata(staging, "65906-ja.html", JA_ROLE, JA_URL, japanese),
                 _save_metadata(staging, "65906-en-original.html", EN_ROLE, EN_URL, original),
             ]
+        elif adapter == "storybook-japan":
+            from .storybooks import LICENSE_ROLE, iter_documents, validate_source
+
+            if mode != "full" or date or max_files or titles or translations:
+                raise SnapshotError("Storybooks uses only its pinned, license-separated story inventory")
+            validate_source(source)
+            pin = source["acquisition"]["site_license"]
+            files = [_download(
+                staging, "site-MIT-LICENSE.txt", LICENSE_ROLE, pin["url"], agent,
+                expected_sha256=pin["sha256"], expected_size=pin["size"],
+            )]
+            for identity, pin in sorted(source["acquisition"]["files"].items()):
+                files.append(_download(
+                    staging, f"storybook-{identity}.html", "storybook-" + identity,
+                    pin["url"], agent, expected_sha256=pin["sha256"], expected_size=pin["size"],
+                ))
+            # A file pin is not a license grant. Verify each HTML work's explicit
+            # rights, primary Japanese column and attribution before publication.
+            for _ in iter_documents({"source": source, "files": files}, staging):
+                pass
         elif adapter == "talpco":
             from .talpco import validate_source
 

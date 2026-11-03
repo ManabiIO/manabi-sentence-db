@@ -1,0 +1,323 @@
+schema_version: 1
+id: storybooks-japan-ja
+title: Storybooks Japan — Japanese narrative (CC-BY-3.0)
+language: ja
+adapter: storybook-japan
+homepage: https://global-asp.github.io/storybooks-japan/stories/ja/
+license:
+  id: CC-BY-3.0
+  url: https://creativecommons.org/licenses/by/3.0/
+attribution:
+  text: Storybooks Japan / Global African Storybook Project / African Storybook contributors.
+    Preserve each work’s named writer, Japanese translator, illustrator credit and
+    original work URL. Japanese text extracted into sentences; no images or audio.
+  url: https://global-asp.github.io/storybooks-japan/stories/ja/
+license_evidence:
+- https://global-asp.github.io/storybooks-japan/about/
+- https://github.com/global-asp/storybooks-japan/blob/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0001/index.html
+- https://github.com/global-asp/storybooks-japan/blob/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0004/index.html
+- https://github.com/global-asp/storybooks-japan/blob/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0006/index.html
+- https://github.com/global-asp/storybooks-japan/blob/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0008/index.html
+- https://github.com/global-asp/storybooks-japan/blob/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0052/index.html
+- https://github.com/global-asp/storybooks-japan/blob/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0066/index.html
+- https://github.com/global-asp/storybooks-japan/blob/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0072/index.html
+- https://github.com/global-asp/storybooks-japan/blob/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0087/index.html
+- https://github.com/global-asp/storybooks-japan/blob/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0095/index.html
+- https://github.com/global-asp/storybooks-japan/blob/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0111/index.html
+- https://github.com/global-asp/storybooks-japan/blob/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0141/index.html
+- https://github.com/global-asp/storybooks-japan/blob/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0156/index.html
+- https://github.com/global-asp/storybooks-japan/blob/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0158/index.html
+- https://github.com/global-asp/storybooks-japan/blob/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0210/index.html
+- https://github.com/global-asp/storybooks-japan/blob/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0291/index.html
+- https://github.com/global-asp/storybooks-japan/blob/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0294/index.html
+- https://github.com/global-asp/storybooks-japan/blob/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0302/index.html
+- https://github.com/global-asp/storybooks-japan/blob/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0327/index.html
+- https://github.com/global-asp/storybooks-japan/blob/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0337/index.html
+- https://github.com/global-asp/storybooks-japan/blob/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0342/index.html
+notes:
+- Explicitly selected, commit/hash-pinned Japanese story HTML only; per-work license
+  is read from that exact page, not inferred from repository software licensing.
+- The two source manifests separate CC BY 3.0 and CC BY 4.0 works. Eleven noncommercial
+  works in the 40-story catalog are excluded.
+- Text is Japanese translation/adaptation; original source language, generation method
+  and native-speaker review remain unknown. Contributor names and publisher editorial
+  workflow do not establish per-record review.
+- Reading levels are publisher labels, not JLPT estimates. Sentence review_state remains
+  unreviewed; publication dates are not inferred from Git timestamps.
+- Only primary Japanese page columns are read; duplicate language columns, navigation,
+  titles, images and audio are excluded. Original page units and gaps survive sentence
+  segmentation.
+- The website wrapper is MIT-licensed; its pinned LICENSE is retained separately as
+  snapshot evidence and never emitted as sentence text.
+- The mixed-license research ZIP is not a redistributable snapshot. Acquisition downloads
+  only the explicitly eligible HTML files and the site MIT license.
+acquisition:
+  version: 812deb4d7089a6f616363c92c21750e077aac4d2
+  site_license:
+    url: https://raw.githubusercontent.com/global-asp/storybooks-japan/812deb4d7089a6f616363c92c21750e077aac4d2/LICENSE
+    size: 1083
+    sha256: a08e8a9da5d701495a9029008728b0a39ead7a38e6e2c873be16c9bf4e5e9fa7
+  files:
+    '0001':
+      url: https://raw.githubusercontent.com/global-asp/storybooks-japan/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0001/index.html
+      size: 24115
+      sha256: 758f5690b2ca968ae4c49cd05ba4e2e79d27ea028740e700bc79a53ab0ad0211
+      metadata:
+        title: とても背の高い男がいた
+        author: Cornelius Gulere
+        illustrator: Catherine Groenewald
+        translator: Tomoyo Okuda
+        source_url: https://africanstorybook.org/reader.php?id=918
+        level: 2
+        pages: 11
+      omitted_pages: {}
+    '0004':
+      url: https://raw.githubusercontent.com/global-asp/storybooks-japan/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0004/index.html
+      size: 21478
+      sha256: 8d62fdfda5f4917a32ef1009a6176540ff60ea50cd7353e13114e12f421f1198
+      metadata:
+        title: ヤギと犬と牛
+        author: Fabian Wakholi
+        illustrator: Marleen Visser, Ingrid Schechter
+        translator: Eriko
+        source_url: https://africanstorybook.org/reader.php?id=6380
+        level: 2
+        pages: 8
+      omitted_pages:
+        '8':
+          sha256: 1233b2d2418732fbc7426585cd4f65eaee9a9ba0e432198a4ddc95c357fe1ee3
+          reason: demonstrated-source-typo
+    '0006':
+      url: https://raw.githubusercontent.com/global-asp/storybooks-japan/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0006/index.html
+      size: 20203
+      sha256: 0bbcb64ce25e1e38ad3185043dc33d0a574fde551310e8f4ab4cf1c4160ffd62
+      metadata:
+        title: アナンシと知恵
+        author: Ghanaian folktale
+        illustrator: Wiehan de Jager
+        translator: Kohei Tsuji
+        source_url: https://africanstorybook.org/reader.php?id=1938
+        level: 3
+        pages: 6
+      omitted_pages: {}
+    0008:
+      url: https://raw.githubusercontent.com/global-asp/storybooks-japan/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0008/index.html
+      size: 20139
+      sha256: 4eef83fc6729974d6d3ab3a569f50c549f54b94b9c020b7bb1ae8cb9fa7c9a85
+      metadata:
+        title: なにしてるの？
+        author: Nina Orange
+        illustrator: Wiehan de Jager
+        translator: dohliam
+        source_url: https://africanstorybook.org/reader.php?id=7292
+        level: 1
+        pages: 8
+      omitted_pages: {}
+    '0052':
+      url: https://raw.githubusercontent.com/global-asp/storybooks-japan/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0052/index.html
+      size: 44261
+      sha256: cd8163b8f0854a2fe617942e99281f26694a680eef79c37373556304d71698fd
+      metadata:
+        title: シンベグィレ
+        author: Rukia Nantale
+        illustrator: Benjamin Mitchley
+        translator: Ryoko Sakakibara
+        source_url: https://africanstorybook.org/reader.php?id=7068
+        level: 5
+        pages: 16
+      omitted_pages: {}
+    '0066':
+      url: https://raw.githubusercontent.com/global-asp/storybooks-japan/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0066/index.html
+      size: 30920
+      sha256: 6fe76931b31ba4361600e7360b075461f818d7a4ad7b6e1126bcbbf6f233a9d4
+      metadata:
+        title: ノジベレと三本の髪の毛
+        author: Tessa Welch
+        illustrator: Wiehan de Jager
+        translator: Masato Tanaka
+        source_url: https://africanstorybook.org/reader.php?id=1880
+        level: 3
+        pages: 13
+      omitted_pages: {}
+    '0072':
+      url: https://raw.githubusercontent.com/global-asp/storybooks-japan/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0072/index.html
+      size: 34931
+      sha256: 3161912a9e4e204f00dae2fd9190f2bdbff764431f4db490b6eb90783030ea05
+      metadata:
+        title: ミツオシエの仕返し
+        author: Zulu folktale
+        illustrator: Wiehan de Jager
+        translator: Akiko Nagayama
+        source_url: https://africanstorybook.org/reader.php?id=2099
+        level: 4
+        pages: 11
+      omitted_pages: {}
+    0087:
+      url: https://raw.githubusercontent.com/global-asp/storybooks-japan/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0087/index.html
+      size: 20367
+      sha256: af016dfdf81dae12f09ed4a399adf6d4e62a605d9eca65d930ba3f982281a23f
+      metadata:
+        title: 本を読むのが好き！
+        author: Letta Machoga
+        illustrator: Wiehan de Jager
+        translator: Tetsuya Okabe
+        source_url: https://africanstorybook.org/reader.php?id=10547
+        level: 1
+        pages: 8
+      omitted_pages: {}
+    0095:
+      url: https://raw.githubusercontent.com/global-asp/storybooks-japan/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0095/index.html
+      size: 26163
+      sha256: c740fd8a9ee9b27ecdb973c4a6ef010d346204cc6ca2aefef0dd2e045a91e280
+      metadata:
+        title: ザーマはすごいよ！
+        author: Michael Oguttu
+        illustrator: Vusi Malindi
+        translator: Yoko Katakura
+        source_url: https://africanstorybook.org/reader.php?id=9984
+        level: 2
+        pages: 12
+      omitted_pages: {}
+    '0111':
+      url: https://raw.githubusercontent.com/global-asp/storybooks-japan/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0111/index.html
+      size: 22898
+      sha256: 3dac13b365ce256eed08518e49915e0040e3ed01c2cad433c46f737436b501b1
+      metadata:
+        title: カバに毛がない訳
+        author: Basilio Gimo, David Ker
+        illustrator: Carol Liddiment
+        translator: Sayuri Hayashi
+        source_url: https://africanstorybook.org/reader.php?id=6160
+        level: 2
+        pages: 8
+      omitted_pages: {}
+    '0141':
+      url: https://raw.githubusercontent.com/global-asp/storybooks-japan/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0141/index.html
+      size: 27960
+      sha256: a58aa86f938fa21ea38b04080996a4df6dd4cec4368f1c41b100ca474324b3ad
+      metadata:
+        title: 鶏とヤスデ
+        author: Winny Asara
+        illustrator: Magriet Brink
+        translator: Rion Nakamichi
+        source_url: https://africanstorybook.org/reader.php?id=9094
+        level: 3
+        pages: 12
+      omitted_pages: {}
+    '0156':
+      url: https://raw.githubusercontent.com/global-asp/storybooks-japan/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0156/index.html
+      size: 16822
+      sha256: 18899754390940b25a210057d2478fd6c775f77770023db1f939d3a36187e1e3
+      metadata:
+        title: はらぺこのワニ
+        author: Christian G.
+        illustrator: Wiehan de Jager
+        translator: Hiromi K. Shimizu
+        source_url: https://africanstorybook.org/reader.php?id=7043
+        level: 1
+        pages: 5
+      omitted_pages: {}
+    0158:
+      url: https://raw.githubusercontent.com/global-asp/storybooks-japan/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0158/index.html
+      size: 27668
+      sha256: bd5f5b5b8ac0de5a805d008ae183db3e288961516fe5f7a9d209fb6c78cb83cc
+      metadata:
+        title: メンドリとワシ
+        author: Ann Nduku
+        illustrator: Wiehan de Jager
+        translator: kiki
+        source_url: https://africanstorybook.org/reader.php?id=2084
+        level: 3
+        pages: 10
+      omitted_pages: {}
+    '0210':
+      url: https://raw.githubusercontent.com/global-asp/storybooks-japan/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0210/index.html
+      size: 24412
+      sha256: 31cbf143293cb7f5f284418146febc6b75363d3bb37489666564a5385beba33a
+      metadata:
+        title: ティンギと牛たち
+        author: Ingrid Schechter
+        illustrator: Ingrid Schechter
+        translator: Shoko Miyaguchi
+        source_url: https://africanstorybook.org/reader.php?id=7441
+        level: 2
+        pages: 11
+      omitted_pages: {}
+    0291:
+      url: https://raw.githubusercontent.com/global-asp/storybooks-japan/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0291/index.html
+      size: 33372
+      sha256: 969ce801ef306c278b2ccc65c621c542bbde1a691934c98652fce94f32dd2cd0
+      metadata:
+        title: ブーシーのお姉さんが言ったこと
+        author: Nina Orange
+        illustrator: Wiehan de Jager
+        translator: Kohei Uesaka
+        source_url: https://africanstorybook.org/reader.php?id=6895
+        level: 4
+        pages: 13
+      omitted_pages: {}
+    0294:
+      url: https://raw.githubusercontent.com/global-asp/storybooks-japan/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0294/index.html
+      size: 30003
+      sha256: b4a0a7ddecdc894d88e8fba17acc8ccd449d727bb178ffe913116ee6be551775
+      metadata:
+        title: おばあちゃんのバナナ
+        author: Ursula Nafula
+        illustrator: Catherine Groenewald
+        translator: Yoshimi Matsui
+        source_url: https://africanstorybook.org/reader.php?id=2094
+        level: 4
+        pages: 10
+      omitted_pages: {}
+    '0302':
+      url: https://raw.githubusercontent.com/global-asp/storybooks-japan/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0302/index.html
+      size: 20248
+      sha256: f2492648902db839c4d705c17ab0cb77bfd2dd0e06633667d79530ba47f70e31
+      metadata:
+        title: 火
+        author: Deborah Namugosa, Beatrice Nabune, Alison Tukei, Rose Sabano
+        illustrator: Rob Owen
+        translator: Chihiro Kato
+        source_url: https://africanstorybook.org/reader.php?id=8565
+        level: 1
+        pages: 8
+      omitted_pages: {}
+    '0327':
+      url: https://raw.githubusercontent.com/global-asp/storybooks-japan/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0327/index.html
+      size: 20988
+      sha256: 2bfb6bc996be10818b68b62e4dba472ec8aac1b422e971011a9bdbe65cff2a50
+      metadata:
+        title: 動物を数える
+        author: Zanele Buthelezi, Thembani Dladla, Clare Verbeek
+        illustrator: Rob Owen
+        translator: Mariko Tani
+        source_url: https://africanstorybook.org/reader.php?id=9671
+        level: 1
+        pages: 8
+      omitted_pages: {}
+    '0337':
+      url: https://raw.githubusercontent.com/global-asp/storybooks-japan/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0337/index.html
+      size: 25413
+      sha256: b4986e35f929ce997d9d70c637ab8fb23846d222436fd4244d6cc1141fb80712
+      metadata:
+        title: ワックスの子供たち
+        author: Southern African Folktale
+        illustrator: Wiehan de Jager
+        translator: Shinji Kanda
+        source_url: https://africanstorybook.org/reader.php?id=2181
+        level: 2
+        pages: 11
+      omitted_pages: {}
+    '0342':
+      url: https://raw.githubusercontent.com/global-asp/storybooks-japan/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0342/index.html
+      size: 26818
+      sha256: f471eebbf7302327810aea2c1741a8777a9d9d07602256d56695029e46bd6058
+      metadata:
+        title: お仕置き
+        author: Adelheid Marie Bwire
+        illustrator: Melany Pietersen
+        translator: Noriko Shibata
+        source_url: https://africanstorybook.org/reader.php?id=11989
+        level: 2
+        pages: 12
+      omitted_pages: {}

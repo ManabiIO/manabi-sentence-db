@@ -80,7 +80,7 @@ def canonical_document(
             ]
             if manifest["source"]["adapter"] == "wikimedia"
             else ["publisher-html-narrative-extraction", "publisher-paragraph-unit"]
-            if manifest["source"]["adapter"] in {"scp-curated", "globalvoices"}
+            if manifest["source"]["adapter"] in {"scp-curated", "globalvoices", "storybook-japan"}
             else ["publisher-sentence-unit"]
         )
         + ["NFC", "edge-whitespace-trim"],
@@ -100,6 +100,10 @@ def canonical_document(
         record["transformations"].append(RUBY_TRANSFORMATION)
     if manifest["source"]["adapter"] == "globalvoices":
         from .globalvoices import TRANSFORMATION
+
+        record["transformations"].append(TRANSFORMATION)
+    if manifest["source"]["adapter"] == "storybook-japan":
+        from .storybooks import TRANSFORMATION
 
         record["transformations"].append(TRANSFORMATION)
     if manifest["source"]["adapter"] == "alt-parallel":
@@ -498,6 +502,8 @@ def build_corpus(
                     from .jec_basic import iter_documents
                 elif source["adapter"] == "talpco":
                     from .talpco import iter_documents
+                elif source["adapter"] == "storybook-japan":
+                    from .storybooks import iter_documents
                 elif source["adapter"] == "alt-parallel":
                     from .alt_parallel import iter_documents
                 elif source["adapter"] == "kyoto-wikipedia":
@@ -523,7 +529,7 @@ def build_corpus(
                            and selection["source_id"] == source_id else {}),
                         **({"progress": progress} if source["adapter"] == "wikimedia" else {}),
                     )
-                    if source["adapter"] in {"wikimedia", "jec-basic", "talpco", "kyoto-wikipedia", "alt-parallel", "yj-captions", "globalvoices"}
+                    if source["adapter"] in {"wikimedia", "jec-basic", "talpco", "kyoto-wikipedia", "alt-parallel", "yj-captions", "globalvoices", "storybook-japan"}
                     else iter_documents(manifest, manifest_path.parent)
                 )
                 for raw in documents:

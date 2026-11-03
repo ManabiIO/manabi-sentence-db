@@ -39,6 +39,10 @@ def load_source(path: Path) -> dict:
         from .talpco import validate_source
 
         validate_source(source)
+    if source["adapter"] == "storybook-japan":
+        from .storybooks import validate_source
+
+        validate_source(source)
     if source["language"] == "jp":
         raise DataError("Use the language code ja, not jp")
     if path.stem != source["id"]:

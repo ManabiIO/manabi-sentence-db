@@ -153,3 +153,22 @@ excluded. Primary license evidence and every archive member hash are pinned in
 `sources/alt-parallel-ja.yaml`.
 
 Global Voices raw HTML snapshots are local evidence and include the withheld third-party material; they are excluded from raw snapshot release packaging. Only the processed, reviewed Japanese subset belongs in public corpus exports.
+
+
+## Storybooks Japan Japanese narrative
+
+`storybooks-japan-ja` selects 20 works explicitly offered under
+[CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) and
+`storybooks-japan-by4-ja` selects nine offered under
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Each exact pinned HTML
+page supplies its own grant, writer, Japanese translator, illustrator credit and
+original African Storybook link. Retain those credits and the extraction/change
+notice. The eleven NC works in the 40-work Japanese catalog are excluded.
+
+The source is the [pinned Storybooks Japan site](https://github.com/global-asp/storybooks-japan/tree/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja).
+The website's MIT license covers its wrapper/software; it does not substitute
+for a story license. That separate LICENSE is retained as raw snapshot evidence.
+Acquisition takes only the explicitly eligible HTML and that license file, never
+images, audio, or the mixed-license repository ZIP. The older Global ASP slides,
+current Markdown repository and Storybooks Japan can differ in text or license
+version; do not silently substitute them.
