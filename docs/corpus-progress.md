@@ -4,7 +4,43 @@ This is the current corpus-pipeline checkpoint. It supersedes earlier dated
 notes describing these completed stages as running or queued. Generated source
 text and evidence remain outside Git. Alex resumed work on 2026-11-02.
 
-## Current pass: Wikipedia admission v6
+## Current pass: v7 applied; combined serving candidate in progress
+
+Admission v7 refinement **completed**. It checked every v6 occurrence, removed
+exactly the two demonstrated condition/reference fragments, and verified all
+retained fields. Canonical result: **11,502 works / 187,435 occurrences**, build
+`build_950cab3200041bfd04e49738d1e47059`.
+
+The current new-work transport has **11,489 works / 187,313 occurrences /
+185,937 distinct texts**: **43,650,322 bytes**, SHA-256
+`085d727938a93bd0dfa142170b3847dbae09cc56167cb301d29cfa135cf3d3c0`.
+There are 779 parent-shared texts and 185,158 absent from the parent before
+warning eligibility/final admission. These supersede the v6 input counts below.
+
+Consumer compilation completed as an explicitly offline compressed import,
+**515,584,000 bytes**, SHA-256
+`16d3f4f2b2e1f44d599f47b4f9239e2195b8fc71a079db0b6c65bf1081b7d4cc`.
+All 185,937 exact-text native analyses were reused with zero new sentence
+analyses, record-dictionary training calls or per-source search-index builds.
+Full logical-record verification passed. This intermediate is deliberately
+unserveable; actual postings are verified in the final combined candidate.
+
+One combined compact SQLite v11 candidate is now building with the qualified
+Wikipedia, corrected ALT/Global Voices and ASDC/TALPCo inputs. It selects 13,072
+added works and 1,882 ALT replacements; these are work counts, not novel text
+counts. The first preflight stopped on a caption-policy hash mismatch without
+creating a candidate. The corrected consumer verifies actual imported works
+are outside every caption scope, preserves the parent's caption-policy identity,
+and still rejects mismatched caption imports. All 330 relevant consumer tests
+passed. No source acquisition or native import was repeated.
+
+The combined build uses one worker / 0.25 CPU, with an **8 GB target and 10 GB
+ceiling for content, indexes and metadata together**. Content remains compressed.
+Its final size, deduplicated growth, full posting/context/rights verification and
+ranked-result quality are not yet established. No new corpus/runtime is active.
+Use the private resume index below for the exact running job and pinned evidence.
+
+## Earlier completed pass: Wikipedia admission v6
 
 [PR #54](https://github.com/ManabiIO/manabi-sentence-db/pull/54) is merged at
 `c528c363a4f81f8a11c20cf5f9a17eeaf1878be2`. All 1,191 tests, Ruff and PR CI
@@ -128,6 +164,7 @@ evidence, or an uncovered requirement. A successful extraction or checksum does
 not establish learner quality, human review, retrieval correctness or serving
 size. Preserve those remaining gates.
 
-Next work is applying v7 admission with compatible analysis reuse, the remaining
-query/quality decisions, and one combined serving candidate. Consumer integrity
-qualification is complete. No newly prepared source above has been activated.
+V7 admission and compatible native reuse are complete. Next work is completing
+the one combined serving candidate, its final integrity/size verification and
+ranked query/quality review before atomic local activation. No newly prepared
+source above has been activated.
