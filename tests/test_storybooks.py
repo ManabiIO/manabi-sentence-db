@@ -21,10 +21,17 @@ def page(texts, *, identity="0001", license_url="https://creativecommons.org/lic
         ("言語", "日本語"), ("レベル", "レベル 2")])
     units = "".join(f'<div id="text{i + 2:02d}"><div class="def"><h3{body_markup}>{text}</h3></div>'
                     f'<div class="l1"><h3>{text}</h3></div></div>' for i, text in enumerate(texts))
+    footer = "".join(f'<h5><span class="colophon-heading">{role}:</span> {value}</h5>'
+                     for role, value in [("作者", "Example Author"), ("絵", "Example Illustrator"),
+                                         ("翻訳", "Example Translator"), ("言語", "日本語"),
+                                         ("レベル", "レベル 2")])
     return (f'<html><head><link rel="canonical" href="{sb.HOMEPAGE}{identity}/"></head><body>'
             f'{navigation}<div id="text01"><h1><span class="def">図書館の物語</span></h1>{credits}</div>'
-            f'{units}<h5>出所:<a href="https://africanstorybook.org/reader.php?id=42">Original</a></h5>'
+            f'{units}<div id="colophon">{footer}'
+            '<h5><span class="colophon-heading">出所:</span>'
+            '<a href="https://africanstorybook.org/reader.php?id=42">Original</a></h5>'
             f'<a rel="license" href="{license_url}deed.ja">license</a>'
+            '</div>'
             '<img src="https://example.org/never-fetch.jpg"><audio src="never-fetch.mp3"></audio>'
             '</body></html>').encode()
 
@@ -91,6 +98,38 @@ def test_unrelated_pinned_navigation_duplicate_is_not_story_text():
     data = page(["町に図書館があります。"], navigation='<a class="btn" class="button" href="/">menu</a>')
     _, units = sb.parts(data, "0001", sb.LICENSES["storybooks-japan-ja"])
     assert units == ["町に図書館があります。"]
+
+
+@pytest.mark.parametrize("change", ["missing", "license-outside", "source-outside", "duplicate",
+                                  "author", "translator", "language", "level", "duplicate-credit",
+                                  "duplicate-attribute", "unrelated-heading"])
+def test_rights_and_matching_work_credits_must_belong_to_the_colophon(change):
+    data = page(["町に図書館があります。"])
+    colophon = data[data.index(b'<div id="colophon">'):data.index(b'</div><img') + 6]
+    if change == "missing":
+        data = data.replace(b'id="colophon"', b'id="other"')
+    elif change in {"license-outside", "source-outside"}:
+        start = colophon.index(b'<a rel="license"' if change == "license-outside" else b'<h5><span class="colophon-heading">' + '出所:'.encode())
+        end = colophon.index(b'</a>' if change == "license-outside" else b'</h5>', start)
+        end += len(b'</a>' if change == "license-outside" else b'</h5>')
+        moved = colophon[start:end]
+        data = data.replace(colophon, colophon.replace(moved, b'') + moved)
+    elif change == "duplicate":
+        data = data.replace(colophon, colophon + colophon)
+    elif change in {"author", "translator", "language", "level"}:
+        old, new = {"author": ("Example Author", "Different Author"),
+                    "translator": ("Example Translator", "Different Translator"),
+                    "language": ("日本語", "English"), "level": ("レベル 2", "レベル 3")}[change]
+        data = data.replace(colophon, colophon.replace(old.encode(), new.encode()))
+    elif change == "duplicate-credit":
+        credit = '<h5><span class="colophon-heading">翻訳:</span> Example Translator</h5>'.encode()
+        data = data.replace(colophon, colophon.replace(credit, credit + credit))
+    elif change == "duplicate-attribute":
+        data = data.replace(b'id="colophon"', b'id="colophon" id="other"')
+    else:
+        data = data.replace(b'class="colophon-heading"', b'class="unrelated-heading"')
+    with pytest.raises(DataError, match="colophon"):
+        sb.parts(data, "0001", sb.LICENSES["storybooks-japan-ja"])
 
 
 @pytest.mark.parametrize("before,after", [

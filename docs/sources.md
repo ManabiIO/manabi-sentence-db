@@ -991,10 +991,19 @@ older slideshow pages differ in wording and can advertise different license
 versions. Its mixed-license ZIP is private research evidence, not a public
 snapshot. Production acquisition uses only pinned eligible HTML files plus the
 site's MIT LICENSE for the wrapper. That software license does not license story
-content. Source pins, explicit license links, credits, page counts, raw bytes and
+content. Source pins, explicit colophon license links, matching cover/colophon
+credits, page counts, raw bytes and
 omission hashes fail closed on drift. Snapshot creation validates every story's
 rights before publishing a manifest; missing/NC/ND/mismatched grants fail.
 
-These are eligible source works and publisher units, not final admitted or novel
-sentence counts. Source build quality, exact novelty, native analysis, final
-serving growth and ranked-query review remain separate gates before activation.
+Offline canonical qualification of all 29 eligible works produced **817
+occurrences / 811 distinct Japanese texts**, with 24,406 Japanese characters
+across occurrences. Of 339 publisher pages, two are withheld and 337 retained;
+222 retained units split into multiple sentences. Eleven occurrences carry
+violence flags. There are no paired translations. These counts follow the
+normal build policy and are not unique additions to the existing corpus.
+The normalized transport ZIP is **241,178 bytes**, not a serving-size estimate.
+Qualification reused the cached immutable Git blobs with zero network requests.
+The stricter colophon guard preserved every canonical field across all 29 works.
+Exact novelty, native analysis, final serving growth and ranked-query review
+remain separate gates before activation.

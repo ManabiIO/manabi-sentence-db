@@ -91,6 +91,13 @@ def parts(data, identity, license):
              and "creativecommons.org/licenses/" in n.attrs.get("href", "")}
     if links != {license["url"] + "deed.ja"}:
         raise DataError("Storybooks work license is not the selected commercial grant")
+    colophon = _one([n for n in nodes if n.attrs.get("id") == "colophon"], "work colophon")
+    if any(n.duplicate_attrs for n in colophon.walk()):
+        raise DataError("Duplicate Storybooks colophon attributes")
+    grant = {n.attrs.get("href") for n in colophon.walk() if n.tag == "a"
+             and "license" in (n.attrs.get("rel") or "").split()}
+    if grant != {license["url"] + "deed.ja"}:
+        raise DataError("Storybooks colophon lacks the selected work license")
     canonical = _one([n.attrs.get("href") for n in nodes
                       if n.tag == "link" and n.attrs.get("rel") == "canonical"], "canonical URL")
     if canonical not in {HOMEPAGE + identity + "/", HOMEPAGE.replace(".io/", ".io//") + identity + "/"}:
@@ -114,12 +121,30 @@ def parts(data, identity, license):
             credits[role] = node.text().strip()
     if set(credits) != set(roles.values()) or credits.pop("language") != "日本語":
         raise DataError("Missing Storybooks Japanese work/translation attribution")
+    footer = {}
+    for node in colophon.walk():
+        if node.tag != "h5":
+            continue
+        headings = [n for n in node.walk() if n.tag == "span"
+                    and "colophon-heading" in (n.attrs.get("class") or "").split()]
+        if not headings:
+            continue
+        label = _one(headings, "colophon credit heading").text().strip()
+        if label not in {role + ":" for role in roles} | {"出所:"}:
+            continue  # Narrator/media credits are not imported.
+        role = roles.get(label[:-1], "source")
+        if role in footer or not node.text().strip().startswith(label):
+            raise DataError("Duplicate or misplaced Storybooks colophon credit")
+        footer[role] = node if role == "source" else node.text().strip()[len(label):].strip()
+    if (set(footer) != set(roles.values()) | {"source"}
+            or any(footer.get(role) != value for role, value in dict(credits, language="日本語").items())):
+        raise DataError("Storybooks colophon and cover credits differ")
     level = re.fullmatch(r"レベル ([1-5])", credits.pop("level"))
     if not level:
         raise DataError("Unknown Storybooks publisher reading level")
-    source = _one([n for n in nodes if n.tag == "h5" and n.text().startswith("出所:")], "original work attribution")
+    source = footer["source"]
     original = _one([n.attrs.get("href") for n in source.walk() if n.tag == "a"
-                     and re.fullmatch(r"https://africanstorybook\.org/reader\.php\?id=[0-9]+", n.attrs.get("href", ""))], "original work URL")
+                     and re.fullmatch(r"https://africanstorybook\.org/reader\.php\?id=[0-9]+", n.attrs.get("href", ""))], "colophon original work URL")
     columns = [n for n in nodes if n.tag == "div" and "def" in (n.attrs.get("class") or "").split()]
     units = []
     for column in columns:
