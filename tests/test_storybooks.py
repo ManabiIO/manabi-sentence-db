@@ -86,6 +86,24 @@ def test_publisher_unit_splitting_and_exclusion_preserve_offsets_and_context_gap
     assert sb.TRANSFORMATION in doc["transformations"]
 
 
+def test_withholding_a_multisentence_page_preserves_all_later_original_ordinals(fixture):
+    source, _, texts, _ = fixture
+    source = copy.deepcopy(source)
+    texts[1] = "誤りを含む文です。次の文もあります。"
+    data = page(texts)
+    pin = source["acquisition"]["files"]["0001"]
+    pin.update(size=len(data), sha256=sb._hash(data))
+    pin["omitted_pages"]["2"]["sha256"] = sb._hash(texts[1].encode())
+    manifest = dict(source=source, source_id=source["id"], snapshot_id="synthetic")
+    withheld = canonical_document(sb.extract(data, source, "0001"), manifest, Counter(), set())
+    pin["omitted_pages"] = {}
+    original = canonical_document(sb.extract(data, source, "0001"), manifest, Counter(), set())
+    by_id = {s["id"]: s for s in original["sentences"]}
+    assert withheld["sentences"][-1]["ordinal"] == 4
+    assert all(s == by_id[s["id"]] for s in withheld["sentences"])
+    assert texts[1] not in str(withheld)
+
+
 @pytest.mark.parametrize("url", ["https://creativecommons.org/licenses/by-nc/3.0/",
                                 "https://creativecommons.org/licenses/by-nd/3.0/",
                                 "https://creativecommons.org/licenses/by/4.0/"])

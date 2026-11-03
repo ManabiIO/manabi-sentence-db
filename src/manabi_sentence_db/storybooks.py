@@ -7,12 +7,13 @@ from collections import Counter
 from .html_tree import Element, Tree
 from .segments import CONTEXT_BREAK
 from .serialization import DataError, safe_relative
+from .text import sentence_spans
 
 HOMEPAGE = "https://global-asp.github.io/storybooks-japan/stories/ja/"
 REPOSITORY = "https://github.com/global-asp/storybooks-japan"
 RAW = "https://raw.githubusercontent.com/global-asp/storybooks-japan/"
 MAX_BYTES = 256 * 1024
-TRANSFORMATION = "storybooks-japanese-page-units-v1"
+TRANSFORMATION = "storybooks-japanese-page-units-v2"
 LICENSES = {
     "storybooks-japan-ja": {"id": "CC-BY-3.0", "url": "https://creativecommons.org/licenses/by/3.0/"},
     "storybooks-japan-by4-ja": {"id": "CC-BY-4.0", "url": "https://creativecommons.org/licenses/by/4.0/"},
@@ -184,7 +185,10 @@ def extract(data, source, identity, *, stats=None):
             if _hash(text.encode()) != omission["sha256"]:
                 raise DataError("Storybooks excluded source page changed")
             stats["rejected:storybooks-" + omission["reason"]] += 1
-            sentences.append(CONTEXT_BREAK)
+            # Reserve every original fragment, as publisher_items would have
+            # split it. A single marker would renumber later sentences whenever
+            # a newly withheld page contains more than one sentence.
+            sentences.extend([CONTEXT_BREAK] * max(1, len(sentence_spans(text, "ja"))))
         else:
             sentences.append(dict(native_id=f"{identity}:page:{number}", text=text,
                                   source_range=dict(unit="character", start=start, end=start + len(text)),
