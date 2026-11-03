@@ -216,7 +216,10 @@ acquisition:
         source_url: https://africanstorybook.org/reader.php?id=7043
         level: 1
         pages: 5
-      omitted_pages: {}
+      omitted_pages:
+        '2':
+          sha256: 5c3457e18521f23dde1dc077be179c9dba08e543e814345168e6e22691bfbd3a
+          reason: incomplete-source-unit
     0158:
       url: https://raw.githubusercontent.com/global-asp/storybooks-japan/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0158/index.html
       size: 27668
@@ -268,7 +271,10 @@ acquisition:
         source_url: https://africanstorybook.org/reader.php?id=2094
         level: 4
         pages: 10
-      omitted_pages: {}
+      omitted_pages:
+        '2':
+          sha256: 8415f40f76234687965aca942f8dc066d2178bdd1415988b1f2f00c50608e788
+          reason: demonstrated-source-typo
     '0302':
       url: https://raw.githubusercontent.com/global-asp/storybooks-japan/812deb4d7089a6f616363c92c21750e077aac4d2/stories/ja/0302/index.html
       size: 20248
