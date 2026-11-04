@@ -1,6 +1,7 @@
 import copy
 import hashlib
 import json
+import sqlite3
 import stat
 import zipfile
 from collections import Counter
@@ -76,6 +77,14 @@ def test_compressed_review_refinement_preserves_siblings_gaps_and_other_identica
     with zipfile.ZipFile(archive) as z:
         occurrences = [json.loads(line) for line in z.read("occurrences.jsonl").splitlines()]
     assert all(r["previous_id"] is None and r["next_id"] is None for r in occurrences)
+    from manabi_sentence_db.normalized_database import build_normalized_database
+
+    database = tmp_path / "consumer.sqlite"
+    build_normalized_database(archive, database)
+    with sqlite3.connect(database) as db:
+        metadata = dict(db.execute("SELECT key,value FROM metadata"))
+    assert json.loads(metadata["catalog"])["options"]["refinement"]["policy"] == jmrd.QUALITY_VERSION
+    assert json.loads(metadata["refinement_parent_catalog"]) == verify_build(parent)
     assert not list(output.rglob("*.sqlite*"))
     again = tmp_path / "again"
     refine_jmrd(output, again)

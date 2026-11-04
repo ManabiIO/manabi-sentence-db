@@ -4,39 +4,65 @@ This is the current corpus-pipeline checkpoint. It supersedes earlier dated
 notes describing these completed stages as running or queued. Generated source
 text and evidence remain outside Git. Alex resumed work on 2026-11-02.
 
-## Latest pass: JMRD dialogue added; source and native growth coordinated
+## Latest pass: two completed source batches; compressed quality refinement queued
 
-Public main `422cc0a` adds the pinned CC BY-SA 4.0 JMRD authored-dialogue adapter.
-The full **1,284-test suite**, Ruff, **24 source configurations** and main CI pass.
-It streams the three publisher splits instead of loading the dataset into memory,
-excludes external knowledge/questionnaires and dependent recommender turns,
-screens both roles for long literal copies with factual-title retention controls,
-and preserves original utterance IDs and gaps. Raw snapshots are local evidence;
-only processed content may be published. Occurrences remain unreviewed.
+Public main `5669f51` adds Wikipedia admission **v8**; `c0737d6` adds
+`jmrd-example-quality-v1` and the reusable **`refine-jmrd`** command. The full
+**1,305-test suite**, Ruff and **24 source configurations** pass. A subsequent
+focused 45-test pass also verifies JMRD refinement through normalized SQLite,
+including its exact parent catalog. No serving architecture or native runtime
+changed.
 
-The **8,797,366-byte** pinned source is cached and registered for ordinary offline
-snapshot reuse; a no-network reuse check passed. Synthetic end-to-end compressed
-fixtures and a six-dialogue structural probe pass. Full corpus counts and exact
-native novelty are **not yet measured**; the publisher's 5,075 dialogue count is
-not an admitted sentence count.
+The completed new Wikipedia cohort selected **27,829 new page IDs**, producing
+**26,695 works / 437,889 occurrences / 434,482 distinct texts within the archive**.
+Its original v7 normalized ZIP is **101,337,270 bytes**. The complete 132-example
+assistant packet was read (12 distinct-text hash examples per metadata topic).
+V8 adds narrow orphan-example and missing-unit-table rules, plus four exact
+hash omissions: three demonstrated wording errors and an unflagged graphic
+passage. Ordinary units statements, medical prose, nominal forms, science and
+history retain controls. This inspection is not a population quality estimate or
+native-speaker certification. **Do not publish this unrefined v7 archive.**
 
-The current 27,829-new-page Wikipedia extraction continues unchanged, having
-passed **393,516 occurrences** at the last progress check. Its waiting successor
-was replaced **before any source/metadata processing** so that the next single
-locked worker runs JMRD canonical/export and one compressed native qualification
-of JMRD plus the finished Wikipedia cohort **before** the larger Wikipedia cohort.
-The source-only waiting capsule is retired; do not restart it or launch duplicates.
+The corrected JMRD v2 batch completed **5,075 works / 111,388 occurrences /
+59,126 distinct texts**, in an **18,954,886-byte** normalized ZIP before refinement.
+Primary paper §3.1 establishes first-party crowdwritten reviews; review-grounded
+dialogue is retained, while external plots/biographies and raw knowledge fields
+remain excluded. The same pinned 8,797,366-byte download is reused, with no new
+acquisition. All 96 hash-selected review sentence texts were read. Five exact
+problematic utterances will be withheld whole, including sibling segments, by
+`jmrd-example-quality-v1`; colloquial language is not broadly banned. Occurrences
+remain `unreviewed`. **Source publication awaits compressed refinement.**
 
-The native pass reuses exact-text analyses from both the verified 2,038,328-text
-baseline and qualified MRMP/YJ import, measures novelty independently, and builds
-no serving indexes. Counters avoid retaining a growing set of analyzed IDs; the
-worker replaces its process to release the native runtime before the large
-metadata/extraction phase. Full memory/performance results remain unmeasured.
-The larger cohort's **190,000-page quota**, exclusion-before-quota policy, quality
-v7 and compressed whole-work exports are unchanged. One worker / 0.25 CPU /
-1 GiB remains serialized by the Linux producer lock. Resume from exact stage
-receipts in the private checkpoint. Source publication and serving activation
-remain separate; neither has occurred for these incoming cohorts.
+One frozen worker is still performing **one compressed non-serving native import
+of JMRD plus the completed Wikipedia batch**, reusing exact analyses from both
+verified parents. Its four-sentence native fixture passed. Full novelty/counts,
+peak memory and import completion must come from its final stage receipt; partial
+logs are not completion. It then releases the native process and builds the
+unchanged larger Wikipedia selection: **190,000-page quota**, excluding both
+previous cohorts before quotas, body-free reusable metadata and 8,000-work ZIP
+buckets. Quotas are not admitted sentence counts. This frozen source job still
+uses **v7** and must receive v8 compressed refinement before publication/promotion.
+Do not relaunch it or repeat completed native work because source quality changes.
+
+A separate frozen **compressed-only refinement worker is dispatched and waiting
+on the same Linux producer lock**. It first runs a tiny Linux fixture, then
+refines the completed Wikipedia and JMRD canonical builds. It checks every
+retained record/field against the parent, preserves ordinal gaps and rights,
+checks normalized member counts/hashes independently, and writes completion
+receipts last. It performs no raw extraction, new downloads, native calls,
+serving index build or activation. The first capsule failed strict ZIP preflight
+before obtaining the lock; its fresh replacement passed packaging preflight and
+is waiting. Do not relaunch either capsule. Exact recipes, parent hashes,
+container identities and stage paths are in the private resume checkpoint.
+
+Both producers remain **one worker / 0.25 CPU / 1 GiB**, serialized through the
+actual Linux producer lock. No new serving dataset is active; no production
+change. Reuse the verified 2,038,328-text baseline and qualified MRMP/YJ native
+analyses. Source archives and serving storage have separate budgets: retain the
+**8 GB serving target / 10 GB ceiling**. The larger new cohort requires a fresh
+review packet and source-only refinement before publication, then deduplicated
+admission/novelty and a measured serving-size decision before any one combined
+serving rebuild.
 
 ## Earlier pass: substantially larger Wikipedia cohorts dispatched
 
