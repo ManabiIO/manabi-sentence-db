@@ -4,7 +4,31 @@ This is the current corpus-pipeline checkpoint. It supersedes earlier dated
 notes describing these completed stages as running or queued. Generated source
 text and evidence remain outside Git. Alex resumed work on 2026-11-02.
 
-## Latest pass: 562,881 source occurrences published; larger Wikipedia cohort recovered
+## Latest pass: large Wikipedia recovery completed; fresh quality refinement running
+
+The preserved large cohort finished successfully: **124,939 works / 1,973,396
+occurrences**, in **16 normalized ZIPs / 471,988,128 compressed bytes** under v8.
+All retained fields and normalized member counts/hashes passed independent checks.
+The worker exited 0; no raw extraction, native analysis or acquisition was repeated.
+These are source occurrences, not globally novel searchable texts.
+
+All **264 fresh topic-stratified example texts** were read by an assistant. Twelve
+sampled cases expose detached formula/list/table remnants, an orphan comma, a bare
+installment label, three exact wording errors and a detailed self-harm passage.
+**Do not publish the v8 buckets.** Producer **`6985215`** adds admission v9 with
+narrow structural rules, exact text hashes and retention controls for ordinary
+prose, inline lists, named relations, dates and nominal forms. The **1,362-test
+suite**, Ruff and all **25 source configs** pass. Samples remain assistant-only,
+not a population estimate or native-speaker certification; occurrences stay
+`unreviewed`.
+
+One frozen worker now refines the saved v8 canonical build, compares retained
+records during export, independently verifies normalized members and prepares a
+review packet. It uses **one worker / 0.25 CPU / 1 GiB**, the actual Linux producer
+lock and disk-backed temporary files. It has no raw dump, metadata index or native
+cache mount. Review the newly selected replacement examples and completion receipts
+before publishing. Existing exact native analyses and the completed baseline
+verification remain reusable. Publication/serving activation is not yet complete.
 
 The [November 4 prose, dialogue and practical-request supplement](https://github.com/ManabiIO/manabi-sentence-db/releases/tag/corpus-prose-dialogue-2026-11-04)
 is public. Three normalized-v2 ZIPs total **123,984,131 compressed bytes** and
@@ -51,14 +75,10 @@ ignoring the configured disk-backed `SQLITE_TMPDIR`. This was not host disk
 exhaustion. `c99daa6` routes that ledger to the configured scratch directory;
 invalid scratch paths fail explicitly, and cancellation closes the ledger.
 
-A new frozen worker is **running** on the same Linux producer lock, one worker /
-**0.25 CPU / 1 GiB**. It reads the preserved canonical input only, applies v8,
-compares retained fields against the parent while exporting 8,000-work buckets,
-checks every normalized member and prepares a fresh topic-stratified review
-packet. There is no source reacquisition, XML re-extraction, metadata reindex,
-selection replay or native analysis. Old partial v7 buckets are not published.
-The exact recipe/stage hashes are in the private checkpoint. Require final
-receipts and fresh assistant review before publishing the larger cohort.
+The subsequent v8 recovery is now complete as recorded above. Fresh review
+requires the running v9 compressed refinement before publication. Preserve both
+canonical stage receipts; do not restart completed source work. Old partial v7
+and reviewed-but-withheld v8 ZIPs are not approved release assets.
 
 Existing native qualification remains reusable: **493,606 input texts**, with
 **485,351 eligible texts absent from both prior parents** before the eighteen
