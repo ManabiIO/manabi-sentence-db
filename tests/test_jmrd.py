@@ -24,13 +24,14 @@ def dialogue():
     return {"dialog_id": "00001", "movie_title": "private-movie-metadata",
             "first_speaker": "seeker", "questionnaire": {"private-evaluation": 5},
             "knowledge": {"[知識なし]": "[知識なし]", "タイトル": "架空の作品",
-                          "レビュー": ["この架空の例では、長い外部の解説文を直接コピーしています。"]},
+                          "レビュー": ["この作品は毎回見るたびに楽しい気分になれます。"],
+                          "あらすじ": ["この架空の例では、長い外部の解説文を直接コピーしています。"]},
             "dialog": [
                 {"utterance_id": "00001_00", "speaker": "seeker", "text": "今日は映画を見たいです。"},
                 {"utterance_id": "00001_01", "speaker": "recommender", "text": "一緒に映画を選びましょう。",
                  "checked_knowledge": [{"type": "[知識なし]", "content": "[知識なし]"}]},
                 {"utterance_id": "00001_02", "speaker": "recommender", "text": "外部の紹介を言い換えました。",
-                 "checked_knowledge": [{"type": "レビュー", "content": "外部のレビュー"}]},
+                 "checked_knowledge": [{"type": "あらすじ", "content": "外部のあらすじ"}]},
                 {"utterance_id": "00001_03", "speaker": "seeker", "text": "明日は友達と見に行きます。"},
             ]}
 
@@ -103,11 +104,38 @@ def test_long_factual_movie_title_alone_is_not_an_external_prose_copy(tmp_path):
     value = dialogue()
     title = "架空の長い映画作品の題名だけを話題として紹介するためのタイトル"
     value["knowledge"]["タイトル"] = title
-    value["knowledge"]["レビュー"] = [f"とくに{title}はとても印象に残りました。"]
+    value["knowledge"]["あらすじ"] = [f"とくに{title}はとても印象に残りました。"]
     value["dialog"][0]["text"] = f"前に{title}を見たことがあります。"
     manifest = fixture(tmp_path, value)
     document = next(iter_documents(manifest, tmp_path))
     assert value["dialog"][0]["text"] in [r["text"] for r in document["sentences"] if isinstance(r, dict)]
+
+
+def test_first_party_crowdwritten_review_grounding_and_literal_reuse_are_retained(tmp_path):
+    value = dialogue()
+    review = value["knowledge"]["レビュー"][0]
+    value["dialog"][0]["text"] = review
+    value["dialog"][1].update(text=review + "おすすめですよ。",
+        checked_knowledge=[{"type": "レビュー", "content": review}])
+    manifest = fixture(tmp_path, value)
+    record = canonical_document(next(iter_documents(manifest, tmp_path)), manifest, Counter(), set())
+    assert [r["text"] for r in record["sentences"]][:3] == [review, review, "おすすめですよ。"]
+    assert record["license"]["id"] == "CC-BY-SA-4.0"
+    assert "knowledge" not in record and "questionnaire" not in record
+    assert all(r["review_state"] == "unreviewed" for r in record["sentences"])
+
+
+def test_first_party_review_label_does_not_restore_copied_wikipedia_plot(tmp_path):
+    value = dialogue()
+    plot = value["knowledge"]["あらすじ"][0]
+    value["knowledge"]["レビュー"] = [plot]
+    value["dialog"][1].update(text=plot,
+        checked_knowledge=[{"type": "レビュー", "content": plot}])
+    manifest = fixture(tmp_path, value)
+    stats = Counter()
+    document = next(iter_documents(manifest, tmp_path, stats=stats))
+    assert plot not in [r["text"] for r in document["sentences"] if isinstance(r, dict)]
+    assert stats["rejected:jmrd-external-prose-copy"] == 1
 
 
 @pytest.mark.parametrize("change", [

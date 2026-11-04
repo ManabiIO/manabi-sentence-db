@@ -8,15 +8,17 @@ license:
   id: CC-BY-SA-4.0
   url: https://creativecommons.org/licenses/by-sa/4.0/
 attribution:
-  text: Takashi Kodama, Ribeka Tanaka, and Sadao Kurohashi. Japanese Movie Recommendation Dialogue (2021; DialDoc 2022).
+  text: JMRD dialogue and review contributors; dataset by Takashi Kodama, Ribeka Tanaka, and Sadao Kurohashi. Japanese Movie Recommendation Dialogue (2021; DialDoc 2022).
   url: https://github.com/ku-nlp/JMRD
 license_evidence:
   - https://github.com/ku-nlp/JMRD/blob/a20b0a89b4cf6ce1db320039f6e27df10604bf4c/README.md
   - https://github.com/ku-nlp/JMRD/blob/a20b0a89b4cf6ce1db320039f6e27df10604bf4c/LICENSE
+  - https://aclanthology.org/2022.dialdoc-1.9.pdf
 notes:
   - Human authored Japanese dialogue only. Never export external movie knowledge, plots, reviews, questionnaires, or model output.
-  - Recommender turns require explicit grounding limited to no-knowledge or the reviewed factual title/year/director/cast/genre types. External-prose-grounded or unannotated recommender turns are withheld whole.
-  - Both roles are screened for long literal overlap with bundled external prose. This is a conservative source-specific gate, not a general copyright classifier or naturalness certification.
+  - Recommender turns require explicit grounding limited to no-knowledge, factual title/year/director/cast/genre types, or first-party crowdsourced reviews. The primary paper section 3.1 says the reviews were written by crowdworkers for this dataset; they are not scraped Yahoo movie reviews. Only their use in dialogue is imported, not the knowledge fields themselves.
+  - Wikipedia-derived plots and director/cast descriptions remain excluded, including turns grounded in them. Unannotated recommender turns are withheld whole.
+  - Both roles are screened for long literal overlap with bundled Wikipedia/other unreviewed prose. First-party review text and factual-only title/name spans are exempt; review grounding never exempts a copied Wikipedia passage. This is a conservative source-specific gate, not a general copyright classifier or naturalness certification.
   - Addressed turns and all withheld turns preserve context gaps. Text is not repaired. Imported occurrences remain unreviewed and no translation metadata is invented.
   - Raw snapshots contain excluded external material and are local processing evidence only. Publish processed normalized corpus archives, never the raw research snapshot.
 acquisition:

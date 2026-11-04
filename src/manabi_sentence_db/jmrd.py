@@ -13,9 +13,12 @@ from .segments import CONTEXT_BREAK, MAX_SOURCE_UNIT_CHARS
 from .serialization import DataError, canonical_json, safe_relative
 
 ROLE = "jmrd-zip"
-TRANSFORMATION = "jmrd-authored-dialogue-v1"
+TRANSFORMATION = "jmrd-authored-dialogue-v2"
 SPLITS = ("train", "valid", "test")
 FACTUAL_TYPES = frozenset({"[知識なし]", "タイトル", "製作年度", "監督名", "キャスト名", "ジャンル"})
+# Paper section 3.1: reviews were newly written by crowdworkers for this dataset.
+# Plots and director/cast descriptions were extracted from Wikipedia instead.
+GROUNDING_TYPES = FACTUAL_TYPES | {"レビュー"}
 
 
 def _comparable(text):
@@ -37,10 +40,10 @@ def _external_prose(knowledge):
         for value in (values if isinstance(values, list) else [values]):
             if isinstance(value, str) and len(normalized := _comparable(value)) >= 16:
                 facts.append(normalized)
-    facts.sort(key=len, reverse=True)
+    facts = sorted(set(facts), key=lambda value: (-len(value), value))
     result = []
     for kind, values in knowledge.items():
-        if kind in FACTUAL_TYPES:
+        if kind in GROUNDING_TYPES:
             continue
         for value in (values if isinstance(values, list) else [values]):
             if isinstance(value, str):
@@ -100,7 +103,7 @@ def _turns(dialogue, stats):
                 if (not isinstance(item, dict) or not isinstance(item.get("type"), str)
                         or not isinstance(item.get("content"), str)):
                     raise DataError("Invalid JMRD knowledge annotation")
-                if item["type"] not in FACTUAL_TYPES:
+                if item["type"] not in GROUNDING_TYPES:
                     reason = "jmrd-external-knowledge"
                 else:
                     values = knowledge.get(item["type"])

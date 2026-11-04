@@ -198,16 +198,27 @@ examples. The adapter now streams one bounded dialogue at a time from each split
 checks exact publisher license/README hashes and split counts, and excludes
 external knowledge, questionnaires and generated-output paths from records.
 
-Recommender turns require explicit grounding in the reviewed no-knowledge or
-factual title/year/director/cast/genre types. Whole turns grounded in other
-knowledge or lacking annotation are withheld. Both speakers are screened for
-long literal overlap with the bundled external prose; matching ignores spacing
-and punctuation but never edits the retained text. Shared spans consisting only
-of long factual titles/names are exempt. This is a bounded source-specific
-exclusion, not a general copyright classifier or naturalness assessment.
+The [primary paper, section 3.1](https://aclanthology.org/2022.dialdoc-1.9.pdf),
+distinguishes the provenance of the knowledge fields: plots and person
+biographies come from Wikipedia, genres from Yahoo Movies, and reviews were
+newly written by crowdworkers for this dataset. The initial v1 adapter treated
+reviews too conservatively as unreviewed external prose. **V2 retains turns
+grounded in those first-party reviews**, under the pinned dataset's CC BY-SA 4.0
+grant, with contributor credit; review knowledge fields themselves are not
+exported as additional works. This is not a translation or native-review claim.
+
+Recommender turns require explicit grounding in no-knowledge, factual
+title/year/director/cast/genre types, or first-party reviews. Whole turns grounded
+in plots/biographies or lacking annotation remain withheld. Both speakers are
+screened for long literal overlap with the bundled Wikipedia/other unreviewed
+prose; matching ignores spacing/punctuation but never edits retained text.
+First-party reviews and spans consisting only of long factual titles/names are
+exempt. A review label never exempts a copied Wikipedia passage. This is a bounded
+source-specific exclusion, not a general copyright classifier or naturalness
+assessment.
 Missing/addressed/withheld turns reserve context gaps before sentence splitting,
 so neither neighbor links nor original-unit context can restore omitted prose.
-The versioned transformation is `jmrd-authored-dialogue-v1`; occurrences remain
+The versioned transformation is `jmrd-authored-dialogue-v2`; occurrences remain
 unreviewed. There are no invented translations or publication dates.
 
 The cached 8,797,366-byte primary ZIP has SHA-256
@@ -220,6 +231,11 @@ novelty remain to be measured. Raw snapshots are local processing evidence:
 `snapshot all` skips this opt-in source, it is absent from the public raw-snapshot
 workflow, and `snapshot-pack` rejects it. Publish processed normalized content
 only. Reuse these pinned inputs rather than repeating source acquisition/review.
+
+The initial v1 source/native successor was stopped while still waiting for the
+producer lock, before processing any JMRD source or native analyses. It must not
+be rerun. The replacement uses the corrected v2 policy and the same immutable
+upstream archive; no new download or repeated native work is needed.
 
 For Common Voice, the current Data Collective distribution remains deferred as
 described below. A separate primary repository publication was checked at
