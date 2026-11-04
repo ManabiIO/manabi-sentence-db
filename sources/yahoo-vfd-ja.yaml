@@ -1,0 +1,26 @@
+schema_version: 1
+id: yahoo-vfd-ja
+title: Yahoo VFD — punctuated crowdwritten spoken pairs
+language: ja
+adapter: vfd
+homepage: https://github.com/yahoojapan/VFD-Dataset
+license:
+  id: CC-BY-4.0
+  url: https://creativecommons.org/licenses/by/4.0/
+attribution:
+  text: "VFD Dataset: Hisashi Kamezawa, Noriki Nishida, Nobuyuki Shimizu, Takashi Miyazaki and Hideki Nakayama (EMNLP 2020), Yahoo Japan Corporation and contributing crowdworkers. Spoken Japanese selected and segmented by Manabi Sentence DB. Images, gaze annotations and non-verbal action descriptions are not included."
+  url: https://aclanthology.org/2020.emnlp-main.267/
+license_evidence:
+  - https://github.com/yahoojapan/VFD-Dataset/blob/5cb774f44d8fa64e288cbb9b8e96c7aa5959ad62/README.md#license
+  - https://aclanthology.org/2020.emnlp-main.267.pdf
+notes:
+  - Publisher README grants CC BY 4.0. Paper section 3.2 documents Japanese utterances and verbal responses authored by crowdworkers, distinct from model-generated evaluation output.
+  - Each TSV row is an independent two-turn prompt/response pair. Repeated image, gaze and utterance fields do not make separate candidate responses consecutive conversation turns.
+  - Keep only spoken units with terminal sentence punctuation, followed by the shared content and text-quality checks. Preserve omitted-turn gaps and exact text. Punctuation does not establish complete grammar, visual independence or native-speaker review.
+  - Never import non_verbal_response as spoken Japanese. Do not download images, execute publisher code, infer translations, or claim these hypothetical crowdwritten conversations were recorded speech.
+  - Visual references and colloquial forms remain. All imported occurrences are unreviewed; assistant development inspection is not native-speaker certification.
+acquisition:
+  revision: 5cb774f44d8fa64e288cbb9b8e96c7aa5959ad62
+  url: https://codeload.github.com/yahoojapan/VFD-Dataset/zip/5cb774f44d8fa64e288cbb9b8e96c7aa5959ad62
+  size: 6576449
+  sha256: d8f90ac159383813da5a79ead1883548356cc97f33fef0cd11a2cc0e737b17d3

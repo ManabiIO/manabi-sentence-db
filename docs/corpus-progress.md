@@ -5,6 +5,30 @@ statements below. Generated corpus text and detailed evidence stay outside Git.
 
 ## Latest: 1,972,952 Wikipedia occurrences published; next disjoint cohort running
 
+Continuation: the next cohort remains active; partial extraction has passed
+**41,500 works / 803,878 occurrences**, without a completion claim. A separate
+bounded native/storage pilot is waiting on the same actual Linux producer lock.
+It selects up to 60 complete articles per topic from the **already published v9
+cohort**, includes the full MASSIVE source, and reuses all three qualified analysis
+parents. Its source projection matched the ordinary exporter byte-for-byte on a
+tiny host fixture. It will measure compact SQLite v11 including content, all
+indexes, metadata and prepared word links, with per-table allocation and fresh
+query samples. No full baseline verification, competing serving engine, full
+serving candidate or activation is included. Exact local jobs and stage receipts
+are recorded in the private checkpoint; do not dispatch copies.
+
+The new **`yahoo-vfd-ja`** adapter adds a conservative candidate for everyday
+conversation. Publisher CC BY 4.0 and paper §3.2 establish crowdwritten Japanese
+spoken pairs. A single pinned **6,576,449-byte compressed acquisition** was reused
+as a canonical snapshot; no duplicate download or uncompressed bulk file.
+All 96 development sample pairs were read. The adapter keeps punctuated spoken
+units, preserves exact pair boundaries and omitted-turn gaps, and excludes
+images, image paths and non-verbal actions. **25 focused tests pass; 1,397 full
+host tests pass, with one existing native-backend-only test skipped because this
+host environment lacks that optional binary.** Ruff and 26 source configs pass.
+Linux/native-backend fixture qualification and the full source build are next;
+no admitted output count, public VFD archive or serving growth is claimed yet.
+
 The [large November 4 Wikipedia supplement](https://github.com/ManabiIO/manabi-sentence-db/releases/tag/corpus-wikipedia-expanded-2026-11-04)
 is **public**: **124,937 articles / 1,972,952 sentence occurrences**, in
 **16 normalized-v2 ZIPs / 471,996,558 compressed bytes**. All twenty uploaded

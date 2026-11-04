@@ -622,7 +622,11 @@ def create_snapshot(
                      _download(staging, "publisher-NOTICE.md", "massive-publisher-notice",
                                notice["url"], agent, expected_sha256=notice["sha256"],
                                expected_size=notice["size"])]
-        elif adapter in {"realpersonachat", "mrmp", "jmrd", "asdc", "jmultiwoz", "yj-captions", "stair", "jec-basic", "kyoto-wikipedia", "alt-parallel"}:
+        elif adapter in {"realpersonachat", "mrmp", "jmrd", "vfd", "asdc", "jmultiwoz", "yj-captions", "stair", "jec-basic", "kyoto-wikipedia", "alt-parallel"}:
+            if adapter == "vfd":
+                from .vfd import validate_source
+
+                validate_source(source)
             if mode != "full" or date or max_files or titles:
                 raise SnapshotError(
                     f"{source['title']} uses a pinned full archive; sample with build --max-documents"
@@ -631,6 +635,7 @@ def create_snapshot(
                 "realpersonachat": ("realpersonachat.zip", "realpersonachat-zip"),
                 "mrmp": ("mrmp.zip", "mrmp-zip"),
                 "jmrd": ("jmrd.zip", "jmrd-zip"),
+                "vfd": ("yahoo-vfd.zip", "yahoo-vfd-zip"),
                 "asdc": ("asdc.zip", "asdc-zip"),
                 "jmultiwoz": ("jmultiwoz.zip", "jmultiwoz-zip"),
                 "stair": ("stair.tar.gz", "stair-tar"),

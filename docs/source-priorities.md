@@ -52,7 +52,7 @@ pairs from source rows and from text overlap with Wikipedia.
 | STAIR Captions (enabled) | [Publisher](https://github.com/STAIR-Lab-CIT/STAIR-captions), CC BY 4.0 | README rechecked; Japanese image captions. Images require separate rights. |
 | Japanese Visual Genome VQA | [Publisher](https://github.com/yahoojapan/ja-vg-vqa), reported CC BY 4.0 | Verify downloadable text license; many answers are fragments. |
 | YJ Captions (adapter enabled) | [Pinned publisher](https://github.com/yahoojapan/YJCaptions/blob/2f2d6de87ce90b7ff1fd318efef17b1ce0e127db/README.md), verified CC BY 4.0 | Human original Japanese caption text only; complete-caption gate and separate works; no English alignment inferred from image IDs. Full admission, overlap and serving growth remain to be measured. |
-| Yahoo VFD | [Publisher](https://github.com/yahoojapan/VFD-Dataset), CC BY 4.0 notice rechecked 2026-11-02 | Manually annotated visual dialogue; separate verbal text from non-verbal action annotations and measure dependence on missing images before admission. |
+| Yahoo VFD (adapter ready; full qualification pending) | [Pinned publisher](https://github.com/yahoojapan/VFD-Dataset/tree/5cb774f44d8fa64e288cbb9b8e96c7aa5959ad62), CC BY 4.0 | Conservative punctuated spoken pairs; no images/non-verbal actions. See the November 4 review below; no published/serving output claimed. |
 | JMRD (enabled and source supplement published) | [Pinned publisher](https://github.com/ku-nlp/JMRD/tree/a20b0a89b4cf6ce1db320039f6e27df10604bf4c), CC BY-SA 4.0 | Review-grounded authored dialogue only; excludes external plots/biographies, copied prose and questionnaires. Five exact problematic utterances are withheld whole. See [current admission evidence](sources.md#high-priority-additions). |
 | MASSIVE Japanese (enabled and source supplement published) | [Publisher](https://github.com/alexa/massive), CC BY 4.0 with SLURP credit | Independent publisher judgments gate human-localized Japanese requests. No English prompts are exported as translations; entities can differ. See [source policy](sources.md#massive-japanese-practical-requests). |
 | JMultiWOZ (enabled) | [Publisher](https://github.com/nu-dialogue/jmultiwoz), verified CC BY-SA 4.0 | Human role-play, preserve speaker/turn context without profiles. |
@@ -87,7 +87,35 @@ verbal replies and non-verbal responses grounded in images and gaze. Non-verbal
 action descriptions are not interchangeable with spoken examples. Keep image
 rights separate and require a text-only usefulness sample before investing in an
 adapter; an open license alone does not establish independent sentence quality.
-No VFD corpus download or admission was performed.
+This November 2 check did not download or admit VFD. The November 4 follow-up
+below supersedes its acquisition status.
+
+### VFD text-only follow-up — 2026-11-04
+
+The pinned publisher commit is `5cb774f44d8fa64e288cbb9b8e96c7aa5959ad62`.
+Its **6,576,449-byte ZIP** contains README, preparation code and a
+**34,569,789-byte TSV**, with no images. SHA-256:
+`d8f90ac159383813da5a79ead1883548356cc97f33fef0cd11a2cc0e737b17d3`.
+The TSV's Git blob matches publisher metadata. It has **314,895 rows**; 6,102
+verbal responses are empty/dummy. These are raw rows, not admitted sentences or
+novel text. The actual header is `gf_id`, despite `gfid` in the README.
+
+The [construction paper §3.2](https://aclanthology.org/2020.emnlp-main.267.pdf)
+establishes that crowdworkers authored Japanese utterances and verbal responses.
+An assistant-only development review read both spoken fields in all 96
+deterministically sampled rows. Everyday requests, sports, travel and household
+language are promising; terse replies, missing punctuation and image references
+are common. This is not a population quality estimate or native review.
+
+The `yahoo-vfd-ja` adapter selects only terminally punctuated spoken units and
+then uses the shared text/content gates. It preserves the exact two-turn pair,
+omitted-turn gaps, original text and row citations; separate candidate responses
+are never joined across TSV rows. Non-verbal actions, image paths, images and
+publisher code are excluded. `context:image-not-included` remains explicit.
+Punctuation is only a conservative admission proxy. **Full source build, fresh
+retained-output review, exact novelty and serving-size qualification are pending;
+no public source archive or search activation is claimed.** Reuse the pinned
+compressed acquisition rather than downloading again.
 
 ## Fiction and longer writing
 

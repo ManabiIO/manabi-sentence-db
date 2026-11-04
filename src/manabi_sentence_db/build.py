@@ -122,6 +122,10 @@ def canonical_document(
         from .massive import TRANSFORMATION
 
         record["transformations"].append(TRANSFORMATION)
+    if manifest["source"]["adapter"] == "vfd":
+        from .vfd import TRANSFORMATION
+
+        record["transformations"].append(TRANSFORMATION)
     if wikipedia_quality:
         from .wikipedia_quality import WIKIPEDIA_QUALITY_VERSION
 
@@ -506,6 +510,8 @@ def build_corpus(
                     from .jmrd import iter_documents
                 elif source["adapter"] == "massive":
                     from .massive import iter_documents
+                elif source["adapter"] == "vfd":
+                    from .vfd import iter_documents
                 elif source["adapter"] == "asdc":
                     from .asdc import iter_documents
                 elif source["adapter"] == "jmultiwoz":
@@ -549,7 +555,7 @@ def build_corpus(
                            and selection["source_id"] == source_id else {}),
                         **({"progress": progress} if source["adapter"] == "wikimedia" else {}),
                     )
-                    if source["adapter"] in {"wikimedia", "jec-basic", "talpco", "kyoto-wikipedia", "alt-parallel", "yj-captions", "globalvoices", "storybook-japan", "jmrd", "massive"}
+                    if source["adapter"] in {"wikimedia", "jec-basic", "talpco", "kyoto-wikipedia", "alt-parallel", "yj-captions", "globalvoices", "storybook-japan", "jmrd", "massive", "vfd"}
                     else iter_documents(manifest, manifest_path.parent)
                 )
                 for raw in documents:
