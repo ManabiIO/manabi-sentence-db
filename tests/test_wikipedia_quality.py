@@ -264,3 +264,42 @@ def test_missing_condition_and_parenthetical_reference_targets_are_rejected(text
 ])
 def test_named_conditions_references_and_quoted_remnants_are_retained(text):
     assert assess_wikipedia_sentence(text) == (None, [])
+
+
+@pytest.mark.parametrize("text", [
+    "のような、いくつかの計算式に現れる。",
+    "のような，説明の一部が残る。",
+    "地域の人口の推移を調査に基づき示す（単位：人）。",
+    "年度ごとの内訳を示した(単位:件)。",
+])
+def test_unbound_formula_examples_and_unit_labeled_missing_tables_are_rejected(text):
+    assert assess_wikipedia_sentence(text) == ("wikipedia-dependent-fragment", [])
+
+
+@pytest.mark.parametrize("text", [
+    "このような、いくつかの例が見られる。",
+    "円のような形に整える。",
+    "「のような、」という断片が残っていた。",
+    "地域の人口の推移を調べた。",
+    "人口の推移を示す指標の単位は人である。",
+    "表の単位は人である。",
+    "速度を示す（単位：キロメートル毎時）。",
+    "人口の推移は増加傾向を示す（単位：人）。",
+    "袖なしの服を着た。",
+    "医師が手術で傷んだ組織を取り除いた。",
+])
+def test_related_complete_prose_nominal_forms_and_clinical_text_stay_eligible(text):
+    assert assess_wikipedia_sentence(text) == (None, [])
+
+
+def test_reviewed_exact_text_exclusions_are_hash_pinned_without_rewriting(monkeypatch):
+    import hashlib
+
+    from manabi_sentence_db import wikipedia_quality
+
+    text = "これは合成の除外テスト文です。"
+    monkeypatch.setattr(wikipedia_quality, "REVIEWED_EXCLUSIONS", {
+        hashlib.sha256(text.encode()).hexdigest(): "wikipedia-reviewed-wording",
+    })
+    assert assess_wikipedia_sentence(text) == ("wikipedia-reviewed-wording", [])
+    assert assess_wikipedia_sentence("これは合成の保持テスト文です。") == (None, [])

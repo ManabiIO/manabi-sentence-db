@@ -373,7 +373,7 @@ through the text heuristic; explicit upstream `archaic` / `old-fashioned` tags
 still exclude a sentence.
 
 Japanese Wikipedia has an additional sentence-level example gate,
-`wikipedia-example-quality-v5`. It rejects sentences longer than 180 characters,
+`wikipedia-example-quality-v8`. It rejects sentences longer than 180 characters,
 dense formulas, long Latin passages, numerical enumerations, unusually low
 hiragana prose, deeply nested/large parenthetical explanations, long enumerations,
 clusters of long kanji compounds and several distinct specialist terms combined
@@ -404,6 +404,10 @@ changes the default. Categories and upstream tags remain available for consumer
 filters.
 The gate also excludes narrowly defined formula remnants, reference-only
 sentences and numbered requirement introductions whose requirements are absent.
+It also omits orphaned `のような、` examples and table introductions ending in
+a unit label without their data. Four exact text hashes with demonstrated wording
+errors or graphic violence are withheld; these assistant findings do not create
+general grammar or medical-topic bans. See [quality policy](docs/sources.md#quality-and-content-filtering).
 `mise run refine-wikipedia -- --build BUILD --output FRESH_OUTPUT` reapplies the
 current gate to a verified canonical build without raw dumps. Retained text and
 source positions stay intact; a parent receipt preserves build lineage. See

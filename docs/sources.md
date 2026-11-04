@@ -669,6 +669,21 @@ Admission v7 additionally rejects whole missing-condition remnants such as
 `（例えば 参照）。`. Full sentences naming the condition, references that retain
 their target, and quotations of the broken fragment have retention controls.
 
+Admission v8 adds a leading orphan `のような、` and a narrow table-introduction
+rule: `推移` / `一覧` / `内訳` followed by `を`, a presentation predicate and a
+terminal `（単位：…）` label. Ordinary unit explanations and complete prose stay
+eligible. A November 3 assistant inspection read 132 distinct-text hash examples,
+12 per metadata topic, from a newly extracted 27,829-page selection. Three
+demonstrated particle/wording errors and one unflagged graphic self-mutilation
+passage are withheld by their exact SHA-256 hashes in `REVIEWED_EXCLUSIONS`.
+They came from `太陽水殺菌`, `ラボ情報管理システム`, `金山寺味噌`, and
+`ロシア睡眠実験`, respectively. Source text is never repaired. These local
+findings do not justify banning ordinary clinical descriptions, nominal prose,
+science or history. The sample is not population-weighted; assistant inspection
+is not native-speaker certification, and retained occurrences stay `unreviewed`.
+Existing source builds made under v7 need compressed refinement before this
+batch is published; source extraction and native analyses need not be repeated.
+
 Use `mise run refine-wikipedia -- --build BUILD --output FRESH_OUTPUT` to tighten
 an existing compressed canonical build without reacquiring or rescanning the raw
 dump. Refinement only removes previously admitted sentences or adds heuristic

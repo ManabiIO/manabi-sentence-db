@@ -5,10 +5,25 @@ science/history prose remains eligible. Thresholds are deliberately explicit;
 this is neither a readability model nor a calibrated JLPT assessment.
 """
 
+import hashlib
 import re
 import unicodedata
 
-WIKIPEDIA_QUALITY_VERSION = "wikipedia-example-quality-v7"
+WIKIPEDIA_QUALITY_VERSION = "wikipedia-example-quality-v8"
+
+# Exact, unchanged texts assessed in the November 3 assistant source review.
+# Hashes keep these local findings from becoming broad grammatical/topic bans.
+# See docs/sources.md; retained occurrences are still marked unreviewed.
+REVIEWED_EXCLUSIONS = {
+    "608065e2355bdf498bc4c7825f39f432141a8d593ff92b9f6c67e70c866ec278":
+        "wikipedia-reviewed-wording",  # 太陽水殺菌: 人々がで
+    "bd14efee27e62bde28c3cebb5c4baf46b61914d7eb7a895ad4f6e1a95b5fc1bc":
+        "wikipedia-reviewed-wording",  # ラボ情報管理システム: を合理化が
+    "72878917af406ce63269af69ad1c99bc06a4058d08e8215275f58c5f17e2fae5":
+        "wikipedia-reviewed-wording",  # 金山寺味噌: 容器に中に
+    "1481b9cbf22716cddda77e95e7da329bcbbedc803d305135c2a737a29bd456f0":
+        "wikipedia-reviewed-explicit-violence",  # ロシア睡眠実験: graphic passage
+}
 
 _NUMBERS = re.compile(r"[0-9０-９]+(?:[.,．][0-9０-９]+)*")
 _KANJI = re.compile(r"[\u3400-\u4dbf\u4e00-\u9fff]")
@@ -65,6 +80,15 @@ _MISSING_LIST = re.compile(
     r"(?:が(?:ある|存在する)|を(?:挙げる|列挙する|示す|紹介する|記載する))"
     r"[。．.!！?？]?\Z"
 )
+_UNBOUND_EXAMPLE = re.compile(r"^のような[、，,]")
+_MISSING_UNIT_TABLE = re.compile(
+    # A table introduction with only a terminal unit label, not the data.
+    # Require both a table-content noun and a terminal presentation predicate.
+    # Generic unit explanations and ordinary population prose remain eligible.
+    r"(?:推移|一覧|内訳)を[^。｡！？!?]{0,80}(?:示す|示した|示している)"
+    r"\s*[（(]\s*単位\s*[:：]\s*[^。｡！？!?()（）]{1,20}[）)]"
+    r"[。．.!！?？]?\Z"
+)
 _NUMBERED_REQUIREMENTS = re.compile(
     r"(?:以下|下記)の?[0-9０-９一二三四五六七八九十]+"
     r"(?:つ(?:の(?:条件|要件|事項))?|項目|条件|要件)(?:の?(?:全て|すべて))?を満たす"
@@ -96,13 +120,17 @@ def assess_wikipedia_sentence(text: str) -> tuple[str | None, list[str]]:
     Work on unchanged text; never simplify formulas or rewrite source sentences.
     Called only after the shared malformed-text/rights extraction gates.
     """
+    reviewed_reason = REVIEWED_EXCLUSIONS.get(hashlib.sha256(text.encode("utf-8")).hexdigest())
+    if reviewed_reason:
+        return reviewed_reason, []
     length = len(text)
     if length > 180:
         return "wikipedia-long-sentence", []
     if (_FOLLOWING_MATERIAL.search(text) or _ORPHAN.search(text)
             or _DANGLING_LIST.search(text) or _CROSS_REFERENCE_ONLY.search(text)
             or _FORMULA_REMNANT.search(text) or _NUMBERED_REQUIREMENTS.search(text)
-            or _MISSING_LIST.search(text)):
+            or _MISSING_LIST.search(text) or _UNBOUND_EXAMPLE.search(text)
+            or _MISSING_UNIT_TABLE.search(text)):
         return "wikipedia-dependent-fragment", []
     symbols = sum(unicodedata.category(char) == "Sm" for char in text)
     if symbols >= 3 or (
