@@ -1,105 +1,117 @@
 # Corpus expansion checkpoint — 2026-11-04
 
-This is the current corpus-pipeline checkpoint. It supersedes earlier dated
-notes describing these completed stages as running or queued. Generated source
-text and evidence remain outside Git. Alex resumed work on 2026-11-02.
+This is the current pipeline checkpoint and supersedes historical running/queued
+statements below. Generated corpus text and detailed evidence stay outside Git.
 
-## Latest pass: large Wikipedia recovery completed; fresh quality refinement running
+## Latest: 1,972,952 Wikipedia occurrences published; next disjoint cohort running
 
-The preserved large cohort finished successfully: **124,939 works / 1,973,396
-occurrences**, in **16 normalized ZIPs / 471,988,128 compressed bytes** under v8.
-All retained fields and normalized member counts/hashes passed independent checks.
-The worker exited 0; no raw extraction, native analysis or acquisition was repeated.
-These are source occurrences, not globally novel searchable texts.
-
-All **264 fresh topic-stratified example texts** were read by an assistant. Twelve
-sampled cases expose detached formula/list/table remnants, an orphan comma, a bare
-installment label, three exact wording errors and a detailed self-harm passage.
-**Do not publish the v8 buckets.** Producer **`6985215`** adds admission v9 with
-narrow structural rules, exact text hashes and retention controls for ordinary
-prose, inline lists, named relations, dates and nominal forms. The **1,362-test
-suite**, Ruff and all **25 source configs** pass. Samples remain assistant-only,
-not a population estimate or native-speaker certification; occurrences stay
-`unreviewed`.
-
-One frozen worker now refines the saved v8 canonical build, compares retained
-records during export, independently verifies normalized members and prepares a
-review packet. It uses **one worker / 0.25 CPU / 1 GiB**, the actual Linux producer
-lock and disk-backed temporary files. It has no raw dump, metadata index or native
-cache mount. Review the newly selected replacement examples and completion receipts
-before publishing. Existing exact native analyses and the completed baseline
-verification remain reusable. Publication/serving activation is not yet complete.
-
-The [November 4 prose, dialogue and practical-request supplement](https://github.com/ManabiIO/manabi-sentence-db/releases/tag/corpus-prose-dialogue-2026-11-04)
-is public. Three normalized-v2 ZIPs total **123,984,131 compressed bytes** and
-contain **562,881 source occurrences** before cross-source deduplication and
-consumer admission. All seven uploaded asset sizes/SHA-256 digests matched,
-and the public manifest was downloaded without authentication and checked.
+The [large November 4 Wikipedia supplement](https://github.com/ManabiIO/manabi-sentence-db/releases/tag/corpus-wikipedia-expanded-2026-11-04)
+is **public**: **124,937 articles / 1,972,952 sentence occurrences**, in
+**16 normalized-v2 ZIPs / 471,996,558 compressed bytes**. All twenty uploaded
+source/metadata asset sizes and SHA-256 digests matched; an unauthenticated
+`additions.json` download was verified. Its SHA-256 is
+`8f3be7926ed04966e0ebc66490d0512ed4805b7dbd552fe8ce6b5bb515b6b9da`.
 The latest full release remains `corpus-2026-10-24-prose`.
 
-| Source archive | Works | Occurrences | Distinct texts within archive | Compressed bytes |
+Every work retains CC BY-SA 4.0, contributor/revision/history citations, snapshot
+identity, processing lineage and context gaps. Source extraction, metadata indexing
+and existing native linguistic analyses were not repeated for this refinement.
+No private serving/native database, private captions, raw dump, images or audio
+were uploaded. This source publication does **not** activate the search preview.
+
+The original 264-example assistant packet was read completely. Admission v9
+(`6985215`) withholds 440 narrow structural remnants, three hash-pinned wording
+errors and one detailed self-harm passage, removing two now-empty works. Retained
+fields were independently compared to the parent during export; every ZIP member
+count/hash was independently verified. All 252 surviving reviewed examples match
+exactly, and all 12 fresh replacements were read. No further demonstrated exact
+omission was identified. Occurrences remain `unreviewed`: this is not a population
+quality estimate or native-speaker certification. Terse, nominal, awkward and
+context-dependent prose can remain. Original v7/v8 transport buckets are withheld;
+publish/use the qualified v9 output, build
+`build_0227dbd5022d182d7cb9114de66733ac`, catalog SHA-256
+`8f5613dbc2864beafdeac10acba885eef01b093b4a17bd6f6c3899c929208af1`.
+The source worker exited 0 in 4,879.10 seconds, peak cgroup memory 878,755,840 bytes.
+
+A completed compressed-member/IDs-only scan measured **1,945,699 distinct texts
+across the Wikipedia buckets**. Wikipedia plus the already published MASSIVE
+source contain **1,958,519 distinct texts**; **1,943,716 are absent from all three
+preserved analysis caches** (the verified combined baseline, qualified conversation/
+caption growth, and prior JMRD/Wikipedia import). This is exact text overlap before
+native/content eligibility, not a final searchable addition count or universal
+novelty claim. The 166,563,840-byte ledger stores no sentence text. The scan took
+563.38 seconds, peak cgroup memory 764,735,488 bytes; no native calls, serving index
+build or repeated full baseline verification. See private receipts before any
+serving-size/admission decision. Keep the **8 GB target / 10 GB serving ceiling**;
+source-release storage is a separate budget.
+
+**Next source cohort is RUNNING**, one worker / **0.25 CPU / 1 GiB**, using the
+actual Linux producer lock. It reuses the body-free metadata index and excludes
+all **170,976 earlier page IDs before quotas**. Its requested quota is 20,000 per
+metadata topic plus 50,000 general (250,000 maximum); quotas are not admitted
+counts. It uses cached raw inputs for genuinely new pages, admission v9, compressed
+canonical shards and whole-work 8,000-article ZIP buckets. Independent member
+verification and fresh 24/topic sampling share one output scan. Both the remapped
+host fixture and actual Linux fixture passed. No source reacquisition, real metadata
+reindex, native linguistic analysis, serving rebuild or activation is included.
+Require stage receipts, exit 0 and fresh assistant review before publication.
+
+## Qualified source-CPU and reusable-import improvements
+
+`67d2d2a` removes a redundant prewrite schema walk while preserving complete
+validation of every written child record before publication. Corrupted written
+tags, licenses and source IDs still fail closed; original inputs remain unchanged.
+`d157c74` adds pinned `jsonschema-rs` 0.59.0 for compatible JSON values, preserving
+Python validation and diagnostics for other inputs. Rust-only probes differed on
+URL whitespace and tuple coercion; the guard prevents those fast acceptances.
+Differential regressions cover over 3,000 mutations of source manifests, nested
+translations/source units and both reference locators. Actual backend/dependency
+versions enter build identity; legacy frozen environments without the native
+package retain Python behavior.
+
+**1,373 full tests pass on both macOS and Linux**, Ruff passes, and 25 source
+configs validate. Linux explicitly used the native backend under the producer
+lock (90.55-second suite). An 80-work / 1,280-sentence full-refinement comparison
+used 0.169–0.201 CPU seconds with Python versus 0.064–0.073 with guarded Rust,
+with every record identical. These are tiny-fixture gains, not an extrapolated
+full-corpus speedup. The completed v9 release kept its original frozen producer;
+only the new source cohort uses the qualified faster producer.
+
+The private offline import command now supports repeatable `--reuse-analysis`
+for already-qualified immutable parents. It reuses exact tokens/JLPT metadata,
+reads corrected provenance/flags/positions from new source archives, keeps one
+decoded sentence and bounded readers, checks parent identities before publication,
+and validates the complete new logical import. Its owned analyzer cannot close
+the web thread's cached analyzer. **42 import/compact-parent/runtime tests pass**.
+The serving architecture remains compact SQLite v11; no new full serving artifact
+or production deployment is claimed.
+
+## Other source supplements already published
+
+The [November 4 prose/dialogue/request supplement](https://github.com/ManabiIO/manabi-sentence-db/releases/tag/corpus-prose-dialogue-2026-11-04)
+contains **562,881 occurrences / 123,984,131 compressed bytes**:
+
+| Source | Works | Occurrences | Archive-distinct texts | Compressed bytes |
 |---|---:|---:|---:|---:|
-| Wikipedia v8 expansion | 26,695 | 437,881 | 434,474 | 101,502,099 |
-| JMRD refined dialogue | 5,075 | 111,378 | 59,116 | 18,956,495 |
+| Earlier Wikipedia v8 cohort | 26,695 | 437,881 | 434,474 | 101,502,099 |
+| Refined JMRD dialogue | 5,075 | 111,378 | 59,116 | 18,956,495 |
 | MASSIVE Japanese requests | 13,598 | 13,622 | 12,820 | 3,525,537 |
 
-Do not sum archive-distinct counts as global novel texts. Wikipedia/JMRD retain
-CC BY-SA 4.0; MASSIVE retains CC BY 4.0 and SLURP credit. Rights, citations,
-snapshot identities, transformations and context gaps remain embedded. No private
-serving/native SQLite, raw mixed-rights JMRD, private captions, images or audio
-were published. Source publication does not activate the search preview.
+Do not sum archive-distinct counts as globally novel text. Wikipedia/JMRD retain
+CC BY-SA 4.0. MASSIVE retains CC BY 4.0 with SLURP credit, explicit human-localized
+origin and independent publisher judgment gates. English prompts can contain
+different entities and are not exported as translations. All 96 MASSIVE examples
+were read; no worker identities, raw judgments or other locales were published.
+The two November 3 supplements and October 24 full base remain unchanged.
 
-Wikipedia refinement checked all 437,889 original occurrences, omitting exactly
-eight: four structural fragments, three hash-pinned wording errors and one graphic
-passage. JMRD refinement omits five whole utterances / ten fragments. Every
-retained record was independently compared to its parent, and normalized member
-counts/hashes were checked. Existing 132/96-example assistant reviews were reused;
-no raw extraction, native analysis or baseline verification was repeated.
-
-MASSIVE's full source build is now complete. The original file uses `|` between
-language labels whereas the guide displays `&`; producer **`c99daa6`** fixes this
-representation mismatch with identical review thresholds. It retains human
-localization origin, requires positive independent publisher judgments, exports
-no English prompts as translations, and keeps unrelated requests in separate
-works. All 96 fresh hash-selected examples were read. Purposeful ellipsis and
-nominal requests remain part of this register. Occurrences stay `unreviewed`;
-assistant inspection/publisher scores are not native-speaker certification.
-Full local checks and main CI pass: **1,340 tests**, Ruff and **25 source configs**.
-
-**Much larger Wikipedia extraction is preserved, not being repeated:** the cached
-snapshot produced **124,939 works / 1,973,399 occurrences** after selecting
-**131,147 new page IDs**, with 39,829 earlier choices excluded before quotas.
-Its metadata index, selection and verified v7 canonical build all completed.
-Only bucket export failed: Python's identity ledger used a 64 MiB `/tmp` tmpfs,
-ignoring the configured disk-backed `SQLITE_TMPDIR`. This was not host disk
-exhaustion. `c99daa6` routes that ledger to the configured scratch directory;
-invalid scratch paths fail explicitly, and cancellation closes the ledger.
-
-The subsequent v8 recovery is now complete as recorded above. Fresh review
-requires the running v9 compressed refinement before publication. Preserve both
-canonical stage receipts; do not restart completed source work. Old partial v7
-and reviewed-but-withheld v8 ZIPs are not approved release assets.
-
-Existing native qualification remains reusable: **493,606 input texts**, with
-**485,351 eligible texts absent from both prior parents** before the eighteen
-quality omissions, in a **1,410,818,048-byte non-serving import**. All 487,215 new
-analyses plus 6,391 reuses are cached. Use corrected source metadata/occurrences
-with those analyses at later integration; do not serve pre-refinement records
-unchanged or repeat the 2,038,328-text baseline verification. Final combined
-serving size remains unmeasured; retain the **8 GB target / 10 GB ceiling**.
-
-## Refinement CPU follow-up
-
-Future refinements avoid a redundant prewrite schema pass: the input iterator
-already validates originals, and the full written output iterator still validates
-every child record, identity, source, rights and count before publication. Three
-new regressions corrupt the actual written tags, license or source and require
-failure without publication or parent mutation. **1,365 tests**, Ruff and all
-**25 source configs** pass. An 80-work / 1,280-sentence synthetic comparison
-measured 0.213–0.214 CPU seconds before versus 0.161–0.162 after, with every
-retained field identical. This is a roughly 25% fixture CPU reduction, not a
-whole-corpus speedup claim. The active v9 worker keeps its previously frozen
-producer; it is not restarted for this optimization.
+Reuse all preserved native analyses, corrected metadata and baseline receipts.
+The completed prior 493,606-text import binds pre-refinement payloads; use its
+cached analyses with corrected occurrences rather than serving it unchanged or
+repeating the verified 2,038,328-text baseline. Exact native eligibility and final
+combined serving size still require their normal gates. Source-priority research
+now pins Rosebleu's publisher grant/Apache notice but does not enable it: adult
+scene boundaries, complete archive inventory, notice support and text quality
+remain open. No scenario text was acquired. See [source priorities](source-priorities.md).
 
 ## Previous pass: two completed source batches; compressed quality refinement queued
 
