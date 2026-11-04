@@ -3,67 +3,78 @@
 This is the current pipeline checkpoint and supersedes historical running/queued
 statements below. Generated corpus text and detailed evidence stay outside Git.
 
-## Latest: larger Wikipedia and VFD sources complete; reviewed refinement dispatched
+## Latest: 1,783,000 further Wikipedia and 429,846 VFD occurrences published
 
-The disjoint Wikipedia successor completed **120,618 articles / 1,783,280
-occurrences**, in **16 ZIPs / 420,517,443 compressed bytes**, with independent
-member verification and **exit 0**. Build `build_2b2fb932430e25eae7038956591a4c11`,
-catalog SHA-256 `8b437875ce560ebf5be93d8a8d8bbe74c6bd0d27f9604e63ee1c49827a9a043a`.
-It selected 127,197 new page IDs after excluding all 170,976 earlier IDs before
-quotas. No dump download, metadata reindex or repeated earlier extraction.
+Both reviewed source supplements are public. **All 59 uploaded source/metadata
+asset sizes and SHA-256 digests matched**, and both unauthenticated manifests
+were checked. The October 24 full base remains GitHub's designated latest.
+These are source occurrences, not globally novel or already searchable additions.
 
-**All 264 fresh topic-stratified examples were read by an assistant.** Thirteen
-have demonstrated problems: nine exact wording/list/formula/legend entries and
-four examples covered by narrow structural rules. Admission **v10** adds those
-omissions, with controls for complete clauses, quoted particles, ordinary
-の-prefixed words, street references and nominal prose. The previously published
-v9 release is unchanged. **Do not publish the unrefined successor.**
+| Release | Retained works/pairs | Occurrences | Compressed source bytes |
+|---|---:|---:|---:|
+| [Further Wikipedia prose](https://github.com/ManabiIO/manabi-sentence-db/releases/tag/corpus-wikipedia-further-2026-11-04) | 120,616 | 1,783,000 | 427,337,970 / 16 ZIPs |
+| [VFD visual-dialogue text](https://github.com/ManabiIO/manabi-sentence-db/releases/tag/corpus-vfd-2026-11-04) | 277,242 | 429,846 | 85,333,252 / 35 ZIPs |
 
-VFD source qualification also completed: **277,246 independent pairs / 429,852
-occurrences**, in **35 ZIPs / 84,074,061 compressed bytes**, independent member
-verification and **exit 0**. Its actual Linux/native-schema preflight passed 25
-tests. All **96 fresh retained examples** and available original spoken units
-were read. `vfd-example-quality-v1` withholds two exact whole spoken units: one
-typing error and one adult-context line. A retained sibling must not re-expose
-withheld text through `source_unit`. **Do not publish the unrefined VFD output.**
+Wikipedia reuses the cached snapshot and body-free metadata. Its 127,197 selected
+page IDs exclude all 170,976 earlier IDs before quotas. V10 canonical refinement
+withholds 163 demonstrated wording/structural remnants and one empty work. A
+replacement example exposed unreliable wording in the captured watermill article;
+that **whole work (117 occurrences)** is additionally withheld from the release.
+All 280 removals and the current 264-example review were inspected by an assistant.
+The last selection reused fifteen compressed ZIPs and replaced only the affected
+bucket, independently comparing every retained normalized record against its
+parent. It took 201.68 seconds / 749,068,288 peak cgroup bytes, without repeating
+a full extraction, native analysis or the prior full verifier.
 
-Public **`4e38a04`** implements both quality changes and `mise run refine-vfd`.
-**1,430 full host tests pass / one existing native-backend-only test skips**;
-236 focused source/refinement controls, Ruff and all 26 source configurations
-pass. Frozen Linux compressed-only refinement workers are **dispatched**, each
-under the actual producer lock, one worker / **0.25 CPU / 1 GiB**. Each runs its
-new affected Linux/native-schema tests before real data, retains exact rights,
-IDs and ordinal gaps, compares every retained record against its parent, verifies
-normalized members, and emits removal/replacement review packets. Require final
-receipts, exit 0 and review before publication. These jobs do no raw extraction,
-network acquisition, native linguistic analysis, serving build or activation.
-Exact job identities and evidence are in the private resume checkpoint.
+The verified v10 canonical build remains `build_4a17eecef2f9239fc5ee48c8ed84dbb7`,
+catalog SHA-256 `7cf016b3cc36c60fcb55fb3cb3ffcebc6ba80c0ec2e8a54d2721cd65786ceff0`.
+It still describes the original full verified build; each published ZIP's bound
+whole-work selection identifies the selected release subset. Use the released
+selection for import, rather than reintroducing the omitted article. The public
+manifest SHA-256 is `9cf9f8d5bf8741341db5f24516eb0a55a6c5a5a38f463470766f48cd880307b7`.
+No retained wording, identifiers, license, attribution, revision or ordinal gap
+was changed. This conservative work omission includes valid sentences; it is not
+a general ban on historical or scientific prose.
 
-The bounded Wikipedia/MASSIVE native/storage pilot is still running on the same
-lock. Its source stage selected **660 whole articles / 11,775 distinct texts**
-from the **already published v9 cohort**, plus all **12,820 MASSIVE texts**.
-Both compressed native imports completed and preserve reusable analyses. Final
-compact SQLite v11 byte allocation (all indexes, metadata and word links) and
-fresh query review remain pending. This is a balanced pilot, not a population
-size/quality estimate. Do not launch copies or repeat the verified baseline.
-Keep the **8 GB serving target / 10 GB ceiling**; source-release storage is a
-separate budget. No new preview corpus is active.
+VFD reuses its single pinned publisher archive. `vfd-example-quality-v1` removes
+one exact typing-error utterance and five occurrences of one adult-context
+utterance, dropping four now-empty pairs. Every retained record was independently
+compared against its parent, with separate pair boundaries and omitted-turn gaps.
+All 96 current examples and all six removals were inspected: 94 prior examples
+matched exactly and both replacements were read. The manifest SHA-256 is
+`d0851cb7cbe24ba7cc19ecbaedd0e847da1a19eaf94d6a362533ef13eb8d971e`.
+Text is CC BY 4.0, with original Japanese crowd authorship established by the
+paper. Images, paths, gaze annotations, action labels and publisher code are
+excluded; `context:image-not-included` remains. There are no translations.
 
-The [large November 4 Wikipedia supplement](https://github.com/ManabiIO/manabi-sentence-db/releases/tag/corpus-wikipedia-expanded-2026-11-04)
-remains public: **124,937 articles / 1,972,952 occurrences**, in **16 normalized-v2
-ZIPs / 471,996,558 compressed bytes**. All twenty remote sizes/SHA-256 digests
-matched; its unauthenticated manifest was verified. No publication is repeated.
-The completed IDs-only comparison across that Wikipedia cohort and MASSIVE
-measured **1,958,519 distinct texts**, **1,943,716 absent from all three preserved
-analysis caches**, before content/native eligibility and final serving admission.
-Reuse its ledger and reports; these are not final searchable addition counts.
+**Public source code `4e38a04` is qualified:** 1,430 host tests pass / one optional
+native-backend-only skip, **all 1,431 main Linux tests pass**, Ruff and 26 source
+configs pass. The private consumer's default acquisition now distinguishes the
+latest full release from newer source-only supplements. No publication has been
+repeated; exact local receipts are in the private resume index.
 
-All works preserve source licenses, authorship/origin evidence, contributor,
-revision/history citations, snapshot identity and processing lineage. Occurrences
-remain `unreviewed`; assistant inspection is not a population quality estimate or
-native-speaker certification. No private serving/native database, private captions,
-raw dump, images or audio is published. The October 24 full release remains latest.
-See [the exact source decisions](sources.md#wikipedia-successor-quality-review--2026-11-04).
+The bounded Wikipedia/MASSIVE native/storage pilot is also **complete, exit 0**:
+**11,775 Wikipedia texts / 49,082,368 bytes** and **12,820 MASSIVE texts /
+44,072,960 bytes** in the selected compact SQLite v11 format, including indexes,
+metadata, projections and word links. Peak cgroup memory was 562,503,680 bytes.
+Word dictionaries reduce payloads 5,622,416 → 2,231,616 and 2,821,755 → 1,091,767
+bytes, plus 131,226 dictionary/manifest bytes each; held-out checks also improve.
+These are measured word-payload gains, not whole-database compression ratios.
+Fifty-five of 1,230 query rows were inspected, including all 15 whole-compound
+matches. No sampled bare-持つ false match was observed for 持っていく. The pilot
+is not a population size/quality, combined-diversity, recall or latency estimate.
+Reuse its analyses, words and verification rather than repeating them.
+
+All imported occurrences remain **unreviewed**. Assistant inspection is not
+native-speaker certification or a population quality estimate; awkward, nominal,
+specialist and context-dependent prose can remain. The previously published
+[1,972,952-occurrence Wikipedia supplement](https://github.com/ManabiIO/manabi-sentence-db/releases/tag/corpus-wikipedia-expanded-2026-11-04)
+and the three earlier supplements remain unchanged. No raw dump, private captions or
+private serving/native artifacts were uploaded. Source publication does not
+activate the preview. Next: exact budgeted native admission, preserving the
+**8 GB serving target / 10 GB ceiling**, followed by one combined serving refresh.
+Source-release storage has a separate budget. Reuse completed source, baseline,
+analysis-cache and IDs-only novelty receipts; do not redo their verification.
 
 ## Qualified source-CPU and reusable-import improvements
 

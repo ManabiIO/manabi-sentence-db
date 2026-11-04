@@ -1211,10 +1211,16 @@ case/typing defects and three detached honor-roll/formula/route-legend entries.
 The source articles and exact reviewed revision links are preserved in the
 qualification evidence; current article links are below. No text is corrected
 or rewritten. Source attribution, licenses, IDs and original ordinal gaps stay
-intact. The unrefined v9 successor output is withheld from publication pending
-compressed refinement, independent retained-field/export verification and
-inspection of replacement review examples. The previously published v9 cohort
-is unchanged.
+intact. The unrefined v9 successor output is withheld. The qualified v10 release
+selection is now public: **120,616 works / 1,783,000 occurrences / 427,337,970
+compressed bytes**. All 163 narrow removals were inspected. Replacement review
+also withholds the captured **水車小屋** work in full (117 occurrences), whose
+wording defects and dense historical-technical prose warrant a conservative
+work-level decision. Some withheld sentences are valid; this is not a ban on
+science/history. Fifteen ZIPs were reused and the affected bucket re-exported;
+every retained normalized record matched its parent. All 280 omissions and the
+current 264 review examples were inspected. Per-ZIP work selections, catalog and
+refinement lineage survive. The previously published v9 cohort is unchanged.
 
 - [ハタハタ](https://ja.wikipedia.org/wiki/%E3%83%8F%E3%82%BF%E3%83%8F%E3%82%BF) — sample 45; reviewed-wording.
 - [中村勝平](https://ja.wikipedia.org/wiki/%E4%B8%AD%E6%9D%91%E5%8B%9D%E5%B9%B3) — sample 49; dependent-fragment.
@@ -1247,4 +1253,10 @@ small-tsu typo in [publisher row 249782](https://github.com/yahoojapan/VFD-Datas
 and [publisher row 211542](https://github.com/yahoojapan/VFD-Dataset/blob/5cb774f44d8fa64e288cbb9b8e96c7aa5959ad62/vfd.tsv#L211543), a topless-context utterance. No spelling or meaning is rewritten, and related photography/clothing
 language is retained. Refinement also removes segmented siblings, preserving
 independent benign occurrences, rights and context barriers. The unrefined source
-output is withheld until compressed refinement and replacement review complete.
+output is withheld. The reviewed v1 supplement is now public: **277,242 pairs /
+429,846 occurrences / 85,333,252 compressed bytes**. Six occurrences were withheld
+(one typing-error line and five repeats of the adult-context line); four pairs
+became empty. All 94 surviving prior review examples matched exactly, both fresh
+replacements and all six omissions were inspected. Independent retained-field and
+normalized-member checks passed. Source publication is separate from native and
+serving admission; occurrences remain unreviewed.

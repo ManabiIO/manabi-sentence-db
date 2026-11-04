@@ -4,21 +4,28 @@ See the [current corpus progress and resume checkpoint](docs/corpus-progress.md)
 before starting another acquisition or build. It distinguishes reusable completed
 artifacts from pending quality and integration checks.
 
-**Downloads:** start with the [full base corpus](https://github.com/ManabiIO/manabi-sentence-db/releases/tag/corpus-2026-10-24-prose)
-and the [November 3 source additions](https://github.com/ManabiIO/manabi-sentence-db/releases/tag/corpus-additions-2026-11-03).
-That supplement contains seven normalized ZIPs (181 MB compressed), with 505,768
-source sentence occurrences before cross-source deduplication and consumer filtering.
-It includes final checked Kyoto Wikipedia pairs, a larger modern Wikipedia sample,
-ASDC/TALPCo, ALT, JEC, one Global Voices article and license-separated Storybooks.
-Read its `README.md`, `additions.json` and checksums; retain each archive's rights.
+**Downloads:** start with the [full base corpus](https://github.com/ManabiIO/manabi-sentence-db/releases/tag/corpus-2026-10-24-prose),
+then add the published source supplements you need:
 
-The separate [conversation and caption supplement](https://github.com/ManabiIO/manabi-sentence-db/releases/tag/corpus-dialogue-captions-2026-11-03)
-adds three normalized ZIPs (49.8 MB compressed): 77,425 MRMP conversation
-occurrences and 128,636 YJ caption occurrences. Download both caption buckets;
-every retained caption preserves all its original sentence fragments. Sources
-use CC BY-SA 4.0 and CC BY 4.0, with attribution embedded. Counts precede
-cross-source deduplication; imported occurrences remain unreviewed. Neither
-supplement replaces the full base or includes private serving indexes.
+| Supplement | Sentence occurrences | Compressed source size | Includes |
+|---|---:|---:|---|
+| [November 3 additions](https://github.com/ManabiIO/manabi-sentence-db/releases/tag/corpus-additions-2026-11-03) | 505,768 | 181 MB / 7 ZIPs | Final checked Kyoto Wikipedia pairs, modern Wikipedia, ASDC/TALPCo, ALT, JEC, one Global Voices article and license-separated Storybooks |
+| [Conversation and captions](https://github.com/ManabiIO/manabi-sentence-db/releases/tag/corpus-dialogue-captions-2026-11-03) | 206,061 | 49.8 MB / 3 ZIPs | 77,425 MRMP conversation and 128,636 YJ caption occurrences |
+| [November 4 prose, dialogue and requests](https://github.com/ManabiIO/manabi-sentence-db/releases/tag/corpus-prose-dialogue-2026-11-04) | 562,881 | 124.0 MB / 3 ZIPs | Further modern Wikipedia, refined JMRD dialogue and human-localized MASSIVE requests |
+| [Large Wikipedia expansion](https://github.com/ManabiIO/manabi-sentence-db/releases/tag/corpus-wikipedia-expanded-2026-11-04) | 1,972,952 | 472.0 MB / 16 ZIPs | 124,937 articles with contributor, revision/history and processing lineage |
+| [Further Wikipedia prose](https://github.com/ManabiIO/manabi-sentence-db/releases/tag/corpus-wikipedia-further-2026-11-04) | 1,783,000 | 427.3 MB / 16 ZIPs | 120,616 further articles, with narrow fragment/wording omissions and one reviewed whole-work exclusion |
+| [VFD visual-dialogue text](https://github.com/ManabiIO/manabi-sentence-db/releases/tag/corpus-vfd-2026-11-04) | 429,846 | 85.3 MB / 35 ZIPs | Crowdwritten Japanese spoken pairs; images/actions excluded and visual dependence labeled |
+
+Counts are source occurrences **before cross-source deduplication and consumer
+filtering**. They are not globally novel or already searchable additions. Read
+each supplement's `README.md`, `additions.json` and checksums; preserve every
+independent occurrence, license, attribution and omission gap. Download both YJ
+caption buckets to retain complete original sentence fragments. MASSIVE's English
+prompts are not exported as translations. Imported occurrences remain unreviewed;
+assistant source inspection does not certify native-speaker review or population
+quality. Supplements accompany the full base; they do not replace it or contain
+private serving indexes. Source publication does not activate the search corpus;
+see the checkpoint for the separate native/serving admission work.
 
 Optional [TUBELEX Japanese external citations](docs/tubelex-external-citations.md)
 can be built privately beside a downloaded corpus release. This separate opt-in
@@ -44,8 +51,8 @@ The build keeps acquisition separate from processing:
 
 1. **Snapshot** an explicitly selected upstream source. Record its exact bytes,
    hashes, source configuration, license, and retrieval time.
-2. **Build** canonical YAML from that snapshot, entirely offline.
-3. **Compile** validated YAML into SQLite, also offline.
+2. **Build** validated canonical JSONL (or optional YAML) from that snapshot, entirely offline.
+3. **Compile** the validated records into SQLite, also offline.
 4. **Package** bounded YAML ZIP archives and per-source SQLite Zstandard downloads
    with catalogs, attribution, provenance, schemas, and checksums.
 
