@@ -6,7 +6,7 @@ statements below. Generated corpus text and detailed evidence stay outside Git.
 ## Latest: 1,972,952 Wikipedia occurrences published; next disjoint cohort running
 
 Continuation: the next cohort remains active; partial extraction has passed
-**41,500 works / 803,878 occurrences**, without a completion claim. A separate
+**45,500 works / 858,734 occurrences**, without a completion claim. A separate
 bounded native/storage pilot is waiting on the same actual Linux producer lock.
 It selects up to 60 complete articles per topic from the **already published v9
 cohort**, includes the full MASSIVE source, and reuses all three qualified analysis
@@ -26,8 +26,13 @@ units, preserves exact pair boundaries and omitted-turn gaps, and excludes
 images, image paths and non-verbal actions. **25 focused tests pass; 1,397 full
 host tests pass, with one existing native-backend-only test skipped because this
 host environment lacks that optional binary.** Ruff and 26 source configs pass.
-Linux/native-backend fixture qualification and the full source build are next;
-no admitted output count, public VFD archive or serving growth is claimed yet.
+Its frozen Linux/native-backend fixture → full compressed source build →
+whole-work bucket export/member verification → fresh 96-text review preparation
+is dispatched, waiting on the same Linux lock. It reuses the cached snapshot and
+has no network, native linguistic analysis, serving build or activation. Require
+exit 0 and the fresh retained-output review before source publication; raw
+314,895 TSV rows are not admitted/novel sentences. Exact jobs and stage receipts
+are in the private checkpoint. Do not repeat acquisition or dispatch copies.
 
 The [large November 4 Wikipedia supplement](https://github.com/ManabiIO/manabi-sentence-db/releases/tag/corpus-wikipedia-expanded-2026-11-04)
 is **public**: **124,937 articles / 1,972,952 sentence occurrences**, in
