@@ -88,6 +88,19 @@ with those analyses at later integration; do not serve pre-refinement records
 unchanged or repeat the 2,038,328-text baseline verification. Final combined
 serving size remains unmeasured; retain the **8 GB target / 10 GB ceiling**.
 
+## Refinement CPU follow-up
+
+Future refinements avoid a redundant prewrite schema pass: the input iterator
+already validates originals, and the full written output iterator still validates
+every child record, identity, source, rights and count before publication. Three
+new regressions corrupt the actual written tags, license or source and require
+failure without publication or parent mutation. **1,365 tests**, Ruff and all
+**25 source configs** pass. An 80-work / 1,280-sentence synthetic comparison
+measured 0.213–0.214 CPU seconds before versus 0.161–0.162 after, with every
+retained field identical. This is a roughly 25% fixture CPU reduction, not a
+whole-corpus speedup claim. The active v9 worker keeps its previously frozen
+producer; it is not restarted for this optimization.
+
 ## Previous pass: two completed source batches; compressed quality refinement queued
 
 Public main `5669f51` adds Wikipedia admission **v8**; `c0737d6` adds
