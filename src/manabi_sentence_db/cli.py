@@ -87,6 +87,12 @@ def parser() -> argparse.ArgumentParser:
     refine.add_argument("--build", type=Path, required=True)
     refine.add_argument("--output", type=Path, required=True)
     refine.add_argument("--progress", action="store_true")
+    refine_jmrd = commands.add_parser(
+        "refine-jmrd", help="Withhold reviewed JMRD utterances from compressed canonical records"
+    )
+    refine_jmrd.add_argument("--build", type=Path, required=True)
+    refine_jmrd.add_argument("--output", type=Path, required=True)
+    refine_jmrd.add_argument("--progress", action="store_true")
     build = commands.add_parser(
         "build", help="Compile verified snapshots into canonical JSONL/YAML offline"
     )
@@ -370,6 +376,12 @@ def main(argv: list[str] | None = None) -> int:
                 from .refinement import refine_wikipedia
 
                 print(refine_wikipedia(args.build, args.output,
+                    progress=(lambda message: print(message, file=sys.stderr, flush=True))
+                    if args.progress else None))
+            case "refine-jmrd":
+                from .refinement import refine_jmrd
+
+                print(refine_jmrd(args.build, args.output,
                     progress=(lambda message: print(message, file=sys.stderr, flush=True))
                     if args.progress else None))
             case "build":

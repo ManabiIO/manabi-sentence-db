@@ -221,13 +221,28 @@ so neither neighbor links nor original-unit context can restore omitted prose.
 The versioned transformation is `jmrd-authored-dialogue-v2`; occurrences remain
 unreviewed. There are no invented translations or publication dates.
 
+The separate `jmrd-example-quality-v1` gate withholds five exact original
+utterances identified in a 96-text assistant inspection: demonstrated wording/
+spelling errors, a broken nested description, and a run-on combining several
+unpunctuated propositions/questions. Hashes and reasons are explicit in
+`jmrd.REVIEWED_UNIT_EXCLUSIONS`. All segmented siblings of an omitted utterance
+are withheld so original-unit context cannot expose that same error. Ordinary
+colloquial ellipsis and contractions remain eligible; this is not a learned
+grammar correction rule. The sample is not population-weighted or native-speaker
+certification. Apply `mise run refine-jmrd -- --build BUILD --output FRESH_OUTPUT`
+to existing compressed canonical builds without reacquisition, raw extraction,
+or repeated native analysis. Retained text, IDs, rights and ordinal gaps remain
+unchanged. Source publication stays gated on this refinement.
+
 The cached 8,797,366-byte primary ZIP has SHA-256
 `21623ae6c72d1e5f9664b0d1aba9b9b6f357f6670d9f964fd4417db53c7461db`.
 Synthetic tests cover streamed JSON, malformed/duplicate IDs, source evidence,
 copy exclusions with long-title retention controls, gaps and compressed exports.
 An assistant-only six-dialogue prefix probe exercises actual source structure;
-it is not a quality estimate. Full source counts, native admission and exact
-novelty remain to be measured. Raw snapshots are local processing evidence:
+it is not a quality estimate. Full v2 canonical extraction subsequently produced
+5,075 works / 111,388 occurrences / 59,126 distinct texts in an 18,954,886-byte
+normalized ZIP before the five-unit refinement. Native admission, cross-source
+novelty and final compressed serving growth remain separate gates. Raw snapshots are local processing evidence:
 `snapshot all` skips this opt-in source, it is absent from the public raw-snapshot
 workflow, and `snapshot-pack` rejects it. Publish processed normalized content
 only. Reuse these pinned inputs rather than repeating source acquisition/review.

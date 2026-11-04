@@ -14,11 +14,33 @@ from .serialization import DataError, canonical_json, safe_relative
 
 ROLE = "jmrd-zip"
 TRANSFORMATION = "jmrd-authored-dialogue-v2"
+QUALITY_VERSION = "jmrd-example-quality-v1"
+# Exact original utterances from the 96-text November 3 assistant source review.
+# Withhold the whole unit so a retained sibling cannot expose its wording errors
+# through source_unit/context. Never rewrite dialogue or infer a general ban.
+REVIEWED_UNIT_EXCLUSIONS = {
+    "b84e72267cb73b9061bcc6127e2818ee2633212aecb8649ddaf6ba0bb0a10f18":
+        "jmrd-reviewed-wording",  # 03541_19: 映画のオチを別に
+    "565f5c6017615474b1ab2b437893bf3c765730588ad74506cb04d334aa8a7afa":
+        "jmrd-reviewed-wording",  # 00213_12: broken nested title description
+    "2895a329a56a6cea6f2483c639846ae1835962185ecc8a5d771d0a307915951a":
+        "jmrd-reviewed-run-on",  # multiple unpunctuated propositions/questions
+    "5d1d3d11005626918ccca5b3491eeb1c8c6f2c1252128ad463d0e760e7f0be1e":
+        "jmrd-reviewed-wording",  # 興味沸いて
+    "537009a49c68176b3f64e4a93b2907f515984a81664914e43e41abc2ee3867bd":
+        "jmrd-reviewed-wording",  # みないな / 基調 in original unit
+}
 SPLITS = ("train", "valid", "test")
 FACTUAL_TYPES = frozenset({"[知識なし]", "タイトル", "製作年度", "監督名", "キャスト名", "ジャンル"})
 # Paper section 3.1: reviews were newly written by crowdworkers for this dataset.
 # Plots and director/cast descriptions were extracted from Wikipedia instead.
 GROUNDING_TYPES = FACTUAL_TYPES | {"レビュー"}
+
+
+def assess_reviewed_unit(text):
+    """Return an exact assistant-reviewed omission, without changing the text."""
+    normalized = unicodedata.normalize("NFC", text.strip())
+    return REVIEWED_UNIT_EXCLUSIONS.get(hashlib.sha256(normalized.encode("utf-8")).hexdigest())
 
 
 def _comparable(text):
@@ -112,6 +134,8 @@ def _turns(dialogue, stats):
                         raise DataError("JMRD retained knowledge annotation disagrees with source")
         if reason is None and _copies_prose(text, external, facts):
             reason = "jmrd-external-prose-copy"
+        if reason is None:
+            reason = assess_reviewed_unit(text)
         if reason:
             stats["rejected:" + reason] += 1
             result.append(CONTEXT_BREAK)

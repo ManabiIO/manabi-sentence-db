@@ -18,7 +18,7 @@ from manabi_sentence_db.demo import create_demo_snapshot
 from manabi_sentence_db.normalized import export_normalized
 from manabi_sentence_db.normalized_database import build_normalized_database
 from manabi_sentence_db.package import package_build, verify_package
-from manabi_sentence_db.refinement import PARENT_PATH, refine_wikipedia
+from manabi_sentence_db.refinement import PARENT_PATH, refine_jmrd, refine_wikipedia
 from manabi_sentence_db.serialization import (
     DataError,
     digest_json,
@@ -108,6 +108,20 @@ def test_other_sources_are_repacked_without_applying_the_wikipedia_policy(tmp_pa
     output = tmp_path / "refined"
     refine_wikipedia(parent, output)
     assert _records(output) == _records(parent)
+
+
+def test_jmrd_refinement_is_source_scoped_and_available_through_cli(tmp_path, monkeypatch):
+    parent = _parent(tmp_path, monkeypatch)
+    output = tmp_path / "jmrd-refinement-of-wikipedia"
+    assert main(["refine-jmrd", "--build", str(parent), "--output", str(output)]) == 0
+    assert _records(output) == _records(parent)
+    from manabi_sentence_db.jmrd import QUALITY_VERSION
+
+    assert verify_build(output)["options"]["refinement"]["policy"] == QUALITY_VERSION
+    with pytest.raises(DataError, match="canonical"):
+        alias = tmp_path / "alias"
+        alias.symlink_to(parent, target_is_directory=True)
+        refine_jmrd(alias, tmp_path / "bad-output")
 
 
 def test_refining_again_is_one_way_and_does_not_duplicate_policy_tags(tmp_path, monkeypatch):

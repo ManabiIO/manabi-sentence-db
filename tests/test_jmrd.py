@@ -16,6 +16,71 @@ from manabi_sentence_db.snapshot import SnapshotError, snapshot_identity
 from manabi_sentence_db.transport import snapshot_pack
 from manabi_sentence_db.validation import load_source
 
+
+@pytest.mark.parametrize("speaker", ["seeker", "recommender"])
+def test_reviewed_wording_withholds_whole_utterance_before_segmentation(tmp_path, monkeypatch, speaker):
+    from manabi_sentence_db import jmrd
+
+    value = dialogue()
+    bad = "これは合成の除外テストです。次の文も同じ発話にあります。"
+    value["dialog"][1].update(text=bad, speaker=speaker)
+    monkeypatch.setattr(jmrd, "REVIEWED_UNIT_EXCLUSIONS", {
+        hashlib.sha256(bad.encode()).hexdigest(): "jmrd-reviewed-wording",
+    })
+    manifest = fixture(tmp_path, value)
+    stats = Counter()
+    record = canonical_document(next(iter_documents(manifest, tmp_path, stats=stats)),
+                                manifest, stats, set())
+    assert [s["text"] for s in record["sentences"]] == [
+        value["dialog"][0]["text"], value["dialog"][3]["text"]]
+    assert [s["ordinal"] for s in record["sentences"]] == [0, 3]
+    assert stats["rejected:jmrd-reviewed-wording"] == 1
+    assert jmrd.QUALITY_VERSION in record["transformations"]
+
+
+def test_compressed_review_refinement_preserves_siblings_gaps_and_other_identical_sentences(
+        tmp_path, monkeypatch):
+    from manabi_sentence_db import jmrd
+    from manabi_sentence_db.refinement import refine_jmrd
+
+    value = dialogue()
+    bad = "今日は映画を見たいです。これは合成の除外対象です。"
+    value["dialog"][1]["text"] = bad
+    manifest = fixture(tmp_path, value)
+    snapshot = tmp_path / "manifest.json"
+    write_json(snapshot, manifest)
+    parent = tmp_path / "parent"
+    build_corpus([snapshot], parent, record_format="jsonl", shard_compression="zstd")
+    original = list(iter_records(parent, verify_build(parent)))
+    assert len(original[0]["sentences"]) == 4
+    before = {str(p.relative_to(parent)): sha256_file(p) for p in parent.rglob("*") if p.is_file()}
+    snapshot.rename(tmp_path / "retired-manifest.json")
+    (tmp_path / "jmrd.zip").rename(tmp_path / "retired-raw.zip")
+    monkeypatch.setattr(jmrd, "REVIEWED_UNIT_EXCLUSIONS", {
+        hashlib.sha256(bad.encode()).hexdigest(): "jmrd-reviewed-wording",
+    })
+    output = tmp_path / "refined"
+    refine_jmrd(parent, output)
+    records = list(iter_records(output, verify_build(output)))
+    expected = copy.deepcopy(original)
+    expected[0]["sentences"] = [original[0]["sentences"][0], original[0]["sentences"][-1]]
+    assert records == expected
+    assert records[0]["sentences"][0]["text"] == bad.split("。")[0] + "。"
+    assert records[0]["sentences"][-1]["ordinal"] == original[0]["sentences"][-1]["ordinal"]
+    catalog = verify_build(output)
+    assert catalog["statistics"]["refinement:checked"] == 4
+    assert catalog["statistics"]["rejected:jmrd-reviewed-wording"] == 2
+    assert catalog["options"]["refinement"]["policy"] == jmrd.QUALITY_VERSION
+    assert before == {str(p.relative_to(parent)): sha256_file(p) for p in parent.rglob("*") if p.is_file()}
+    archive = export_normalized(output, tmp_path / "refined.zip")
+    with zipfile.ZipFile(archive) as z:
+        occurrences = [json.loads(line) for line in z.read("occurrences.jsonl").splitlines()]
+    assert all(r["previous_id"] is None and r["next_id"] is None for r in occurrences)
+    assert not list(output.rglob("*.sqlite*"))
+    again = tmp_path / "again"
+    refine_jmrd(output, again)
+    assert list(iter_records(again, verify_build(again))) == records
+
 LICENSE = b"Synthetic fixture CC BY-SA 4.0"
 README = b"Synthetic human dialogue fixture"
 

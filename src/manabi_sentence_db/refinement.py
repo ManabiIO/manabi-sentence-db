@@ -1,4 +1,4 @@
-"""Tighten Wikipedia admission using verified compressed canonical records.
+"""Tighten source admission using verified compressed canonical records.
 
 This is a one-way filter, not re-extraction: previously rejected text cannot be
 recovered. Retained text, public IDs, rights and source positions stay intact.
@@ -39,10 +39,10 @@ def verify_refinement(catalog, artifact):
     if (not isinstance(receipt, dict)
             or set(receipt) != {"policy", "parent_build_id", "parent_catalog_sha256"}
             or not isinstance(receipt["policy"], str)
-            or not re.fullmatch(r"wikipedia-example-quality-v[1-9][0-9]*", receipt["policy"])
+            or not re.fullmatch(r"(?:wikipedia|jmrd)-example-quality-v[1-9][0-9]*", receipt["policy"])
             or not isinstance(parent_entry, dict) or parent_entry.get("path") != PARENT_PATH
             or parent_entry.get("sha256") != receipt["parent_catalog_sha256"]):
-        raise DataError("Invalid Wikipedia refinement receipt")
+        raise DataError("Invalid source refinement receipt")
     parent = read_json(artifact(parent_entry))
     try:
         parent_id = "build_" + digest_json({
@@ -80,6 +80,25 @@ def _retire(stage):
 
 def refine_wikipedia(build, output, *, progress=None):
     """Recheck retained Wikipedia sentences offline, with compressed staging."""
+    return _refine(build, output, policy=WIKIPEDIA_QUALITY_VERSION,
+        applies=lambda record: record["source_id"].startswith("wikipedia-")
+        and record["language"].split("-", 1)[0] == "ja",
+        assess=lambda sentence: assess_wikipedia_sentence(sentence["text"]), progress=progress)
+
+
+def refine_jmrd(build, output, *, progress=None):
+    """Withhold reviewed JMRD utterances, including every segmented sibling."""
+    from .jmrd import QUALITY_VERSION, assess_reviewed_unit
+
+    return _refine(build, output, policy=QUALITY_VERSION,
+        applies=lambda record: record["source_id"] == "jmrd-ja" and record["language"] == "ja",
+        assess=lambda sentence: (
+            assess_reviewed_unit(sentence.get("source_unit", sentence)["text"]), []),
+        progress=progress)
+
+
+def _refine(build, output, *, policy, applies, assess, progress):
+    """Shared compressed lineage/retained-field verification for source gates."""
     from . import PROCESSOR_VERSION
     from .build import (
         ShardWriter,
@@ -103,7 +122,7 @@ def refine_wikipedia(build, output, *, progress=None):
     processor, runtime = _processor_fingerprint(), _runtime_versions()
     catalog = deepcopy(original)
     catalog["options"].update(record_format="jsonl", shard_compression="zstd", refinement={
-        "policy": WIKIPEDIA_QUALITY_VERSION, "parent_build_id": original["build_id"],
+        "policy": policy, "parent_build_id": original["build_id"],
         "parent_catalog_sha256": parent_sha,
     })
     sources = {row["source"]["id"]: row for row in catalog["sources"]}
@@ -125,11 +144,10 @@ def refine_wikipedia(build, output, *, progress=None):
                 stats = sources[source_id]["statistics"]
                 input_totals[(source_id, "documents")] += 1
                 input_totals[(source_id, "sentences")] += len(record.get("sentences", []))
-                if (record["kind"] == "document" and source_id.startswith("wikipedia-")
-                        and record["language"].split("-", 1)[0] == "ja"):
+                if record["kind"] == "document" and applies(record):
                     accepted = []
                     for sentence in record["sentences"]:
-                        reason, tags = assess_wikipedia_sentence(sentence["text"])
+                        reason, tags = assess(sentence)
                         stats["refinement:checked"] = stats.get("refinement:checked", 0) + 1
                         if reason:
                             stats["rejected:" + reason] = stats.get("rejected:" + reason, 0) + 1
@@ -143,8 +161,8 @@ def refine_wikipedia(build, output, *, progress=None):
                         continue
                     record = dict(record, sentences=accepted,
                                   transformations=list(record["transformations"]))
-                    if WIKIPEDIA_QUALITY_VERSION not in record["transformations"]:
-                        record["transformations"].append(WIKIPEDIA_QUALITY_VERSION)
+                    if policy not in record["transformations"]:
+                        record["transformations"].append(policy)
                 validate_record(record)
                 # Valid canonical catalogs may interleave sources. Close at
                 # transitions so shard order and document-index order agree.
@@ -171,7 +189,7 @@ def refine_wikipedia(build, output, *, progress=None):
             writer.close()
             collect(source_id)
         if not kept["documents"]:
-            raise DataError("No usable documents remain after Wikipedia refinement")
+            raise DataError("No usable documents remain after source refinement")
         for entry in [*catalog["snapshots"], catalog["licenses"]]:
             name = entry.get("manifest", entry.get("path"))
             target = safe_relative(stage, name)

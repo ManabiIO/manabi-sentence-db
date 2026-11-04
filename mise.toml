@@ -54,6 +54,10 @@ run = "uv run --locked sentence-db index-wikimedia"
 description = "Tighten Wikipedia sentence admission from compressed builds without raw dump scans"
 run = "uv run --locked sentence-db refine-wikipedia"
 
+[tasks.refine-jmrd]
+description = "Withhold exact reviewed utterances from compressed JMRD records offline"
+run = "uv run --locked sentence-db refine-jmrd"
+
 [tasks.build-db]
 description = "Compile canonical YAML to SQLite offline"
 run = "uv run --locked sentence-db build-db"

@@ -76,6 +76,13 @@ licenses, source ranges and ordinals. Omitting an example leaves its original ga
 normalized export does not connect neighbors across that gap. Empty works are
 omitted. Other sources and languages are preserved without this Wikipedia gate.
 
+`mise run refine-jmrd -- --build BUILD --output FRESH_OUTPUT --progress` uses
+the same compressed/lineage machinery for the pinned JMRD reviewed-utterance
+exclusions. It checks the complete original unit when present and withholds
+every sibling segment of that unit. Unrelated sources are repacked unchanged.
+Run these source refinements under the existing Linux corpus producer lock;
+they make no native-analysis calls or serving indexes.
+
 The new build identity binds the current processor/runtime and a refinement
 receipt containing the policy version, exact parent build ID and parent-catalog
 hash. `lineage/parent.catalog.json` travels in canonical/normalized ZIPs, metadata
