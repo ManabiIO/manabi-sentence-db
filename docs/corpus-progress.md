@@ -4,7 +4,41 @@ This is the current corpus-pipeline checkpoint. It supersedes earlier dated
 notes describing these completed stages as running or queued. Generated source
 text and evidence remain outside Git. Alex resumed work on 2026-11-02.
 
-## Latest pass: substantially larger Wikipedia cohorts dispatched
+## Latest pass: JMRD dialogue added; source and native growth coordinated
+
+Public main `422cc0a` adds the pinned CC BY-SA 4.0 JMRD authored-dialogue adapter.
+The full **1,284-test suite**, Ruff, **24 source configurations** and main CI pass.
+It streams the three publisher splits instead of loading the dataset into memory,
+excludes external knowledge/questionnaires and dependent recommender turns,
+screens both roles for long literal copies with factual-title retention controls,
+and preserves original utterance IDs and gaps. Raw snapshots are local evidence;
+only processed content may be published. Occurrences remain unreviewed.
+
+The **8,797,366-byte** pinned source is cached and registered for ordinary offline
+snapshot reuse; a no-network reuse check passed. Synthetic end-to-end compressed
+fixtures and a six-dialogue structural probe pass. Full corpus counts and exact
+native novelty are **not yet measured**; the publisher's 5,075 dialogue count is
+not an admitted sentence count.
+
+The current 27,829-new-page Wikipedia extraction continues unchanged, having
+passed **393,516 occurrences** at the last progress check. Its waiting successor
+was replaced **before any source/metadata processing** so that the next single
+locked worker runs JMRD canonical/export and one compressed native qualification
+of JMRD plus the finished Wikipedia cohort **before** the larger Wikipedia cohort.
+The source-only waiting capsule is retired; do not restart it or launch duplicates.
+
+The native pass reuses exact-text analyses from both the verified 2,038,328-text
+baseline and qualified MRMP/YJ import, measures novelty independently, and builds
+no serving indexes. Counters avoid retaining a growing set of analyzed IDs; the
+worker replaces its process to release the native runtime before the large
+metadata/extraction phase. Full memory/performance results remain unmeasured.
+The larger cohort's **190,000-page quota**, exclusion-before-quota policy, quality
+v7 and compressed whole-work exports are unchanged. One worker / 0.25 CPU /
+1 GiB remains serialized by the Linux producer lock. Resume from exact stage
+receipts in the private checkpoint. Source publication and serving activation
+remain separate; neither has occurred for these incoming cohorts.
+
+## Earlier pass: substantially larger Wikipedia cohorts dispatched
 
 Following Alex's request for dramatic, sensible growth, public main `c7f439a`
 adds a reusable body-free Wikipedia metadata index, exclusion of previous page
