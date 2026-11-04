@@ -129,6 +129,29 @@ def test_self_review_is_not_counted_but_english_loan_names_and_good_enough_gramm
     assert len(list(iter_documents(manifest, tmp_path))) == 1
 
 
+@pytest.mark.parametrize("language,kept", [
+    ("target|english", True), ("english|target", True),
+    ("target & english", True), ("target|other", False),
+    ("target|english|other", False), ("other|target|english", False),
+])
+def test_actual_release_multilanguage_labels_preserve_the_same_review_gate(tmp_path, language, kept):
+    value = row()
+    value["judgments"][0]["language_identification"] = language
+    manifest = fixture(tmp_path, [value])
+    stats = Counter()
+    records = list(iter_documents(manifest, tmp_path, stats=stats))
+    assert bool(records) is kept
+    assert stats["rejected:massive-adverse-independent-review"] == int(not kept)
+
+
+@pytest.mark.parametrize("language", ["target||english", "target|target", "target|unknown", ""])
+def test_unknown_empty_or_repeated_language_components_are_not_guessed(tmp_path, language):
+    value = row()
+    value["judgments"][0]["language_identification"] = language
+    with pytest.raises(DataError, match="language"):
+        list(iter_documents(fixture(tmp_path, [value]), tmp_path))
+
+
 def test_changed_publisher_notice_and_partition_count_are_rejected(tmp_path):
     manifest = fixture(tmp_path)
     path = tmp_path / "publisher-NOTICE.md"

@@ -16,8 +16,7 @@ TRANSFORMATION = "massive-reviewed-japanese-localization-v1"
 MAX_MEMBER_BYTES = 32 * 1024**2
 MAX_TOTAL_BYTES = 1024**3
 MAX_ROW_BYTES = 64 * 1024
-LANGUAGES = {"target", "english", "other", "target & english", "target & other",
-             "english & other", "target & english & other"}
+LANGUAGES = frozenset({"target", "english", "other"})
 
 
 def validate_source(source):
@@ -116,6 +115,19 @@ def _worker(value):
     return str(value)
 
 
+def _review_languages(value):
+    # The publisher's guide displays ampersands; release 1.1 stores pipes.
+    # Both denote a set of language labels. Never guess unknown components or
+    # turn duplicated/empty labels into extra independent evidence.
+    if not isinstance(value, str):
+        raise DataError("Invalid MASSIVE review language")
+    parts = re.split(r"\s*[|&]\s*", value.strip())
+    languages = frozenset(parts)
+    if len(parts) != len(languages) or not languages <= LANGUAGES:
+        raise DataError("Invalid MASSIVE review language")
+    return languages
+
+
 def _review_reason(row):
     author = _worker(row.get("worker_id"))
     reviews = row.get("judgments")
@@ -133,16 +145,15 @@ def _review_reason(row):
                                ("grammar_score", {0, 1, 2, 3, 4}), ("spelling_score", {0, 1, 2})]:
             if type(review.get(field)) is not int or review[field] not in allowed:
                 raise DataError("Invalid MASSIVE review score")
-        if not isinstance(review.get("language_identification"), str) or review["language_identification"] not in LANGUAGES:
-            raise DataError("Invalid MASSIVE review language")
+        languages = _review_languages(review.get("language_identification"))
         if reviewer != author:
-            independent.append(review)
+            independent.append((review, languages))
     if len(independent) < 2:
         return "massive-insufficient-independent-review"
     if any(r["grammar_score"] < 3 or r["spelling_score"] != 2
            or r["intent_score"] == 0 or r["slots_score"] == 0
-           or r["language_identification"] not in {"target", "target & english"}
-           for r in independent):
+           or "target" not in languages or not languages <= {"target", "english"}
+           for r, languages in independent):
         return "massive-adverse-independent-review"
     return None
 

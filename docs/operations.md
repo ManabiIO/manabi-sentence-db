@@ -55,6 +55,14 @@ second heavy scan with an existing corpus refresh or increase its quota.
 
 The repository stores code, schemas, reviewed source configuration, and original test fixtures. Downloaded source archives, generated YAML, SQLite databases, and release packages stay outside Git. `data/`, `build/`, and `dist/` are ignored.
 
+For large corpus verification/export in containers, point `SQLITE_TMPDIR` at an
+existing disk-backed scratch directory. Canonical identity ledgers honor it as
+well as SQLite's own temporary operations; a small `/tmp` tmpfs can otherwise
+fill after millions of IDs despite ample host disk. An invalid configured path
+fails explicitly. Ledgers contain IDs, not sentence text, and close when record
+iteration finishes or is cancelled. Keep `/tmp` small for unrelated runtime use;
+do not recover an export failure by repeating completed acquisition/extraction.
+
 ## Tightening Wikipedia quality without rescanning raw dumps
 
 A completed canonical build can be filtered again with the current Wikipedia

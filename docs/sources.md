@@ -666,6 +666,10 @@ the localization author. Every independent judgment must give grammar ≥3,
 spelling 2, positive intent/slots judgments, and `target` or `target & english`
 language identification. Missing or adverse independent evidence withholds the
 whole utterance; invalid/duplicate identifiers and unknown score values fail.
+The publisher guide displays combined language labels with `&`; the original
+1.1 Japanese file uses `|`. Both are parsed as the same set of documented
+language components, without changing admission thresholds. Other-language
+labels remain adverse; unknown, empty or repeated components fail explicitly.
 These publisher ratings do not establish Manabi review or native-speaker
 certification. Retained occurrences remain `unreviewed`.
 

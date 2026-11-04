@@ -50,6 +50,45 @@ def test_original_build_is_verified_and_yaml_only_is_validated(corpus, tmp_path)
     assert package_build(corpus, tmp_path / "release", include_sqlite=False).is_file()
 
 
+def test_identity_ledger_uses_configured_disk_scratch_and_is_closed_on_early_exit(
+        corpus, tmp_path, monkeypatch):
+    from pathlib import Path
+
+    from manabi_sentence_db import build as builder
+
+    scratch = tmp_path / "disk-scratch"
+    scratch.mkdir()
+    monkeypatch.setenv("SQLITE_TMPDIR", str(scratch))
+    original = builder.tempfile.TemporaryDirectory
+    allocated = []
+
+    def temporary(*args, **kwargs):
+        if kwargs.get("prefix") == "sentence-db-validate-":
+            assert Path(kwargs.get("dir", "missing")) == scratch
+            allocated.append(True)
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(builder.tempfile, "TemporaryDirectory", temporary)
+    records = iter_records(corpus, verify_build(corpus))
+    try:
+        next(records)
+        assert list(scratch.glob("sentence-db-validate-*/identities.sqlite3"))
+    finally:
+        records.close()
+    assert allocated == [True] and not list(scratch.iterdir())
+
+
+@pytest.mark.parametrize("kind", ["missing", "file"])
+def test_invalid_configured_disk_scratch_does_not_fall_back_to_small_tmpfs(
+        corpus, tmp_path, monkeypatch, kind):
+    scratch = tmp_path / kind
+    if kind == "file":
+        scratch.write_text("not a directory")
+    monkeypatch.setenv("SQLITE_TMPDIR", str(scratch))
+    with pytest.raises(DataError, match="SQLITE_TMPDIR"):
+        next(iter_records(corpus, verify_build(corpus)))
+
+
 def test_catalog_cannot_write_outside_package_staging(corpus, tmp_path):
     edit_catalog(corpus, lambda c: c["shards"][0].update(source_id="../escape"))
     with pytest.raises(DataError, match="unknown source"):

@@ -1065,7 +1065,18 @@ def iter_records(build: Path, catalog: dict, source_id: str | None = None):
             if source_id is None or row.get("source_id") == source_id:
                 yield row
 
-    with tempfile.TemporaryDirectory(prefix="sentence-db-validate-") as temporary:
+    # SQLITE_TMPDIR normally controls SQLite's internal scratch, not Python's
+    # explicitly named ledger. Honor it here too: /tmp may be a small tmpfs even
+    # when the caller has provisioned ample disk-backed SQLite scratch.
+    scratch = os.environ.get("SQLITE_TMPDIR")
+    if scratch is not None:
+        try:
+            scratch = Path(scratch).resolve(strict=True)
+            if not scratch.is_dir():
+                raise ValueError("not a directory")
+        except (OSError, ValueError, RuntimeError) as exc:
+            raise DataError("SQLITE_TMPDIR must name an existing scratch directory") from exc
+    with tempfile.TemporaryDirectory(prefix="sentence-db-validate-", dir=scratch) as temporary:
         ledger = sqlite3.connect(Path(temporary) / "identities.sqlite3")
         ledger.execute(
             "CREATE TABLE identities(kind TEXT, id TEXT, PRIMARY KEY(kind,id)) WITHOUT ROWID"
