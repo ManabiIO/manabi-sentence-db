@@ -24,7 +24,6 @@ from .serialization import (
     sha256_file,
     write_json,
 )
-from .validation import validate_record
 from .wikipedia_quality import WIKIPEDIA_QUALITY_VERSION, assess_wikipedia_sentence
 
 PARENT_PATH = "lineage/parent.catalog.json"
@@ -163,7 +162,9 @@ def _refine(build, output, *, policy, applies, assess, progress):
                                   transformations=list(record["transformations"]))
                     if policy not in record["transformations"]:
                         record["transformations"].append(policy)
-                validate_record(record)
+                # Input records were validated by iter_records. Validate every
+                # actual written record again below, before publication; an
+                # extra prewrite schema walk duplicates that expensive work.
                 # Valid canonical catalogs may interleave sources. Close at
                 # transitions so shard order and document-index order agree.
                 if active is not None and active != source_id:

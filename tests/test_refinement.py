@@ -194,6 +194,36 @@ def test_implementation_drift_prevents_publication_and_preserves_failed_compress
     assert list((fake_home / ".Trash").glob(".unpublished-*"))
 
 
+@pytest.mark.parametrize("field", ["tags", "license", "source_id"])
+def test_written_candidate_is_fully_validated_before_refinement_publication(
+        tmp_path, monkeypatch, field):
+    from copy import deepcopy
+
+    parent = _parent(tmp_path, monkeypatch)
+    before = _tree(parent)
+    original = builder.ShardWriter.append
+
+    def corrupted(writer, record):
+        record = deepcopy(record)
+        if field == "tags":
+            record["sentences"][0]["tags"] = [17]
+        elif field == "license":
+            record["license"]["id"] = "CC-BY-NC-4.0"
+        else:
+            record["source_id"] = "another-source"
+        return original(writer, record)
+
+    monkeypatch.setattr(builder.ShardWriter, "append", corrupted)
+    fake_home = tmp_path / "fake-home"
+    fake_home.mkdir()
+    monkeypatch.setattr(Path, "home", lambda: fake_home)
+    output = tmp_path / "not-published"
+    with pytest.raises(DataError):
+        refine_wikipedia(parent, output)
+    assert not output.exists() and _tree(parent) == before
+    assert list((fake_home / ".Trash").glob(".not-published-*"))
+
+
 def test_cli_routes_to_offline_refinement(tmp_path, monkeypatch, capsys):
     parent = _parent(tmp_path, monkeypatch)
     output = tmp_path / "refined"
