@@ -47,9 +47,10 @@ source-release storage is a separate budget.
 
 **Next source cohort is RUNNING**, one worker / **0.25 CPU / 1 GiB**, using the
 actual Linux producer lock. It reuses the body-free metadata index and excludes
-all **170,976 earlier page IDs before quotas**. Its requested quota is 20,000 per
-metadata topic plus 50,000 general (250,000 maximum); quotas are not admitted
-counts. It uses cached raw inputs for genuinely new pages, admission v9, compressed
+all **170,976 earlier page IDs before quotas**. It selected **127,197 genuinely new article IDs** after excluding earlier
+selections, from a requested 20,000/topic + 50,000 general quota (250,000 maximum).
+Selection is not an admitted work/sentence count; cached-input extraction is in
+progress. It uses cached raw inputs for genuinely new pages, admission v9, compressed
 canonical shards and whole-work 8,000-article ZIP buckets. Independent member
 verification and fresh 24/topic sampling share one output scan. Both the remapped
 host fixture and actual Linux fixture passed. No source reacquisition, real metadata
