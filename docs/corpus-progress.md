@@ -4,7 +4,53 @@ This is the current corpus-pipeline checkpoint. It supersedes earlier dated
 notes describing these completed stages as running or queued. Generated source
 text and evidence remain outside Git. Alex resumed work on 2026-11-02.
 
-## Current pass: v7 applied; combined candidate verified, query review pending
+## Latest pass: public additions published; next growth batch prepared
+
+The [November 3 supplemental release](https://github.com/ManabiIO/manabi-sentence-db/releases/tag/corpus-additions-2026-11-03)
+is public. Its seven normalized-v2 ZIPs total **181,031,342 compressed bytes** and
+contain **505,768 sentence occurrences**, before cross-source deduplication and
+consumer quality/content admission. It supplements the October 24 full base;
+that base remains GitHub's latest full-corpus release for existing consumers.
+
+| Archive group | Works | Occurrences | Distinct texts within archive | Translations |
+|---|---:|---:|---:|---:|
+| Kyoto Wikipedia, final checked pairs | 14,094 | 288,201 | 282,624 | 288,201 |
+| Modern Wikipedia sample, quality v7 | 11,489 | 187,313 | 185,937 | 0 |
+| ASDC and TALPCo | 1,582 | 9,994 | 6,409 | 1,372 |
+| ALT parallel news | 1,882 | 14,696 | 14,693 | 14,696 |
+| JEC basic examples | 4,733 | 4,733 | 4,733 | 9,466 |
+| Global Voices reviewed article | 1 | 25 | 25 | 0 |
+| Storybooks CC BY subsets | 29 | 806 | 800 | 0 |
+
+Do not sum distinct-text counts as global novel Japanese texts. Every archive
+embeds work/occurrence/translation rights, snapshot identity and extraction
+metadata. `additions.json` records exact byte/member hashes and build IDs;
+`SHA256SUMS` covers every download. All ten uploaded asset sizes and GitHub SHA-256
+digests matched staging, and an unauthenticated manifest download was verified.
+Completed canonical qualification was reused; no native/serving artifact, private
+caption text, image, audio or mixed-license raw research snapshot was published.
+This source publication does not activate the private search preview.
+
+The next growth pass prioritizes already cached **MRMP conversation data**:
+its completed source review counted 77,425 admitted occurrences / 64,551 distinct
+texts before comparison with the current corpus. Addressed/masked turns remain
+withheld with context gaps. YJ Captions is prepared alongside it, with the existing
+native final-predicate gate required for serving admission. These are not new
+measured serving additions yet.
+
+A subsequent Wikipedia cohort is prepared for **up to 34,000 pages** (3,000 per
+practical/topic bucket plus 4,000 general). It uses cached 2026-10-01 inputs and
+routing v2, excludes IDs from the previous 12,000-page cohort, applies quality v7,
+and preserves rights and ordinal gaps. Novelty and final storage must be measured;
+page quotas are not approved sentence counts. No second full serving database is
+being built. The native-analysis reuse cache and Storybooks import remain reusable.
+
+Docker Desktop received a quit request on November 3 at 12:46; the new processing
+jobs are **prepared, not started**, while reopening clarification is pending.
+See the private resume index for exact launch/source bindings. Do not rerun the
+completed combined verification or duplicate the prepared jobs.
+
+## Earlier pass: v7 applied; combined candidate verified
 
 Admission v7 refinement **completed**. It checked every v6 occurrence, removed
 exactly the two demonstrated condition/reference fragments, and verified all
@@ -39,14 +85,15 @@ these are work counts, not novel text counts. Its caption-policy preflight fix
 preserves the parent's identity for verified non-caption additions and rejects
 mismatched caption imports. All 330 compatibility tests passed before the build.
 
-**Not yet active or published.** Ranked-query review found dictionary-boundary
+**Not yet active in the private preview.** The canonical additions were published
+in the supplemental release above. Ranked-query review found dictionary-boundary
 false positives and competing causative/name interpretations; request-side fixes
-are being qualified. Source quality still varies: specialist prose, directory
+subsequently passed 375 tests and actual-candidate integration checks. Source quality still varies: specialist prose, directory
 fragments and publisher typos are not resolved by integrity verification.
 Assistant-only development checks are not human/native-speaker certification.
-The latest public source download remains `corpus-2026-10-24-prose`; updated
-canonical assets with licenses and refinement lineage remain to be packaged and
-published. Do not distribute private serving artifacts as public source data.
+The October 24 base remains the latest full-corpus download; the November 3
+supplement adds the qualified canonical assets and refinement lineage. Do not
+distribute private serving artifacts as public source data.
 
 Storybooks Japan's canonical v2 supplement is also qualified: **29 works / 806
 occurrences / 800 distinct texts**, with licenses separated into CC BY 3.0 and
@@ -179,8 +226,7 @@ evidence, or an uncovered requirement. A successful extraction or checksum does
 not establish learner quality, human review, retrieval correctness or serving
 size. Preserve those remaining gates.
 
-V7 admission, compatible native reuse and the combined candidate's full
-integrity/size verification are complete. Next work is request-side query
-qualification, ranked quality review, atomic local activation and publication of
-updated canonical source assets. No newly prepared source above has been
-activated. Do not repeat completed corpus verification.
+V7 admission, compatible native reuse, combined full verification, query
+qualification and supplemental canonical publication are complete. Next work is
+local activation and the newly prepared MRMP/YJ/larger-Wikipedia source batch.
+No new preview activation has occurred. Do not repeat completed verification.

@@ -4,6 +4,14 @@ See the [current corpus progress and resume checkpoint](docs/corpus-progress.md)
 before starting another acquisition or build. It distinguishes reusable completed
 artifacts from pending quality and integration checks.
 
+**Downloads:** start with the [full base corpus](https://github.com/ManabiIO/manabi-sentence-db/releases/tag/corpus-2026-10-24-prose)
+and the [November 3 source additions](https://github.com/ManabiIO/manabi-sentence-db/releases/tag/corpus-additions-2026-11-03).
+The supplement contains seven normalized ZIPs (181 MB compressed), with 505,768
+source sentence occurrences before cross-source deduplication and consumer filtering.
+It includes final checked Kyoto Wikipedia pairs, a larger modern Wikipedia sample,
+ASDC/TALPCo, ALT, JEC, one Global Voices article and license-separated Storybooks.
+Read its `README.md`, `additions.json` and checksums; retain each archive's rights.
+
 Optional [TUBELEX Japanese external citations](docs/tubelex-external-citations.md)
 can be built privately beside a downloaded corpus release. This separate opt-in
 step indexes manual captions for literal substring searches and emits only timed
