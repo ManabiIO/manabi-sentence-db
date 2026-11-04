@@ -609,6 +609,19 @@ def create_snapshot(
                     staging, f"talpco-{language}.txt", f"talpco-{language}", pin["url"], agent,
                     expected_sha256=pin["sha256"], expected_size=pin["size"],
                 ))
+        elif adapter == "massive":
+            from .massive import ROLE, validate_source
+
+            if mode != "full" or date or max_files or titles or translations:
+                raise SnapshotError("MASSIVE uses its pinned full archive; sample with build --max-documents")
+            validate_source(source)
+            pin = source["acquisition"]
+            notice = pin["publisher_notice"]
+            files = [_download(staging, "massive-1.1.tar.gz", ROLE, pin["url"], agent,
+                               expected_sha256=pin["sha256"], expected_size=pin["size"]),
+                     _download(staging, "publisher-NOTICE.md", "massive-publisher-notice",
+                               notice["url"], agent, expected_sha256=notice["sha256"],
+                               expected_size=notice["size"])]
         elif adapter in {"realpersonachat", "mrmp", "jmrd", "asdc", "jmultiwoz", "yj-captions", "stair", "jec-basic", "kyoto-wikipedia", "alt-parallel"}:
             if mode != "full" or date or max_files or titles:
                 raise SnapshotError(

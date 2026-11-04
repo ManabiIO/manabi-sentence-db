@@ -644,6 +644,47 @@ available, and keep administrative/technical register labels.
 | [JSICK](https://github.com/verypluming/JSICK) | Defer pending rights-chain verification: publisher README says BY 4.0 but the repository LICENSE is BY-SA 4.0, and the original SICK sentence rights require separate verification. A translation repository license does not resolve its underlying English-source rights. Stress-test permutations/deleted particles are also unsuitable as blanket learner examples. |
 | [OPUS](https://opus.nlpl.eu/) as a whole | Not one licensable source. Review each component and its original sources. Human text mined into an automatic alignment must not be relabeled as machine-translated text. |
 
+## MASSIVE Japanese practical requests
+
+The [publisher repository](https://github.com/alexa/massive/tree/f966f21846043aabef9b0f974fa7970027f43738)
+and its commit-pinned
+[NOTICE](https://github.com/alexa/massive/blob/f966f21846043aabef9b0f974fa7970027f43738/NOTICE.md)
+explicitly license **the dataset under CC BY 4.0**; the repository's Apache 2.0
+software license is separate. The original 1.1 archive is 40,251,390 compressed
+bytes, SHA-256 `4cba5faa11c71437928e17cb1b9b3d8b8e727e7ea363a3a9a8045e19c0491577`.
+Its own LICENSE and SLURP attribution notice must be present, and the separate
+publisher grant is also pinned into each snapshot. Credit both MASSIVE / Amazon
+and the original SLURP authors; no audio is downloaded.
+
+The documented Japanese inventory is **16,521 utterances** (11,514 train,
+2,033 dev, 2,974 test), before our admission rules. It covers practical
+assistant requests in domains such as weather, alarms, music and reminders.
+The publisher's [data guide](https://github.com/alexa/massive/blob/f966f21846043aabef9b0f974fa7970027f43738/README.md)
+documents human localization workers and separate grammar/spelling/intent/slot
+judgments. `massive-ja` requires at least two distinct reviewers other than
+the localization author. Every independent judgment must give grammar ≥3,
+spelling 2, positive intent/slots judgments, and `target` or `target & english`
+language identification. Missing or adverse independent evidence withholds the
+whole utterance; invalid/duplicate identifiers and unknown score values fail.
+These publisher ratings do not establish Manabi review or native-speaker
+certification. Retained occurrences remain `unreviewed`.
+
+Japanese is labeled **human translation/localization from English**. Only raw
+Japanese `utt` is imported. Do not attach the English seed prompt as a translation:
+localization may change names, places, dates or other entities. No worker IDs,
+slot annotations, raw judgments or other languages enter normalized records.
+Each unrelated request is a separate work; consecutive dataset IDs are not
+conversational context. Ordinary shared sentence/content checks still apply.
+The versioned selection is `massive-reviewed-japanese-localization-v1`.
+
+The TAR is scanned once under a bounded memory/disk policy, buffering only the
+selected Japanese member with Zstandard compression. No record is emitted until
+the full bounded archive inventory and its licensing evidence pass, including a
+LICENSE placed after the text. No TAR member is extracted to disk. Canonical
+shards and downstream source archives remain compressed. Full admission counts,
+assistant source review and native novelty require the worker's completion
+receipts; upstream utterance counts are not claimed corpus growth.
+
 ## Quality and content filtering
 
 Licensing, linguistic quality, and content suitability are separate properties.

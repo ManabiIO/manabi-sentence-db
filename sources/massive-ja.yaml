@@ -1,0 +1,37 @@
+schema_version: 1
+id: massive-ja
+title: MASSIVE 1.1 — independently reviewed Japanese localizations
+language: ja
+adapter: massive
+homepage: https://github.com/alexa/massive
+license:
+  id: CC-BY-4.0
+  url: https://creativecommons.org/licenses/by/4.0/
+attribution:
+  text: "MASSIVE: Copyright Amazon.com Inc. or its affiliates; human localization contributors; Jack FitzGerald et al. (2022). Adapted from SLURP (CC BY 4.0), Emanuele Bastianelli, Andrea Vanzo, Pawel Swietojanski, and Verena Rieser (2020). Japanese utterances selected and segmented by Manabi Sentence DB; no audio or other locales."
+  url: https://github.com/alexa/massive
+license_evidence:
+  - https://raw.githubusercontent.com/alexa/massive/f966f21846043aabef9b0f974fa7970027f43738/NOTICE.md
+  - https://raw.githubusercontent.com/alexa/massive/f966f21846043aabef9b0f974fa7970027f43738/README.md
+  - https://amazon-massive-nlu-dataset.s3.amazonaws.com/amazon-massive-dataset-1.1.tar.gz
+  - https://github.com/pswietojanski/slurp/blob/master/LICENSE.txt
+notes:
+  - The publisher's NOTICE explicitly licenses the dataset under CC BY 4.0. The repository's Apache 2.0 software license is separate. The archive retains its own data LICENSE and inherited SLURP attribution notice.
+  - Japanese was human localized from English SLURP requests. Keep this translated origin explicit; do not label it original Japanese or machine generated.
+  - Require at least two distinct reviewers other than the localization worker, all with grammar score at least 3, spelling score 2, positive intent/slots judgments and target-language identification. These are publisher judgments, not Manabi or native-speaker certification. Occurrences remain unreviewed.
+  - Import Japanese utt only. Exclude annotations, worker identifiers, raw judgments and all other locales. English seed prompts may contain different localized entities, so do not expose them as translations.
+  - Each independent request is its own work. Never fabricate conversational neighbors from consecutive dataset IDs.
+acquisition:
+  version: '1.1'
+  url: https://amazon-massive-nlu-dataset.s3.amazonaws.com/amazon-massive-dataset-1.1.tar.gz
+  size: 40251390
+  sha256: 4cba5faa11c71437928e17cb1b9b3d8b8e727e7ea363a3a9a8045e19c0491577
+  publisher_notice:
+    url: https://raw.githubusercontent.com/alexa/massive/f966f21846043aabef9b0f974fa7970027f43738/NOTICE.md
+    size: 500
+    sha256: db1466b051afd1d9ad34b7bd6346a1857f568a0c5f6534168813b4ad3c26013e
+  archive_notice_sha256: b90534ccd20c6f0e1e5239567af0d150496339542b75a15bfbc3e1e737593ddb
+  partition_counts:
+    train: 11514
+    dev: 2033
+    test: 2974
