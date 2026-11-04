@@ -6,11 +6,19 @@ artifacts from pending quality and integration checks.
 
 **Downloads:** start with the [full base corpus](https://github.com/ManabiIO/manabi-sentence-db/releases/tag/corpus-2026-10-24-prose)
 and the [November 3 source additions](https://github.com/ManabiIO/manabi-sentence-db/releases/tag/corpus-additions-2026-11-03).
-The supplement contains seven normalized ZIPs (181 MB compressed), with 505,768
+That supplement contains seven normalized ZIPs (181 MB compressed), with 505,768
 source sentence occurrences before cross-source deduplication and consumer filtering.
 It includes final checked Kyoto Wikipedia pairs, a larger modern Wikipedia sample,
 ASDC/TALPCo, ALT, JEC, one Global Voices article and license-separated Storybooks.
 Read its `README.md`, `additions.json` and checksums; retain each archive's rights.
+
+The separate [conversation and caption supplement](https://github.com/ManabiIO/manabi-sentence-db/releases/tag/corpus-dialogue-captions-2026-11-03)
+adds three normalized ZIPs (49.8 MB compressed): 77,425 MRMP conversation
+occurrences and 128,636 YJ caption occurrences. Download both caption buckets;
+every retained caption preserves all its original sentence fragments. Sources
+use CC BY-SA 4.0 and CC BY 4.0, with attribution embedded. Counts precede
+cross-source deduplication; imported occurrences remain unreviewed. Neither
+supplement replaces the full base or includes private serving indexes.
 
 Optional [TUBELEX Japanese external citations](docs/tubelex-external-citations.md)
 can be built privately beside a downloaded corpus release. This separate opt-in

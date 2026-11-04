@@ -346,11 +346,13 @@ surrounding dialogue; human collection is not a project quality review.
 
 The full pinned snapshot and an assistant-only sample show ordinary contemporary
 chat alongside short, context-dependent fragments. Human collection is not native
-quality certification; occurrence review state remains unreviewed. Compressed
-normalization, novelty against the serving corpus, and serving-size qualification
-remain required before a corpus addition. No serving import is implied by
-enabling its source manifest. Processor source fingerprints identify the changed
-extraction; existing builds require a new output to apply it.
+quality certification; occurrence review state remains unreviewed. The full
+compressed source build now contains 960 works / 77,425 occurrences / 64,551
+distinct texts. Native admission measured 61,319 eligible texts absent from the
+verified combined candidate. The [conversation/caption supplement](https://github.com/ManabiIO/manabi-sentence-db/releases/tag/corpus-dialogue-captions-2026-11-03)
+publishes the normalized source ZIP with attribution and preserved gaps.
+Final combined serving-size qualification and activation remain separate;
+enabling a source manifest does not itself change the search corpus.
 
 The enabled [Accommodation Search Dialog Corpus (ASDC) main
 configuration](../sources/asdc-main-ja.yaml) contains Japanese customer/operator
@@ -897,10 +899,16 @@ No images, image URLs, image-license fields, or inferred translations enter the
 corpus. Each complete caption is its own work with caption/image identity,
 source-row hash, publisher revision and attribution; captions sharing an image
 are independent examples. Rejected incomplete captions have separate acquisition
-counters. Synthetic tests cover ingestion and compressed normalized export;
-full source admission, overlap, serving predicate checks, representative review
-and size measurements remain required before activation. The publisher count
-is not a measured corpus increase.
+counters. The completed November 3 whole-caption qualification retained 128,632
+works / 128,636 occurrences after comparing every original occurrence ID against
+native predicate admission and requiring every fragment of a caption to survive.
+Its two compressed normalized buckets are in the
+[conversation/caption supplement](https://github.com/ManabiIO/manabi-sentence-db/releases/tag/corpus-dialogue-captions-2026-11-03).
+There are 122,717 eligible distinct caption texts absent from the verified combined
+candidate, before final serving integration. Both buckets are required for this
+selected cohort. Predicate checks do not establish context independence or
+naturalness; representative quality review and final combined storage/serving
+qualification remain separate from this source publication.
 
 A November 3 assistant development inspection of a 64-example image-grouped
 prefix withholds exact caption ID 22 for awkward source wording and ID 62 for

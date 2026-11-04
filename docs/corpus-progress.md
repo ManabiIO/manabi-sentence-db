@@ -4,7 +4,48 @@ This is the current corpus-pipeline checkpoint. It supersedes earlier dated
 notes describing these completed stages as running or queued. Generated source
 text and evidence remain outside Git. Alex resumed work on 2026-11-02.
 
-## Latest pass: public additions published; next growth batch prepared
+## Latest pass: conversation/caption growth published; Wikipedia running
+
+The separate [conversation and caption supplement](https://github.com/ManabiIO/manabi-sentence-db/releases/tag/corpus-dialogue-captions-2026-11-03)
+is public. Three normalized-v2 ZIPs total **49,847,146 compressed bytes** and
+contain **206,061 source sentence occurrences**:
+
+| Archive | Works | Occurrences | Distinct texts within archive |
+|---|---:|---:|---:|
+| MRMP conversation | 960 | 77,425 | 64,551 |
+| YJ complete captions, bucket 0 | 80,000 | 80,004 | 77,084 |
+| YJ complete captions, bucket 1 | 48,632 | 48,632 | 47,299 |
+
+Do not sum distinct-text counts across buckets or sources as novel sentences.
+MRMP uses CC BY-SA 4.0; YJ uses CC BY 4.0. No translations, images, image URLs,
+audio, participant profiles or evaluations are included. All seven uploaded asset
+sizes and SHA-256 digests matched; the manifest was also downloaded without
+authentication. The full base and earlier supplement remain unchanged.
+
+Whole-caption selection compared **every original occurrence ID** with native
+admission, requiring all fragments of each retained caption to pass. It retained
+128,632 complete works / 128,636 occurrences, with two exact assistant-reviewed
+wording/typo cases withheld whole. Original source text is never repaired.
+`qualification.json` records the selection policy and counts; the two buckets
+keep each normalized manifest below 4 MiB. Imported occurrences remain unreviewed;
+predicate checks and assistant inspection are not native-speaker certification.
+
+The final compressed offline consumer import is qualified: **184,036 novel
+eligible texts** relative to the already verified 2,038,328-text candidate.
+All **187,268** input native analyses were reused; no new native calls or serving
+indexes were required for this final pass. Its **553,922,560 bytes** are an
+intermediate import, not the increase in final serving size. The previous full
+candidate verification remains valid and must not be repeated. Public source
+publication does not activate the private search preview.
+
+The next Wikipedia cohort is **running**, using cached 2026-10-01 inputs,
+routing v2 and quality v7, with up to 34,000 selected pages before excluding the
+previous cohort. Page quotas are not sentence counts or quality approval.
+Native/quality qualification and final combined serving-size measurement follow.
+One worker / 0.25 CPU holds the Linux producer lock; no new snapshot is downloaded.
+The private resume index binds the exact container, frozen recipe and receipts.
+
+## Earlier pass: Wikipedia/pairs and seven source additions published
 
 The [November 3 supplemental release](https://github.com/ManabiIO/manabi-sentence-db/releases/tag/corpus-additions-2026-11-03)
 is public. Its seven normalized-v2 ZIPs total **181,031,342 compressed bytes** and
@@ -31,24 +72,11 @@ Completed canonical qualification was reused; no native/serving artifact, privat
 caption text, image, audio or mixed-license raw research snapshot was published.
 This source publication does not activate the private search preview.
 
-The next growth pass prioritizes already cached **MRMP conversation data**:
-its completed source review counted 77,425 admitted occurrences / 64,551 distinct
-texts before comparison with the current corpus. Addressed/masked turns remain
-withheld with context gaps. YJ Captions is prepared alongside it, with the existing
-native final-predicate gate required for serving admission. These are not new
-measured serving additions yet.
-
-A subsequent Wikipedia cohort is prepared for **up to 34,000 pages** (3,000 per
-practical/topic bucket plus 4,000 general). It uses cached 2026-10-01 inputs and
-routing v2, excludes IDs from the previous 12,000-page cohort, applies quality v7,
-and preserves rights and ordinal gaps. Novelty and final storage must be measured;
-page quotas are not approved sentence counts. No second full serving database is
-being built. The native-analysis reuse cache and Storybooks import remain reusable.
-
-Docker Desktop received a quit request on November 3 at 12:46; the new processing
-jobs are **prepared, not started**, while reopening clarification is pending.
-See the private resume index for exact launch/source bindings. Do not rerun the
-completed combined verification or duplicate the prepared jobs.
+Docker was subsequently reopened with Alex's explicit “Go”. The completed
+conversation/caption batch and running Wikipedia cohort above supersede earlier
+prepared-job statuses. No second full serving database is being built. Reuse the
+qualified imports and Storybooks native analyses in the next substantial serving
+batch; do not repeat completed combined verification or duplicate running jobs.
 
 ## Earlier pass: v7 applied; combined candidate verified
 
@@ -227,6 +255,6 @@ not establish learner quality, human review, retrieval correctness or serving
 size. Preserve those remaining gates.
 
 V7 admission, compatible native reuse, combined full verification, query
-qualification and supplemental canonical publication are complete. Next work is
-local activation and the newly prepared MRMP/YJ/larger-Wikipedia source batch.
+qualification and both supplemental source publications are complete. Next work
+is larger-Wikipedia qualification and a size-budgeted combined serving refresh.
 No new preview activation has occurred. Do not repeat completed verification.
