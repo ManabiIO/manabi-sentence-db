@@ -111,7 +111,9 @@ def test_oversized_pages_and_bad_ids_never_enter_topic_routing(monkeypatch):
     assert not rows and counts["page-text-limit"] == counts["invalid-identity"] == 1
 
 
-@pytest.mark.parametrize("topic,general", [(-1, 2), (True, 2), (1, 1.5), (0, 0), (5000, 1)])
+@pytest.mark.parametrize("topic,general", [
+    (-1, 2), (True, 2), (1, 1.5), (0, 0), (selection.MAX_SELECTED // len(selection.TOPICS), 1),
+])
 def test_bad_quotas_fail_before_input_verification(tmp_path, monkeypatch, topic, general):
     def forbidden(*args):
         pytest.fail("Invalid quota read a snapshot")
@@ -252,3 +254,19 @@ def test_identity_database_has_bounded_cache_and_closes_on_interruption(monkeypa
         selection.sample_pages(pages(), snapshot_id="fixture", per_topic=0, general=1)
     with pytest.raises(sqlite3.ProgrammingError, match="closed"):
         connections[0].execute("SELECT 1")
+
+
+def test_previously_selected_pages_do_not_consume_new_topic_quota():
+    pages = [page(i, "健康") for i in range(1, 21)]
+    original, _ = selection.sample_pages(pages, snapshot_id="fixture", per_topic=3, general=0)
+    excluded = {row["native_id"] for row in original}
+    for ordered in (pages, pages[::-1]):
+        fresh, counts = selection.sample_pages(ordered, snapshot_id="fixture", per_topic=3,
+                                                general=0, exclude_ids=excluded)
+        assert len(fresh) == 3
+        assert not excluded & {row["native_id"] for row in fresh}
+        assert counts["previously-selected"] == 3
+    conflict = pages[0] | {"text": "変わった文章です。"}
+    with pytest.raises(DataError, match="Conflicting"):
+        selection.sample_pages([pages[0], conflict], snapshot_id="fixture", per_topic=1,
+                               general=0, exclude_ids={"1"})

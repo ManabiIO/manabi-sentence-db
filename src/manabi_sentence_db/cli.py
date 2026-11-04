@@ -66,12 +66,21 @@ def parser() -> argparse.ArgumentParser:
     select = commands.add_parser(
         "select-wikimedia", help="Sample balanced Japanese article metadata from cached snapshots"
     )
-    select.add_argument("--snapshot", type=Path, required=True)
+    select_input = select.add_mutually_exclusive_group(required=True)
+    select_input.add_argument("--snapshot", type=Path)
+    select_input.add_argument("--metadata-cache", type=Path)
+    select.add_argument("--exclude-selection", type=Path, action="append", default=[])
     select.add_argument("--output", type=Path, required=True)
     select.add_argument("--per-topic", type=int, default=1000)
     select.add_argument("--general", type=int, default=2000)
     select.add_argument("--seed", default="")
     select.add_argument("--progress", action="store_true")
+    metadata = commands.add_parser(
+        "index-wikimedia", help="Index body-free Wikimedia metadata once for disjoint growth cohorts"
+    )
+    metadata.add_argument("--snapshot", type=Path, required=True)
+    metadata.add_argument("--output", type=Path, required=True)
+    metadata.add_argument("--progress", action="store_true")
     refine = commands.add_parser(
         "refine-wikipedia", help="Tighten Wikipedia admission from a canonical build without raw dumps"
     )
@@ -116,6 +125,13 @@ def parser() -> argparse.ArgumentParser:
     normalized_export.add_argument("--source")
     normalized_export.add_argument("--work-selection", type=Path,
                                    help="JSON work allowlist bound to the exact build ID")
+    bucket_export = commands.add_parser(
+        "export-normalized-buckets", help="Export complete works in compressed buckets in one scan"
+    )
+    bucket_export.add_argument("--build", type=Path, required=True)
+    bucket_export.add_argument("--output", type=Path, required=True)
+    bucket_export.add_argument("--source")
+    bucket_export.add_argument("--works-per-archive", type=int, default=8000)
     package = commands.add_parser(
         "package", help="Package YAML ZIPs and per-source SQLite.zst files offline"
     )
@@ -332,12 +348,24 @@ def main(argv: list[str] | None = None) -> int:
             case "select-wikimedia":
                 from .wikimedia_selection import select_wikimedia_documents
 
-                print(select_wikimedia_documents(
-                    args.snapshot, args.output, per_topic=args.per_topic, general=args.general,
-                    seed=args.seed,
+                options = dict(per_topic=args.per_topic, general=args.general, seed=args.seed,
                     progress=(lambda message: print(message, file=sys.stderr, flush=True))
-                    if args.progress else None,
-                ))
+                    if args.progress else None)
+                if args.metadata_cache:
+                    from .wikimedia_inventory import select_wikimedia_metadata
+
+                    print(select_wikimedia_metadata(args.metadata_cache, args.output,
+                        exclude_selections=args.exclude_selection, **options))
+                else:
+                    if args.exclude_selection:
+                        raise DataError("--exclude-selection requires --metadata-cache")
+                    print(select_wikimedia_documents(args.snapshot, args.output, **options))
+            case "index-wikimedia":
+                from .wikimedia_inventory import index_wikimedia_metadata
+
+                print(index_wikimedia_metadata(args.snapshot, args.output,
+                    progress=(lambda message: print(message, file=sys.stderr, flush=True))
+                    if args.progress else None))
             case "refine-wikipedia":
                 from .refinement import refine_wikipedia
 
@@ -378,6 +406,11 @@ def main(argv: list[str] | None = None) -> int:
                     selection = read_json(args.work_selection)
                 print(export_normalized(args.build, args.output, source_id=args.source,
                                         work_selection=selection))
+            case "export-normalized-buckets":
+                from .normalized import export_normalized_buckets
+
+                print(export_normalized_buckets(args.build, args.output, source_id=args.source,
+                                                works_per_archive=args.works_per_archive))
             case "audit-parallel-numbers":
                 from .parallel_review import audit_parallel_numbers
 

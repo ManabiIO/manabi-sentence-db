@@ -157,13 +157,50 @@ mise run build -- \
 
 Selection verifies and streams existing inputs without downloading them. Ten topic
 quotas plus the general quota cap this example at 12,000 articles; the combined
-ceiling is 50,000. `selection-report.json` records article metadata, routing counts,
+ceiling is 250,000. `selection-report.json` records article metadata, routing counts,
 the producing implementation hash and selection checksum. Routing allocates
 variety; normal prose, rights and quality gates still determine admitted sentences.
 Conflicting page identities fail even after eviction from the bounded sample.
 The identity inventory stores hashes in a temporary SQLite database with a 1 MiB
 page-cache target; temporary disk use grows with unique page IDs, without storing
 article bodies. SQLite releases the inventory when selection ends or fails.
+
+For repeated or larger cohorts, index the snapshot's **metadata once**:
+
+```sh
+mise run index-wikimedia -- \
+  --snapshot data/snapshots/wikipedia-2026-10-01/manifest.json \
+  --output build/wikipedia-metadata --progress
+
+mise run select-wikimedia -- \
+  --metadata-cache build/wikipedia-metadata --output build/wikipedia-next \
+  --per-topic 15000 --general 40000 --seed practical-growth \
+  --exclude-selection build/wikipedia-selection/selection.json --progress
+
+mise run build -- \
+  --snapshot data/snapshots/wikipedia-2026-10-01/manifest.json \
+  --document-selection build/wikipedia-next/selection.json \
+  --format jsonl --shard-compression zstd --output build/wikipedia-next-corpus
+
+mise run export-normalized-buckets -- \
+  --build build/wikipedia-next-corpus --output dist/wikipedia-buckets \
+  --works-per-archive 8000
+```
+
+The persistent SQLite metadata index contains page titles, revisions, compressed
+category metadata and full-page fingerprints, **no article bodies or sentence
+text**. Selections verify that index's checksum without reopening the raw XML.
+Repeated `--exclude-selection` arguments must match this exact source/snapshot;
+their IDs are removed **before quotas**, so old pages cannot consume new slots.
+Every later build still verifies the raw snapshot and applies the ordinary
+rights, segmentation and quality gates. Metadata topics are not quality labels.
+
+Bucket export reads canonical records once, keeps complete works together and
+stages sentence tables compressed. Each bucket is an ordinary normalized-v2 ZIP
+with an exact work selection; `normalized-buckets.json` is published last, only
+after all archives finish. Distinct-text counts are per bucket, so consumers
+deduplicate text identities while preserving every source occurrence. Source
+archives can grow independently of a downstream search server's storage budget.
 
 For large builds, add `--shard-compression zstd` to write YAML or JSONL shards
 directly as compressed `.yaml.zst` or `.jsonl.zst` files. The catalog records their

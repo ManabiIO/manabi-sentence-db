@@ -7,16 +7,26 @@ No probabilistic normalization is allowed to collapse distinct original spelling
 from __future__ import annotations
 
 import hashlib
+import json
 import os
 import sqlite3
 import tempfile
 import zipfile
 from contextlib import ExitStack
+from itertools import groupby
 from pathlib import Path
 
 import zstandard
 
-from .serialization import DataError, canonical_json, digest_json, sha256_file
+from .serialization import (
+    DataError,
+    atomic_replace_file,
+    canonical_json,
+    digest_json,
+    require_new_directory,
+    sha256_file,
+    write_json,
+)
 
 
 def sentence_identity(language: str, text: str) -> str:
@@ -43,8 +53,62 @@ def export_normalized(build: Path, output: Path, *, source_id=None, catalog=None
                 or len(set(identities)) != len(identities)):
             raise DataError("Work selection requires unique, nonempty work-ID strings")
         selected = set(identities)
-        unmatched = set(identities)
         work_selection = {**work_selection, "work_ids": sorted(identities)}
+    return _export_records(build, output, iter_records(build, catalog, source_id), catalog,
+                           source_id, selected=selected, work_selection=work_selection)
+
+
+def export_normalized_buckets(build: Path, output: Path, *, works_per_archive=8000,
+                              source_id=None, catalog=None) -> Path:
+    """Export whole-work buckets in one canonical scan, with completion last.
+
+    Each ZIP is ordinary normalized v2. Text deduplication is per bucket;
+    consumers deduplicate identities while retaining independent occurrences.
+    """
+    from .build import iter_records, verify_build
+
+    if type(works_per_archive) is not int or not 1 <= works_per_archive <= 80_000:
+        raise DataError("Normalized bucket work limit must be 1..80000")
+    output = output.absolute()
+    if output.is_symlink() or output.parent.resolve() != output.parent:
+        raise DataError("Use a bucket output directory outside symlinks")
+    if output.exists():
+        raise DataError("Use a fresh bucket output directory")
+    catalog = catalog or verify_build(build)
+    require_new_directory(output)
+    output.mkdir(mode=0o700)
+    entries = []
+    records = iter_records(build, catalog, source_id)
+    try:
+        for index, group in groupby(enumerate(records), lambda row: row[0] // works_per_archive):
+            path = output / f"corpus-{index:04d}.normalized.zip"
+            _export_records(build, path, (record for _, record in group), catalog,
+                            source_id, bucket=True)
+            with zipfile.ZipFile(path) as archive:
+                manifest = json.loads(archive.read("manifest.json"))
+                if archive.getinfo("manifest.json").file_size >= 4 * 1024**2:
+                    raise DataError("Normalized bucket manifest exceeds consumer record bound")
+            entries.append({"name": path.name, "bytes": path.stat().st_size,
+                            "sha256": sha256_file(path), "counts": manifest["counts"],
+                            "work_selection_sha256": manifest["work_selection_sha256"]})
+    finally:
+        records.close()
+    if not entries:
+        raise DataError("No source documents to export in buckets")
+    result = output / "normalized-buckets.json"
+    staged = output / ".normalized-buckets.json.part"
+    write_json(staged, {"schema_version": 1, "kind": "normalized-corpus-buckets",
+        "complete": True, "build_id": catalog["build_id"], "source_id": source_id,
+        "works_per_archive": works_per_archive, "archives": entries,
+        "note": "Distinct sentence counts are per bucket. Do not sum them as global unique texts."})
+    atomic_replace_file(staged, result)
+    return result
+
+
+def _export_records(build, output, records, catalog, source_id, *, selected=None,
+                    work_selection=None, bucket=False):
+    unmatched = set(selected) if selected is not None else set()
+    bucket_ids = []
     if output.exists() or output.is_symlink():
         raise DataError(f"Output already exists: {output}")
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -72,7 +136,11 @@ def export_normalized(build: Path, output: Path, *, source_id=None, catalog=None
                 counts[name] += 1
 
             try:
-                for record in iter_records(build, catalog, source_id):
+                for record in records:
+                    if bucket:
+                        if record["kind"] != "document":
+                            raise DataError("Whole-work buckets require documents; export references separately")
+                        bucket_ids.append(record["id"])
                     if selected is not None:
                         if record["kind"] != "document" or record["id"] not in selected:
                             continue
@@ -137,6 +205,10 @@ def export_normalized(build: Path, output: Path, *, source_id=None, catalog=None
             if selected is not None and unmatched:
                 raise DataError("Selected works absent from build/source: "
                                 + ", ".join(sorted(unmatched)[:5]))
+        if bucket:
+            selected = set(bucket_ids)
+            work_selection = {"schema_version": 1, "build_id": catalog["build_id"],
+                              "work_ids": sorted(bucket_ids)}
         manifest = {
             "schema_version": 2,
             "kind": "normalized-corpus",

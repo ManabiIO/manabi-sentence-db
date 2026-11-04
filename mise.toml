@@ -46,6 +46,10 @@ run = "uv run --locked sentence-db build"
 description = "Offline balanced article metadata selection from cached Japanese Wikimedia"
 run = "uv run --locked sentence-db select-wikimedia"
 
+[tasks.index-wikimedia]
+description = "Index body-free Wikimedia metadata once for larger, disjoint source cohorts"
+run = "uv run --locked sentence-db index-wikimedia"
+
 [tasks.refine-wikipedia]
 description = "Tighten Wikipedia sentence admission from compressed builds without raw dump scans"
 run = "uv run --locked sentence-db refine-wikipedia"
@@ -69,6 +73,10 @@ run = "uv run --locked sentence-db build-normalized-db"
 [tasks.export-normalized]
 description = "Export normalized compressed ZIP, optionally selecting reviewed whole works"
 run = "uv run --locked sentence-db export-normalized"
+
+[tasks.export-normalized-buckets]
+description = "Export whole-work normalized ZIP buckets in one canonical scan"
+run = "uv run --locked sentence-db export-normalized-buckets"
 
 [tasks.vocabulary-coverage]
 description = "Compare distinct and marginal vocabulary using an explicit analyzer export"

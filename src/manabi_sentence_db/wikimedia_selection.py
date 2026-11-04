@@ -30,7 +30,7 @@ from .wikimedia import (
 )
 
 POLICY = "wikimedia-balanced-metadata-v2"
-MAX_SELECTED = 50_000
+MAX_SELECTED = 250_000
 TOPICS = {
     "food": r"料理|食文化|食品|食材|調理|食事|飲料|菓子",
     "home": r"家事|日常生活|日用品|住宅|家具|衣服|被服|家電|園芸",
@@ -97,7 +97,8 @@ def _implementation_sha256():
     return hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
 
 
-def sample_pages(pages, *, snapshot_id, per_topic, general, seed="", progress=None):
+def sample_pages(pages, *, snapshot_id, per_topic, general, seed="", progress=None,
+                 exclude_ids=frozenset(), metadata=False):
     """Retain only the requested top-k metadata, independent of scan order."""
     limits = _limits(per_topic, general)
     if not isinstance(seed, str) or len(seed) > 200:
@@ -111,10 +112,28 @@ def sample_pages(pages, *, snapshot_id, per_topic, general, seed="", progress=No
         seen.execute("PRAGMA synchronous = OFF")
         seen.execute("CREATE TABLE seen (identity TEXT PRIMARY KEY, fingerprint BLOB) WITHOUT ROWID")
         return _sample_pages(pages, snapshot_id=snapshot_id, limits=limits,
-                             seed=seed, progress=progress, seen=seen)
+                             seed=seed, progress=progress, seen=seen,
+                             exclude_ids=exclude_ids, metadata=metadata)
 
 
-def _sample_pages(pages, *, snapshot_id, limits, seed, progress, seen):
+def page_metadata(page, counts):
+    """Copy only routing metadata and a full original-page fingerprint."""
+    identity = page["native_id"]
+    if not re.fullmatch(r"[1-9][0-9]*", identity) or not page["revision_id"] or not page["title"]:
+        counts["invalid-identity"] += 1
+        return None
+    if len(page["text"]) > MAX_WIKITEXT_CHARACTERS:
+        counts["page-text-limit"] += 1
+        return None
+    return {
+        "native_id": identity, "revision_id": page["revision_id"], "title": page["title"],
+        "source_characters": len(page["text"]),
+        "categories": sorted({match.strip() for match in _CATEGORIES.findall(page["text"])}),
+        "fingerprint": digest_json([page["title"], page["revision_id"], page["text"]]),
+    }
+
+
+def _sample_pages(pages, *, snapshot_id, limits, seed, progress, seen, exclude_ids, metadata):
     heaps = {topic: [] for topic in limits}
     retained = {}
     counts = Counter()
@@ -122,16 +141,11 @@ def _sample_pages(pages, *, snapshot_id, limits, seed, progress, seen):
         counts["pages_seen"] += 1
         if progress and counts["pages_seen"] % 50_000 == 0:
             progress(f"Metadata scanned {counts['pages_seen']} pages")
+        page = page if metadata else page_metadata(page, counts)
+        if page is None:
+            continue
         identity = page["native_id"]
-        if not re.fullmatch(r"[1-9][0-9]*", identity) or not page["revision_id"] or not page["title"]:
-            counts["invalid-identity"] += 1
-            continue
-        if len(page["text"]) > MAX_WIKITEXT_CHARACTERS:
-            counts["page-text-limit"] += 1
-            continue
-        fingerprint = bytes.fromhex(digest_json(
-            [page["title"], page["revision_id"], page["text"]]
-        ))
+        fingerprint = bytes.fromhex(page["fingerprint"])
         previous = seen.execute("SELECT fingerprint FROM seen WHERE identity = ?",
                                 (identity,)).fetchone()
         if previous is not None:
@@ -139,20 +153,22 @@ def _sample_pages(pages, *, snapshot_id, limits, seed, progress, seen):
                 raise DataError("Conflicting retained Wikimedia page identity")
         else:
             seen.execute("INSERT INTO seen VALUES (?, ?)", (identity, fingerprint))
-        priority = digest_json([POLICY, snapshot_id, seed, identity])
-        categories = sorted({match.strip() for match in _CATEGORIES.findall(page["text"])})
-        topic, evidence = classify(page["title"], categories, priority)
-        counts["routed:" + topic] += 1
         if previous is not None:
             if identity in retained:
                 counts["duplicate-retained-page"] += 1
             continue
+        if identity in exclude_ids:
+            counts["previously-selected"] += 1
+            continue
+        priority = digest_json([POLICY, snapshot_id, seed, identity])
+        topic, evidence = classify(page["title"], page["categories"], priority)
+        counts["routed:" + topic] += 1
         if topic not in limits or limits[topic] == 0:
             continue
         row = {
             "native_id": identity, "revision_id": page["revision_id"],
             "title": page["title"][:500], "topic": topic,
-            "category_evidence": evidence, "source_characters": len(page["text"]),
+            "category_evidence": evidence, "source_characters": page["source_characters"],
         }
         heap = heaps[topic]
         item = (-int(priority, 16), identity, row)
