@@ -1,4 +1,4 @@
-# Corpus expansion checkpoint — 2026-11-03
+# Corpus expansion checkpoint — 2026-11-04
 
 This is the current corpus-pipeline checkpoint. It supersedes earlier dated
 notes describing these completed stages as running or queued. Generated source
@@ -7,7 +7,7 @@ text and evidence remain outside Git. Alex resumed work on 2026-11-02.
 ## Latest pass: reviewed practical requests added as the next source
 
 Public producer `06a5a3d` adds **MASSIVE 1.1 Japanese** (`massive-ja`). Full local
-validation passes: **1,327 tests**, Ruff and **25 source configurations**. The
+validation passes: **1,327 tests**, Ruff and **25 source configurations**, and main CI passes. The
 publisher explicitly grants CC BY 4.0 for the dataset, separately from its
 Apache-licensed software, and documents human localization from SLURP. The
 16,521 Japanese rows are upstream counts, **not yet admitted growth**.
@@ -32,12 +32,25 @@ index is included. Raw source text is never extracted to disk; selected Japanese
 is buffered compressed until the full bounded archive and licensing evidence
 pass. No source count, actual quality rate or full completion is yet claimed.
 
-Existing JMRD/Wikipedia native qualification continues unchanged (past 380,000
-new Wikipedia records at the last check, approximately 270 MiB / 1 GiB). The
-already dispatched compressed v8/JMRD refinement remains waiting on the same
-lock; no duplicate native work or full serving candidate was started. Stage
-receipts and exact worker/input identities remain in the private checkpoint.
-The larger Wikipedia cohort and serving-size gates described below still apply.
+JMRD/Wikipedia native qualification has now **completed**: **493,606 distinct
+input texts**, with **485,351 eligible texts absent from both verified parents**,
+before pending quality omissions. All 549,277 occurrence records and the new
+sentence payloads passed import validation. The compressed non-serving import is
+**1,410,818,048 bytes**; this is not measured final serving growth. Its **487,215
+new analyses** and 6,391 reused analyses are cached. Do not repeat those native
+calls or the completed baseline verification. The native process was replaced to
+release its heaps before further source work.
+
+Compressed Wikipedia v8 refinement has acquired the same producer lock. Its
+verified canonical output retains **26,695 works / 437,881 occurrences**, omitting
+**eight**: four structural fragments, three exact wording errors and one exact
+graphic passage. Archive export and independent retained-field/member-hash
+checks remain pending; JMRD refinement follows. MASSIVE and the larger Wikipedia
+source phase remain waiting, with no FIFO guarantee. No serving candidate or
+activation was started. The private checkpoint binds exact receipts/recipes.
+Use corrected source metadata/occurrences together with cached native analyses
+in later integration; the pre-refinement native import must not become final
+content unchanged. The larger-cohort review and serving-size gates still apply.
 
 ## Previous pass: two completed source batches; compressed quality refinement queued
 
