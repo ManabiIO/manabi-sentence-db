@@ -4,7 +4,42 @@ This is the current corpus-pipeline checkpoint. It supersedes earlier dated
 notes describing these completed stages as running or queued. Generated source
 text and evidence remain outside Git. Alex resumed work on 2026-11-02.
 
-## Latest pass: two completed source batches; compressed quality refinement queued
+## Latest pass: reviewed practical requests added as the next source
+
+Public producer `06a5a3d` adds **MASSIVE 1.1 Japanese** (`massive-ja`). Full local
+validation passes: **1,327 tests**, Ruff and **25 source configurations**. The
+publisher explicitly grants CC BY 4.0 for the dataset, separately from its
+Apache-licensed software, and documents human localization from SLURP. The
+16,521 Japanese rows are upstream counts, **not yet admitted growth**.
+
+Admission requires at least two distinct non-author reviewers, with no adverse
+independent grammar/spelling/intent/slot/language judgments. Only Japanese raw
+utterances are retained. English prompts can differ after entity localization
+and are deliberately not represented as translations; worker IDs, annotations,
+judgments and other locales are excluded. Translated origin remains explicit,
+with ordinary shared sentence/content checks and `unreviewed` occurrence state.
+Every independent request has its own work, with no invented neighboring context.
+
+The pinned **40,251,390-byte compressed archive** is cached and registered for
+ordinary offline snapshot reuse. The acquired file was moved into its snapshot;
+there is no second physical bulk copy or repeat download. A bounded 64 KiB
+header/schema probe checked publisher metadata and row field types without a
+full competing scan. A single compressed-only source worker is **dispatched and
+waiting on the existing Linux producer lock**, behind already running work. It
+runs a tiny Linux fixture before full extraction, then normalized member/hash
+checks and a 96-text assistant review packet. No native analysis or serving
+index is included. Raw source text is never extracted to disk; selected Japanese
+is buffered compressed until the full bounded archive and licensing evidence
+pass. No source count, actual quality rate or full completion is yet claimed.
+
+Existing JMRD/Wikipedia native qualification continues unchanged (past 380,000
+new Wikipedia records at the last check, approximately 270 MiB / 1 GiB). The
+already dispatched compressed v8/JMRD refinement remains waiting on the same
+lock; no duplicate native work or full serving candidate was started. Stage
+receipts and exact worker/input identities remain in the private checkpoint.
+The larger Wikipedia cohort and serving-size gates described below still apply.
+
+## Previous pass: two completed source batches; compressed quality refinement queued
 
 Public main `5669f51` adds Wikipedia admission **v8**; `c0737d6` adds
 `jmrd-example-quality-v1` and the reusable **`refine-jmrd`** command. The full
