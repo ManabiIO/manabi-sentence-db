@@ -9,9 +9,9 @@ import hashlib
 import re
 import unicodedata
 
-WIKIPEDIA_QUALITY_VERSION = "wikipedia-example-quality-v8"
+WIKIPEDIA_QUALITY_VERSION = "wikipedia-example-quality-v9"
 
-# Exact, unchanged texts assessed in the November 3 assistant source review.
+# Exact, unchanged texts assessed in the November 3–4 assistant source reviews.
 # Hashes keep these local findings from becoming broad grammatical/topic bans.
 # See docs/sources.md; retained occurrences are still marked unreviewed.
 REVIEWED_EXCLUSIONS = {
@@ -23,6 +23,16 @@ REVIEWED_EXCLUSIONS = {
         "wikipedia-reviewed-wording",  # 金山寺味噌: 容器に中に
     "1481b9cbf22716cddda77e95e7da329bcbbedc803d305135c2a737a29bd456f0":
         "wikipedia-reviewed-explicit-violence",  # ロシア睡眠実験: graphic passage
+    "d4342a9d819d3a41567127cd238d517460d57b596e63fda81079f31b0430bccb":
+        "wikipedia-reviewed-wording",  # 代替肉: 取り入れるこに
+    "02e776d8a557349c5a23fda8c9d0b25c3d7af0b4fe05047971f080d72fcb83fd":
+        "wikipedia-reviewed-wording",  # パラサイト・イヴ: contradictory active/passive wording
+    "08295fa53420b4b07a1602e68f436ffb38295d258874264d113e76c65bc71ee4":
+        "wikipedia-reviewed-wording",  # Server Message Block: 相互運用性に問題を解消
+    "41dd307b8471fcb47f225c44b75b1cdfb1b2b8023f83c83530db58515326a42f":
+        "wikipedia-dependent-fragment",  # 作業環境測定士: detached table-symbol legend
+    "ee71edcfe1521aa298fe01070a6d37970d8de9b3a3b09a4f1051f4436077b721":
+        "wikipedia-reviewed-explicit-violence",  # detailed self-harm passage
 }
 
 _NUMBERS = re.compile(r"[0-9０-９]+(?:[.,．][0-9０-９]+)*")
@@ -70,6 +80,9 @@ _FORMULA_REMNANT = re.compile(
     # No condition/reference target remains after the omitted display/link.
     r"|^の(?:下|もと)に考え(?:る|られる)[。．.!！?？]?\Z"
     r"|^[（(]\s*(?:例えば|たとえば)?\s*参照\s*[）)][。．.!！?？]?\Z"
+    # Whole relation phrases whose missing formula was their only argument.
+    r"|^(?:のようである|と分解することができる|と言い換えることもできる)"
+    r"[。．.!！?？]?\Z"
 )
 _MISSING_LIST = re.compile(
     # Require a literal forward reference and a list-introducing predicate.
@@ -79,6 +92,12 @@ _MISSING_LIST = re.compile(
     r"|(?:以下|下記|次)の(?:施設|項目|種類|条件|要件|特徴|例|もの)"
     r"(?:が(?:ある|存在する)|を(?:挙げる|列挙する|示す|紹介する|記載する))"
     r"[。．.!！?？]?\Z"
+    r"|(?:以下|下記|次)の(?:施設|項目|種類|条件|要件|特徴|例|もの|場合)"
+    r"が(?:ある|挙げられる)[。．.!！?？]?\Z"
+)
+_DETACHED_LABEL = re.compile(
+    r"^[、，,]"
+    r"|^第[0-9０-９一二三四五六七八九十百]+(?:巻|話)登場[。．.!！?？]?\Z"
 )
 _UNBOUND_EXAMPLE = re.compile(r"^のような[、，,]")
 _MISSING_UNIT_TABLE = re.compile(
@@ -130,7 +149,7 @@ def assess_wikipedia_sentence(text: str) -> tuple[str | None, list[str]]:
             or _DANGLING_LIST.search(text) or _CROSS_REFERENCE_ONLY.search(text)
             or _FORMULA_REMNANT.search(text) or _NUMBERED_REQUIREMENTS.search(text)
             or _MISSING_LIST.search(text) or _UNBOUND_EXAMPLE.search(text)
-            or _MISSING_UNIT_TABLE.search(text)):
+            or _MISSING_UNIT_TABLE.search(text) or _DETACHED_LABEL.search(text)):
         return "wikipedia-dependent-fragment", []
     symbols = sum(unicodedata.category(char) == "Sm" for char in text)
     if symbols >= 3 or (

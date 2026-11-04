@@ -744,6 +744,23 @@ is not native-speaker certification, and retained occurrences stay `unreviewed`.
 Existing source builds made under v7 need compressed refinement before this
 batch is published; source extraction and native analyses need not be repeated.
 
+Admission v9 follows a November 4 assistant inspection of all 264 hash-selected
+examples (24 per metadata topic) from the larger, disjoint Wikipedia selection.
+It rejects whole detached relation phrases (`のようである。`,
+`と分解することができる。`, `と言い換えることもできる。`), terminal
+introductions to missing lists ending in `が挙げられる` / `次の場合がある`,
+leading orphan commas, and bare installment labels such as `第9巻登場。`.
+Named relations, inline lists, quotations, dates and ordinary nominal prose have
+retention controls. Three exact wording errors, a detached table-symbol legend,
+and a detailed self-harm passage are additionally hash-pinned. These exclusions
+do not repair text or justify blanket bans on science, history, clinical prose
+or colloquial Japanese. Other sample concerns (terse timelines, awkward translated
+prose and redundant wording) remain limitations, not calibrated rejection rules.
+The packet is a small topic-stratified assistant review, not a population quality
+estimate or native-speaker certification. Retained occurrences stay `unreviewed`.
+Apply compressed refinement to the saved canonical cohort before publication;
+do not repeat raw extraction, metadata indexing or existing native analyses.
+
 Use `mise run refine-wikipedia -- --build BUILD --output FRESH_OUTPUT` to tighten
 an existing compressed canonical build without reacquiring or rescanning the raw
 dump. Refinement only removes previously admitted sentences or adds heuristic

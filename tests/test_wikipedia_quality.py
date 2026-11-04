@@ -303,3 +303,49 @@ def test_reviewed_exact_text_exclusions_are_hash_pinned_without_rewriting(monkey
     })
     assert assess_wikipedia_sentence(text) == ("wikipedia-reviewed-wording", [])
     assert assess_wikipedia_sentence("これは合成の保持テスト文です。") == (None, [])
+
+
+@pytest.mark.parametrize("text", [
+    "のようである。", "と分解することができる。", "と言い換えることもできる。",
+    "また、反則の具体例は次の場合がある。",
+    "具体的な応用分野としては、以下のものが挙げられる。",
+    "、この言語は日常会話で用いられる。",
+    "第9巻登場。", "第１２話登場。",
+])
+def test_detached_relations_missing_lists_and_installment_labels_are_rejected(text):
+    assert assess_wikipedia_sentence(text) == ("wikipedia-dependent-fragment", [])
+
+
+@pytest.mark.parametrize("text", [
+    "この図は花のようである。",
+    "水は水素と酸素に分解することができる。",
+    "この言葉は、自由と言い換えることもできる。",
+    "彼は「のようである」という断片を見つけた。",
+    "次の場合があるかどうか調べる。",
+    "次の場合、担当者に連絡してください。",
+    "例として、水、塩、砂糖が挙げられる。",
+    "「以下のものが挙げられる」という表現を使った。",
+    "第9巻に登場する人物である。", "第9巻では主人公が登場。",
+    "2009年3月18日、長男誕生。",
+    "ホテイチクはマダケ属に属する竹の一種。",
+    "母親の支援は子供の成長に役立つ。",
+])
+def test_v9_preserves_named_relations_inline_lists_nominal_prose_and_dates(text):
+    assert assess_wikipedia_sentence(text) == (None, [])
+
+
+def test_v9_admission_preserves_original_positions_and_attribution():
+    source = yaml.safe_load((Path(__file__).parents[1] / "sources/wikipedia-ja.yaml").read_text())
+    texts = ["水は私たちの生活に欠かせない。", "と分解することができる。",
+             "具体的な用途には以下のものが挙げられる。", "水は水素と酸素からできている。"]
+    raw = dict(native_id="v9-gap", language="ja", title="架空の水の記事",
+               url="https://example.invalid/water", license=source["license"],
+               attribution=source["attribution"],
+               sentences=[{"text": text, "source_ordinal": i * 2} for i, text in enumerate(texts)])
+    stats = Counter()
+    record = canonical_document(raw, dict(source_id="wikipedia-ja", snapshot_id="fixture", source=source),
+                                stats, set())
+    assert [(s["ordinal"], s["text"]) for s in record["sentences"]] == [(0, texts[0]), (6, texts[3])]
+    assert record["license"] == source["license"]
+    assert record["attribution"] == source["attribution"]
+    assert stats["rejected:wikipedia-dependent-fragment"] == 2
