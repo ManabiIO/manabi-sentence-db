@@ -38,6 +38,11 @@ from .wikimedia_selection import (
 KIND = "wikimedia-metadata-index-v1"
 
 
+def _signature(path):
+    stat = path.stat()
+    return stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime_ns, stat.st_ctime_ns
+
+
 def _canonical(path):
     path = Path(path).absolute()
     if path.resolve(strict=True) != path:
@@ -75,6 +80,9 @@ def index_wikimedia_metadata(snapshot, output, *, progress=None):
         raise DataError("Metadata indexing supports Japanese Wikimedia only")
     output = _fresh_output(output)
     producer = (sha256_file(Path(__file__)), _implementation_sha256())
+    inputs = [snapshot, *(_snapshot_path(snapshot.parent, entry["path"])
+                          for entry in manifest["files"])]
+    input_identities = [_signature(path) for path in inputs]
     path = output / "metadata.sqlite"
     counts = Counter()
     compressor = zstandard.ZstdCompressor(level=6)
@@ -111,6 +119,8 @@ def index_wikimedia_metadata(snapshot, output, *, progress=None):
             raise DataError("Wikimedia metadata index integrity failure")
     if producer != (sha256_file(Path(__file__)), _implementation_sha256()):
         raise DataError("Metadata implementation changed while indexing")
+    if input_identities != [_signature(path) for path in inputs]:
+        raise DataError("Wikimedia snapshot changed while indexing metadata")
     if not counts["records"]:
         raise DataError("No valid Wikimedia metadata to index")
     staged = output / ".manifest.json.part"
@@ -130,8 +140,11 @@ def _read_cache(cache):
     cache = _canonical(cache)
     manifest_path = _canonical(cache / "manifest.json")
     path = _canonical(cache / "metadata.sqlite")
+    before = _signature(path)
+    manifest_before = _signature(manifest_path)
     manifest = read_json(manifest_path)
-    if (type(manifest.get("schema_version")) is not int or manifest["schema_version"] != 1
+    if (not isinstance(manifest, dict)
+            or type(manifest.get("schema_version")) is not int or manifest["schema_version"] != 1
             or manifest.get("kind") != KIND
             or manifest.get("contains_article_bodies") is not False
             or type(manifest.get("records")) is not int or manifest["records"] < 1
@@ -140,7 +153,9 @@ def _read_cache(cache):
         raise DataError("Invalid Wikimedia metadata manifest")
     if path.stat().st_size != manifest.get("bytes") or sha256_file(path) != manifest.get("sha256"):
         raise DataError("Wikimedia metadata checksum mismatch")
-    return path, manifest
+    if before != _signature(path) or manifest_before != _signature(manifest_path):
+        raise DataError("Wikimedia metadata changed during verification")
+    return path, manifest, before
 
 
 def _excluded(paths, manifest):
@@ -181,22 +196,17 @@ def select_wikimedia_metadata(cache, output, *, per_topic=1000, general=2000,
     limits = _limits(per_topic, general)
     if not isinstance(seed, str) or len(seed) > 200:
         raise DataError("Selection seed must be at most 200 characters")
-    path, manifest = _read_cache(cache)
+    path, manifest, before = _read_cache(cache)
     excluded, receipts = _excluded(exclude_selections, manifest)
     output = _fresh_output(output)
     producer = (sha256_file(Path(__file__)), _implementation_sha256())
-    def signature():
-        stat = path.stat()
-        return stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime_ns, stat.st_ctime_ns
-
-    before = signature()
     with closing(sqlite3.connect(path.as_uri() + "?mode=ro&immutable=1", uri=True)) as db:
         db.execute("PRAGMA cache_size=-4096")
         db.execute("PRAGMA mmap_size=0")
         rows, counts = sample_pages(_rows(db), snapshot_id=manifest["snapshot_id"],
             per_topic=per_topic, general=general, seed=seed, exclude_ids=excluded,
             progress=progress, metadata=True)
-    if counts["pages_seen"] != manifest["records"] or signature() != before:
+    if counts["pages_seen"] != manifest["records"] or _signature(path) != before:
         raise DataError("Wikimedia metadata changed during selection")
     if producer != (sha256_file(Path(__file__)), _implementation_sha256()):
         raise DataError("Metadata selection implementation changed during scan")

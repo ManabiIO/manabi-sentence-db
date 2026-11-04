@@ -100,3 +100,35 @@ def test_cli_indexes_then_selects_and_emits_normal_snapshot_bound_allowlist(tmp_
     assert main(["select-wikimedia", "--metadata-cache", str(cache), "--output",
                  str(tmp_path / "selected"), "--per-topic", "0", "--general", "2"]) == 0
     assert len(read_json(tmp_path / "selected" / "selection.json")["page_ids"]) == 2
+
+
+def test_source_mutation_during_indexing_cannot_publish_completion(tmp_path, monkeypatch):
+    snapshot = create_demo_snapshot(tmp_path / "snapshot")
+    original = inventory.snapshot_pages
+
+    def changed(*args, **kwargs):
+        yield from original(*args, **kwargs)
+        with (snapshot.parent / "synthetic.xml").open("a") as stream:
+            stream.write(" ")
+
+    monkeypatch.setattr(inventory, "snapshot_pages", changed)
+    with pytest.raises(DataError, match="snapshot changed"):
+        inventory.index_wikimedia_metadata(snapshot, tmp_path / "metadata")
+    assert not (tmp_path / "metadata" / "manifest.json").exists()
+
+
+def test_metadata_mutation_after_hash_check_cannot_publish_selection(tmp_path, monkeypatch):
+    snapshot = create_demo_snapshot(tmp_path / "snapshot")
+    cache = inventory.index_wikimedia_metadata(snapshot, tmp_path / "metadata")
+    original = inventory._read_cache
+
+    def changed(*args):
+        result = original(*args)
+        with (cache / "metadata.sqlite").open("ab") as stream:
+            stream.write(b" ")
+        return result
+
+    monkeypatch.setattr(inventory, "_read_cache", changed)
+    with pytest.raises(DataError, match="metadata changed"):
+        inventory.select_wikimedia_metadata(cache, tmp_path / "selected", per_topic=0, general=1)
+    assert not (tmp_path / "selected" / "selection.json").exists()

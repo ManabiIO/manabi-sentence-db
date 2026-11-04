@@ -185,6 +185,30 @@ unpaired encyclopedia prose; the implemented Kyoto adapter is described below.
 | [Global Voices Japanese](https://jp.globalvoices.org/) | Translated reporting across many countries and topics | Only the opt-in, hash-pinned 65906 editorial subset is enabled below. Wider acquisition still needs per-work rights/attribution review; no blanket crawl. |
 | [MDN Japanese documentation](https://github.com/mdn/translated-content) | Substantial technical prose with source files in Git | CC BY-SA 2.5 or later for documentation; pin commit, skip code, retain document/contributor credit. |
 | [Japanese Wikiversity](https://ja.wikiversity.org/wiki/Wikiversity:著作権) | Educational prose; natural reuse of the Wikimedia adapter | General Wikimedia CC BY-SA 4.0 framework, subject to local/imported exceptions. Tag register and exclude classical-language exercises/quotations. Wikibooks is already enabled. |
+| [Japanese Movie Recommendation Dialogue (JMRD)](https://github.com/ku-nlp/JMRD/tree/a20b0a89b4cf6ce1db320039f6e27df10604bf4c) | Publisher describes 5,075 human recommendation dialogues across train/valid/test; this is not an admitted-sentence count | Pinned README/LICENSE identify CC BY-SA 4.0. Next adapter must separate authored dialogue from external movie knowledge, plots, reviews and questionnaires; grounded utterances also need review. No source admitted yet. |
+
+The November 3 JMRD primary-source check pins commit
+`a20b0a89b4cf6ce1db320039f6e27df10604bf4c`, README SHA-256
+`495b53f25e0662f13474ab09578e0d1dd4edb3c9c1c7d8c3a9aff53dbf84c253`
+and LICENSE SHA-256
+`23ee78c8bae49cf08ea2f0c84945c66b987ebe4520881fb51b3dad4fb43d07c2`.
+The data schema explicitly separates authored utterances and external knowledge;
+do not extract every string in its JSON or label the entire archive as learner
+examples. An adapter, synthetic fixtures, context-gap policy and actual novelty
+measurement remain required. Reuse this rights/schema evidence.
+
+For Common Voice, the current Data Collective distribution remains deferred as
+described below. A separate primary repository publication was checked at
+`common-voice/common-voice` commit
+`ec845c798ead7144f2acc95fd8955e9d3995c7d0`: its
+[README's sentence-data exception](https://github.com/common-voice/common-voice/blob/ec845c798ead7144f2acc95fd8955e9d3995c7d0/README.md#licensing-and-content-source)
+identifies CC0. The Japanese `server/data/ja/sentence-collector.txt` is 594,641
+bytes, SHA-256 `964acfaa4c6ed0f968fbeb152300ab800bb30fce5b2e4c234201ffb3a971598b`.
+This separate publication should not be conflated with the distribution route's
+additional terms. Its inspected prefix includes literary/archaic quotations and
+incomplete clauses, however; no modern-Japanese subset is qualified or imported.
+Other Japanese files and audio are not covered by this bounded review. Primary
+evidence and the inspected source bytes are cached locally, the latter compressed.
 
 ### Global Voices acquisition evidence — 2026-10-31
 

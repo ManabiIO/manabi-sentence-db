@@ -4,7 +4,40 @@ This is the current corpus-pipeline checkpoint. It supersedes earlier dated
 notes describing these completed stages as running or queued. Generated source
 text and evidence remain outside Git. Alex resumed work on 2026-11-02.
 
-## Latest pass: conversation/caption growth published; Wikipedia running
+## Latest pass: substantially larger Wikipedia cohorts dispatched
+
+Following Alex's request for dramatic, sensible growth, public main `c7f439a`
+adds a reusable body-free Wikipedia metadata index, exclusion of previous page
+IDs **before** topic quotas, and single-pass whole-work normalized ZIP buckets.
+Its full **1,256-test suite**, Ruff, 23 source configurations and main CI passed.
+Two further input-mutation regressions now bring the passing local suite to
+**1,258 tests**: changes during metadata indexing or after checksum verification
+cannot publish completion/selection manifests.
+Existing segmentation, rights and Wikipedia quality v7 gates remain in force.
+
+The current 27,829-new-page cohort is still extracting from cached inputs. A
+larger successor is **dispatched and waiting on the same Linux producer lock**:
+15,000 pages per topic plus 40,000 general, a combined **190,000-page quota**,
+with both prior cohorts excluded first. Actual new page and sentence counts
+will be lower than the quotas and must be read from its completion receipts.
+No native analysis or serving activation is claimed for these running jobs.
+
+The larger worker first runs a tiny Linux index → disjoint selection → compressed
+bucket fixture; failure prevents full processing. It then creates the reusable
+metadata index, selects a new cohort, extracts compressed canonical records,
+exports 8,000-work ZIP buckets in one pass, and prepares a topic-stratified
+assistant review packet. Completion manifests are published last. Each worker
+is limited to one worker / 0.25 CPU / 1 GiB; processing is serialized, with no new
+download or concurrent full serving rebuild. The private resume index binds
+exact container, recipe, code and input hashes; do not dispatch duplicates.
+
+Large source archives and a downstream serving database have separate budgets.
+Source publication retains every eligible occurrence and its attribution;
+deduplicated native/quality qualification and the existing 8 GB target / 10 GB
+serving ceiling remain subsequent gates. Reuse the already verified baseline
+and exact-text analyses instead of repeating their verification.
+
+## Earlier pass: conversation/caption growth published; Wikipedia started
 
 The separate [conversation and caption supplement](https://github.com/ManabiIO/manabi-sentence-db/releases/tag/corpus-dialogue-captions-2026-11-03)
 is public. Three normalized-v2 ZIPs total **49,847,146 compressed bytes** and
