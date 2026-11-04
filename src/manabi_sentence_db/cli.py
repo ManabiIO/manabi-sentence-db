@@ -293,7 +293,7 @@ def main(argv: list[str] | None = None) -> int:
                 )
                 failures = []
                 for source in selected:
-                    if args.source == "all" and source["adapter"] == "globalvoices":
+                    if args.source == "all" and source["adapter"] in {"globalvoices", "jmrd"}:
                         print(
                             f"Skipping {source['id']}: requires explicit single-source selection",
                             file=sys.stderr,

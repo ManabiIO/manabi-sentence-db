@@ -124,3 +124,11 @@ def array_items(stream, key):
     """Yield a named top-level array, streaming and discarding other arrays."""
     for _, value in _Reader(stream).items(array_key=key):
         yield value
+
+
+def array_values(stream):
+    """Yield one bounded top-level array value at a time; reject trailing data."""
+    reader = _Reader(stream)
+    yield from reader.array()
+    if reader.peek():
+        raise DataError("Trailing content in publisher JSON")

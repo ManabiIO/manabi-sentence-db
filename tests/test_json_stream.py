@@ -3,7 +3,7 @@ import json
 
 import pytest
 
-from manabi_sentence_db.json_stream import _Reader, array_items, object_items
+from manabi_sentence_db.json_stream import _Reader, array_items, array_values, object_items
 from manabi_sentence_db.serialization import DataError
 
 
@@ -70,3 +70,18 @@ def test_missing_array_and_oversized_unit_are_rejected():
         list(array_items(io.StringIO('{"images":[]}'), "annotations"))
     with pytest.raises(DataError, match="size bound"):
         list(_Reader(SmallChunks('{"a":"' + "x" * 200 + '"}'), max_item_chars=100).items())
+
+
+def test_standalone_array_stream_is_lazy_and_handles_small_unicode_chunks():
+    values = [{"text": "今日も元気です。", "number": 1.25}, {"number": -6.02e23}]
+    assert list(array_values(SmallChunks(json.dumps(values)))) == values
+    large = io.StringIO(json.dumps(list(range(50_000))))
+    rows = array_values(large)
+    assert next(rows) == 0 and large.tell() <= 65_536
+    rows.close()
+
+
+@pytest.mark.parametrize("raw", ['[1,]', '[1]x', '[{"a":1,"a":2}]', '[NaN]', '[1', '{}'])
+def test_standalone_array_rejects_malformed_duplicate_and_trailing_data(raw):
+    with pytest.raises(DataError):
+        list(array_values(SmallChunks(raw)))

@@ -281,9 +281,10 @@ def test_manual_snapshot_choices_cover_every_public_raw_snapshot_source():
     assert len(options) == len(set(options))
     public_raw_sources = {
         path.stem for path in (root / "sources").glob("*.yaml")
-        if load_yaml(path)["adapter"] != "globalvoices"
+        if load_yaml(path)["adapter"] not in {"globalvoices", "jmrd"}
     }
     assert set(options) == public_raw_sources | {"all"}
     # Global Voices raw pages contain withheld third-party material. Its local
     # evidence snapshot must never enter this public artifact/release workflow.
     assert "globalvoices-65906-ja" not in options
+    assert "jmrd-ja" not in options

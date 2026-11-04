@@ -246,6 +246,7 @@ request reports which sources failed and preserves completed snapshots.
 | `tatoeba-ja` | CC BY 2.0 **France** | Detailed Japanese TSV, tags, optional English/direct-link TSV |
 | `realpersonachat-ja` | CC BY-SA 4.0 | Commit-pinned human-dialogue JSON archive; excludes profiles, model conversations, and masked utterances |
 | `mrmp-ja` | CC BY-SA 4.0 | Pinned human multi-party chat; verifies exact publisher license/README, excludes profiles/evaluations, preserves utterance gaps |
+| `jmrd-ja` | CC BY-SA 4.0 | Pinned authored movie-recommendation turns; excludes external knowledge/plots/reviews/questionnaires and dependent turns, preserving gaps; local raw evidence only |
 | `asdc-main-ja` | CC BY 4.0 | Pinned human accommodation role-play; 210 main dialogue files only, verified corpus/collection evidence, no SCUD descriptions or scenarios |
 | `jmultiwoz-ja` | CC BY-SA 4.0 | Commit/hash-pinned human task dialogue turns; excludes goals, worker metadata, backend data, and model outputs |
 | `yj-captions-ja` | CC BY 4.0 | Commit/hash-pinned human original Japanese captions; independent complete-caption works, no translations or images; image rights are separate |

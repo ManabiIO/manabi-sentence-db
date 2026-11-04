@@ -185,7 +185,7 @@ unpaired encyclopedia prose; the implemented Kyoto adapter is described below.
 | [Global Voices Japanese](https://jp.globalvoices.org/) | Translated reporting across many countries and topics | Only the opt-in, hash-pinned 65906 editorial subset is enabled below. Wider acquisition still needs per-work rights/attribution review; no blanket crawl. |
 | [MDN Japanese documentation](https://github.com/mdn/translated-content) | Substantial technical prose with source files in Git | CC BY-SA 2.5 or later for documentation; pin commit, skip code, retain document/contributor credit. |
 | [Japanese Wikiversity](https://ja.wikiversity.org/wiki/Wikiversity:著作権) | Educational prose; natural reuse of the Wikimedia adapter | General Wikimedia CC BY-SA 4.0 framework, subject to local/imported exceptions. Tag register and exclude classical-language exercises/quotations. Wikibooks is already enabled. |
-| [Japanese Movie Recommendation Dialogue (JMRD)](https://github.com/ku-nlp/JMRD/tree/a20b0a89b4cf6ce1db320039f6e27df10604bf4c) | Publisher describes 5,075 human recommendation dialogues across train/valid/test; this is not an admitted-sentence count | Pinned README/LICENSE identify CC BY-SA 4.0. Next adapter must separate authored dialogue from external movie knowledge, plots, reviews and questionnaires; grounded utterances also need review. No source admitted yet. |
+| [Japanese Movie Recommendation Dialogue (JMRD)](https://github.com/ku-nlp/JMRD/tree/a20b0a89b4cf6ce1db320039f6e27df10604bf4c) (adapter enabled) | Publisher describes 5,075 human recommendation dialogues across train/valid/test; this is not an admitted-sentence count | Pinned CC BY-SA 4.0 human dialogue only. Excludes external prose and questionnaires, prose-grounded/unannotated recommender turns and long literal copies. Full native/novelty qualification remains pending. |
 
 The November 3 JMRD primary-source check pins commit
 `a20b0a89b4cf6ce1db320039f6e27df10604bf4c`, README SHA-256
@@ -194,8 +194,32 @@ and LICENSE SHA-256
 `23ee78c8bae49cf08ea2f0c84945c66b987ebe4520881fb51b3dad4fb43d07c2`.
 The data schema explicitly separates authored utterances and external knowledge;
 do not extract every string in its JSON or label the entire archive as learner
-examples. An adapter, synthetic fixtures, context-gap policy and actual novelty
-measurement remain required. Reuse this rights/schema evidence.
+examples. The adapter now streams one bounded dialogue at a time from each split,
+checks exact publisher license/README hashes and split counts, and excludes
+external knowledge, questionnaires and generated-output paths from records.
+
+Recommender turns require explicit grounding in the reviewed no-knowledge or
+factual title/year/director/cast/genre types. Whole turns grounded in other
+knowledge or lacking annotation are withheld. Both speakers are screened for
+long literal overlap with the bundled external prose; matching ignores spacing
+and punctuation but never edits the retained text. Shared spans consisting only
+of long factual titles/names are exempt. This is a bounded source-specific
+exclusion, not a general copyright classifier or naturalness assessment.
+Missing/addressed/withheld turns reserve context gaps before sentence splitting,
+so neither neighbor links nor original-unit context can restore omitted prose.
+The versioned transformation is `jmrd-authored-dialogue-v1`; occurrences remain
+unreviewed. There are no invented translations or publication dates.
+
+The cached 8,797,366-byte primary ZIP has SHA-256
+`21623ae6c72d1e5f9664b0d1aba9b9b6f357f6670d9f964fd4417db53c7461db`.
+Synthetic tests cover streamed JSON, malformed/duplicate IDs, source evidence,
+copy exclusions with long-title retention controls, gaps and compressed exports.
+An assistant-only six-dialogue prefix probe exercises actual source structure;
+it is not a quality estimate. Full source counts, native admission and exact
+novelty remain to be measured. Raw snapshots are local processing evidence:
+`snapshot all` skips this opt-in source, it is absent from the public raw-snapshot
+workflow, and `snapshot-pack` rejects it. Publish processed normalized content
+only. Reuse these pinned inputs rather than repeating source acquisition/review.
 
 For Common Voice, the current Data Collective distribution remains deferred as
 described below. A separate primary repository publication was checked at

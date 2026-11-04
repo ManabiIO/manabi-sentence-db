@@ -609,7 +609,7 @@ def create_snapshot(
                     staging, f"talpco-{language}.txt", f"talpco-{language}", pin["url"], agent,
                     expected_sha256=pin["sha256"], expected_size=pin["size"],
                 ))
-        elif adapter in {"realpersonachat", "mrmp", "asdc", "jmultiwoz", "yj-captions", "stair", "jec-basic", "kyoto-wikipedia", "alt-parallel"}:
+        elif adapter in {"realpersonachat", "mrmp", "jmrd", "asdc", "jmultiwoz", "yj-captions", "stair", "jec-basic", "kyoto-wikipedia", "alt-parallel"}:
             if mode != "full" or date or max_files or titles:
                 raise SnapshotError(
                     f"{source['title']} uses a pinned full archive; sample with build --max-documents"
@@ -617,6 +617,7 @@ def create_snapshot(
             filename, role = {
                 "realpersonachat": ("realpersonachat.zip", "realpersonachat-zip"),
                 "mrmp": ("mrmp.zip", "mrmp-zip"),
+                "jmrd": ("jmrd.zip", "jmrd-zip"),
                 "asdc": ("asdc.zip", "asdc-zip"),
                 "jmultiwoz": ("jmultiwoz.zip", "jmultiwoz-zip"),
                 "stair": ("stair.tar.gz", "stair-tar"),
