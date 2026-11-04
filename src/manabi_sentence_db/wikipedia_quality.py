@@ -9,7 +9,7 @@ import hashlib
 import re
 import unicodedata
 
-WIKIPEDIA_QUALITY_VERSION = "wikipedia-example-quality-v9"
+WIKIPEDIA_QUALITY_VERSION = "wikipedia-example-quality-v10"
 
 # Exact, unchanged texts assessed in the November 3–4 assistant source reviews.
 # Hashes keep these local findings from becoming broad grammatical/topic bans.
@@ -33,6 +33,24 @@ REVIEWED_EXCLUSIONS = {
         "wikipedia-dependent-fragment",  # 作業環境測定士: detached table-symbol legend
     "ee71edcfe1521aa298fe01070a6d37970d8de9b3a3b09a4f1051f4436077b721":
         "wikipedia-reviewed-explicit-violence",  # detailed self-harm passage
+    "2f31c87fd9948e985754df1a51790cebb0613d4f7f98ff41fb6042c639e37447":
+        "wikipedia-reviewed-wording",  # ハタハタ: November 4 successor sample 45
+    "3ef65cb8567645d70180565a1cc7a13020cd0a4df80fc6291f27cdaa5159cd5d":
+        "wikipedia-dependent-fragment",  # 中村勝平: November 4 successor sample 49
+    "707b7bc90e1e715b01d738177b39645825331228fb4bb56eac13c628f6bdbe23":
+        "wikipedia-reviewed-wording",  # 北区 (香港): November 4 successor sample 69
+    "276443fec36b7dcfa8f0ad2aae71bb6238a04568977482f44f67f422723709bc":
+        "wikipedia-reviewed-wording",  # 下水道: November 4 successor sample 90
+    "71c50770dbf1b907aaf42bcca8e7c4d4d7ac0a6ce65e0a9d7208c80ec8dbb2c9":
+        "wikipedia-reviewed-wording",  # 国際園芸博覧会: November 4 successor sample 134
+    "a19817971d95931406db1bffb65d964ae74d848c3c599dd1b2e1a153986eae5a":
+        "wikipedia-reviewed-wording",  # エコール・デ・ボザール: November 4 successor sample 145
+    "3445592c0948196fb8b37848ba8fd89f9743c9f1826d99af87fbd2eb2ae003f4":
+        "wikipedia-dependent-fragment",  # ウォルステンホルム素数: November 4 successor sample 208
+    "d4826cbe2b594aa926c31f525f976bf24c38ac38dba53a56da3f749c6131a17d":
+        "wikipedia-reviewed-wording",  # アルゴリズム制: November 4 successor sample 235
+    "a101c7a02c0966bf920a467462912ae63354083ca2146ec6374684168b4a6690":
+        "wikipedia-dependent-fragment",  # 真室川町路線バス: November 4 successor sample 260
 }
 
 _NUMBERS = re.compile(r"[0-9０-９]+(?:[.,．][0-9０-９]+)*")
@@ -50,7 +68,8 @@ _FOLLOWING_MATERIAL = re.compile(
 )
 _ORPHAN = re.compile(
     r"^(?:(?:は(?!虫類|虫|行)|を)(?=[一-鿿A-Za-z0-9α-ωΑ-Ω])"
-    r"|が(?=[一-鿿ァ-ヺA-Za-z0-9α-ωΑ-Ω]))"
+    r"|が(?=[一-鿿ァ-ヺA-Za-z0-9α-ωΑ-Ω])"
+    r"|の(?=[A-Za-zＡ-Ｚａ-ｚ0-9０-９]))"
 )
 _DANGLING_LIST = re.compile(
     # A terminal introduction has no components/reasons in this sentence.
@@ -98,6 +117,14 @@ _MISSING_LIST = re.compile(
 _DETACHED_LABEL = re.compile(
     r"^[、，,]"
     r"|^第[0-9０-９一二三四五六七八九十百]+(?:巻|話)登場[。．.!！?？]?\Z"
+)
+# A terminal topic particle has lost its predicate; quoted mentions of the
+# particle and complete clauses do not end in this bare form.
+_DANGLING_TOPIC = re.compile(r"には[。．.!！?？]\Z")
+# Require a list noun so 下の通り (a street below) remains ordinary prose.
+_LIST_REFERENCE = re.compile(
+    r"(?:内訳|項目|分類|条件|特徴|要件)は(?:下|上)の(?:通り|とおり)"
+    r"(?:である|です)[。．.!！?？]?\Z"
 )
 _UNBOUND_EXAMPLE = re.compile(r"^のような[、，,]")
 _MISSING_UNIT_TABLE = re.compile(
@@ -149,7 +176,8 @@ def assess_wikipedia_sentence(text: str) -> tuple[str | None, list[str]]:
             or _DANGLING_LIST.search(text) or _CROSS_REFERENCE_ONLY.search(text)
             or _FORMULA_REMNANT.search(text) or _NUMBERED_REQUIREMENTS.search(text)
             or _MISSING_LIST.search(text) or _UNBOUND_EXAMPLE.search(text)
-            or _MISSING_UNIT_TABLE.search(text) or _DETACHED_LABEL.search(text)):
+            or _MISSING_UNIT_TABLE.search(text) or _DETACHED_LABEL.search(text)
+            or _DANGLING_TOPIC.search(text) or _LIST_REFERENCE.search(text)):
         return "wikipedia-dependent-fragment", []
     symbols = sum(unicodedata.category(char) == "Sm" for char in text)
     if symbols >= 3 or (

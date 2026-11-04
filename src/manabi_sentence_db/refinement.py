@@ -38,7 +38,7 @@ def verify_refinement(catalog, artifact):
     if (not isinstance(receipt, dict)
             or set(receipt) != {"policy", "parent_build_id", "parent_catalog_sha256"}
             or not isinstance(receipt["policy"], str)
-            or not re.fullmatch(r"(?:wikipedia|jmrd)-example-quality-v[1-9][0-9]*", receipt["policy"])
+            or not re.fullmatch(r"(?:wikipedia|jmrd|vfd)-example-quality-v[1-9][0-9]*", receipt["policy"])
             or not isinstance(parent_entry, dict) or parent_entry.get("path") != PARENT_PATH
             or parent_entry.get("sha256") != receipt["parent_catalog_sha256"]):
         raise DataError("Invalid source refinement receipt")
@@ -91,6 +91,17 @@ def refine_jmrd(build, output, *, progress=None):
 
     return _refine(build, output, policy=QUALITY_VERSION,
         applies=lambda record: record["source_id"] == "jmrd-ja" and record["language"] == "ja",
+        assess=lambda sentence: (
+            assess_reviewed_unit(sentence.get("source_unit", sentence)["text"]), []),
+        progress=progress)
+
+
+def refine_vfd(build, output, *, progress=None):
+    """Withhold reviewed VFD spoken units and every segmented sibling offline."""
+    from .vfd import QUALITY_VERSION, assess_reviewed_unit
+
+    return _refine(build, output, policy=QUALITY_VERSION,
+        applies=lambda record: record["source_id"] == "yahoo-vfd-ja" and record["language"] == "ja",
         assess=lambda sentence: (
             assess_reviewed_unit(sentence.get("source_unit", sentence)["text"]), []),
         progress=progress)

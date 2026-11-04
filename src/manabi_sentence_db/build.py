@@ -123,9 +123,9 @@ def canonical_document(
 
         record["transformations"].append(TRANSFORMATION)
     if manifest["source"]["adapter"] == "vfd":
-        from .vfd import TRANSFORMATION
+        from .vfd import QUALITY_VERSION, TRANSFORMATION
 
-        record["transformations"].append(TRANSFORMATION)
+        record["transformations"] += [TRANSFORMATION, QUALITY_VERSION]
     if wikipedia_quality:
         from .wikipedia_quality import WIKIPEDIA_QUALITY_VERSION
 

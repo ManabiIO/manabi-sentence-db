@@ -93,6 +93,12 @@ def parser() -> argparse.ArgumentParser:
     refine_jmrd.add_argument("--build", type=Path, required=True)
     refine_jmrd.add_argument("--output", type=Path, required=True)
     refine_jmrd.add_argument("--progress", action="store_true")
+    refine_vfd = commands.add_parser(
+        "refine-vfd", help="Withhold reviewed VFD spoken units from compressed canonical records"
+    )
+    refine_vfd.add_argument("--build", type=Path, required=True)
+    refine_vfd.add_argument("--output", type=Path, required=True)
+    refine_vfd.add_argument("--progress", action="store_true")
     build = commands.add_parser(
         "build", help="Compile verified snapshots into canonical JSONL/YAML offline"
     )
@@ -382,6 +388,12 @@ def main(argv: list[str] | None = None) -> int:
                 from .refinement import refine_jmrd
 
                 print(refine_jmrd(args.build, args.output,
+                    progress=(lambda message: print(message, file=sys.stderr, flush=True))
+                    if args.progress else None))
+            case "refine-vfd":
+                from .refinement import refine_vfd
+
+                print(refine_vfd(args.build, args.output,
                     progress=(lambda message: print(message, file=sys.stderr, flush=True))
                     if args.progress else None))
             case "build":

@@ -1195,3 +1195,56 @@ sentences. Every field of all 806 retained occurrences matches the unomitted
 source build, including original ordinals, IDs, offsets and source-unit context.
 Exact novelty, native analysis, final serving growth and ranked-query review
 remain separate gates before activation.
+
+
+### Wikipedia successor quality review — 2026-11-04
+
+The next disjoint cohort completed 120,618 articles / 1,783,280 occurrences
+under v9. An assistant read all 264 fresh, topic-stratified retained examples.
+Admission v10 adds narrow controls for a leading genitive before Latin/digits,
+a terminal bare `には。`, and a list noun explicitly referring to an absent
+upper/lower list. Complete clauses, quoted particles, ordinary の-prefixed words,
+street references, dates and nominal prose remain eligible.
+
+Nine exact unchanged texts are withheld by SHA-256: six demonstrated wording/
+case/typing defects and three detached honor-roll/formula/route-legend entries.
+The source articles and exact reviewed revision links are preserved in the
+qualification evidence; current article links are below. No text is corrected
+or rewritten. Source attribution, licenses, IDs and original ordinal gaps stay
+intact. The unrefined v9 successor output is withheld from publication pending
+compressed refinement, independent retained-field/export verification and
+inspection of replacement review examples. The previously published v9 cohort
+is unchanged.
+
+- [ハタハタ](https://ja.wikipedia.org/wiki/%E3%83%8F%E3%82%BF%E3%83%8F%E3%82%BF) — sample 45; reviewed-wording.
+- [中村勝平](https://ja.wikipedia.org/wiki/%E4%B8%AD%E6%9D%91%E5%8B%9D%E5%B9%B3) — sample 49; dependent-fragment.
+- [北区 (香港)](https://ja.wikipedia.org/wiki/%E5%8C%97%E5%8C%BA_(%E9%A6%99%E6%B8%AF)) — sample 69; reviewed-wording.
+- [下水道](https://ja.wikipedia.org/wiki/%E4%B8%8B%E6%B0%B4%E9%81%93) — sample 90; reviewed-wording.
+- [国際園芸博覧会](https://ja.wikipedia.org/wiki/%E5%9B%BD%E9%9A%9B%E5%9C%92%E8%8A%B8%E5%8D%9A%E8%A6%A7%E4%BC%9A) — sample 134; reviewed-wording.
+- [エコール・デ・ボザール](https://ja.wikipedia.org/wiki/%E3%82%A8%E3%82%B3%E3%83%BC%E3%83%AB%E3%83%BB%E3%83%87%E3%83%BB%E3%83%9C%E3%82%B6%E3%83%BC%E3%83%AB) — sample 145; reviewed-wording.
+- [ウォルステンホルム素数](https://ja.wikipedia.org/wiki/%E3%82%A6%E3%82%A9%E3%83%AB%E3%82%B9%E3%83%86%E3%83%B3%E3%83%9B%E3%83%AB%E3%83%A0%E7%B4%A0%E6%95%B0) — sample 208; dependent-fragment.
+- [アルゴリズム制](https://ja.wikipedia.org/wiki/%E3%82%A2%E3%83%AB%E3%82%B4%E3%83%AA%E3%82%BA%E3%83%A0%E5%88%B6) — sample 235; reviewed-wording.
+- [真室川町路線バス](https://ja.wikipedia.org/wiki/%E7%9C%9F%E5%AE%A4%E5%B7%9D%E7%94%BA%E8%B7%AF%E7%B7%9A%E3%83%90%E3%82%B9) — sample 260; dependent-fragment.
+
+This is assistant-only development inspection, not a population error estimate,
+translation-method determination or native-speaker review. Occurrences remain
+`unreviewed`. Awkward, nominal, context-dependent and specialist prose can remain;
+topic buckets do not certify subject matter or usefulness. Native eligibility,
+exact cross-source novelty and the combined serving-size budget remain separate.
+
+
+### VFD retained-output review — 2026-11-04
+
+The full conservative source build completed 277,246 independent pairs /
+429,852 sentence occurrences, in 35 compressed buckets / 84,074,061 bytes.
+Independent member hashes/counts passed. All 96 fresh retained sentence texts
+and their available original spoken units were read by an assistant. Everyday
+spoken forms are promising, with ordinary deictic/photo dependence and short
+replies; this is not a population estimate or native-speaker review.
+
+`vfd-example-quality-v1` withholds two exact whole utterances: the duplicated
+small-tsu typo in [publisher row 249782](https://github.com/yahoojapan/VFD-Dataset/blob/5cb774f44d8fa64e288cbb9b8e96c7aa5959ad62/vfd.tsv#L249783)
+and [publisher row 211542](https://github.com/yahoojapan/VFD-Dataset/blob/5cb774f44d8fa64e288cbb9b8e96c7aa5959ad62/vfd.tsv#L211543), a topless-context utterance. No spelling or meaning is rewritten, and related photography/clothing
+language is retained. Refinement also removes segmented siblings, preserving
+independent benign occurrences, rights and context barriers. The unrefined source
+output is withheld until compressed refinement and replacement review complete.

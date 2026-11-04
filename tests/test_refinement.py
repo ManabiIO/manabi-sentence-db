@@ -335,3 +335,17 @@ def test_normalized_sqlite_refuses_incomplete_or_changed_refinement_before_publi
     with pytest.raises(DataError, match="provenance|Refinement|refinement|identity"):
         build_normalized_database(invalid, output)
     assert not output.exists()
+
+
+def test_vfd_refinement_never_filters_identical_text_from_other_sources(tmp_path, monkeypatch):
+    import hashlib
+
+    from manabi_sentence_db import vfd
+    from manabi_sentence_db.refinement import refine_vfd
+
+    parent = _parent(tmp_path, monkeypatch)
+    monkeypatch.setattr(vfd, 'REVIEWED_UNIT_EXCLUSIONS', {
+        hashlib.sha256(TEXTS[0].encode()).hexdigest(): 'vfd-reviewed-wording'})
+    output = tmp_path / 'vfd-refinement-of-wikipedia'
+    refine_vfd(parent, output)
+    assert _records(output) == _records(parent)

@@ -5,6 +5,7 @@ import hashlib
 import io
 import re
 import stat
+import unicodedata
 import zipfile
 from collections import Counter
 
@@ -23,6 +24,21 @@ ROW_COUNT = 314895
 # The actual publisher file uses gf_id, despite gfid in its README.
 HEADER = ("utterance", "image_path", "gf_id", "verbal_response", "non_verbal_response")
 TRANSFORMATION = "vfd-punctuated-spoken-pairs-v1"
+QUALITY_VERSION = "vfd-example-quality-v1"
+# Exact whole spoken units from the 96-text November 4 assistant review.
+# Omit siblings too; source_unit must not re-expose a withheld utterance.
+REVIEWED_UNIT_EXCLUSIONS = {
+    "a38512515f361aa4d8dd4d22c01b6c789353fbb7bb7bad4f75c6443050aa0877":
+        "vfd-reviewed-wording",  # fresh retained sample 30
+    "ad943a0d9c33a49b7ab46560d5bf5ac3973050f2131984841e3b6f6a7aa27de1":
+        "vfd-reviewed-adult-context",  # fresh retained sample 73
+}
+
+
+def assess_reviewed_unit(text):
+    """Withhold exact unchanged reviewed units; never correct their text."""
+    normalized = unicodedata.normalize("NFC", text.strip())
+    return REVIEWED_UNIT_EXCLUSIONS.get(hashlib.sha256(normalized.encode("utf-8")).hexdigest())
 
 
 def validate_source(source):
@@ -86,6 +102,9 @@ def iter_documents(manifest, snapshot_dir, *, stats=None):
                         # Withheld turns reserve gaps; never join independent rows.
                         if text.strip().lower() in {"", "x"}:
                             stats["rejected:vfd-dummy-unit"] += 1
+                            items.append(CONTEXT_BREAK)
+                        elif reason := assess_reviewed_unit(text):
+                            stats["rejected:" + reason] += 1
                             items.append(CONTEXT_BREAK)
                         elif not is_complete_sentence(text, "ja"):
                             stats["rejected:vfd-incomplete-unit"] += 1

@@ -188,3 +188,83 @@ def test_translations_cannot_be_requested_from_a_monolingual_source(tmp_path, mo
     source = fixture(inputs, monkeypatch)['source']
     with pytest.raises(ValueError, match='translations applies only to Tatoeba'):
         create_snapshot(source, tmp_path / 'snapshot', mode='full', translations=['en'])
+
+
+@pytest.mark.parametrize("role", ["utterance", "verbal_response"])
+def test_reviewed_spoken_unit_is_withheld_before_splitting_with_gap(tmp_path, monkeypatch, role):
+    import hashlib
+
+    bad = "これは合成の除外対象です。同じ発話の残りも除外します。"
+    row = ['今日は晴れています。', '00000001/00000002.jpg', '9',
+           '明日は海へ行きます。', 'PRIVATE ACTION']
+    row[0 if role == "utterance" else 3] = bad
+    manifest = fixture(tmp_path, monkeypatch, [row])
+    monkeypatch.setattr(vfd, 'REVIEWED_UNIT_EXCLUSIONS', {
+        hashlib.sha256(bad.encode()).hexdigest(): 'vfd-reviewed-wording'})
+    stats = Counter()
+    raw = next(vfd.iter_documents(manifest, tmp_path, stats=stats))
+    record = canonical_document(raw, manifest, stats, set())
+    assert [(s['text'], s['ordinal']) for s in record['sentences']] == [
+        (row[3], 1) if role == "utterance" else (row[0], 0)]
+    assert stats['rejected:vfd-reviewed-wording'] == 1
+    assert vfd.QUALITY_VERSION in record['transformations']
+
+
+def test_vfd_compressed_refinement_removes_whole_units_but_preserves_other_speakers_and_rights(
+        tmp_path, monkeypatch):
+    import hashlib
+    import sqlite3
+
+    from manabi_sentence_db.cli import main
+    from manabi_sentence_db.normalized_database import build_normalized_database
+    from manabi_sentence_db.refinement import refine_vfd
+
+    first = "今日は晴れています。"
+    bad = first + "これは合成の除外対象です。"
+    rows = [[first, '00000001/00000002.jpg', '9', bad, 'PRIVATE ACTION'],
+            [bad, '00000001/00000002.jpg', '9', '明日は海へ行きます。', 'x']]
+    manifest = fixture(tmp_path, monkeypatch, rows)
+    snapshot = tmp_path / 'manifest.json'
+    write_json(snapshot, manifest)
+    parent = tmp_path / 'parent'
+    build_corpus([snapshot], parent, record_format='jsonl', shard_compression='zstd')
+    original = list(iter_records(parent, verify_build(parent)))
+    before = {str(p.relative_to(parent)): sha256_file(p) for p in parent.rglob('*') if p.is_file()}
+    snapshot.rename(tmp_path / 'retired-manifest.json')
+    (tmp_path / 'publisher.zip').rename(tmp_path / 'retired-raw.zip')
+    monkeypatch.setattr(vfd, 'REVIEWED_UNIT_EXCLUSIONS', {
+        hashlib.sha256(bad.encode()).hexdigest(): 'vfd-reviewed-wording'})
+    output = tmp_path / 'refined'
+    assert main(['refine-vfd', '--build', str(parent), '--output', str(output)]) == 0
+    records = list(iter_records(output, verify_build(output)))
+    expected = copy.deepcopy(original)
+    expected[0]['sentences'] = [original[0]['sentences'][0]]
+    expected[1]['sentences'] = [original[1]['sentences'][-1]]
+    assert records == expected
+    assert records[0]['sentences'][0]['text'] == first
+    assert records[1]['sentences'][0]['ordinal'] == 2
+    assert before == {str(p.relative_to(parent)): sha256_file(p) for p in parent.rglob('*') if p.is_file()}
+    catalog = verify_build(output)
+    assert catalog['statistics']['rejected:vfd-reviewed-wording'] == 4
+    assert catalog['options']['refinement']['policy'] == vfd.QUALITY_VERSION
+    archive = export_normalized(output, tmp_path / 'refined.zip')
+    with zipfile.ZipFile(archive) as z:
+        occurrences = [json.loads(line) for line in z.read('occurrences.jsonl').splitlines()]
+    assert all(r['previous_id'] is None and r['next_id'] is None for r in occurrences)
+    database = tmp_path / 'consumer.sqlite'
+    build_normalized_database(archive, database)
+    with sqlite3.connect(database) as db:
+        metadata = dict(db.execute('SELECT key,value FROM metadata'))
+    assert json.loads(metadata['catalog'])['options']['refinement']['policy'] == vfd.QUALITY_VERSION
+    assert json.loads(metadata['refinement_parent_catalog']) == verify_build(parent)
+    again = tmp_path / 'again'
+    refine_vfd(output, again)
+    assert list(iter_records(again, verify_build(again))) == records
+    assert not list(output.rglob('*.sqlite*'))
+
+
+def test_vfd_reviewed_exact_units_do_not_ban_related_photography_or_clothing():
+    assert vfd.assess_reviewed_unit("この市場の日常風景を撮っっています。") == 'vfd-reviewed-wording'
+    assert vfd.assess_reviewed_unit("私のファースト・トップレスよ。") == 'vfd-reviewed-adult-context'
+    assert vfd.assess_reviewed_unit("この市場の日常風景を撮っています。") is None
+    assert vfd.assess_reviewed_unit("私の新しいトップスよ。") is None

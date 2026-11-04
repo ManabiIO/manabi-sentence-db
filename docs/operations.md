@@ -391,3 +391,10 @@ SQLite integrity/foreign-key checks and checks of all 14 occurrence links adjace
 to the excluded pairs passed. Processing used no network access and did not
 activate a serving replacement. Four remaining numeric-disagreement signals
 remain diagnostic rather than evidence of confirmed errors.
+
+
+For a previously built VFD input, `mise run refine-vfd -- --build BUILD --output NEW`
+applies the current exact-unit omissions without a raw-source download or scan.
+The whole original spoken unit and all its segmented siblings are withheld;
+independent turns/rows, attribution and original ordinal gaps survive. Inspect
+retained-output samples before publishing the refined compressed archives.

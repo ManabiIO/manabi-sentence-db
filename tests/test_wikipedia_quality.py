@@ -349,3 +349,67 @@ def test_v9_admission_preserves_original_positions_and_attribution():
     assert record["license"] == source["license"]
     assert record["attribution"] == source["attribution"]
     assert stats["rejected:wikipedia-dependent-fragment"] == 2
+
+
+@pytest.mark.parametrize("text", [
+    "代表的な事例の内訳は下の通りである。",
+    "主な条件は上のとおりです。",
+    "近世以降の鬼瓦には。",
+    "のCMに登場する人物について説明する。",
+    "の15個のみである。",
+])
+def test_v10_rejects_missing_list_topic_predicate_and_leading_genitive(text):
+    assert assess_wikipedia_sentence(text) == ("wikipedia-dependent-fragment", [])
+
+
+@pytest.mark.parametrize("text", [
+    "近世以降の鬼瓦には多くの種類がある。",
+    "「には」という表現を使った。",
+    "この説明では、助詞を「には」。",
+    "この道は坂の下の通りに続いている。",
+    "自宅の住所は坂の下の通りである。",
+    "条件は下の通りにある店舗で働くことです。",
+    "特徴は上の通りからもよく見える。",
+    "条件は年齢と住所の二つである。",
+    "のどが痛いので病院へ行く。",
+    "のれんを店の入口に掛けた。",
+    "15個のみである。",
+    "このCMに登場する人物について説明する。",
+    "この数の15個のみである。",
+])
+def test_v10_preserves_complete_clauses_quoted_particles_and_ordinary_no_words(text):
+    assert assess_wikipedia_sentence(text) == (None, [])
+
+
+# Exact unchanged CC BY-SA Wikipedia examples and citations: docs/sources.md.
+@pytest.mark.parametrize(("text", "reason"), [
+    ("餌は、端脚類、橈脚類、オキアミ類、アミ類、イカ類、魚類を捕食している。", "wikipedia-reviewed-wording"),
+    ("8月30日 正八位。", "wikipedia-dependent-fragment"),
+    ("香港で最も北に位置する区でそう名付けられて、香港と中国本土が陸地連接区の二つの一つ（もう一つは元朗区）。", "wikipedia-reviewed-wording"),
+    ("近代式下水道は18世紀以降に水系伝染病予防や地域環境改善の施設としして建設されたものをいうが、日本で最初といわれることもある東京の神田下水も当初は雨水排除が目的であった。", "wikipedia-reviewed-wording"),
+    ("日本では1985年8月に社団法人日本造園建設業協会が国際園芸家協会 (AIPH) に加盟し、その後国際園芸博覧会の招請している。", "wikipedia-reviewed-wording"),
+    ("こうして1819年に、名称を国立の美術学校（エコール・ナシオナル・シュペリウール・デ・ボザール）に改称となった。", "wikipedia-reviewed-wording"),
+    ("素数 p > 7 は、次の合同関係を満たすときウォルステンホルム素数という。", "wikipedia-dependent-fragment"),
+    ("アルゴリズム制は電子政府の文献において補足されない、または公的な行政の実践における、新しい問題を提起する。", "wikipedia-reviewed-wording"),
+    ("括弧内は一部便のみ経由。", "wikipedia-dependent-fragment"),
+ ])
+def test_v10_withholds_demonstrated_exact_errors_without_rewriting(text, reason):
+    assert assess_wikipedia_sentence(text) == (reason, [])
+
+
+def test_v10_retains_correct_related_wording_and_source_gaps():
+    source = yaml.safe_load((Path(__file__).parents[1] / "sources/wikipedia-ja.yaml").read_text())
+    texts = ["魚は小さなエビやイカを捕食している。", "近世以降の鬼瓦には。",
+             "近代式下水道は地域環境を改善する施設として建設された。"]
+    raw = dict(native_id="v10-gap", language="ja", title="架空の例文集",
+               url="https://example.invalid/examples", license=source["license"],
+               attribution=source["attribution"],
+               sentences=[{"text": text, "source_ordinal": i * 3} for i, text in enumerate(texts)])
+    stats = Counter()
+    record = canonical_document(raw, dict(source_id="wikipedia-ja", snapshot_id="fixture", source=source),
+                                stats, set())
+    assert [(s["ordinal"], s["text"]) for s in record["sentences"]] == [(0, texts[0]), (6, texts[2])]
+    assert record["license"] == source["license"]
+    assert record["attribution"] == source["attribution"]
+    assert all(s["review_state"] == "unreviewed" for s in record["sentences"])
+    assert WIKIPEDIA_QUALITY_VERSION in record["transformations"]
