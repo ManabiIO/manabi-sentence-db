@@ -3,88 +3,67 @@
 This is the current pipeline checkpoint and supersedes historical running/queued
 statements below. Generated corpus text and detailed evidence stay outside Git.
 
-## Latest: 1,972,952 Wikipedia occurrences published; next disjoint cohort running
+## Latest: larger Wikipedia and VFD sources complete; reviewed refinement dispatched
 
-Continuation: the next cohort remains active; partial extraction has passed
-**45,500 works / 858,734 occurrences**, without a completion claim. A separate
-bounded native/storage pilot is waiting on the same actual Linux producer lock.
-It selects up to 60 complete articles per topic from the **already published v9
-cohort**, includes the full MASSIVE source, and reuses all three qualified analysis
-parents. Its source projection matched the ordinary exporter byte-for-byte on a
-tiny host fixture. It will measure compact SQLite v11 including content, all
-indexes, metadata and prepared word links, with per-table allocation and fresh
-query samples. No full baseline verification, competing serving engine, full
-serving candidate or activation is included. Exact local jobs and stage receipts
-are recorded in the private checkpoint; do not dispatch copies.
+The disjoint Wikipedia successor completed **120,618 articles / 1,783,280
+occurrences**, in **16 ZIPs / 420,517,443 compressed bytes**, with independent
+member verification and **exit 0**. Build `build_2b2fb932430e25eae7038956591a4c11`,
+catalog SHA-256 `8b437875ce560ebf5be93d8a8d8bbe74c6bd0d27f9604e63ee1c49827a9a043a`.
+It selected 127,197 new page IDs after excluding all 170,976 earlier IDs before
+quotas. No dump download, metadata reindex or repeated earlier extraction.
 
-The new **`yahoo-vfd-ja`** adapter adds a conservative candidate for everyday
-conversation. Publisher CC BY 4.0 and paper §3.2 establish crowdwritten Japanese
-spoken pairs. A single pinned **6,576,449-byte compressed acquisition** was reused
-as a canonical snapshot; no duplicate download or uncompressed bulk file.
-All 96 development sample pairs were read. The adapter keeps punctuated spoken
-units, preserves exact pair boundaries and omitted-turn gaps, and excludes
-images, image paths and non-verbal actions. **25 focused tests pass; 1,397 full
-host tests pass, with one existing native-backend-only test skipped because this
-host environment lacks that optional binary.** Ruff and 26 source configs pass.
-Its frozen Linux/native-backend fixture → full compressed source build →
-whole-work bucket export/member verification → fresh 96-text review preparation
-is dispatched, waiting on the same Linux lock. It reuses the cached snapshot and
-has no network, native linguistic analysis, serving build or activation. Require
-exit 0 and the fresh retained-output review before source publication; raw
-314,895 TSV rows are not admitted/novel sentences. Exact jobs and stage receipts
-are in the private checkpoint. Do not repeat acquisition or dispatch copies.
+**All 264 fresh topic-stratified examples were read by an assistant.** Thirteen
+have demonstrated problems: nine exact wording/list/formula/legend entries and
+four examples covered by narrow structural rules. Admission **v10** adds those
+omissions, with controls for complete clauses, quoted particles, ordinary
+の-prefixed words, street references and nominal prose. The previously published
+v9 release is unchanged. **Do not publish the unrefined successor.**
+
+VFD source qualification also completed: **277,246 independent pairs / 429,852
+occurrences**, in **35 ZIPs / 84,074,061 compressed bytes**, independent member
+verification and **exit 0**. Its actual Linux/native-schema preflight passed 25
+tests. All **96 fresh retained examples** and available original spoken units
+were read. `vfd-example-quality-v1` withholds two exact whole spoken units: one
+typing error and one adult-context line. A retained sibling must not re-expose
+withheld text through `source_unit`. **Do not publish the unrefined VFD output.**
+
+Public **`4e38a04`** implements both quality changes and `mise run refine-vfd`.
+**1,430 full host tests pass / one existing native-backend-only test skips**;
+236 focused source/refinement controls, Ruff and all 26 source configurations
+pass. Frozen Linux compressed-only refinement workers are **dispatched**, each
+under the actual producer lock, one worker / **0.25 CPU / 1 GiB**. Each runs its
+new affected Linux/native-schema tests before real data, retains exact rights,
+IDs and ordinal gaps, compares every retained record against its parent, verifies
+normalized members, and emits removal/replacement review packets. Require final
+receipts, exit 0 and review before publication. These jobs do no raw extraction,
+network acquisition, native linguistic analysis, serving build or activation.
+Exact job identities and evidence are in the private resume checkpoint.
+
+The bounded Wikipedia/MASSIVE native/storage pilot is still running on the same
+lock. Its source stage selected **660 whole articles / 11,775 distinct texts**
+from the **already published v9 cohort**, plus all **12,820 MASSIVE texts**.
+Both compressed native imports completed and preserve reusable analyses. Final
+compact SQLite v11 byte allocation (all indexes, metadata and word links) and
+fresh query review remain pending. This is a balanced pilot, not a population
+size/quality estimate. Do not launch copies or repeat the verified baseline.
+Keep the **8 GB serving target / 10 GB ceiling**; source-release storage is a
+separate budget. No new preview corpus is active.
 
 The [large November 4 Wikipedia supplement](https://github.com/ManabiIO/manabi-sentence-db/releases/tag/corpus-wikipedia-expanded-2026-11-04)
-is **public**: **124,937 articles / 1,972,952 sentence occurrences**, in
-**16 normalized-v2 ZIPs / 471,996,558 compressed bytes**. All twenty uploaded
-source/metadata asset sizes and SHA-256 digests matched; an unauthenticated
-`additions.json` download was verified. Its SHA-256 is
-`8f3be7926ed04966e0ebc66490d0512ed4805b7dbd552fe8ce6b5bb515b6b9da`.
-The latest full release remains `corpus-2026-10-24-prose`.
+remains public: **124,937 articles / 1,972,952 occurrences**, in **16 normalized-v2
+ZIPs / 471,996,558 compressed bytes**. All twenty remote sizes/SHA-256 digests
+matched; its unauthenticated manifest was verified. No publication is repeated.
+The completed IDs-only comparison across that Wikipedia cohort and MASSIVE
+measured **1,958,519 distinct texts**, **1,943,716 absent from all three preserved
+analysis caches**, before content/native eligibility and final serving admission.
+Reuse its ledger and reports; these are not final searchable addition counts.
 
-Every work retains CC BY-SA 4.0, contributor/revision/history citations, snapshot
-identity, processing lineage and context gaps. Source extraction, metadata indexing
-and existing native linguistic analyses were not repeated for this refinement.
-No private serving/native database, private captions, raw dump, images or audio
-were uploaded. This source publication does **not** activate the search preview.
-
-The original 264-example assistant packet was read completely. Admission v9
-(`6985215`) withholds 440 narrow structural remnants, three hash-pinned wording
-errors and one detailed self-harm passage, removing two now-empty works. Retained
-fields were independently compared to the parent during export; every ZIP member
-count/hash was independently verified. All 252 surviving reviewed examples match
-exactly, and all 12 fresh replacements were read. No further demonstrated exact
-omission was identified. Occurrences remain `unreviewed`: this is not a population
-quality estimate or native-speaker certification. Terse, nominal, awkward and
-context-dependent prose can remain. Original v7/v8 transport buckets are withheld;
-publish/use the qualified v9 output, build
-`build_0227dbd5022d182d7cb9114de66733ac`, catalog SHA-256
-`8f5613dbc2864beafdeac10acba885eef01b093b4a17bd6f6c3899c929208af1`.
-The source worker exited 0 in 4,879.10 seconds, peak cgroup memory 878,755,840 bytes.
-
-A completed compressed-member/IDs-only scan measured **1,945,699 distinct texts
-across the Wikipedia buckets**. Wikipedia plus the already published MASSIVE
-source contain **1,958,519 distinct texts**; **1,943,716 are absent from all three
-preserved analysis caches** (the verified combined baseline, qualified conversation/
-caption growth, and prior JMRD/Wikipedia import). This is exact text overlap before
-native/content eligibility, not a final searchable addition count or universal
-novelty claim. The 166,563,840-byte ledger stores no sentence text. The scan took
-563.38 seconds, peak cgroup memory 764,735,488 bytes; no native calls, serving index
-build or repeated full baseline verification. See private receipts before any
-serving-size/admission decision. Keep the **8 GB target / 10 GB serving ceiling**;
-source-release storage is a separate budget.
-
-**Next source cohort is RUNNING**, one worker / **0.25 CPU / 1 GiB**, using the
-actual Linux producer lock. It reuses the body-free metadata index and excludes
-all **170,976 earlier page IDs before quotas**. It selected **127,197 genuinely new article IDs** after excluding earlier
-selections, from a requested 20,000/topic + 50,000 general quota (250,000 maximum).
-Selection is not an admitted work/sentence count; cached-input extraction is in
-progress. It uses cached raw inputs for genuinely new pages, admission v9, compressed
-canonical shards and whole-work 8,000-article ZIP buckets. Independent member
-verification and fresh 24/topic sampling share one output scan. Both the remapped
-host fixture and actual Linux fixture passed. No source reacquisition, real metadata
-reindex, native linguistic analysis, serving rebuild or activation is included.
-Require stage receipts, exit 0 and fresh assistant review before publication.
+All works preserve source licenses, authorship/origin evidence, contributor,
+revision/history citations, snapshot identity and processing lineage. Occurrences
+remain `unreviewed`; assistant inspection is not a population quality estimate or
+native-speaker certification. No private serving/native database, private captions,
+raw dump, images or audio is published. The October 24 full release remains latest.
+See [the exact source decisions](sources.md#wikipedia-successor-quality-review--2026-11-04).
 
 ## Qualified source-CPU and reusable-import improvements
 
