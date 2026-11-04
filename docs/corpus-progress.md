@@ -4,53 +4,69 @@ This is the current corpus-pipeline checkpoint. It supersedes earlier dated
 notes describing these completed stages as running or queued. Generated source
 text and evidence remain outside Git. Alex resumed work on 2026-11-02.
 
-## Latest pass: reviewed practical requests added as the next source
+## Latest pass: 562,881 source occurrences published; larger Wikipedia cohort recovered
 
-Public producer `06a5a3d` adds **MASSIVE 1.1 Japanese** (`massive-ja`). Full local
-validation passes: **1,327 tests**, Ruff and **25 source configurations**, and main CI passes. The
-publisher explicitly grants CC BY 4.0 for the dataset, separately from its
-Apache-licensed software, and documents human localization from SLURP. The
-16,521 Japanese rows are upstream counts, **not yet admitted growth**.
+The [November 4 prose, dialogue and practical-request supplement](https://github.com/ManabiIO/manabi-sentence-db/releases/tag/corpus-prose-dialogue-2026-11-04)
+is public. Three normalized-v2 ZIPs total **123,984,131 compressed bytes** and
+contain **562,881 source occurrences** before cross-source deduplication and
+consumer admission. All seven uploaded asset sizes/SHA-256 digests matched,
+and the public manifest was downloaded without authentication and checked.
+The latest full release remains `corpus-2026-10-24-prose`.
 
-Admission requires at least two distinct non-author reviewers, with no adverse
-independent grammar/spelling/intent/slot/language judgments. Only Japanese raw
-utterances are retained. English prompts can differ after entity localization
-and are deliberately not represented as translations; worker IDs, annotations,
-judgments and other locales are excluded. Translated origin remains explicit,
-with ordinary shared sentence/content checks and `unreviewed` occurrence state.
-Every independent request has its own work, with no invented neighboring context.
+| Source archive | Works | Occurrences | Distinct texts within archive | Compressed bytes |
+|---|---:|---:|---:|---:|
+| Wikipedia v8 expansion | 26,695 | 437,881 | 434,474 | 101,502,099 |
+| JMRD refined dialogue | 5,075 | 111,378 | 59,116 | 18,956,495 |
+| MASSIVE Japanese requests | 13,598 | 13,622 | 12,820 | 3,525,537 |
 
-The pinned **40,251,390-byte compressed archive** is cached and registered for
-ordinary offline snapshot reuse. The acquired file was moved into its snapshot;
-there is no second physical bulk copy or repeat download. A bounded 64 KiB
-header/schema probe checked publisher metadata and row field types without a
-full competing scan. A single compressed-only source worker is **dispatched and
-waiting on the existing Linux producer lock**, behind already running work. It
-runs a tiny Linux fixture before full extraction, then normalized member/hash
-checks and a 96-text assistant review packet. No native analysis or serving
-index is included. Raw source text is never extracted to disk; selected Japanese
-is buffered compressed until the full bounded archive and licensing evidence
-pass. No source count, actual quality rate or full completion is yet claimed.
+Do not sum archive-distinct counts as global novel texts. Wikipedia/JMRD retain
+CC BY-SA 4.0; MASSIVE retains CC BY 4.0 and SLURP credit. Rights, citations,
+snapshot identities, transformations and context gaps remain embedded. No private
+serving/native SQLite, raw mixed-rights JMRD, private captions, images or audio
+were published. Source publication does not activate the search preview.
 
-JMRD/Wikipedia native qualification has now **completed**: **493,606 distinct
-input texts**, with **485,351 eligible texts absent from both verified parents**,
-before pending quality omissions. All 549,277 occurrence records and the new
-sentence payloads passed import validation. The compressed non-serving import is
-**1,410,818,048 bytes**; this is not measured final serving growth. Its **487,215
-new analyses** and 6,391 reused analyses are cached. Do not repeat those native
-calls or the completed baseline verification. The native process was replaced to
-release its heaps before further source work.
+Wikipedia refinement checked all 437,889 original occurrences, omitting exactly
+eight: four structural fragments, three hash-pinned wording errors and one graphic
+passage. JMRD refinement omits five whole utterances / ten fragments. Every
+retained record was independently compared to its parent, and normalized member
+counts/hashes were checked. Existing 132/96-example assistant reviews were reused;
+no raw extraction, native analysis or baseline verification was repeated.
 
-Compressed Wikipedia v8 refinement has acquired the same producer lock. Its
-verified canonical output retains **26,695 works / 437,881 occurrences**, omitting
-**eight**: four structural fragments, three exact wording errors and one exact
-graphic passage. Archive export and independent retained-field/member-hash
-checks remain pending; JMRD refinement follows. MASSIVE and the larger Wikipedia
-source phase remain waiting, with no FIFO guarantee. No serving candidate or
-activation was started. The private checkpoint binds exact receipts/recipes.
-Use corrected source metadata/occurrences together with cached native analyses
-in later integration; the pre-refinement native import must not become final
-content unchanged. The larger-cohort review and serving-size gates still apply.
+MASSIVE's full source build is now complete. The original file uses `|` between
+language labels whereas the guide displays `&`; producer **`c99daa6`** fixes this
+representation mismatch with identical review thresholds. It retains human
+localization origin, requires positive independent publisher judgments, exports
+no English prompts as translations, and keeps unrelated requests in separate
+works. All 96 fresh hash-selected examples were read. Purposeful ellipsis and
+nominal requests remain part of this register. Occurrences stay `unreviewed`;
+assistant inspection/publisher scores are not native-speaker certification.
+Full local checks and main CI pass: **1,340 tests**, Ruff and **25 source configs**.
+
+**Much larger Wikipedia extraction is preserved, not being repeated:** the cached
+snapshot produced **124,939 works / 1,973,399 occurrences** after selecting
+**131,147 new page IDs**, with 39,829 earlier choices excluded before quotas.
+Its metadata index, selection and verified v7 canonical build all completed.
+Only bucket export failed: Python's identity ledger used a 64 MiB `/tmp` tmpfs,
+ignoring the configured disk-backed `SQLITE_TMPDIR`. This was not host disk
+exhaustion. `c99daa6` routes that ledger to the configured scratch directory;
+invalid scratch paths fail explicitly, and cancellation closes the ledger.
+
+A new frozen worker is **running** on the same Linux producer lock, one worker /
+**0.25 CPU / 1 GiB**. It reads the preserved canonical input only, applies v8,
+compares retained fields against the parent while exporting 8,000-work buckets,
+checks every normalized member and prepares a fresh topic-stratified review
+packet. There is no source reacquisition, XML re-extraction, metadata reindex,
+selection replay or native analysis. Old partial v7 buckets are not published.
+The exact recipe/stage hashes are in the private checkpoint. Require final
+receipts and fresh assistant review before publishing the larger cohort.
+
+Existing native qualification remains reusable: **493,606 input texts**, with
+**485,351 eligible texts absent from both prior parents** before the eighteen
+quality omissions, in a **1,410,818,048-byte non-serving import**. All 487,215 new
+analyses plus 6,391 reuses are cached. Use corrected source metadata/occurrences
+with those analyses at later integration; do not serve pre-refinement records
+unchanged or repeat the 2,038,328-text baseline verification. Final combined
+serving size remains unmeasured; retain the **8 GB target / 10 GB ceiling**.
 
 ## Previous pass: two completed source batches; compressed quality refinement queued
 
