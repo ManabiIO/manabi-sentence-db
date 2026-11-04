@@ -159,10 +159,11 @@ def test_archive_bytes_must_match_reviewed_release(tmp_path, monkeypatch):
         list(yj.iter_documents(manifest, tmp_path))
 
 
-def test_reviewed_source_wording_is_withheld_without_rewriting_other_captions(tmp_path, monkeypatch):
+@pytest.mark.parametrize("identity", [22, 62])
+def test_reviewed_source_wording_is_withheld_without_rewriting_other_captions(tmp_path, monkeypatch, identity):
     from collections import Counter
 
-    bad = {"id": 22, "image_id": 9, "caption": "庭の草を犬が三頭立っています。"}
+    bad = {"id": identity, "image_id": 9, "caption": "庭の草を犬が三頭立っています。"}
     good = {"id": 23, "image_id": 9, "caption": "庭で犬が三頭立っています。"}
     monkeypatch.setattr(yj, "REVIEWED_WORDING_EXCLUSIONS", {
         bad["id"]: hashlib.sha256(canonical_json(bad)).hexdigest()}, raising=False)

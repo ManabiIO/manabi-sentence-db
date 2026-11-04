@@ -902,9 +902,10 @@ full source admission, overlap, serving predicate checks, representative review
 and size measurements remain required before activation. The publisher count
 is not a measured corpus increase.
 
-A November 3 assistant development inspection of the first 24 image-grouped rows
-withholds exact caption ID 22 for awkward source wording. Its entire original
-row is SHA-256-pinned; changed text fails for re-review rather than being silently
+A November 3 assistant development inspection of a 64-example image-grouped
+prefix withholds exact caption ID 22 for awkward source wording and ID 62 for
+a source typo. Each entire original row is SHA-256-pinned; changed text fails
+for re-review rather than being silently
 omitted or repaired. This is a narrow curation decision, not a general grammar
 filter, native-speaker certification or a population quality estimate. Other rows
 retain their original wording and unreviewed status. New builds apply this

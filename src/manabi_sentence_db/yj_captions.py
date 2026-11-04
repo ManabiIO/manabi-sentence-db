@@ -22,10 +22,13 @@ MEMBER = "yjcaptions26k_clean.json"
 MAX_MEMBER_BYTES = 28825849
 MAX_ARCHIVE_BYTES = 4257429
 
-# One exact caption withheld after assistant development review of awkward
-# source wording. This is an individual curation decision, not a grammar rule
+# Exact captions withheld after assistant development review of awkward
+# source wording or a source typo. These are individual decisions, not a grammar rule
 # or native-speaker certification. Never silently repair or omit changed text.
-REVIEWED_WORDING_EXCLUSIONS = {22: "f17e689705aab10af269c0e67af54e96fe69a895dc51c1cdca5ed9752151112c"}
+REVIEWED_WORDING_EXCLUSIONS = {
+    22: "f17e689705aab10af269c0e67af54e96fe69a895dc51c1cdca5ed9752151112c",
+    62: "d2dcc556c837d13f20c0c3bc8c450b87e20f1765749d802ae7e16b602af64e39",
+}
 
 
 def iter_documents(manifest, snapshot_dir, *, stats=None):
