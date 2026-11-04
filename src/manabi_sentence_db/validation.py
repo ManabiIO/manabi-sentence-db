@@ -2,16 +2,44 @@ from __future__ import annotations
 
 import hashlib
 import math
+import re
 import unicodedata
 from functools import lru_cache
 from pathlib import Path
 
 from jsonschema import Draft202012Validator
 
+try:
+    from jsonschema_rs import Draft202012Validator as NativeValidator
+except ImportError:
+    # Older frozen consumers may not have the newly declared native dependency.
+    # Keep their existing semantics; builds record the actual backend below.
+    NativeValidator = None
+
 from .licenses import validate_license, validate_rights
 from .serialization import DataError, load_yaml, read_json
 
 SCHEMAS = Path(__file__).parent / "schemas"
+_PYTHON_EXTRA_WHITESPACE = re.compile(r"[\x1c-\x1f\x85]")
+
+
+def _native_compatible(value):
+    """Constrain fast acceptance to the shared JSON/regular-expression domain.
+
+    The native binding converts Python tuples to JSON arrays, unlike jsonschema.
+    ECMAScript regex whitespace also differs from Python's for five characters.
+    Fall back for these values instead of weakening the existing schema rules.
+    """
+    kind = type(value)
+    if kind is dict:
+        return all(type(key) is str and _native_compatible(item) for key, item in value.items())
+    if kind is list:
+        return all(_native_compatible(item) for item in value)
+    if kind is str:
+        return _PYTHON_EXTRA_WHITESPACE.search(value) is None
+    if kind is float:
+        return math.isfinite(value)
+    return kind in (type(None), bool, int)
 
 
 @lru_cache
@@ -21,7 +49,19 @@ def validator(name: str) -> Draft202012Validator:
     return Draft202012Validator(schema)
 
 
+@lru_cache
+def _native_validator(name):
+    return NativeValidator(validator(name).schema, validate_formats=False)
+
+
 def validate(value: dict, name: str) -> None:
+    if NativeValidator is not None and _native_compatible(value):
+        try:
+            if _native_validator(name).is_valid(value):
+                return
+        except (ValueError, TypeError, OverflowError):
+            # Preserve the established diagnostics and Python input behavior.
+            pass
     errors = list(validator(name).iter_errors(value))
     if errors:
         error = min(errors, key=lambda e: len(e.absolute_path))

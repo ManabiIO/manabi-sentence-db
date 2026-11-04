@@ -276,15 +276,23 @@ def _git_revision() -> str | None:
 
 
 def _runtime_versions() -> dict:
+    from .validation import NativeValidator
+
     dependencies = {}
     for name in [
         "PyYAML", "jsonschema", "mwparserfromhell", "defusedxml", "zstandard", "xlrd"
     ]:
         dependencies[name] = importlib.metadata.version(name)
+    try:
+        dependencies["jsonschema-rs"] = importlib.metadata.version("jsonschema-rs")
+    except importlib.metadata.PackageNotFoundError:
+        dependencies["jsonschema-rs"] = "not-installed"
     return {
         "python": platform.python_version(),
         "sqlite": sqlite3.sqlite_version,
         "dependencies": dependencies,
+        "schema_validation": "jsonschema-rs-with-python-compatibility"
+        if NativeValidator is not None else "python-jsonschema",
     }
 
 
