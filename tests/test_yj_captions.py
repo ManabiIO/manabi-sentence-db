@@ -157,3 +157,46 @@ def test_archive_bytes_must_match_reviewed_release(tmp_path, monkeypatch):
     path.write_bytes(raw)
     with pytest.raises(DataError, match="archive checksum"):
         list(yj.iter_documents(manifest, tmp_path))
+
+
+def test_reviewed_source_wording_is_withheld_without_rewriting_other_captions(tmp_path, monkeypatch):
+    from collections import Counter
+
+    bad = {"id": 22, "image_id": 9, "caption": "庭の草を犬が三頭立っています。"}
+    good = {"id": 23, "image_id": 9, "caption": "庭で犬が三頭立っています。"}
+    monkeypatch.setattr(yj, "REVIEWED_WORDING_EXCLUSIONS", {
+        bad["id"]: hashlib.sha256(canonical_json(bad)).hexdigest()}, raising=False)
+    manifest = fixture(tmp_path, monkeypatch, [bad, good])
+    stats = Counter()
+    docs = list(yj.iter_documents(manifest, tmp_path, stats=stats))
+    assert [d["native_id"] for d in docs] == ["23"]
+    assert docs[0]["sentences"][0]["text"] == good["caption"]
+    assert stats["rejected:yj-reviewed-source-wording"] == 1
+
+
+def test_reviewed_wording_pin_rejects_changed_rows_before_omission(tmp_path, monkeypatch):
+    original = {"id": 22, "image_id": 9, "caption": "庭の草を犬が三頭立っています。"}
+    monkeypatch.setattr(yj, "REVIEWED_WORDING_EXCLUSIONS", {
+        22: hashlib.sha256(canonical_json(original)).hexdigest()}, raising=False)
+    corrected = {**original, "caption": "庭で犬が三頭立っています。"}
+    manifest = fixture(tmp_path, monkeypatch, [corrected])
+    with pytest.raises(DataError, match="wording exclusion.*changed"):
+        list(yj.iter_documents(manifest, tmp_path))
+
+
+def test_reviewed_wording_exclusion_does_not_become_a_general_text_filter(tmp_path, monkeypatch):
+    row = {"id": 22, "image_id": 9, "caption": "庭の草を犬が三頭立っています。"}
+    monkeypatch.setattr(yj, "REVIEWED_WORDING_EXCLUSIONS", {
+        22: hashlib.sha256(canonical_json(row)).hexdigest()}, raising=False)
+    same_wording_elsewhere = {**row, "id": 23}
+    manifest = fixture(tmp_path, monkeypatch, [row, same_wording_elsewhere])
+    assert [d["native_id"] for d in yj.iter_documents(manifest, tmp_path)] == ["23"]
+
+
+def test_duplicate_reviewed_rows_still_fail_after_omission(tmp_path, monkeypatch):
+    row = {"id": 22, "image_id": 9, "caption": "庭の草を犬が三頭立っています。"}
+    monkeypatch.setattr(yj, "REVIEWED_WORDING_EXCLUSIONS", {
+        22: hashlib.sha256(canonical_json(row)).hexdigest()}, raising=False)
+    manifest = fixture(tmp_path, monkeypatch, [row, row])
+    with pytest.raises(DataError, match="Duplicate"):
+        list(yj.iter_documents(manifest, tmp_path))

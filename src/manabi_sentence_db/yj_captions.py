@@ -22,6 +22,11 @@ MEMBER = "yjcaptions26k_clean.json"
 MAX_MEMBER_BYTES = 28825849
 MAX_ARCHIVE_BYTES = 4257429
 
+# One exact caption withheld after assistant development review of awkward
+# source wording. This is an individual curation decision, not a grammar rule
+# or native-speaker certification. Never silently repair or omit changed text.
+REVIEWED_WORDING_EXCLUSIONS = {22: "f17e689705aab10af269c0e67af54e96fe69a895dc51c1cdca5ed9752151112c"}
+
 
 def iter_documents(manifest, snapshot_dir, *, stats=None):
     stats = stats if stats is not None else Counter()
@@ -72,6 +77,12 @@ def iter_documents(manifest, snapshot_dir, *, stats=None):
                                     ledger.execute("INSERT INTO seen VALUES (?)", (identity,))
                                 except sqlite3.IntegrityError as error:
                                     raise DataError("Duplicate YJ caption identity") from error
+                                expected = REVIEWED_WORDING_EXCLUSIONS.get(identity)
+                                if expected is not None:
+                                    if hashlib.sha256(canonical_json(row)).hexdigest() != expected:
+                                        raise DataError("YJ wording exclusion source row changed; review the pin")
+                                    stats["rejected:yj-reviewed-source-wording"] += 1
+                                    continue
                                 if not is_complete_sentence(text, "ja"):
                                     stats["rejected:yj-incomplete-caption"] += 1
                                     continue

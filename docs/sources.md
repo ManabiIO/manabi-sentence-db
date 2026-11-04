@@ -902,6 +902,16 @@ full source admission, overlap, serving predicate checks, representative review
 and size measurements remain required before activation. The publisher count
 is not a measured corpus increase.
 
+A November 3 assistant development inspection of the first 24 image-grouped rows
+withholds exact caption ID 22 for awkward source wording. Its entire original
+row is SHA-256-pinned; changed text fails for re-review rather than being silently
+omitted or repaired. This is a narrow curation decision, not a general grammar
+filter, native-speaker certification or a population quality estimate. Other rows
+retain their original wording and unreviewed status. New builds apply this
+exclusion from the cached snapshot; older frozen builds need the same exact work
+withheld when preparing their next qualified addition. Snapshot acquisition does
+not need to be repeated.
+
 For the opt-in Global Voices source, raw HTML is local rights evidence, not a public snapshot asset: it still includes withheld third-party quotations and caption text. The adapter is absent from the raw snapshot workflow and `snapshot-pack` rejects its pages. Public corpus exports contain only the reviewed eligible Japanese paragraphs.
 
 
