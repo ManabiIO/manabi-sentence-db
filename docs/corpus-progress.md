@@ -5,6 +5,37 @@ statements below. Generated corpus text and detailed evidence stay outside Git.
 
 ## Latest: 1,783,000 further Wikipedia and 429,846 VFD occurrences published
 
+**Serving-admission follow-up:** current refined VFD has **218,953 distinct
+Japanese texts**, of which **215,007 are absent from the verified combined
+consumer baseline**. Exact novelty uses an **18,726,912-byte IDs-only ledger**;
+source text remains compressed. These counts precede native/content admission,
+so they are not yet searchable growth. No acquisition or extraction was repeated.
+
+Whole-work consumer pilots are complete in the selected compact SQLite v11
+format, including search indexes, metadata and word links: **1,950 JMRD texts /
+7,315,456 bytes**, **9,027 MRMP / 22,794,240**, **511 complete YJ captions /
+3,055,616**, and **820 VFD / 3,829,760**. Peak memory was **491,458,560 bytes**.
+All 11,488 earlier-source analyses were reused; 784 new VFD analyses were saved
+in a resumable native-filesystem checkpoint. Each standalone pilot includes
+1,019,904 fixed dictionary/schema bytes, so its total size cannot be multiplied
+directly into a reliable combined-corpus estimate. These short-text pilots kept
+dictionary-free word frames through the normal compression-benefit gate.
+
+Assistant inspection read **31 of 490 recorded query rows**, including both
+compound-query matches. No sampled bare-`持つ` result was observed for
+`持っていく`. This is neither population accuracy/recall nor a combined-source
+diversity or production-latency measurement. All source occurrences stay
+**unreviewed**. Conversation still includes colloquial/context-dependent turns;
+VFD retains its image-context limitations and attribution.
+
+The full refined VFD native import is now running with qualified analysis reuse
+and durable compressed checkpoints. It has not activated a preview or changed
+production. Next is exact composed serving admission, retaining the **8 GB
+target / 10 GB complete serving ceiling**. Keep published sources available
+even when a serving batch selects a subset. The private consumer's resume index
+records exact artifacts and completion receipts; do not repeat completed source
+verification, baseline verification or native analyses.
+
 Both reviewed source supplements are public. **All 59 uploaded source/metadata
 asset sizes and SHA-256 digests matched**, and both unauthenticated manifests
 were checked. The October 24 full base remains GitHub's designated latest.
