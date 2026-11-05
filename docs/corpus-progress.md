@@ -28,13 +28,33 @@ diversity or production-latency measurement. All source occurrences stay
 **unreviewed**. Conversation still includes colloquial/context-dependent turns;
 VFD retains its image-context limitations and attribution.
 
-The full refined VFD native import is now running with qualified analysis reuse
-and durable compressed checkpoints. It has not activated a preview or changed
-production. Next is exact composed serving admission, retaining the **8 GB
-target / 10 GB complete serving ceiling**. Keep published sources available
-even when a serving batch selects a subset. The private consumer's resume index
-records exact artifacts and completion receipts; do not repeat completed source
-verification, baseline verification or native analyses.
+**Full refined VFD native admission is complete:** **218,927 eligible texts**
+from 218,953 distinct inputs, with all 277,242 works / 429,846 occurrences
+preserved in the compressed non-serving import. The reusable import is
+1,000,984,576 bytes; its analysis-only native checkpoint is 166,559,744 bytes.
+It performed 213,945 additional analyses and reused 5,008, including the pilot.
+The import took 1,777.01 seconds; peak charged memory reached the configured
+1 GiB ceiling. All records, relationships, memberships and stored scores passed
+logical import validation. These are not yet searchable additions.
+
+A combined consumer refresh is now running with full refined VFD, JMRD, MRMP,
+MASSIVE and a balanced **6,951-whole-article Wikipedia subset / 109,995
+occurrences** from the already-analyzed published v8 cohort. Source preparation
+reused **all 232,073** selected Wikipedia/JMRD/MRMP sentence analyses, with no new
+native calls. Eleven existing Wikipedia works are explicit replacements: their
+source, revision, license and attribution match, ten retain identical text,
+and the medical article omits two dense/context-dependent sentences under the
+published quality policy. Both omissions were inspected by an assistant.
+
+The sole serving candidate is staged directly in Docker's native volume to
+avoid a second full artifact transfer for activation. Its **9.8 GB build limit**
+leaves reserve below the **10 GB complete serving ceiling**; the **8 GB target**
+remains. It has not activated a preview or changed production. Exact final size,
+net growth, full index verification and query review remain pending. Keep all
+published sources available even when a serving batch selects a subset. The
+private consumer's resume index records exact artifacts and completion receipts;
+do not repeat completed source verification, baseline verification or native
+analyses.
 
 Both reviewed source supplements are public. **All 59 uploaded source/metadata
 asset sizes and SHA-256 digests matched**, and both unauthenticated manifests
