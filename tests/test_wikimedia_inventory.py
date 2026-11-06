@@ -11,6 +11,42 @@ from manabi_sentence_db.serialization import DataError, read_json
 from manabi_sentence_db.wikimedia_selection import sample_pages, select_wikimedia_documents
 
 
+@pytest.mark.parametrize("budget", [True, False, 0, -1, 8191, 8192.0, "8192"])
+def test_invalid_storage_budget_does_not_verify_snapshot_or_create_output(tmp_path, monkeypatch, budget):
+    monkeypatch.setattr(inventory, "verify_snapshot", lambda *_: pytest.fail("raw snapshot read"))
+    with pytest.raises(DataError, match="budget"):
+        inventory.index_wikimedia_metadata(tmp_path / "absent", tmp_path / "output",
+                                           max_index_bytes=budget)
+    assert not (tmp_path / "output").exists()
+
+
+def test_storage_cap_stops_growth_without_publishing_completion(tmp_path, monkeypatch):
+    snapshot = create_demo_snapshot(tmp_path / "snapshot")
+    pages = ({"native_id": str(i), "revision_id": str(i), "title": "長い題名" * 100,
+              "text": "普通の本文です。"} for i in range(1, 501))
+    monkeypatch.setattr(inventory, "snapshot_pages", lambda *a, **kw: pages)
+    output = tmp_path / "limited"
+    with pytest.raises(DataError, match="storage budget exhausted"):
+        inventory.index_wikimedia_metadata(snapshot, output, max_index_bytes=10_000)
+    assert (output / "metadata.sqlite").stat().st_size <= 8192
+    assert not (output / "manifest.json").exists()
+    with pytest.raises(FileNotFoundError):
+        inventory.select_wikimedia_metadata(output, tmp_path / "invalid-selection")
+
+
+def test_cli_budget_preserves_selection_and_is_recorded(tmp_path):
+    snapshot = create_demo_snapshot(tmp_path / "snapshot")
+    capped = tmp_path / "capped"
+    assert main(["index-wikimedia", "--snapshot", str(snapshot), "--output", str(capped),
+                 "--max-index-bytes", "65536"]) == 0
+    assert read_json(capped / "manifest.json")["max_index_bytes"] == 65536
+    uncapped = inventory.index_wikimedia_metadata(snapshot, tmp_path / "uncapped")
+    assert read_json(uncapped / "manifest.json")["max_index_bytes"] is None
+    first = inventory.select_wikimedia_metadata(capped, tmp_path / "one", per_topic=0, general=2)
+    second = inventory.select_wikimedia_metadata(uncapped, tmp_path / "two", per_topic=0, general=2)
+    assert read_json(first) == read_json(second)
+
+
 def test_indexed_selection_matches_direct_selection_without_rereading_dump(tmp_path, monkeypatch):
     snapshot = create_demo_snapshot(tmp_path / "snapshot")
     direct = select_wikimedia_documents(snapshot, tmp_path / "direct", per_topic=0, general=2)

@@ -72,7 +72,11 @@ def snapshot_pages(snapshot, manifest, progress=None):
         yield from (_xml_pages(path) if entry["role"] == "mediawiki-xml" else _api_pages(path))
 
 
-def index_wikimedia_metadata(snapshot, output, *, progress=None):
+def index_wikimedia_metadata(snapshot, output, *, progress=None, max_index_bytes=None):
+    # Validate before verifying a potentially multi-gigabyte snapshot or creating output.
+    if max_index_bytes is not None and (
+            type(max_index_bytes) is not int or max_index_bytes < 8192):
+        raise DataError("Metadata index budget must be an integer of at least 8192 bytes")
     snapshot = _canonical(snapshot)
     manifest = verify_snapshot(snapshot)
     if (manifest["source"]["adapter"] != "wikimedia"
@@ -87,6 +91,12 @@ def index_wikimedia_metadata(snapshot, output, *, progress=None):
     counts = Counter()
     compressor = zstandard.ZstdCompressor(level=6)
     with closing(sqlite3.connect(path)) as db:
+        if max_index_bytes is not None:
+            page_size = db.execute("PRAGMA page_size").fetchone()[0]
+            pages = max_index_bytes // page_size
+            actual = db.execute(f"PRAGMA max_page_count={pages}").fetchone()[0]
+            if actual != pages:
+                raise DataError("Cannot enforce metadata index storage budget")
         db.executescript("""
             PRAGMA journal_mode=OFF; PRAGMA synchronous=OFF;
             PRAGMA cache_size=-4096; PRAGMA mmap_size=0;
@@ -109,10 +119,15 @@ def index_wikimedia_metadata(snapshot, output, *, progress=None):
                     raise DataError("Conflicting Wikimedia page identity in metadata index")
                 counts["exact_duplicates"] += 1
                 continue
-            db.execute("INSERT INTO pages VALUES (?,?,?,?,?,?)", (
-                row["native_id"], fingerprint, row["revision_id"], row["title"],
-                row["source_characters"], compressor.compress(canonical_json(row["categories"])),
-            ))
+            try:
+                db.execute("INSERT INTO pages VALUES (?,?,?,?,?,?)", (
+                    row["native_id"], fingerprint, row["revision_id"], row["title"],
+                    row["source_characters"], compressor.compress(canonical_json(row["categories"])),
+                ))
+            except sqlite3.OperationalError as exc:
+                if max_index_bytes is not None and exc.sqlite_errorcode == sqlite3.SQLITE_FULL:
+                    raise DataError("Metadata index storage budget exhausted or disk capacity unavailable") from exc
+                raise
             counts["records"] += 1
         db.commit()
         if db.execute("PRAGMA quick_check").fetchone() != ("ok",):
@@ -123,6 +138,8 @@ def index_wikimedia_metadata(snapshot, output, *, progress=None):
         raise DataError("Wikimedia snapshot changed while indexing metadata")
     if not counts["records"]:
         raise DataError("No valid Wikimedia metadata to index")
+    if max_index_bytes is not None and path.stat().st_size > max_index_bytes:
+        raise DataError("Metadata index exceeded its storage budget")
     staged = output / ".manifest.json.part"
     write_json(staged, {
         "schema_version": 1, "kind": KIND, "source_id": manifest["source_id"],
@@ -131,6 +148,7 @@ def index_wikimedia_metadata(snapshot, output, *, progress=None):
         "producer_sha256": list(producer), "records": counts["records"], "counts": dict(counts),
         "bytes": path.stat().st_size, "sha256": sha256_file(path),
         "contains_article_bodies": False,
+        "max_index_bytes": max_index_bytes,
     })
     atomic_replace_file(staged, output / "manifest.json")
     return output

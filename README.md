@@ -177,10 +177,10 @@ For repeated or larger cohorts, index the snapshot's **metadata once**:
 ```sh
 mise run index-wikimedia -- \
   --snapshot data/snapshots/wikipedia-2026-10-01/manifest.json \
-  --output build/wikipedia-metadata --progress
+  --output data/research/wikipedia-metadata --max-index-bytes 2147483648 --progress
 
 mise run select-wikimedia -- \
-  --metadata-cache build/wikipedia-metadata --output build/wikipedia-next \
+  --metadata-cache data/research/wikipedia-metadata --output build/wikipedia-next \
   --per-topic 15000 --general 40000 --seed practical-growth \
   --exclude-selection build/wikipedia-selection/selection.json --progress
 
@@ -197,6 +197,12 @@ mise run export-normalized-buckets -- \
 The persistent SQLite metadata index contains page titles, revisions, compressed
 category metadata and full-page fingerprints, **no article bodies or sentence
 text**. Selections verify that index's checksum without reopening the raw XML.
+Keep the index and previous selections in a durable data directory rather than
+a disposable experiment directory. `--max-index-bytes` optionally caps the SQLite
+file through its page allocator (rounded down to whole pages); the 2 GiB above
+is an example budget, not a measured requirement. It excludes raw inputs and
+other output files. A cap/disk failure leaves no completion manifest, and partial
+indexes are not reusable selections. Invalid budgets fail before source hashing.
 Repeated `--exclude-selection` arguments must match this exact source/snapshot;
 their IDs are removed **before quotas**, so old pages cannot consume new slots.
 Every later build still verifies the raw snapshot and applies the ordinary

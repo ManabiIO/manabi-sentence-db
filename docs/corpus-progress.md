@@ -61,6 +61,50 @@ sentence is admitted. Reuse the completed inventory and compressed sample;
 prioritize a specifically reviewed clean subset before bulk acquisition or Apache
 license support. See [the findings and remaining license work](source-priorities.md#rosebleu-complete-inventory-and-bounded-text-pilot--2026-11-06).
 
+## Next Wikipedia expansion: full-dump exclusions recovered
+
+The 120,616-work normalized inventory covers only the November 4 further-source
+release, not the full cached dump. Its first growth selection plus today's v15
+batch consume that normalized reserve. Additional substantial growth should use
+previously unselected articles from the existing October 1 raw snapshot; there
+is no need to acquire another dump.
+
+The full-dump metadata index's recorded historical path is absent, and bounded
+checks of this checkout, current experiment roots, nearby project directories,
+Trash and named Docker volumes did not recover it. This does not prove that no
+copy exists elsewhere. Do not silently relabel a newly rebuilt index as the old
+verified artifact. Keep a replacement in a durable data directory, separately
+from disposable experiment output, and serialize its raw scan behind the live
+native import/refresh work.
+
+Recovered release catalogs provide the exact four disjoint prior page selections:
+**12,000 + 27,829 + 131,147 + 127,197 = 298,173 page IDs**. The union passes the
+existing snapshot/source selection validator against snapshot
+`568d86489a4548dd848d6e703bb14e3948d612d79e6b5bbaf65512a1c7f721c0`.
+This includes selected pages later rejected by source processing; it is not an
+accepted-work count or a count of eligible remaining pages. Union file SHA-256:
+`05c589f2d189c7729646c5d5cabbfd0db90a62b7b0754d5259f6a9a622b7725f`.
+
+Three remote ZIP catalogs/manifests were recovered using exact HTTP ranges,
+stable per-asset ETags, bounded response sizes, ZIP CRC checks and available
+refinement-catalog hashes; the fourth came from the retained local release.
+Only **949,785 network bytes** were read, with no sentence members and no whole
+archive download or whole-archive verification. Source metadata and range receipts
+are retained under `data/research/wikipedia-selection-recovery-20261106/`; the
+validated union and its input hashes are under
+`data/research/wikipedia-cohort-exclusions-20261001/` (generated data, not Git).
+
+`index-wikimedia --max-index-bytes` now supports an explicit SQLite file cap.
+The page allocator prevents growth beyond the cap, rounded down to whole pages;
+invalid budgets fail before source hashing. Failure cannot publish a completion
+manifest. **120 focused host tests** and Ruff pass, including real cap exhaustion
+and unchanged selected IDs. This is not a completed replacement index or Linux
+full-source qualification. Before the next guarded scan, check actual available
+host/container disk space, run the bounded Linux fixture, and bind the code,
+raw snapshot and recovered exclusion hashes. Then select disjoint whole-work
+chunks and apply the current quality/rights gates; do not guess usable yield by
+subtracting selected pages from the historical 1.52-million-page scan count.
+
 ## Earlier: v14 export complete; v15 and in-pass omission reviews qualified
 
 The v14 successor completed all 16 archives: **113,772 works / 1,673,563
