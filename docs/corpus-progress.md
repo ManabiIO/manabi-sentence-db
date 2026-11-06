@@ -55,6 +55,25 @@ The active local corpus remains unchanged. Focused quality/refinement validation
 sample, v13 removes exactly the two targeted reference fragments; this is not
 a full-export omission measurement.
 
+The follow-up **v14** candidate addresses statistical rows, article naming
+scaffolding, format/abbreviation labels and four uncovered specialist vocabulary
+clusters. It retains the existing requirement for three distinct specialist
+terms plus structural density. No article-topic bans or new exact-text exclusions
+were added. In the development sample it addresses ten of the fifteen flagged
+cases. The other five remain eligible on reconsideration: terse nominal narration,
+a complete rounding explanation, a fictional synopsis and a route comparison
+do not justify broad exclusions of names, nominal predicates or numerical prose.
+
+Validation passed **327 focused host tests**, Ruff and **260 Linux policy tests**.
+A frozen, locked, read-only scan compared all **1,656,264 per-archive sentence
+records** against v12 and v14. It found **54 new exclusions: 49 dependent
+fragments and five dense specialist records**. All 25 sampled omissions were
+read and judged justified by an assistant. The sample remains compressed; this
+is not human review or a global distinct-count measurement. Refinement is
+approved; native admission still requires survivor/replacement review. The initial Linux wrapper omitted a
+source-manifest fixture and failed before scanning; a fresh corrected wrapper
+passed. No acquisition, extraction or native analysis is repeated.
+
 ## Current growth policy: add good licensed sentences; size target is movable
 
 Alex clarified on2026-11-06 that good, properly licensed sentences should be

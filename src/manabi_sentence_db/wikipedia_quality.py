@@ -9,7 +9,7 @@ import hashlib
 import re
 import unicodedata
 
-WIKIPEDIA_QUALITY_VERSION = "wikipedia-example-quality-v13"
+WIKIPEDIA_QUALITY_VERSION = "wikipedia-example-quality-v14"
 
 # Exact, unchanged texts assessed in the November 3–4 assistant source reviews.
 # Hashes keep these local findings from becoming broad grammatical/topic bans.
@@ -151,6 +151,27 @@ _NUMBERED_REQUIREMENTS = re.compile(
     r"(?:つ(?:の(?:条件|要件|事項))?|項目|条件|要件)(?:の?(?:全て|すべて))?を満たす"
     r"(?:必要がある|ことが必要である|ものであることを求めている)?[。．.!！?？]?\Z"
 )
+# Whole labels rather than sentences. Restrict noun-label detection to a Latin
+# format name followed by の and an uninflected noun; ordinary nominal
+# predicates, named people, and sentences containing a verb remain eligible.
+_BARE_LABEL = re.compile(
+    r"^[A-Za-zＡ-Ｚａ-ｚ][A-Za-zＡ-Ｚａ-ｚ0-9０-９ _-]*形式の"
+    r"[ァ-ヺー一-鿿]+[。．.!！?？]?\Z"
+    r"|^[A-Za-zＡ-Ｚａ-ｚ][A-Za-zＡ-Ｚａ-ｚ0-9０-９ -]*の略[。．.!！?？]?\Z"
+    # A statistical row: repeated counts, a bare event label, and a
+    # parenthetical numeric comparison. Complete statistical prose stays.
+    r"|^[0-9０-９]+回[・/／][0-9０-９]+日(?:開催|実施)"
+    r"[（(](?:前年比|前月比|前年差|前月差)[:：][+＋−－-]?[0-9０-９]+日[）)]"
+    r"[。．.!！?？]?\Z"
+)
+_ARTICLE_NAMING_ONLY = re.compile(
+    # Editorial naming conventions in this article contain no example content.
+    # Anchor the entire sentence and disallow commas within its substantive
+    # body so an additional explanation does not become a reference-only label.
+    r"^以下(?:本|当)(?:記事|項目|節|章)では[、，,]?"
+    r"[^。｡！？!?、，,「」『』]{1,100}と(?:記す|呼ぶ|表記する)"
+    r"[。．.!！?？]?\Z"
+)
 # Require several distinct terms plus structural density. A single term, or
 # repeated mentions of one term, never establishes specialist density.
 _SPECIALIST = (
@@ -174,6 +195,10 @@ _SPECIALIST = (
     "mRNA", "ゲノム", "リボソーム", "宿主細胞",
     "逆ミルズ比", "回帰分析", "セレクションバイアス",
     "脊髄", "神経活動", "発火パターン",
+    "透析", "細胞内液", "間質液",
+    "表皮剥脱", "生活反応", "発赤",
+    "マルチパーパスソリューション", "過酸化水素", "コールド消毒",
+    "ウィグナー効果", "高速中性子", "熱中性子", "減速材",
 )
 _SPECIALIST_PATTERN = re.compile("|".join(sorted(_SPECIALIST, key=len, reverse=True)))
 
@@ -196,7 +221,8 @@ def assess_wikipedia_sentence(text: str) -> tuple[str | None, list[str]]:
             or _MISSING_LIST.search(text) or _UNBOUND_EXAMPLE.search(text)
             or _MISSING_UNIT_TABLE.search(text) or _DETACHED_LABEL.search(text)
             or _DANGLING_TOPIC.search(text) or _DANGLING_COMMA.search(text)
-            or _LIST_REFERENCE.search(text)):
+            or _LIST_REFERENCE.search(text) or _BARE_LABEL.search(text)
+            or _ARTICLE_NAMING_ONLY.search(text)):
         return "wikipedia-dependent-fragment", []
     symbols = sum(unicodedata.category(char) == "Sm" for char in text)
     if symbols >= 3 or (

@@ -502,3 +502,62 @@ def test_v13_rejects_missing_following_relations_and_reference_only_promises(tex
 ])
 def test_v13_keeps_inline_relations_numeric_bounds_and_substantive_later_discussion(text):
     assert assess_wikipedia_sentence(text) == (None, [])
+
+
+@pytest.mark.parametrize("text", [
+    "23回・106日開催（前年比：-3日）。",
+    "12回／30日実施(前月差:+2日)。",
+    "以下当項目では、このライブを横浜BLITZ大決戦と記す。",
+    "以下本記事では、この方式を新方式と呼ぶ。",
+    "TIFF形式のラスタデータ。",
+    "PNG形式の画像データ。",
+    "Scadec data eXchange Formatの略。",
+    "Portable Network Graphicsの略。",
+])
+def test_v14_rejects_whole_statistical_editorial_and_format_labels(text):
+    assert assess_wikipedia_sentence(text) == ("wikipedia-dependent-fragment", [])
+
+
+@pytest.mark.parametrize("text", [
+    "大会は23回、106日間開催された。",
+    "今年は106日開催し、前年より3日短かった。",
+    "前年比で3日短い日程で開催した。",
+    "以下本記事では、この方式を新方式と呼ぶが、仕組みは従来と同じである。",
+    "地元では、このライブを大決戦と呼ぶ。",
+    "彼は手紙に、この出来事を大決戦と記す。",
+    "TIFF形式のラスタデータを保存した。",
+    "TIFF形式のラスタデータである。",
+    "TIFF形式の使いやすい画像データ。",
+    "東京の公園。",
+    "これは画像データ。",
+    "国際連合の略。",
+    "PNGはPortable Network Graphicsの略。",
+    "PNGの略称について調べた。",
+])
+def test_v14_keeps_complete_statistics_naming_prose_and_nominal_predicates(text):
+    assert assess_wikipedia_sentence(text) == (None, [])
+
+
+@pytest.mark.parametrize("text", [
+    "透析を短時間で終えると、細胞内液や間質液に含まれる物質が血液に移行する前に処置が終わってしまうことがある。",
+    "表皮剥脱の周囲には生活反応があり、軽度の発赤もあると指摘されたが、その原因については異なる説明も示された。",
+    "この製品では、マルチパーパスソリューションと過酸化水素を使ったコールド消毒について、それぞれの手順を説明している。",
+    "ウィグナー効果の影響は、高速中性子を熱中性子に変える減速材では大きな問題となることがあり、対策が必要とされる。",
+])
+def test_v14_additional_specialist_terms_use_existing_distinct_density_threshold(text):
+    assert assess_wikipedia_sentence(text) == ("wikipedia-specialist-density", [])
+
+
+@pytest.mark.parametrize("text", [
+    "透析のために病院へ行った。",
+    "細胞内液と間質液の違いを学ぶ。",
+    "発赤は皮膚が赤くなることである。",
+    "生活反応について調べ、生活反応の意味を説明した。",
+    "過酸化水素を使った実験を行った。",
+    "黒鉛は鉛筆の芯に使われる。",
+    "高速中性子と熱中性子の違いを学ぶ。",
+    "ウィグナー効果について先生に質問した。",
+    "透析、細胞内液、間質液についてやさしく学ぶ。",
+])
+def test_v14_new_terms_alone_repetition_and_short_science_remain_eligible(text):
+    assert assess_wikipedia_sentence(text)[0] is None
