@@ -9,7 +9,7 @@ import hashlib
 import re
 import unicodedata
 
-WIKIPEDIA_QUALITY_VERSION = "wikipedia-example-quality-v11"
+WIKIPEDIA_QUALITY_VERSION = "wikipedia-example-quality-v12"
 
 # Exact, unchanged texts assessed in the November 3–4 assistant source reviews.
 # Hashes keep these local findings from becoming broad grammatical/topic bans.
@@ -123,6 +123,8 @@ _DETACHED_LABEL = re.compile(
 # A terminal topic particle has lost its predicate; quoted mentions of the
 # particle and complete clauses do not end in this bare form.
 _DANGLING_TOPIC = re.compile(r"には[。．.!！?？]\Z")
+# A comma immediately followed by terminal punctuation has lost its continuation.
+_DANGLING_COMMA = re.compile(r"[、，,][。．.!！?？]\Z")
 # Require a list noun so 下の通り (a street below) remains ordinary prose.
 _LIST_REFERENCE = re.compile(
     r"(?:内訳|項目|分類|条件|特徴|要件)は(?:下|上)の(?:通り|とおり)"
@@ -186,7 +188,8 @@ def assess_wikipedia_sentence(text: str) -> tuple[str | None, list[str]]:
             or _FORMULA_REMNANT.search(text) or _NUMBERED_REQUIREMENTS.search(text)
             or _MISSING_LIST.search(text) or _UNBOUND_EXAMPLE.search(text)
             or _MISSING_UNIT_TABLE.search(text) or _DETACHED_LABEL.search(text)
-            or _DANGLING_TOPIC.search(text) or _LIST_REFERENCE.search(text)):
+            or _DANGLING_TOPIC.search(text) or _DANGLING_COMMA.search(text)
+            or _LIST_REFERENCE.search(text)):
         return "wikipedia-dependent-fragment", []
     symbols = sum(unicodedata.category(char) == "Sm" for char in text)
     if symbols >= 3 or (

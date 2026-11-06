@@ -1301,3 +1301,26 @@ existing v10 ZIPs does not apply v11. The pilot's optional whole-work exclusion
 allowlists retain 265 works / 4,547 occurrences, dropping all six affected
 articles, including their otherwise acceptable sentences. This conservative
 alternative is not an estimate of sentence-level filtering yield.
+
+
+### Wikipedia growth review — 2026-11-06
+
+The next selected cohort contains 6,833 whole articles and 108,856 v11-retained
+occurrences (108,242 distinct texts across archives). An assistant read all 110
+fresh examples, ten per newly routed topic. This remains assistant development
+inspection, not human review or a population accuracy estimate. Useful practical
+prose coexists with nominal labels, historical detail and technical descriptions;
+category routing does not certify learning value or source subject matter.
+
+Quality **v12** adds only a narrow terminal-comma cutoff rule: a comma immediately
+followed by final sentence punctuation, as captured in
+[ネパール語訳聖書](https://ja.wikipedia.org/wiki/ネパール語訳聖書):
+`ネパール語はネパールの国語であり、インドのシッキム州の公用語でもあり、ブータンでも使われていて、。`
+(CC-BY-SA-4.0; exact snapshot provenance stays in the released work).
+Completed continuations and quoted punctuation stay eligible. No source wording
+is repaired. Two initially questioned location/topic constructions were retained
+on reconsideration; topic は need not be a grammatical subject. They do not
+justify a broad case-marking ban. The existing active corpus is unchanged.
+Before admission, rerun the qualified normalized refinement over the already
+selected compressed v11 ZIPs, preserving parent receipts, neighboring sentences,
+rights and ordinal gaps. No source reacquisition or re-extraction is required.

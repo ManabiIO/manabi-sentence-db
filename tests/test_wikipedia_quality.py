@@ -456,3 +456,22 @@ def test_v11_keeps_two_terms_as_style_metadata():
     assert assess_wikipedia_sentence("ゲノムとmRNAの関係を学ぶ。") == (
         None, ["style:specialist-vocabulary"],
     )
+
+
+@pytest.mark.parametrize("text", [
+    "ネパール語はネパールの国語であり、インドのシッキム州の公用語でもあり、ブータンでも使われていて、。",
+    "また、この地域でも使われていて，。",
+    "その後、多くの地域で,.",
+])
+def test_v12_rejects_terminal_comma_cutoffs(text):
+    assert assess_wikipedia_sentence(text) == ("wikipedia-dependent-fragment", [])
+
+
+@pytest.mark.parametrize("text", [
+    "この言葉は多くの地域で使われていて、各地で親しまれている。",
+    "この文では、最後に読点「、」。",
+    "句読点の組み合わせ「、。」について説明した。",
+    "練習場は北蒲原郡聖籠町にある新潟聖籠スポーツセンターを主に使用している。",
+])
+def test_v12_preserves_completed_clauses_quoted_punctuation_and_topic_usage(text):
+    assert assess_wikipedia_sentence(text) == (None, [])
