@@ -428,3 +428,22 @@ review, native eligibility and distinct-text overlap checks complete. Topic
 labels alone do not establish quality. Reuse prior verification and analysis
 receipts whose inputs still match; never rerun the original inventory constructor
 just to choose a new cohort.
+
+For the next cohort's topic-stratified review packet, use
+`review_sampling.TopicReviewSampler(topics, seed=FRESH_SEED, per_topic=10)` while
+streaming retained occurrences. Call `add(topic, sentence_id, work_id, archive)`;
+`results()` returns metadata candidates grouped by topic. Resolve only those
+candidates to text and full source attribution afterward. The helper stores at
+most ten identities per topic, rather than every occurrence ever seen. Duplicate
+sentences cannot occupy multiple slots within a topic; minimum `(archive, work_id)`
+chooses a stable citation independent of traversal order. A sentence can appear
+in more than one topic. The seed and JSON-framed identity hashing must be recorded
+with the packet. This is a deterministic development sample, not native-speaker
+review or a population-quality estimate. Do not alter completed review receipts
+or replay already accepted samples with the new algorithm.
+
+Cohort boundaries divide selection and review work; they do not require a full
+serving rebuild per cohort. Group accepted additions into one combined refresh
+when feasible. Avoid repeatedly decoding the same source archive for multiple
+small cohorts: combine compatible selections bound to its exact build before
+processing, while preserving the selector's per-archive work limit.

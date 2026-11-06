@@ -103,6 +103,26 @@ including 16 subtests; Ruff passed.** These are synthetic host checks. The plann
 has not run against the real inventory yet; that requires the producer and install
 leases after the current job finishes. See [operations.md](operations.md#plan-further-wikipedia-cohorts-without-reacquisition).
 
+## Bounded review sampling for larger cohorts
+
+The previous task-local review script kept every seen `(topic, sentence_id)` even
+though it selected only ten examples per topic. The reusable `TopicReviewSampler`
+now retains only sample metadata, with deterministic hash priorities and minimum
+citation tie-breaking independent of input order. Rejected candidates compare
+against a cached cutoff. **20 focused tests passed**, including comparison with
+an independent full-sort reference under reordered/duplicate input; Ruff passed.
+
+A synthetic 40,000-row stream containing 20,000 distinct IDs produced identical
+100-candidate samples with and without the old global seen set. Python allocation
+peak fell from **5,654,458 to 75,243 bytes**. CPU rose from **0.515 to 0.819 seconds**
+because discarded duplicates are hashed again. This trades bounded CPU work for
+memory independent of stream length; it is not a full-corpus speed benchmark.
+Evidence is retained in `sentence-review-sampler-memory-f0kvlhlf/report.json`.
+Use the helper for the next fresh review packet; the accepted earlier review and
+running producer are unchanged. Cohorts divide review/selection work, not mandatory
+whole-corpus rebuilds. Group accepted additions into a combined refresh and avoid
+repeated source-archive decoding for compatible selections.
+
 ## Refinement selection-lineage guard
 
 A follow-up review found that canonical exports also contain `work_selection`,
