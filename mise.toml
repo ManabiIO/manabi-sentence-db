@@ -150,3 +150,7 @@ run = "uv run --locked sentence-db refine-vfd"
 [tasks.refine-normalized-wikipedia]
 description = "Apply current Wikipedia sentence gates to an existing normalized ZIP"
 run = "uv run --locked sentence-db refine-normalized-wikipedia"
+
+[tasks.plan-wikipedia-cohorts]
+description = "Plan all remaining eligible cached articles in whole-work operational chunks"
+run = "uv run --locked sentence-db plan-wikipedia-cohorts"

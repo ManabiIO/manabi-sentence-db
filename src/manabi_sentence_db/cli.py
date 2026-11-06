@@ -143,6 +143,15 @@ def parser() -> argparse.ArgumentParser:
     normalized_refine.add_argument("--archive", type=Path, required=True)
     normalized_refine.add_argument("--output", type=Path, required=True)
     normalized_refine.add_argument("--progress", action="store_true")
+    cohort = commands.add_parser(
+        "plan-wikipedia-cohorts", help="Plan remaining whole works from a verified metadata inventory"
+    )
+    cohort.add_argument("--inventory", type=Path, required=True)
+    cohort.add_argument("--consumer", type=Path, required=True)
+    cohort.add_argument("--prior-selection", type=Path, action="append", default=[])
+    cohort.add_argument("--occurrence-budget", type=int, required=True,
+                        help="Per-chunk cached count estimate; never drops remaining works")
+    cohort.add_argument("--output", type=Path, required=True)
     normalized_select = commands.add_parser(
         "select-normalized-works", help="Select complete works from an existing normalized ZIP"
     )
@@ -457,6 +466,15 @@ def main(argv: list[str] | None = None) -> int:
                     progress=(lambda message: print(message, file=sys.stderr, flush=True))
                     if args.progress else None,
                 ))
+            case "plan-wikipedia-cohorts":
+                from .cohort_planner import plan_cohorts
+
+                result = plan_cohorts(
+                    args.inventory, args.consumer, args.occurrence_budget, args.output,
+                    prior_selections=args.prior_selection,
+                )
+                print(json.dumps({"works": result["total_works"],
+                                  "chunks": len(result["chunks"]), "output": str(args.output)}))
             case "select-normalized-works":
                 from .normalized_selection import select_normalized_works
                 from .serialization import read_json

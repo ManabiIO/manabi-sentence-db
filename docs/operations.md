@@ -398,3 +398,31 @@ applies the current exact-unit omissions without a raw-source download or scan.
 The whole original spoken unit and all its segmented siblings are withheld;
 independent turns/rows, attribution and original ordinal gaps survive. Inspect
 retained-output samples before publishing the refined compressed archives.
+
+## Plan further Wikipedia cohorts without reacquisition
+
+Use `mise run plan-wikipedia-cohorts -- --inventory INVENTORY.sqlite
+--consumer ACCEPTED.sqlite --prior-selection SELECTION.json
+--occurrence-budget 150000 --output NEW_DIRECTORY` (as one command).
+The input inventory is the verified metadata-only Wikipedia inventory with
+`works(id,archive,build,topic,priority,existing,kept)`; the accepted consumer must
+expose `works(id)`. Repeat `--prior-selection` to exclude additional prior work
+allowlists. The output parent must already exist at a canonical, non-symlink path.
+
+Run under the offline producer and consumer-install locks. The command itself
+does not acquire application-specific locks. It reads consistent SQLite
+transactions and rejects changed input stat/WAL receipts before writing. These
+receipts identify local inputs; they do not replace source checksum or license
+verification. Source archives and sentence text are not read.
+
+All remaining works with a positive cached v11 retained count are assigned once,
+with topics interleaved deterministically. The occurrence budget divides work
+into operational chunks: it is not a corpus quota. An oversized article remains
+whole, and each archive allowlist respects the selector's 80,000-work limit.
+Use the output manifest's archive names and build-bound selection files with
+`select-normalized-works`, then apply current `refine-normalized-wikipedia`.
+Counts remain cached estimates until current quality refinement, assistant
+review, native eligibility and distinct-text overlap checks complete. Topic
+labels alone do not establish quality. Reuse prior verification and analysis
+receipts whose inputs still match; never rerun the original inventory constructor
+just to choose a new cohort.

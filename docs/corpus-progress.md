@@ -92,6 +92,15 @@ and choose an explicit budget before a combined refresh. This next cohort is
 **not extracted, admitted or active yet**. The current producer owns the heavy
 worker lease; do not start another producer while it validates.
 
+The reusable `plan-wikipedia-cohorts` CLI/Mise task now implements this metadata
+planning step. It excludes accepted/prior work IDs, rotates topics deterministically,
+keeps oversized articles intact and carries all remaining work into subsequent
+chunks. Inputs use read-only transactions and stat/WAL receipts; prior selection
+files have SHA-256 receipts. **13 focused planner/selector CLI tests passed,
+including 16 subtests; Ruff passed.** These are synthetic host checks. The planner
+has not run against the real inventory yet; that requires the producer and install
+leases after the current job finishes. See [operations.md](operations.md#plan-further-wikipedia-cohorts-without-reacquisition).
+
 ## Refinement selection-lineage guard
 
 A follow-up review found that canonical exports also contain `work_selection`,
