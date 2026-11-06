@@ -9,9 +9,9 @@ import hashlib
 import re
 import unicodedata
 
-WIKIPEDIA_QUALITY_VERSION = "wikipedia-example-quality-v14"
+WIKIPEDIA_QUALITY_VERSION = "wikipedia-example-quality-v15"
 
-# Exact, unchanged texts assessed in the November 3–4 assistant source reviews.
+# Exact, unchanged texts assessed in the November 3–6 assistant source reviews.
 # Hashes keep these local findings from becoming broad grammatical/topic bans.
 # See docs/sources.md; retained occurrences are still marked unreviewed.
 REVIEWED_EXCLUSIONS = {
@@ -51,6 +51,20 @@ REVIEWED_EXCLUSIONS = {
         "wikipedia-reviewed-wording",  # アルゴリズム制: November 4 successor sample 235
     "a101c7a02c0966bf920a467462912ae63354083ca2146ec6374684168b4a6690":
         "wikipedia-dependent-fragment",  # 真室川町路線バス: November 4 successor sample 260
+    "efc6e9ab315170af68fc92f68386e08fd8a6ec292c6919a274b42d2a7d5b48ef":
+        "wikipedia-reviewed-wording",  # Strangecolorlessness: Kangxi radical ⽇ in 日本語
+    "21e12ea991abe5f41ad9e3d7a8a6985263f957453f229a0d2830db788ad83bcc":
+        "wikipedia-reviewed-wording",  # ASヴィタ・クルブ: missing と before いう
+    "98d50962177adea1c5737918f627ecdfda189c5d833d1ad608ad15fdd43641dc":
+        "wikipedia-reviewed-wording",  # ニューヨーク市の日本人: retained citation [5]
+    "70b78f160caf2342fd93e0f681348b2632b0b8a09d16c9f31200b4022a0b527d":
+        "wikipedia-dependent-fragment",  # 金魚ちょうちん: detached photo caption
+    "a5e8984877a4acedc590cd8e58dc8c3f54d961c3286a83a24af5156fb2e61bdc":
+        "wikipedia-reviewed-wording",  # 2023年パレスチナ・イスラエル戦争: 8夜 likely missing 日
+    "e96241d847399dd2c1a18aee915b07a432e537b082397e1fdafed5f84b927371":
+        "wikipedia-dependent-fragment",  # 時刻表: publication metadata label
+    "7380a7568d5d9be31f81908adc101b41fbf35880d9fde449d376c51601d5b719":
+        "wikipedia-reviewed-wording",  # 丹生酒殿神社: 909年 / 明治42年 mismatch and 制作 typo
 }
 
 _NUMBERS = re.compile(r"[0-9０-９]+(?:[.,．][0-9０-９]+)*")
@@ -172,6 +186,17 @@ _ARTICLE_NAMING_ONLY = re.compile(
     r"[^。｡！？!?、，,「」『』]{1,100}と(?:記す|呼ぶ|表記する)"
     r"[。．.!！?？]?\Z"
 )
+# A whole article-scope announcement promises coverage without giving facts.
+# Disallow internal commas, punctuation and quotes to preserve added clauses
+# and quoted mentions; the optional leading comma is editorial punctuation.
+_ARTICLE_SCOPE_ONLY = re.compile(
+    r"^(?:この|本)(?:項目|記事)では[、，,]?"
+    r"[^。｡．.!！?？、，,「」『』]{1,140}について(?:も|は)?(?:記述|説明|解説)する"
+    r"[。．.!！?？]?\Z"
+)
+# Require an immediately preceding Japanese inflection: Latin abbreviations
+# such as Inc.。 and quoted punctuation do not establish this malformed form.
+_DUPLICATE_TERMINAL = re.compile(r"[ぁ-ゖ][.．]。\Z")
 # Require several distinct terms plus structural density. A single term, or
 # repeated mentions of one term, never establishes specialist density.
 _SPECIALIST = (
@@ -199,6 +224,7 @@ _SPECIALIST = (
     "表皮剥脱", "生活反応", "発赤",
     "マルチパーパスソリューション", "過酸化水素", "コールド消毒",
     "ウィグナー効果", "高速中性子", "熱中性子", "減速材",
+    "細胞分化", "多能性", "細胞種特異的",
 )
 _SPECIALIST_PATTERN = re.compile("|".join(sorted(_SPECIALIST, key=len, reverse=True)))
 
@@ -212,6 +238,8 @@ def assess_wikipedia_sentence(text: str) -> tuple[str | None, list[str]]:
     reviewed_reason = REVIEWED_EXCLUSIONS.get(hashlib.sha256(text.encode("utf-8")).hexdigest())
     if reviewed_reason:
         return reviewed_reason, []
+    if _DUPLICATE_TERMINAL.search(text):
+        return "wikipedia-malformed-punctuation", []
     length = len(text)
     if length > 180:
         return "wikipedia-long-sentence", []
@@ -222,7 +250,7 @@ def assess_wikipedia_sentence(text: str) -> tuple[str | None, list[str]]:
             or _MISSING_UNIT_TABLE.search(text) or _DETACHED_LABEL.search(text)
             or _DANGLING_TOPIC.search(text) or _DANGLING_COMMA.search(text)
             or _LIST_REFERENCE.search(text) or _BARE_LABEL.search(text)
-            or _ARTICLE_NAMING_ONLY.search(text)):
+            or _ARTICLE_NAMING_ONLY.search(text) or _ARTICLE_SCOPE_ONLY.search(text)):
         return "wikipedia-dependent-fragment", []
     symbols = sum(unicodedata.category(char) == "Sm" for char in text)
     if symbols >= 3 or (

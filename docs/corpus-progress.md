@@ -3,7 +3,34 @@
 This is the current pipeline checkpoint and supersedes historical running/queued
 statements below. Generated corpus text and detailed evidence stay outside Git.
 
-## Latest: first expansion accepted; larger compressed export completed
+## Latest: v14 export complete; v15 and in-pass omission reviews qualified
+
+The v14 successor completed all 16 archives: **113,772 works / 1,673,563
+occurrences / 401,924,558 compressed ZIP bytes**. Its per-archive sentence sum is
+**1,656,210**, not distinct/net growth. Two assistants inspected the fresh
+100-example packet. Ten findings warrant follow-up: isolated wording/glyph/date
+defects, retained citation/caption/publication labels, article scaffolding,
+duplicate terminal punctuation and one concentrated specialist passage.
+Other demanding or context-dependent prose remains eligible.
+
+Policy **v15** uses seven exact-text exclusions, two narrow structural rules and
+the existing distinct-term density threshold for additional biology vocabulary.
+It does not rewrite source text or create broad topic/nominal-predicate bans.
+The public Linux suite passed **1,694 tests**, and Ruff passed.
+
+Refinement can now emit an attributed compressed omission sidecar during its
+existing JSONL passes. Regression coverage proves unchanged corpus bytes and no
+extra JSONL passes when sampling is enabled. Sidecars bind the input/output ZIPs,
+policy and implementation, retain original rights, and enforce memory bounds.
+See the [sidecar contract](normalized-format.md#omission-review-sidecars).
+
+Next: apply v15 to the completed compressed v14 outputs with omission sampling,
+inspect omissions and the replacement examples under the **same** survivor-review
+seed, then decide native admission. Reuse earlier reviewed survivors by matching
+text/citation identity. No native admission, activation or production deployment
+of this larger batch has occurred; the accepted local corpus is unchanged.
+
+## Earlier: first expansion accepted; larger compressed export completed
 
 The first growth batch completed full validation and independent preservation
 checks. The downstream local consumer now contains **2,597,508 texts**, a net

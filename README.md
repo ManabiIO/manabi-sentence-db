@@ -537,6 +537,10 @@ See [vocabulary coverage](docs/vocabulary-coverage.md) for the export contract a
 
 Apply current Japanese Wikipedia quality rules to an existing normalized ZIP with
 `mise run refine-normalized-wikipedia -- --archive corpus.normalized.zip --output refined.zip`.
+Add `--review-output omissions.json.zst --review-seed REVIEW_ID` to collect a
+small attributed omission sample during the same passes. The review must be a
+fresh sibling of the corpus output; `--review-per-reason` accepts 1–20 (default 20).
+See [the omission review contract](docs/normalized-format.md#omission-review-sidecars).
 This offline transform keeps useful neighboring occurrences and independent owners
 of shared text, drops only translations owned by rejected occurrences, and cuts
 context links at removed neighbors without bridging ordinal gaps. Original public

@@ -143,6 +143,10 @@ def parser() -> argparse.ArgumentParser:
     normalized_refine.add_argument("--archive", type=Path, required=True)
     normalized_refine.add_argument("--output", type=Path, required=True)
     normalized_refine.add_argument("--progress", action="store_true")
+    normalized_refine.add_argument("--review-output", type=Path,
+                                   help="Fresh sibling .json.zst path for attributed omissions")
+    normalized_refine.add_argument("--review-seed", default="wikipedia-omissions-v1")
+    normalized_refine.add_argument("--review-per-reason", type=int, default=20)
     topic_review = commands.add_parser(
         "review-normalized-topics", help="Prepare a bounded compressed topic review packet"
     )
@@ -474,6 +478,8 @@ def main(argv: list[str] | None = None) -> int:
 
                 print(refine_normalized_wikipedia(
                     args.archive, args.output,
+                    review_output=args.review_output, review_seed=args.review_seed,
+                    review_per_reason=args.review_per_reason,
                     progress=(lambda message: print(message, file=sys.stderr, flush=True))
                     if args.progress else None,
                 ))

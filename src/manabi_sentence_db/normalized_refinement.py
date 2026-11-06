@@ -14,7 +14,7 @@ from pathlib import Path
 
 import zstandard
 
-from . import wikipedia_quality
+from . import omission_review, review_sampling, wikipedia_quality
 from .licenses import validate_rights
 from .normalized import sentence_identity
 from .normalized_database import TABLES, _check_text, _manifest, _provenance, _rows
@@ -27,6 +27,7 @@ from .normalized_selection import (
     _signature,
     _write_archive,
 )
+from .omission_review import OmissionReview
 from .serialization import DataError, canonical_json, digest_json, sha256_file
 from .validation import validate_record, validate_source_unit
 
@@ -118,7 +119,9 @@ def _selected_lineage(manifest, receipt):
     return set(selection["work_ids"])
 
 
-def refine_normalized_wikipedia(archive_path: Path, output: Path, *, progress=None) -> Path:
+def refine_normalized_wikipedia(archive_path: Path, output: Path, *, progress=None,
+                               review_output=None, review_seed="wikipedia-omissions-v1",
+                               review_per_reason=20) -> Path:
     """Apply current Japanese Wikipedia gates; retain independent ownership.
 
     All input rows are hash/count checked and structurally validated before
@@ -133,11 +136,22 @@ def refine_normalized_wikipedia(archive_path: Path, output: Path, *, progress=No
     if output.is_symlink() or output.resolve() != output or output.exists():
         raise DataError("Choose a fresh canonical normalized output path")
     output.parent.mkdir(parents=True, exist_ok=True)
+    review = None
+    if review_output is not None:
+        review_output = Path(review_output).absolute()
+        if (review_output.parent != output.parent or review_output == output
+                or review_output.resolve() != review_output or review_output.is_symlink()
+                or review_output.exists()):
+            raise DataError("Choose a fresh sibling omission review path outside symlinks")
+        review = OmissionReview(seed=review_seed, per_reason=review_per_reason)
     signature = _signature(archive_path)
     notify("Hashing normalized refinement input")
     input_digest = sha256_file(archive_path)
     policy_digest = sha256_file(Path(wikipedia_quality.__file__))
     implementation_digest = sha256_file(Path(__file__))
+    review_producers = ({Path(module.__file__): sha256_file(Path(module.__file__))
+                        for module in (omission_review, review_sampling)}
+                       if review is not None else {})
     try:
         with zipfile.ZipFile(archive_path) as archive:
             _inventory(archive)
@@ -219,6 +233,8 @@ def refine_normalized_wikipedia(archive_path: Path, output: Path, *, progress=No
                         kept = not (owner[1] and text[1])
                         if not kept:
                             reasons[text[2]] += 1
+                            if review is not None:
+                                review.add(text[2], sentence, work, archive_path.name)
                         db.execute("INSERT INTO occurrences VALUES (?,?,?,?,?,?,?,?)",
                                    (identity, sentence, work, ordinal, *links, unit, kept))
                     for column, offset in (("previous_id", -1), ("next_id", 1)):
@@ -246,6 +262,8 @@ def refine_normalized_wikipedia(archive_path: Path, output: Path, *, progress=No
                                   "LIMIT 1").fetchone():
                         raise DataError("Unowned normalized sentence has no occurrence rights context")
                     counts = dict.fromkeys(TABLES, 0)
+                    if review is not None:
+                        review.seal()
                     digests = {table: hashlib.sha256() for table in TABLES}
                     with ExitStack() as stack:
                         handles = {table: stack.enter_context(zstandard.open(
@@ -255,6 +273,8 @@ def refine_normalized_wikipedia(archive_path: Path, output: Path, *, progress=No
                         notify("Staging refined normalized members in compressed form")
                         for table in TABLES:
                             for row in _rows(archive, table, original):
+                                if review is not None:
+                                    review.observe(table, row)
                                 if table == "works":
                                     targeted = db.execute("SELECT targeted FROM works WHERE id=?",
                                                           (row["id"],)).fetchone()[0]
@@ -305,15 +325,35 @@ def refine_normalized_wikipedia(archive_path: Path, output: Path, *, progress=No
                     if len(canonical_json(manifest)) > MAX_MANIFEST_BYTES:
                         raise DataError("Oversized normalized refinement manifest")
                     staged = _write_archive(root, archive, manifest)
+                    if review is not None:
+                        packet = review.packet(binding={
+                            "input_zip_sha256": input_digest,
+                            "output_zip_sha256": sha256_file(staged),
+                            "policy_version": wikipedia_quality.WIKIPEDIA_QUALITY_VERSION,
+                            "policy_sha256": policy_digest,
+                            "implementation_sha256": implementation_digest,
+                            "review_implementation_sha256": {
+                                path.name: digest for path, digest in review_producers.items()},
+                        }, counts=reasons)
+                        review_staged = root / "omission-review.json.zst"
+                        with review_staged.open("xb") as stream:
+                            stream.write(zstandard.ZstdCompressor(
+                                level=9, write_checksum=True).compress(canonical_json(packet)))
+                            stream.flush()
+                            os.fsync(stream.fileno())
                     if _signature(archive_path) != signature or sha256_file(archive_path) != input_digest:
                         raise DataError("Normalized input changed during refinement")
                     if (sha256_file(Path(wikipedia_quality.__file__)) != policy_digest
-                            or sha256_file(Path(__file__)) != implementation_digest):
+                            or sha256_file(Path(__file__)) != implementation_digest
+                            or any(sha256_file(path) != digest
+                                   for path, digest in review_producers.items())):
                         raise DataError("Normalized refinement implementation changed during run")
                     with staged.open("rb") as stream:
                         os.fsync(stream.fileno())
                     try:
                         os.link(staged, output)
+                        if review is not None:
+                            os.link(review_staged, review_output)
                     except FileExistsError as exc:
                         raise DataError("Choose a fresh normalized output path") from exc
                     directory = os.open(output.parent, os.O_RDONLY)

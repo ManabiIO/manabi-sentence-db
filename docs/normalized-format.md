@@ -44,6 +44,33 @@ selection. Neither transformations nor heuristic acceptance grant human review.
 Staging uses zstd JSONL streams and a SQLite identity/ownership ledger; sentence
 text is not written to that ledger or expanded onto disk.
 
+### Omission review sidecars
+
+`refine-normalized-wikipedia --review-output omissions.json.zst` optionally
+samples rejected Wikipedia occurrences during the existing validation/staging
+passes. It does not add JSONL passes or change corpus output bytes. Sampling
+uses a seed and deterministic bottom-k sentence identities per rejection reason;
+multiple owners use a deterministic citation tie-break. The same seed permits
+combining per-archive samples without favoring early archives.
+
+Each checksum-enabled Zstandard packet binds the input/output ZIP hashes, policy
+and implementation hashes, and contains original sentence text, work identity,
+URL, license and attribution. Rejection counts refer to occurrences; cases are
+unique sentence examples per reason. Shared text can remain in the corpus under
+independent rights. Packets are pending assistant review, never human certification.
+
+The optional `--review-per-reason` accepts 1–20 examples (default 20). Limits also
+bound reason count, projected citation/text record size and retained record bytes;
+oversized review metadata fails before publication rather than truncating credit.
+Only selected review text lives in memory; on disk it remains compressed.
+
+Both output paths must be fresh siblings outside symlinks. Each is published
+without overwriting an existing file. Publication of two files is not atomic:
+a race or filesystem failure on the second link can leave the completed corpus
+without its sidecar. The command reports failure and preserves existing files.
+Consumers must verify completion and the packet's output hash before adopting
+the pair; do not blindly overwrite or adopt an unreceipted partial result.
+
 A sentence ID is `s_` plus SHA-256 of the compact sorted-key UTF-8 JSON array
 `[language, text]`. Deduplication never chooses a winning license: every occurrence
 and its original work remains. Cross-source consumers deduplicate by this ID and

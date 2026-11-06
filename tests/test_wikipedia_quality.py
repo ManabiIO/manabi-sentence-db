@@ -561,3 +561,64 @@ def test_v14_additional_specialist_terms_use_existing_distinct_density_threshold
 ])
 def test_v14_new_terms_alone_repetition_and_short_science_remain_eligible(text):
     assert assess_wikipedia_sentence(text)[0] is None
+
+
+# Unchanged November 6 review examples; tests need no external review packet.
+@pytest.mark.parametrize(("text", "reason"), [
+    ('歌詞については英語と⽇本語を織り交ぜ、海外シーンへのアプローチもプランニング。', 'reviewed-wording'),
+    ('ASヴィタ・クルブは、1935年にオノレ・エサブ（Honoré Essabe）によってキンシャサ・ウソケ通り73番地 (rue Usoke n° 73)で、ルネサンス（Renaissance）いう名前で結成された。', 'reviewed-wording'),
+    ('1950年代には国連関係の日本人職員が到着し、1950年代後半には日系企業関連のビジネスマンが到着し始めた[5]。', 'reviewed-wording'),
+    ('金魚ちょうちん祭りの風景。', 'dependent-fragment'),
+    ('8夜から9日にかけて、イスラエル空軍がガザの約500カ所を空爆した。', 'reviewed-wording'),
+    ('この項目ではこの党の結成準備のために作られた新党組織準備会およびその後身である政治的自由獲得労農同盟についても記述する。', 'dependent-fragment'),
+    ('細胞分化は遺伝子発現パターンの変化を伴い、多能性遺伝子を発現している状態から細胞種特異的遺伝子発現への変化が生じる過程である。', 'specialist-density'),
+    ('天然のビリジカタムトキシンBと一致する合成構造により、その抗生物質活性に匹敵する、あるいはそれを上回る合成変異体が可能となる.。', 'malformed-punctuation'),
+    ('無料、A6変型判、不定期。', 'dependent-fragment'),
+    ('政府の小社合併制作により、909年（明治42年）に兄井村（現、和歌山県伊都郡かつらぎ町大字兄井）に鎮座する鎌八幡宮を合祀。', 'reviewed-wording'),
+])
+def test_v15_withholds_all_ten_reviewed_examples_without_rewriting(text, reason):
+    assert assess_wikipedia_sentence(text) == ("wikipedia-" + reason, [])
+
+
+@pytest.mark.parametrize("text", [
+    "この記事では、地域の歴史について説明する。",
+    "本項目では地域の自然については解説する。",
+    "本記事では地域の祭りについても記述する。",
+])
+def test_v15_article_scope_only_announcements_are_fragments(text):
+    assert assess_wikipedia_sentence(text) == ("wikipedia-dependent-fragment", [])
+
+
+@pytest.mark.parametrize("text", [
+    "この項目では、町は川沿いにあり、地域の歴史について説明する。",
+    "この記事では町は川沿いにある。地域の歴史について説明する。",
+    "この項目では「地域の歴史」について説明する。",
+    "「この項目では地域の歴史について説明する」という文がある。",
+    "この記事では地域の祭りが毎年春に開かれると説明している。",
+    "本記事では地域の歴史について説明するが、祭りは春に行われる。",
+    "町は川沿いにあるため、この記事では地域の歴史について説明する。",
+    "会社の正式名称はExample Inc.。",
+    "会社の略称はExample Co．。",
+    "記号「.。」について説明した。",
+    "彼は「そうなる.。」と書いた。",
+    "最後の表現は「となる.」。",
+    "これは祭りの風景。",
+    "時刻表は無料で、不定期に発行される。",
+    "ルネサンスという名前で結成された。",
+    "歌詞には英語と日本語を織り交ぜている。",
+    "8日夜から9日にかけて、雨が降った。",
+    "1909年（明治42年）に神社を合祀した。",
+    "政府の小社合併政策により、神社を合祀した。",
+    "細胞分化は体の成長に関わっている。",
+    "多能性について学んだ。",
+    "細胞種特異的な働きについて学ぶ。",
+    "細胞分化を調べ、細胞分化について学び、細胞分化の意味を説明した。",
+    "細胞分化、多能性、細胞種特異的な働きについてこどもにもわかるように学ぶ。",
+])
+def test_v15_preserves_substantive_prose_quotes_dates_and_introductory_biology(text):
+    assert assess_wikipedia_sentence(text)[0] is None
+
+
+@pytest.mark.parametrize("text", ["結果は同じとなる.。", "結果は同じとなる．。"])
+def test_v15_duplicate_terminal_punctuation_has_a_specific_reason(text):
+    assert assess_wikipedia_sentence(text) == ("wikipedia-malformed-punctuation", [])

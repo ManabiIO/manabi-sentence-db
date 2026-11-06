@@ -4,6 +4,7 @@ import hashlib
 import json
 import sqlite3
 import zipfile
+from collections import Counter
 from copy import deepcopy
 
 import pytest
@@ -14,6 +15,118 @@ from manabi_sentence_db import normalized_refinement as refinement
 from manabi_sentence_db.normalized_database import TABLES, build_normalized_database
 from manabi_sentence_db.serialization import DataError
 from manabi_sentence_db.wikipedia_quality import WIKIPEDIA_QUALITY_VERSION
+
+
+def _review_packet(path):
+    return json.loads(zstandard.ZstdDecompressor().decompress(path.read_bytes()))
+
+
+def test_inline_omission_review_preserves_rights_and_reuses_existing_stream_passes(tmp_path, monkeypatch):
+    path, original, _ = _fixture(tmp_path, change=_corpus)
+    calls = Counter()
+    rows = refinement._rows
+
+    def observed(archive, table, manifest):
+        calls[table] += 1
+        yield from rows(archive, table, manifest)
+
+    monkeypatch.setattr(refinement, "_rows", observed)
+    baseline = refinement.refine_normalized_wikipedia(path, tmp_path / "baseline.zip")
+    baseline_calls = calls.copy()
+    calls.clear()
+    review = tmp_path / "review.json.zst"
+    output = refinement.refine_normalized_wikipedia(
+        path, tmp_path / "reviewed.zip", review_output=review, review_seed="fixture-v1")
+    assert calls == baseline_calls
+    assert output.read_bytes() == baseline.read_bytes()
+    packet = _review_packet(review)
+    assert packet["human_review"] is False and packet["review_pending"] is True
+    assert packet["binding"]["input_zip_sha256"] == hashlib.sha256(path.read_bytes()).hexdigest()
+    assert packet["binding"]["output_zip_sha256"] == hashlib.sha256(output.read_bytes()).hexdigest()
+    assert packet["rejected_occurrences_by_reason"] == {"wikipedia-dependent-fragment": 1}
+    assert len(packet["cases"]) == 1
+    case = packet["cases"][0]
+    assert case["sentence"] == {key: original["sentences"][0][key]
+                                for key in ("id", "language", "text", "text_sha256")}
+    assert case["work"]["id"] == "selected"
+    assert case["work"]["license"] == original["works"][0]["license"]
+    assert case["work"]["attribution"] == original["works"][0]["attribution"]
+    # An independent source still owns this text; the sample claims only a
+    # rejected Wikipedia occurrence, not deletion of the global sentence.
+    assert original["sentences"][0] in _read(output)[0]["sentences"]
+
+
+def test_inline_omission_review_empty_and_cli(tmp_path, capsys):
+    from manabi_sentence_db.cli import main
+    def change(tables):
+        _corpus(tables)
+        tables["works"][0]["source_id"] = "other-source"
+    path, _, _ = _fixture(tmp_path, change=change)
+    output, review = tmp_path / "out.zip", tmp_path / "review.json.zst"
+    assert main(["refine-normalized-wikipedia", "--archive", str(path),
+                 "--output", str(output), "--review-output", str(review),
+                 "--review-per-reason", "1", "--review-seed", "empty"]) == 0
+    assert capsys.readouterr().out.strip() == str(output)
+    assert _review_packet(review)["cases"] == []
+
+
+@pytest.mark.parametrize("limit", [0, -1, True, 21])
+def test_inline_omission_review_rejects_unbounded_limits_before_publication(tmp_path, limit):
+    path, _, _ = _fixture(tmp_path)
+    output, review = tmp_path / "out.zip", tmp_path / "review.json.zst"
+    with pytest.raises(DataError):
+        refinement.refine_normalized_wikipedia(path, output, review_output=review,
+                                               review_per_reason=limit)
+    assert not output.exists() and not review.exists()
+
+
+def test_inline_omission_review_refuses_oversized_citation_without_publication(tmp_path):
+    def change(tables):
+        _corpus(tables)
+        tables["works"][0]["attribution"]["text"] = "x" * 17000
+    path, _, _ = _fixture(tmp_path, change=change)
+    output, review = tmp_path / "out.zip", tmp_path / "review.json.zst"
+    with pytest.raises(DataError, match="bounded record size"):
+        refinement.refine_normalized_wikipedia(path, output, review_output=review)
+    assert not output.exists() and not review.exists()
+
+
+def test_inline_omission_review_never_overwrites_existing_file(tmp_path):
+    path, _, _ = _fixture(tmp_path)
+    output, review = tmp_path / "out.zip", tmp_path / "review.json.zst"
+    review.write_bytes(b"keep")
+    with pytest.raises(DataError, match="fresh sibling"):
+        refinement.refine_normalized_wikipedia(path, output, review_output=review)
+    assert review.read_bytes() == b"keep" and not output.exists()
+
+
+def test_inline_omission_review_invalid_seed_is_a_cli_error(tmp_path, capsys):
+    from manabi_sentence_db.cli import main
+    path, _, _ = _fixture(tmp_path)
+    output, review = tmp_path / "out.zip", tmp_path / "review.json.zst"
+    assert main(["refine-normalized-wikipedia", "--archive", str(path),
+                 "--output", str(output), "--review-output", str(review),
+                 "--review-seed", ""]) == 2
+    assert "seed" in capsys.readouterr().err
+    assert not output.exists() and not review.exists()
+
+
+def test_inline_omission_review_publication_race_preserves_existing_output(tmp_path, monkeypatch):
+    path, _, _ = _fixture(tmp_path, change=_corpus)
+    output, review = tmp_path / "out.zip", tmp_path / "review.json.zst"
+    link = refinement.os.link
+
+    def race(source, destination):
+        if destination == review:
+            review.write_bytes(b"other writer")
+        return link(source, destination)
+
+    monkeypatch.setattr(refinement.os, "link", race)
+    with pytest.raises(DataError):
+        refinement.refine_normalized_wikipedia(path, output, review_output=review)
+    assert review.read_bytes() == b"other writer"
+    assert output.is_file()  # Preserve the completed corpus; never claim pair publication succeeded.
+    assert _read(output)[1]["normalized_refinement_provenance"]["output_counts"]
 
 
 def _corpus(tables):
