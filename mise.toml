@@ -146,3 +146,7 @@ run = "uv run --locked sentence-db audit-parallel-numbers"
 [tasks.refine-vfd]
 description = "Withhold reviewed VFD spoken units from compressed builds offline"
 run = "uv run --locked sentence-db refine-vfd"
+
+[tasks.refine-normalized-wikipedia]
+description = "Apply current Wikipedia sentence gates to an existing normalized ZIP"
+run = "uv run --locked sentence-db refine-normalized-wikipedia"

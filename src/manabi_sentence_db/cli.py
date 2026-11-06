@@ -137,6 +137,12 @@ def parser() -> argparse.ArgumentParser:
     normalized_export.add_argument("--source")
     normalized_export.add_argument("--work-selection", type=Path,
                                    help="JSON work allowlist bound to the exact build ID")
+    normalized_refine = commands.add_parser(
+        "refine-normalized-wikipedia", help="Apply current Wikipedia quality gates to a normalized ZIP"
+    )
+    normalized_refine.add_argument("--archive", type=Path, required=True)
+    normalized_refine.add_argument("--output", type=Path, required=True)
+    normalized_refine.add_argument("--progress", action="store_true")
     normalized_select = commands.add_parser(
         "select-normalized-works", help="Select complete works from an existing normalized ZIP"
     )
@@ -443,6 +449,14 @@ def main(argv: list[str] | None = None) -> int:
 
                 print(export_normalized_buckets(args.build, args.output, source_id=args.source,
                                                 works_per_archive=args.works_per_archive))
+            case "refine-normalized-wikipedia":
+                from .normalized_refinement import refine_normalized_wikipedia
+
+                print(refine_normalized_wikipedia(
+                    args.archive, args.output,
+                    progress=(lambda message: print(message, file=sys.stderr, flush=True))
+                    if args.progress else None,
+                ))
             case "select-normalized-works":
                 from .normalized_selection import select_normalized_works
                 from .serialization import read_json
