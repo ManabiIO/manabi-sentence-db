@@ -36,9 +36,11 @@ ZIPs and refreshes one combined candidate directly, preserving existing prepared
 words/codecs and attaching exact normalized transformation/archive receipts.
 Native import is complete: **108,241 distinct texts /107,775 eligible texts**,
 **299,413,504 compressed bytes**. It reused1,343 current analyses and4,869 cached
-analyses, saving102,029 new checkpoint analyses. Combined refresh is preparing
-new word links; observed RSS is576,764 KiB and charged peak reached the1GiB
-limit. The job has not OOMed, but this establishes no memory headroom claim. The
+analyses, saving102,029 new checkpoint analyses. Word-link preparation and provenance import are
+complete. The **working** candidate has **2,597,508 texts /106,432 net growth**
+after pruning ineligible-only additions; display/search projections are rebuilding.
+These are provisional counts pending full output validation, final size and exit0.
+Observed RSS is576,764 KiB and charged peak reached the1GiB limit. The job has not OOMed, but this establishes no memory headroom claim. The
 existing **2,491,076-text /7.075 GB** consumer remains active until the replacement
 passes full output/native-query/HTTP validation. No larger consumer activation,
 new public source release or production deployment has yet occurred.
