@@ -32,7 +32,7 @@ class SelectorTests(unittest.TestCase):
             ("zero", "x", "bx", "a", "0", 0, 0),
         ]
         inv.executemany("INSERT INTO works VALUES (?,?,?,?,?,?,?)", reversed(rows))
-        current.execute("INSERT INTO works VALUES ('new')")
+        current.executemany("INSERT INTO works VALUES (?)", [("new",), ("old",)])
         chunks = s.plan(inv, current, 5, ["prior"])
         self.assertEqual([[r["id"] for r in c] for c in chunks], [["a1"], ["b1"], ["a2", "b2"]])
         self.assertEqual(chunks, s.plan(inv, current, 5, ["prior"]))
@@ -190,3 +190,14 @@ def test_cli_emits_plan_and_rejects_invalid_budget(tmp_path, capsys):
     assert manifest["chunks"][0]["oversized_single_work"]
     selection = output / manifest["chunks"][0]["directory"] / "archive-0001.selection.json"
     assert json.loads(selection.read_text())["work_ids"] == ["b"]
+
+
+def test_stale_existing_inventory_flag_does_not_drop_absent_work():
+    with sqlite3.connect(":memory:") as inventory, sqlite3.connect(":memory:") as consumer:
+        inventory.execute("CREATE TABLE works(id,archive,build,topic,priority,existing,kept)")
+        inventory.execute("INSERT INTO works VALUES ('returning','a.zip','b','food','1',1,5)")
+        consumer.execute("CREATE TABLE works(id)")
+        chunks = s.plan(inventory, consumer, 10)
+        assert [row["id"] for chunk in chunks for row in chunk] == ["returning"]
+        consumer.execute("INSERT INTO works VALUES ('returning')")
+        assert s.plan(inventory, consumer, 10) == []

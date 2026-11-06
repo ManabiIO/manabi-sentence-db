@@ -57,7 +57,8 @@ def plan(inventory, consumer, occurrence_budget, prior_ids=()):
         if archive in builds and builds[archive] != build:
             raise DataError("conflicting build IDs for archive: " + archive)
         builds[archive] = build
-        if existing or identity in excluded or kept <= 0:
+        # Inventory flags describe an older consumer; current IDs are authoritative.
+        if identity in excluded or kept <= 0:
             continue
         considered += 1
         queues[topic].append(

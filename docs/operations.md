@@ -415,7 +415,9 @@ transactions and rejects changed input stat/WAL receipts before writing. These
 receipts identify local inputs; they do not replace source checksum or license
 verification. Source archives and sentence text are not read.
 
-All remaining works with a positive cached v11 retained count are assigned once,
+Inventory `existing` flags describe the older baseline; only current consumer IDs
+and explicit prior selections exclude works. All remaining works with a positive
+cached v11 retained count are assigned once,
 with topics interleaved deterministically. The occurrence budget divides work
 into operational chunks: it is not a corpus quota. An oversized article remains
 whole, and each archive allowlist respects the selector's 80,000-work limit.
