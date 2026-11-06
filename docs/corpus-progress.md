@@ -51,6 +51,16 @@ source configuration validation and Ruff passed. The frozen ongoing Wikipedia
 import remains unchanged. Review and source-policy details are in
 [sources.md](sources.md#additional-reviewed-work-65886--2026-11-06).
 
+## Next-source investigation: Rosebleu inventory completed
+
+The pinned publisher inventory is complete: **1,805 JSONL chapter occurrences /
+1,706 distinct Git blobs** across ten titles. A **276-row, three-chapter**
+assistant-only pilot found that unmarked chapters still contain sexualized
+material and quality defects missed by the current lexical gate. No chapter or
+sentence is admitted. Reuse the completed inventory and compressed sample;
+prioritize a specifically reviewed clean subset before bulk acquisition or Apache
+license support. See [the findings and remaining license work](source-priorities.md#rosebleu-complete-inventory-and-bounded-text-pilot--2026-11-06).
+
 ## Earlier: v14 export complete; v15 and in-pass omission reviews qualified
 
 The v14 successor completed all 16 archives: **113,772 works / 1,673,563

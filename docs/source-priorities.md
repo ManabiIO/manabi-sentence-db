@@ -170,6 +170,54 @@ Only the small pinned README, LICENSE and one metadata page were acquired during
 this check. No scenario text, archive, adapter, native analysis or serving import
 was produced. Preserve/reuse that evidence rather than repeating the source search.
 
+### Rosebleu complete inventory and bounded text pilot — 2026-11-06
+
+The earlier cache could not be located. Fresh pinned README/LICENSE responses
+reproduce both November 4 SHA-256 values exactly; this is separate acquisition,
+not recovery of the old files. The complete recursive publisher tree is now
+verified across **37 pages / 3,622 entries**: ten title directories, **1,805 JSONL
+chapter occurrences**, exactly paired TSV files, README and LICENSE. There are
+**1,706 distinct JSONL Git blobs**; 99 identical-blob groups recur across paths.
+These are file counts, not sentence counts or usable yield. Metadata responses
+occupied **577,300 bytes**. No additional notice files appear in that pinned tree.
+
+After removing `_converted.jsonl`, **72** chapter stems end in `h` or `H`.
+Uppercase and `ah/bh/ch/dh` variants occur, so checking literal `h.txt` or lowercase
+alone misses marked scenes. The `HO_` family remains ambiguous. Neither the
+absence of a marker nor a seemingly early chapter number establishes suitability.
+
+A separate bounded pilot fetched three exact Git blobs, verified Git and SHA-256
+identities, and retained only Zstandard-compressed scenario bytes (**13,540 bytes;
+42,982 bytes before compression**). The primary assistant read every one of the
+**276 rows** in these deliberately selected, unmarked files:
+
+- `01_StellarTheater/01_Z00_converted.jsonl`: 107 rows; sexualized youth/sibling
+  references and a visible wording defect occur amid otherwise usable dialogue.
+- `03_Tiny Dungeon BaW/010101_converted.jsonl`: 24 rows; includes a voyeuristic
+  undressing incident despite having no adult-scene filename marker.
+- `07_Endless Dungeon/010100_converted.jsonl`: 145 rows; sexual innuendo, intense
+  fantasy violence, fragments and self-contained prose are interspersed.
+
+The existing basic text gate accepts **270/276 rows**, and the sexual-content
+lexicon flags **none**. Those are gate measurements, not quality endorsements or
+population estimates. There is no human/native-speaker review. No chapter is
+approved for whole-chapter ingestion, and no sentence has been admitted. A
+future clean subset needs explicit reviewed chapter/utterance selection and
+context gaps; do not silently repair wording or join disconnected fragments.
+Do not bulk-download the dataset based only on the unmarked file count.
+
+Apache support also remains pending. Its
+[redistribution terms](https://www.apache.org/licenses/LICENSE-2.0) require a copy
+of the license, change notices, and applicable original notices. The current
+public and private allowlists reject Apache. The interchange already retains
+`license.notice` and work attribution, but the public build requires identical
+license objects for a given license ID. A viable implementation should retain a
+canonical full Apache license once in the license inventory and preserve
+publisher-specific copyright/notice text with work attribution, proving retention
+through normalized export, SQLite import and the attribution display. Adding
+only an allowlist entry or URL is insufficient. Do this alongside a qualified
+clean subset, rather than widening admission for an unreviewed bulk source.
+
 Wikibooks, government public-information pages, Japanese Stack Overflow, and Fandom
 are additional candidates, with per-site/per-post license dates and third-party
 exclusions. KAKEN and J-ResearchCorpus need original document rights checks; a mirror
