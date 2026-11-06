@@ -258,6 +258,8 @@ def test_canonical_pairs_preserve_translation_alignment_and_source_gaps():
         Counter(),
         set(),
     )
+    assert raw["language_origin"] == "unknown"
+    assert record["language_origin"] == "unknown"
     assert [s["ordinal"] for s in record["sentences"]] == [0, 5]
     from manabi_sentence_db.wikipedia_quality import WIKIPEDIA_QUALITY_VERSION
 

@@ -181,7 +181,8 @@ def article_document(data, name, row, source, stats):
         "native_id": name, "language": "ja", "title": title, "url": page,
         "license": source["license"], "attribution": attribution,
         "revision": {"id": "2.01:" + dump, "url": source["acquisition"]["url"]},
-        "source_text_hash": digest, "authorship": "unknown", "language_origin": "original_japanese",
+        # Japanese source language does not establish original authorship language.
+        "source_text_hash": digest, "authorship": "unknown", "language_origin": "unknown",
         "content_type": "encyclopedia", "tags": ["category:" + row["Category"], "translation:final-checked"]
         + (["kyoto:primary-translator:" + row["Translator ID"]] if row.get("Translator ID") else [])
         + (["publisher:xml-entity-repaired"] if repaired else []), "sentences": sentences,
