@@ -3,7 +3,39 @@
 This is the current pipeline checkpoint and supersedes historical running/queued
 statements below. Generated corpus text and detailed evidence stay outside Git.
 
-## Latest: v14 export complete; v15 and in-pass omission reviews qualified
+## Latest: v15 source review accepted; native import started
+
+The v15 refinement completed all **16 archives / 113,772 works / 1,673,361
+occurrences / 401,886,418 compressed ZIP bytes**. Its per-archive sentence sum is
+**1,656,009**, not globally distinct texts or net consumer growth. Completion
+receipt SHA-256: `d4393448ee8f3583df8e1ee56a5e71001a873f58e97f4ae363f1aaa70bee6b33`.
+Do not repeat source acquisition, selection or completed refinement to resume.
+
+The pass rejected **202 occurrences**: 113 dependent fragments/navigation rows,
+83 malformed-punctuation occurrences, five exact reviewed-wording occurrences
+and one dense specialist occurrence. All **200 sampled omission examples** were
+read and their exclusions judged justified. Repeated text and the per-reason
+sample cap mean this is not individual review of every rejected occurrence.
+
+The same-seed retained review preserved **90 identical previously reviewed
+text/citation records** and replaced exactly the ten flagged v14 cases. Two
+assistants independently retained all ten replacements. This is explicitly
+assistant-only review, not human/native-speaker certification or an estimate of
+whole-corpus quality. Advanced and context-dependent grammatical prose remains
+eligible. Final review packet SHA-256:
+`f436b501dcd800d9a7a95058e02129ffc32adb53ab732d66c8aeaa20b2f852fd`.
+
+The accepted source passed the downstream import's evidence preflight. Native
+import has started with current-analysis/checkpoint reuse, a read-only current
+corpus and an explicit **6 GB compiled-import cap**. The existing **1,694-test
+public Linux** and **94-test downstream native-phase** evidence is reused for
+unchanged inputs; a separate minimal-runtime compatibility check also passed.
+No completed imported count, final serving size, consumer activation, new public
+release or production deployment is claimed. Measure actual imported/checkpoint
+storage and fresh capacity before separately admitting the combined rebuild.
+The active local consumer remains **2,597,508 texts / 7,626,911,744 bytes**.
+
+## Earlier: v14 export complete; v15 and in-pass omission reviews qualified
 
 The v14 successor completed all 16 archives: **113,772 works / 1,673,563
 occurrences / 401,924,558 compressed ZIP bytes**. Its per-archive sentence sum is
