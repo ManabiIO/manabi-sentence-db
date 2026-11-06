@@ -123,6 +123,17 @@ running producer are unchanged. Cohorts divide review/selection work, not mandat
 whole-corpus rebuilds. Group accepted additions into a combined refresh and avoid
 repeated source-archive decoding for compatible selections.
 
+The bounded sampler is now connected to `review-normalized-topics` (CLI and Mise).
+Its builder binds expected ZIP hashes, streams occurrence sampling, loads only
+selected full work/sentence records and writes a deterministic checksummed Zstd
+packet. Sampled text identities and rights are checked; input mutation, unknown
+work topics, missing/duplicate selected records and unsafe output paths fail.
+The packet records algorithm/seed/input hashes and is explicitly review-pending,
+not human-reviewed. **39 focused builder/sampler/CLI tests passed; Ruff passed.**
+This does not replace full validation of unsampled records or untouched members.
+No existing source archives were rescanned and no accepted packet was regenerated.
+Use it after the next selected archives have passed current refinement.
+
 ## Refinement selection-lineage guard
 
 A follow-up review found that canonical exports also contain `work_selection`,

@@ -143,6 +143,17 @@ def parser() -> argparse.ArgumentParser:
     normalized_refine.add_argument("--archive", type=Path, required=True)
     normalized_refine.add_argument("--output", type=Path, required=True)
     normalized_refine.add_argument("--progress", action="store_true")
+    topic_review = commands.add_parser(
+        "review-normalized-topics", help="Prepare a bounded compressed topic review packet"
+    )
+    topic_review.add_argument("--archive", type=Path, action="append", required=True)
+    topic_review.add_argument("--archive-checksums", type=Path, required=True,
+                              help="JSON mapping of archive basenames to expected SHA-256")
+    topic_review.add_argument("--work-topics", type=Path, required=True,
+                              help="JSON mapping of work IDs to topic labels")
+    topic_review.add_argument("--seed", required=True)
+    topic_review.add_argument("--per-topic", type=int, default=10)
+    topic_review.add_argument("--output", type=Path, required=True)
     cohort = commands.add_parser(
         "plan-wikipedia-cohorts", help="Plan remaining whole works from a verified metadata inventory"
     )
@@ -466,6 +477,22 @@ def main(argv: list[str] | None = None) -> int:
                     progress=(lambda message: print(message, file=sys.stderr, flush=True))
                     if args.progress else None,
                 ))
+            case "review-normalized-topics":
+                from .normalized_review import build_topic_review
+                from .serialization import read_json
+
+                for metadata_path in (args.archive_checksums, args.work_topics):
+                    if metadata_path.stat().st_size > 32 * 1024**2:
+                        raise DataError("Review input metadata exceeds 32 MiB")
+                try:
+                    result = build_topic_review(
+                        args.archive, read_json(args.work_topics), args.output,
+                        archive_sha256=read_json(args.archive_checksums),
+                        seed=args.seed, per_topic=args.per_topic,
+                    )
+                except ValueError as error:
+                    raise DataError(str(error)) from error
+                print(json.dumps(result))
             case "plan-wikipedia-cohorts":
                 from .cohort_planner import plan_cohorts
 

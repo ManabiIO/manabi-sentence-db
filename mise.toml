@@ -154,3 +154,7 @@ run = "uv run --locked sentence-db refine-normalized-wikipedia"
 [tasks.plan-wikipedia-cohorts]
 description = "Plan all remaining eligible cached articles in whole-work operational chunks"
 run = "uv run --locked sentence-db plan-wikipedia-cohorts"
+
+[tasks.review-normalized-topics]
+description = "Prepare a compressed assistant review sample from normalized archives"
+run = "uv run --locked sentence-db review-normalized-topics"

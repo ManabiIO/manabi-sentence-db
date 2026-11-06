@@ -447,3 +447,21 @@ serving rebuild per cohort. Group accepted additions into one combined refresh
 when feasible. Avoid repeatedly decoding the same source archive for multiple
 small cohorts: combine compatible selections bound to its exact build before
 processing, while preserving the selector's per-archive work limit.
+
+`mise run review-normalized-topics -- --archive REFINED.zip
+--archive-checksums HASHES.json --work-topics TOPICS.json --seed FRESH_SEED
+--per-topic 10 --output review.json.zst` (as one command) builds the packet;
+repeat `--archive` for additional ZIPs. `HASHES.json` maps unique archive basenames
+to expected SHA-256 values from their refinement receipts. `TOPICS.json` maps work
+IDs to routed topic labels; every occurrence's work needs a label. The output
+parent must exist at a canonical path and the output must be new. Run within the
+same offline producer lease used for the preceding source work.
+
+The builder streams occurrence members first, then reads work/sentence members
+only in archives owning selected candidates. Only selected records are retained
+in memory; the compressed packet preserves their complete original work and
+sentence fields. Input checksums, the fresh seed, sampling algorithm and citation
+tie-break are recorded. Consumed members have digest/count checks, but this is
+**not** a replacement for full corpus validation: unrelated members and unsampled
+record semantics are outside its scope. A generated packet has `review_pending`
+and `human_review: false`; producing it does not admit or human-review sentences.
