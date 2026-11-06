@@ -21,8 +21,28 @@ for new consumers. It contains UTF-8 JSONL tables:
 JSONL member. The ZIP also carries original snapshot manifests, licenses, and the
 build catalog. ZIP members can be streamed individually; no full archive extraction
 is necessary. Each source archive must remain below GitHub's 2 GiB asset limit;
-packaging rejects oversized archives. Splitting normalized tables into multiple
-release assets is still a future large-Wikipedia requirement.
+packaging rejects oversized archives. `export-normalized-buckets` partitions
+complete works into separate archives; each retains its exact-build work
+allowlist and original provenance. `select-normalized-works` makes a smaller
+whole-work allowlist directly from an existing ZIP, without raw re-extraction.
+
+`refine-normalized-wikipedia` applies current Japanese Wikipedia sentence gates
+to an existing normalized ZIP. It verifies every logical member, preserves
+independent owners of shared text and removes only rejected Wikipedia occurrences
+and their owned translations. Removed occurrences keep ordinal gaps; context
+pointers never bridge them. Empty targeted works and unreferenced sentence rows
+are omitted, while text-free references and original snapshot/license/catalog
+bytes remain unchanged. Invalid unowned sentence rows fail closed.
+
+The original canonical `build_id` and catalog still describe their original
+source build. The manifest's `normalized_refinement_provenance` separately binds
+the input ZIP and manifest, policy/version/module hashes, input/output counts and
+rejection reasons. Repeated refinement retains hash-bound parent receipts to a
+maximum depth of 16. Consumers should retain these transformation receipts with
+the exact ZIP identity; the original build ID alone does not identify a refined
+selection. Neither transformations nor heuristic acceptance grant human review.
+Staging uses zstd JSONL streams and a SQLite identity/ownership ledger; sentence
+text is not written to that ledger or expanded onto disk.
 
 A sentence ID is `s_` plus SHA-256 of the compact sorted-key UTF-8 JSON array
 `[language, text]`. Deduplication never chooses a winning license: every occurrence
