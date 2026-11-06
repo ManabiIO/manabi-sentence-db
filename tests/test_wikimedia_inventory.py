@@ -168,3 +168,72 @@ def test_metadata_mutation_after_hash_check_cannot_publish_selection(tmp_path, m
     with pytest.raises(DataError, match="metadata changed"):
         inventory.select_wikimedia_metadata(cache, tmp_path / "selected", per_topic=0, general=1)
     assert not (tmp_path / "selected" / "selection.json").exists()
+
+
+@pytest.mark.parametrize("per_topic,general,seed,excluded", [
+    (0, 4, "", ()), (2, 3, "", ("1", "11")),
+    (3, 0, "next", ("2", "20")), (1, 2, "next", ()),
+])
+def test_cached_ordered_selection_matches_direct_without_identity_ledger(
+        tmp_path, monkeypatch, per_topic, general, seed, excluded):
+    snapshot = create_demo_snapshot(tmp_path / "snapshot")
+    pages = [{"native_id": str(i), "revision_id": str(i), "title": f"記事{i}",
+              "text": "普通の本文です。" + (
+                  "[[Category:健康]][[Category:食文化]]" if i % 2 else "")}
+             for i in range(1, 31)]
+    monkeypatch.setattr(inventory, "snapshot_pages", lambda *a, **kw: iter(pages))
+    cache = inventory.index_wikimedia_metadata(snapshot, tmp_path / "metadata")
+    manifest = read_json(cache / "manifest.json")
+    expected, counts = sample_pages(pages, snapshot_id=manifest["snapshot_id"],
+        per_topic=per_topic, general=general, seed=seed, exclude_ids=frozenset(excluded))
+    exclusions = []
+    if excluded:
+        path = tmp_path / "excluded.json"
+        path.write_text(json.dumps({"schema_version": 1, "source_id": manifest["source_id"],
+            "snapshot_id": manifest["snapshot_id"], "page_ids": list(excluded)}))
+        exclusions.append(path)
+    connect = sqlite3.connect
+
+    def existing_only(filename, *args, **kwargs):
+        assert filename != "", "Cached selection opened a temporary identity ledger"
+        return connect(filename, *args, **kwargs)
+
+    monkeypatch.setattr(inventory.sqlite3, "connect", existing_only)
+    selected = inventory.select_wikimedia_metadata(cache, tmp_path / "selected",
+        per_topic=per_topic, general=general, seed=seed, exclude_selections=exclusions)
+    report = read_json(selected.parent / "selection-report.json")
+    assert report["articles"] == expected
+    assert report["counts"] == counts
+    assert read_json(selected)["page_ids"] == [r["native_id"] for r in expected]
+
+
+@pytest.mark.parametrize("identities", [("1", "1"), ("2", "1")])
+def test_invalid_cached_order_cannot_publish_selection(tmp_path, monkeypatch, identities):
+    snapshot = create_demo_snapshot(tmp_path / "snapshot")
+    cache = inventory.index_wikimedia_metadata(snapshot, tmp_path / "metadata")
+    original = inventory._rows
+
+    def invalid_rows(db):
+        rows = {row["native_id"]: row for row in original(db)}
+        first = next(iter(rows.values()))
+        return iter(first | {"native_id": identity} for identity in identities)
+
+    monkeypatch.setattr(inventory, "_rows", invalid_rows)
+    output = tmp_path / "selected"
+    with pytest.raises(DataError, match="strictly increase"):
+        inventory.select_wikimedia_metadata(cache, output, per_topic=0, general=1)
+    assert not (output / "selection.json").exists()
+    assert not (output / "selection-report.json").exists()
+
+
+def test_metadata_id_order_uses_existing_primary_key_without_temporary_sort(tmp_path):
+    snapshot = create_demo_snapshot(tmp_path / "snapshot")
+    cache = inventory.index_wikimedia_metadata(snapshot, tmp_path / "metadata")
+    with closing(sqlite3.connect(cache / "metadata.sqlite")) as db:
+        statements = []
+        db.set_trace_callback(statements.append)
+        list(inventory._rows(db))
+        db.set_trace_callback(None)
+        query, = statements
+        plan = db.execute("EXPLAIN QUERY PLAN " + query).fetchall()
+        assert not any("TEMP B-TREE" in row[3].upper() for row in plan), plan

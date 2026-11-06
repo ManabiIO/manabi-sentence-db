@@ -270,3 +270,33 @@ def test_previously_selected_pages_do_not_consume_new_topic_quota():
     with pytest.raises(DataError, match="Conflicting"):
         selection.sample_pages([pages[0], conflict], snapshot_id="fixture", per_topic=1,
                                general=0, exclude_ids={"1"})
+
+
+def test_ordered_unique_sampling_requires_metadata():
+    with pytest.raises(DataError, match="requires metadata"):
+        selection.sample_pages([], snapshot_id="fixture", per_topic=0, general=1,
+                               ordered_unique_metadata=True)
+
+
+@pytest.mark.parametrize("identities", [("2", "1"), ("1", "1"), ("1", "2", "1")])
+@pytest.mark.parametrize("excluded", [frozenset(), frozenset({"1", "2"})])
+def test_ordered_metadata_rejects_repeated_or_decreasing_ids_before_exclusions(identities, excluded):
+    rows = [selection.page_metadata(page(i), Counter()) for i in identities]
+    with pytest.raises(DataError, match="strictly increase"):
+        selection.sample_pages(rows, snapshot_id="fixture", per_topic=0, general=1,
+                               metadata=True, ordered_unique_metadata=True, exclude_ids=excluded)
+
+
+def test_ordered_metadata_rejects_duplicate_after_eviction(monkeypatch):
+    original_digest = selection.digest_json
+
+    def priority(value):
+        if isinstance(value, list) and value[0] == selection.POLICY:
+            return ("f" if value[-1] == "1" else "0") * 64
+        return original_digest(value)
+
+    monkeypatch.setattr(selection, "digest_json", priority)
+    rows = [selection.page_metadata(page(i), Counter()) for i in ("1", "2", "1")]
+    with pytest.raises(DataError, match="strictly increase"):
+        selection.sample_pages(rows, snapshot_id="fixture", per_topic=0, general=1,
+                               metadata=True, ordered_unique_metadata=True)

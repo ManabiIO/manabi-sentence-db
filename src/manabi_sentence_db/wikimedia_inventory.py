@@ -192,7 +192,8 @@ def _excluded(paths, manifest):
 def _rows(db):
     decoder = zstandard.ZstdDecompressor()
     for identity, fingerprint, revision, title, size, blob in db.execute(
-        "SELECT native_id,fingerprint,revision_id,title,source_characters,categories FROM pages"
+        "SELECT native_id,fingerprint,revision_id,title,source_characters,categories FROM pages "
+        "ORDER BY native_id COLLATE BINARY"
     ):
         if (not isinstance(blob, bytes)
                 or not 0 <= zstandard.frame_content_size(blob) <= 16 * 1024**2):
@@ -223,7 +224,7 @@ def select_wikimedia_metadata(cache, output, *, per_topic=1000, general=2000,
         db.execute("PRAGMA mmap_size=0")
         rows, counts = sample_pages(_rows(db), snapshot_id=manifest["snapshot_id"],
             per_topic=per_topic, general=general, seed=seed, exclude_ids=excluded,
-            progress=progress, metadata=True)
+            progress=progress, metadata=True, ordered_unique_metadata=True)
     if counts["pages_seen"] != manifest["records"] or _signature(path) != before:
         raise DataError("Wikimedia metadata changed during selection")
     if producer != (sha256_file(Path(__file__)), _implementation_sha256()):

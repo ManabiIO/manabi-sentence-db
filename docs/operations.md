@@ -37,6 +37,10 @@ evidence, counts, the exact implementation hash, seed and selection digest.
 Counts describe input page units, not an independently deduplicated article census.
 Repeated IDs do not consume quota; conflicting metadata for an already seen
 page identity fails, including pages that do not survive the sampling heap.
+Raw snapshot selection uses a temporary disk-backed identity ledger for this
+check. Metadata cache selection streams IDs in binary lexical order and checks
+that each ID strictly increases, avoiding a second identity ledger. Duplicate
+or out-of-order cached IDs fail before exclusions or routing.
 
 The smallest snapshot/seed/page-ID hashes win within each topic, independently
 of input order. Raising quotas with the same seed retains earlier selected IDs.
@@ -80,8 +84,9 @@ and a general allocation. Underfilled routes stay underfilled. This is one
 processing batch, not a corpus ceiling or evidence of learner quality.
 
 The 2 GiB cap is a planning allowance for the metadata SQLite file, not a measured
-requirement or total-job disk bound. Separately reserve space for manifests,
-selection reports and the disk-backed identity ledger. Check actual free space
+requirement or total-job disk bound. Separately reserve space for manifests and
+selection reports; raw snapshot selection also needs its disk-backed identity
+ledger, while metadata cache selection avoids that second ledger. Check actual free space
 and acquire the existing heavy-worker lock before the scan; never overlap it
 with import or refresh. Admit extraction, native analysis and serving refresh
 separately using measured artifacts and their temporary-space requirements.

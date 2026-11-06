@@ -98,11 +98,17 @@ def _implementation_sha256():
 
 
 def sample_pages(pages, *, snapshot_id, per_topic, general, seed="", progress=None,
-                 exclude_ids=frozenset(), metadata=False):
+                 exclude_ids=frozenset(), metadata=False, ordered_unique_metadata=False):
     """Retain only the requested top-k metadata, independent of scan order."""
     limits = _limits(per_topic, general)
     if not isinstance(seed, str) or len(seed) > 200:
         raise DataError("Selection seed must be at most 200 characters")
+    if ordered_unique_metadata:
+        if not metadata:
+            raise DataError("Ordered unique sampling requires metadata rows")
+        return _sample_pages(pages, snapshot_id=snapshot_id, limits=limits,
+                             seed=seed, progress=progress, seen=None,
+                             exclude_ids=exclude_ids, metadata=True)
     # An empty filename gives SQLite ownership of its temporary on-disk file.
     # Keep the identity inventory off the Python heap, including evicted pages.
     with closing(sqlite3.connect("")) as seen:
@@ -137,6 +143,7 @@ def _sample_pages(pages, *, snapshot_id, limits, seed, progress, seen, exclude_i
     heaps = {topic: [] for topic in limits}
     retained = {}
     counts = Counter()
+    previous_identity = None
     for page in pages:
         counts["pages_seen"] += 1
         if progress and counts["pages_seen"] % 50_000 == 0:
@@ -145,18 +152,21 @@ def _sample_pages(pages, *, snapshot_id, limits, seed, progress, seen, exclude_i
         if page is None:
             continue
         identity = page["native_id"]
-        fingerprint = bytes.fromhex(page["fingerprint"])
-        previous = seen.execute("SELECT fingerprint FROM seen WHERE identity = ?",
-                                (identity,)).fetchone()
-        if previous is not None:
-            if previous[0] != fingerprint:
-                raise DataError("Conflicting retained Wikimedia page identity")
+        if seen is None:
+            if previous_identity is not None and identity <= previous_identity:
+                raise DataError("Ordered Wikimedia metadata IDs must strictly increase")
+            previous_identity = identity
         else:
+            fingerprint = bytes.fromhex(page["fingerprint"])
+            previous = seen.execute("SELECT fingerprint FROM seen WHERE identity = ?",
+                                    (identity,)).fetchone()
+            if previous is not None:
+                if previous[0] != fingerprint:
+                    raise DataError("Conflicting retained Wikimedia page identity")
+                if identity in retained:
+                    counts["duplicate-retained-page"] += 1
+                continue
             seen.execute("INSERT INTO seen VALUES (?, ?)", (identity, fingerprint))
-        if previous is not None:
-            if identity in retained:
-                counts["duplicate-retained-page"] += 1
-            continue
         if identity in exclude_ids:
             counts["previously-selected"] += 1
             continue
