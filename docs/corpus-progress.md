@@ -3,6 +3,32 @@
 This is the current pipeline checkpoint and supersedes historical running/queued
 statements below. Generated corpus text and detailed evidence stay outside Git.
 
+## Latest: first expansion accepted; larger compressed export running
+
+The first growth batch completed full validation and independent preservation
+checks. The downstream local consumer now contains **2,597,508 texts**, a net
+addition of **106,432**, in **7,626,911,744 bytes** including indexes/metadata.
+These are consumer counts, not a new public release. Existing sentence, work,
+occurrence, translation, analysis and word records were preserved. The local
+preview passed HTTP search checks, and its superseded dataset was retired.
+No production deployment or hosted runner was started.
+
+The accepted consumer was reconciled with the cached Wikipedia inventory:
+**113,773 additional whole articles**, organized into **12 topic-balanced
+chunks**, with **1,673,639 cached-v11 occurrence candidates**. This is neither a
+distinct-text count nor an admission count. A grouped export is now selecting
+from each of the16 existing source archives once, then applying the current v12
+quality policy directly. Retained text remains in compressed ZIPs; per-stage
+checksums bind source files, whole-work selections and transform code. No source
+redownload, native sentence analysis or serving refresh is part of this export.
+
+The relevant selector, refinement, review and cohort tools passed **344 focused
+Linux tests** with native schema validation. The large export requires that
+backend and uses the existing single-worker lease at0.25 CPU/1GiB. Fresh attributed
+review packets follow export, with explicit assistant-only/unreviewed status.
+Reuse completed selection/refinement receipts; do not replay the previous
+successful consumer build or rerun source extraction.
+
 ## Current growth policy: add good licensed sentences; size target is movable
 
 Alex clarified on2026-11-06 that good, properly licensed sentences should be
@@ -10,13 +36,13 @@ added. Historical8GB target /10GB hard-ceiling language below is superseded.
 Use measured whole-artifact and temporary-space budgets, compression, compatible
 caches and prompt retirement of superseded outputs to prevent runaway storage.
 Do not withhold worthwhile sentences solely to meet an arbitrary file-size target.
-Licensing, provenance and quality checks still govern admission. The running
-candidate retains its existing7.8GB job limit because its7.627GB pages fit; no
+Licensing, provenance and quality checks still govern admission. The completed
+candidate fit its existing7.8GB job limit at7.627GB; no
 rebuild or repeated analysis is needed. Additional clean Wikipedia cohorts should
 reuse the verified metadata inventory and source bytes, with quality/cost review,
 rather than treating the earlier150,000-text planning cap as a permanent limit.
 
-## Current growth continuation: native import complete, combined refresh running
+## Earlier growth checkpoint: native import complete, combined refresh running
 
 The normalized sentence-refinement tool is merged in **PR #64**, followed by
 the narrow terminal-comma cutoff policy **v12 / PR #65**. Full normalized-tool
