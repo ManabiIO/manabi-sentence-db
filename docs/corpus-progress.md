@@ -5,7 +5,7 @@ statements below. Generated corpus text and detailed evidence stay outside Git.
 
 ## Latest consumer checkpoint: 2,491,076 texts active locally
 
-The combined downstream compact SQLite v11 build completed and is now active in
+The combined downstream compact SQLite v12 artifact is validated and active in
 the local search preview: **2,491,076 distinct texts / 23 sources**, including
 **218,927 VFD / 58,895 JMRD / 64,537 MRMP / 12,818 MASSIVE** memberships.
 Wikipedia now has **295,796** source memberships, alongside **281,293** from the
@@ -13,12 +13,28 @@ human-translated Kyoto Wikipedia dataset. Memberships overlap and must not be
 summed as distinct texts. Net growth is **452,748** against the verified build
 parent and **642,234** against the replaced local preview.
 
-The complete consumer artifact is **9,170,046,976 bytes (9.17 GB / 8.54 GiB)**,
-including search indexes, metadata and word links; bulk text remains compressed.
-It passes the stricter **9.8 GB** build limit and **10 GB** hard ceiling, but is
-above the **8 GB** target. Source archives and reusable native-analysis inputs
-are separate. This is a local consumer activation, not a new public full release
-or a production deployment.
+The complete consumer artifact is now **7,075,229,696 bytes (7.08 GB)**,
+including search indexes, metadata and word links. Integer provenance references
+saved **2,094,817,280 bytes / 22.844%** against the same v11 corpus; every public
+ID, attribution, translation, compressed payload, posting and prepared word
+stream was preserved. The artifact is below the **8 GB** target and **10 GB**
+hard ceiling. Bulk text remains compressed. This storage conversion adds no
+sentences and is a local activation, not a new public release or production
+deployment. The full converter and canonical-record/posting validation passed;
+17 offline deterministic query controls agreed exactly. Ordinary time-budgeted
+queries can select different bounded results; that report is retained separately.
+The old serving file was retired to host Trash after successful HTTP checks.
+
+The new **`mise run select-normalized-works`** command selects complete works
+from published normalized ZIPs without repeating raw extraction. It binds the
+exact original build ID and selection digest, streams and verifies all five
+logical members, retains selected context/rights and copies provenance bytes.
+Bulk staging stays compressed; SQLite holds identity/ownership fields only.
+Linux qualification: **1,474 passed**; macOS: **1,473 passed / 1 expected skip**.
+A real lineage fixture caught and fixed copying virtual ZIP parent directories.
+The next Wikipedia admission first excludes current work IDs and measures a
+mixed whole-article pilot before choosing a larger batch. No new admission has
+yet been activated.
 
 Completed build verification and real Linux queries were reused for activation;
 no source downloads, native analyses or full verifier were repeated. Post-switch
