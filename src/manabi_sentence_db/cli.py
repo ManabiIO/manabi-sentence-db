@@ -137,6 +137,14 @@ def parser() -> argparse.ArgumentParser:
     normalized_export.add_argument("--source")
     normalized_export.add_argument("--work-selection", type=Path,
                                    help="JSON work allowlist bound to the exact build ID")
+    normalized_select = commands.add_parser(
+        "select-normalized-works", help="Select complete works from an existing normalized ZIP"
+    )
+    normalized_select.add_argument("--archive", type=Path, required=True)
+    normalized_select.add_argument("--output", type=Path, required=True)
+    normalized_select.add_argument("--work-selection", type=Path, required=True,
+                                   help="JSON work allowlist bound to the archive's build ID")
+    normalized_select.add_argument("--progress", action="store_true")
     bucket_export = commands.add_parser(
         "export-normalized-buckets", help="Export complete works in compressed buckets in one scan"
     )
@@ -435,6 +443,17 @@ def main(argv: list[str] | None = None) -> int:
 
                 print(export_normalized_buckets(args.build, args.output, source_id=args.source,
                                                 works_per_archive=args.works_per_archive))
+            case "select-normalized-works":
+                from .normalized_selection import select_normalized_works
+                from .serialization import read_json
+
+                if args.work_selection.stat().st_size > 16 * 1024**2:
+                    raise DataError("Work selection exceeds 16 MiB")
+                print(select_normalized_works(
+                    args.archive, args.output, work_selection=read_json(args.work_selection),
+                    progress=(lambda message: print(message, file=sys.stderr, flush=True))
+                    if args.progress else None,
+                ))
             case "audit-parallel-numbers":
                 from .parallel_review import audit_parallel_numbers
 

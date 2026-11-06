@@ -82,6 +82,10 @@ run = "uv run --locked sentence-db export-normalized"
 description = "Export whole-work normalized ZIP buckets in one canonical scan"
 run = "uv run --locked sentence-db export-normalized-buckets"
 
+[tasks.select-normalized-works]
+description = "Select complete works directly from a published normalized ZIP"
+run = "uv run --locked sentence-db select-normalized-works"
+
 [tasks.vocabulary-coverage]
 description = "Compare distinct and marginal vocabulary using an explicit analyzer export"
 run = "uv run --locked sentence-db vocabulary-coverage"
