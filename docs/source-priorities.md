@@ -19,7 +19,8 @@ Wikipedia, Kyoto Wikipedia pairs, Wikivoyage, Wikibooks, archived Japanese
 Wikinews, Tatoeba, RealPersonaChat, MRMP multi-party chat, JMultiWOZ, STAIR Captions, YJ Captions, JEC Basic
 Sentence Data, NICT ALT parallel news text, ASDC main accommodation dialogues, TALPCo teaching examples,
 JMRD review-grounded authored dialogue, MASSIVE human-localized Japanese requests,
-one opt-in Global Voices translated-news work (`globalvoices-65906-ja`),
+two opt-in Global Voices translated-news works (`globalvoices-65906-ja` and
+`globalvoices-65886-ja`; the latter is not yet in the active consumer),
 the license-separated Storybooks Japan Japanese narrative subsets,
 and individually curated SCP-JP Tales
 『適性』『カモと商人』『証明写真』『定点観測』『髭を剃ったあとは気分がいい。』.

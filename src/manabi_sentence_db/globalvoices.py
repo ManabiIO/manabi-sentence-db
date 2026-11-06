@@ -1,4 +1,4 @@
-"""One explicitly reviewed Global Voices translation; no generic site admission."""
+"""Explicitly reviewed Global Voices translations; no generic site admission."""
 
 import fcntl
 import hashlib
@@ -26,6 +26,24 @@ MAX_BYTES = 1_500_000
 PROFILE = json.loads(Path(__file__).with_name('globalvoices_65906.json').read_text())
 PROFILE_SHA256 = hashlib.sha256(canonical_json(PROFILE)).hexdigest()
 TRANSFORMATION = 'globalvoices-reviewed-paragraph-inventory-v1'
+
+# Each entry is a separately reviewed work, never a discovery/crawl registry.
+WORKS = {
+    'globalvoices-65906-ja': {'native_id': '65906', 'ja_url': JA_URL,
+                            'en_url': EN_URL, 'profile': PROFILE,
+                            'profile_sha256': PROFILE_SHA256},
+}
+_PROFILE_65886 = json.loads(Path(__file__).with_name('globalvoices_65886.json').read_text())
+WORKS['globalvoices-65886-ja'] = {
+    'native_id': '65886',
+    'ja_url': 'https://jp.globalvoices.org/2026/10/09/65886/',
+    'en_url': ('https://globalvoices.org/2026/08/10/'
+               'in-japan-ryukyuan-indigenous-claim-hindered-by-u-s-military-bases-in-okinawa/'),
+    'profile': _PROFILE_65886,
+    'profile_sha256': hashlib.sha256(canonical_json(_PROFILE_65886)).hexdigest(),
+}
+ARTICLE_URLS = frozenset(url for work in WORKS.values()
+                         for url in (work['ja_url'], work['en_url']))
 
 
 def _hash(data):
@@ -101,33 +119,38 @@ def profile_from_pages(japanese, original, decisions):
 
 
 def reviewed_source(source):
-    acquisition = {'url': JA_URL, 'original_url': EN_URL,
-                   'inventory_sha256': PROFILE_SHA256}
-    if (source.get('id') != 'globalvoices-65906-ja'
-            or source.get('adapter') != 'globalvoices' or source.get('language') != 'ja'
-            or source.get('homepage') != JA_URL or source.get('license') != LICENSE
+    work = WORKS.get(source.get('id'))
+    if work is None:
+        raise DataError('Global Voices requires an explicitly reviewed work identity')
+    acquisition = {'url': work['ja_url'], 'original_url': work['en_url'],
+                   'inventory_sha256': work['profile_sha256']}
+    if (source.get('adapter') != 'globalvoices' or source.get('language') != 'ja'
+            or source.get('homepage') != work['ja_url'] or source.get('license') != LICENSE
             or source.get('acquisition') != acquisition):
         raise DataError('Global Voices requires the reviewed single-work identity, license and inventory')
+    return work
 
 
 def extract(japanese, original, source, *, stats=None):
-    reviewed_source(source)
+    work = reviewed_source(source)
+    profile, profile_sha256 = work['profile'], work['profile_sha256']
+    ja_url, en_url, native_id = work['ja_url'], work['en_url'], work['native_id']
     stats = stats if stats is not None else Counter()
     ja_meta, blocks = _parts(japanese)
     en_meta, en_blocks = _parts(original)
-    if ja_meta != PROFILE['japanese_metadata'] or en_meta != PROFILE['original_metadata']:
+    if ja_meta != profile['japanese_metadata'] or en_meta != profile['original_metadata']:
         raise DataError('Global Voices metadata/rights/bylines/dates changed')
-    if _hash(canonical_json([b.as_dict() for b in en_blocks])) != PROFILE['original_body_sha256']:
+    if _hash(canonical_json([b.as_dict() for b in en_blocks])) != profile['original_body_sha256']:
         raise DataError('Global Voices original article body/exception changed')
-    if len(blocks) != len(PROFILE['blocks']):
+    if len(blocks) != len(profile['blocks']):
         raise DataError('Global Voices body inventory changed')
     # Even a new work-specific notice outside div.entry must force re-review.
     # These exact response pins intentionally reject unrelated wrapper changes too.
-    if (_hash(japanese) != PROFILE['japanese_response_sha256']
-            or _hash(original) != PROFILE['original_response_sha256']):
+    if (_hash(japanese) != profile['japanese_response_sha256']
+            or _hash(original) != profile['original_response_sha256']):
         raise DataError('Global Voices raw page changed; explicit rights/layout review required')
     sentences, position = [], 0
-    for ordinal, (block, pin) in enumerate(zip(blocks, PROFILE['blocks'], strict=True)):
+    for ordinal, (block, pin) in enumerate(zip(blocks, profile['blocks'], strict=True)):
         stats['publisher_blocks_seen'] += 1
         if (pin['ordinal'] != ordinal or block.tag != pin['tag']
                 or _hash(block.text().encode()) != pin['text_sha256']
@@ -145,38 +168,39 @@ def extract(japanese, original, source, *, stats=None):
                 or any(c in text for c in '「」『』“”"')):
             raise DataError('Unexpected quotation/media in Global Voices eligible paragraph')
         stats['eligible_publisher_paragraphs'] += 1
-        sentences.append({'native_id': f'65906:paragraph:{ordinal}', 'text': text,
+        sentences.append({'native_id': f'{native_id}:paragraph:{ordinal}', 'text': text,
                           'source_range': {'unit': 'character', 'start': start, 'end': start+len(text)},
                           'tags': [], 'content_flags': [], 'translations': []})
     en_dates = en_meta['publisher_datetimes']
     ja_dates = ja_meta['publisher_datetimes']
     attribution = (
         f"{ja_meta['title']} — Jo Carter, writer (English) and translator (Japanese); Global Voices. "
-        f"Original English: {EN_URL} (published {en_dates['article:published_time']}; "
-        f"modified {en_dates['article:modified_time']}). Japanese translation: {JA_URL} "
+        f"Original English: {en_url} (published {en_dates['article:published_time']}; "
+        f"modified {en_dates['article:modified_time']}). Japanese translation: {ja_url} "
         f"(published {ja_dates['article:published_time']}). CC BY 3.0. "
         'Reviewed narrative paragraphs selected, HTML inline markup removed and text split into sentences.'
     )
-    return {'native_id': '65906', 'language': 'ja', 'title': ja_meta['title'], 'url': JA_URL,
-            'license': LICENSE, 'attribution': {'text': attribution, 'url': JA_URL},
-            'revision': {'id': PROFILE_SHA256, 'url': JA_URL,
+    return {'native_id': native_id, 'language': 'ja', 'title': ja_meta['title'], 'url': ja_url,
+            'license': LICENSE, 'attribution': {'text': attribution, 'url': ja_url},
+            'revision': {'id': profile_sha256, 'url': ja_url,
                          'timestamp': ja_dates['article:modified_time']},
             'published_at': ja_dates['article:published_time'],
             'authorship': 'unknown', 'language_origin': 'unknown', 'content_type': 'news',
             'source_text_hash': _hash('\n\n'.join(block.text() for block in blocks).encode()),
             'tags': ['translation:from-english', 'translation:method-unknown',
-                     f'original-url:{EN_URL}',
+                     f'original-url:{en_url}',
                      f"original-published-at:{en_dates['article:published_time']}",
                      f"original-modified-at:{en_dates['article:modified_time']}",
                      'scope:single-reviewed-work'], 'sentences': sentences}
 
 
 def iter_documents(manifest, snapshot_dir, *, stats=None):
+    work = reviewed_source(manifest['source'])
     entries = manifest['files']
     if len(entries) != 2 or {e['role'] for e in entries} != {JA_ROLE, EN_ROLE}:
         raise DataError('Global Voices requires exactly the Japanese and original article inventory')
     data = {}
-    for role, url in ((JA_ROLE, JA_URL), (EN_ROLE, EN_URL)):
+    for role, url in ((JA_ROLE, work['ja_url']), (EN_ROLE, work['en_url'])):
         entry = _one([e for e in entries if e['role'] == role], role)
         if entry['url'] != url:
             raise DataError('Global Voices snapshot article URL changed')
@@ -275,8 +299,8 @@ def _cache_response(url, cache, agent):
 
 def cached_article(url, cache, agent):
     """One worker across both hosts/retries; URL-keyed durable cache outside snapshots."""
-    if url not in {JA_URL, EN_URL}:
-        raise DataError('Only the two reviewed Global Voices article URLs may be acquired')
+    if url not in ARTICLE_URLS:
+        raise DataError('Only explicitly reviewed Global Voices article URLs may be acquired')
     cache = Path(cache)
     if cache.resolve() != cache.absolute():
         raise DataError('Global Voices cache must use its canonical, symlink-free path')

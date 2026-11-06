@@ -559,9 +559,7 @@ def create_snapshot(
         elif adapter == "globalvoices":
             from .globalvoices import (
                 EN_ROLE,
-                EN_URL,
                 JA_ROLE,
-                JA_URL,
                 cached_article,
                 extract,
                 reviewed_source,
@@ -569,13 +567,14 @@ def create_snapshot(
 
             if mode != "full" or date or max_files or titles or translations:
                 raise SnapshotError("Global Voices uses only its explicit reviewed single-work inventory")
-            reviewed_source(source)
-            japanese = cached_article(JA_URL, article_cache, agent)
-            original = cached_article(EN_URL, article_cache, agent)
+            work = reviewed_source(source)
+            ja_url, en_url, native_id = work['ja_url'], work['en_url'], work['native_id']
+            japanese = cached_article(ja_url, article_cache, agent)
+            original = cached_article(en_url, article_cache, agent)
             extract(japanese, original, source)
             files = [
-                _save_metadata(staging, "65906-ja.html", JA_ROLE, JA_URL, japanese),
-                _save_metadata(staging, "65906-en-original.html", EN_ROLE, EN_URL, original),
+                _save_metadata(staging, f"{native_id}-ja.html", JA_ROLE, ja_url, japanese),
+                _save_metadata(staging, f"{native_id}-en-original.html", EN_ROLE, en_url, original),
             ]
         elif adapter == "storybook-japan":
             from .storybooks import LICENSE_ROLE, iter_documents, validate_source

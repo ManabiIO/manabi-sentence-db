@@ -272,6 +272,7 @@ request reports which sources failed and preserves completed snapshots.
 | `storybooks-japan-ja`, `storybooks-japan-by4-ja` | Per-work CC BY 3.0 / CC BY 4.0, kept in separate sources | Commit/hash-pinned Japanese narrative text from 29 storybooks; explicit per-work grants, named translators, page-unit context and exact typo exclusions; excludes 11 NC works, images and audio |
 | `wikipedia-kyoto-ja` | CC BY-SA 3.0 | Hash-pinned NICT Kyoto parallel corpus v2.01; Japanese originals aligned only with final checked English translations; preserves Wikipedia/NICT attribution and filters excluded XML sections |
 | `alt-parallel-ja` | CC BY 4.0 Japanese; CC BY 2.5 English originals | Pinned NICT parallel news text; Japanese translated from English, with method/authorship unknown; excludes NC treebanks, ambiguous pairs and quotations |
+| `globalvoices-65886-ja` | CC BY 3.0 | Opt-in reviewed report: 13 Japanese narrative paragraphs; exact response and provenance pins, quotations/media/wording defects withheld with context gaps |
 | `globalvoices-65906-ja` | CC BY 3.0 | Opt-in single reviewed news article: 11 Japanese narrative paragraphs; exact page/metadata/body pins, original English retained only as rights evidence, all omissions preserve context gaps |
 | `scp-jp-aptitude-ja` | CC BY-SA 3.0 | One reviewed contemporary Tale, revision/body-hash pinned; exact raw HTML and paragraph units retained |
 | `scp-jp-duck-merchant-ja`, `scp-jp-id-photo-ja`, `scp-jp-fixed-point-ja` | CC BY-SA 3.0 | Three additional individually reviewed contemporary Tales; direct prose only, exact credit/revision/body pins |
@@ -280,10 +281,10 @@ request reports which sources failed and preserves completed snapshots.
 
 See [source research and admission decisions](docs/sources.md) for primary
 licensing evidence, source-specific exceptions, and approximately thirty
-researched source families. The Global Voices adapter covers only article 65906;
+researched source families. The Global Voices adapter covers only articles 65906 and 65886;
 the wider site remains unadmitted.
 
-### One explicitly reviewed Global Voices article
+### Explicitly reviewed Global Voices articles
 
 ```sh
 mise run snapshot -- --source globalvoices-65906-ja --mode full \
@@ -291,7 +292,8 @@ mise run snapshot -- --source globalvoices-65906-ja --mode full \
   --output data/snapshots/globalvoices-65906
 ```
 
-`--source all` skips this source in every mode. Use a persistent canonical cache
+Use `globalvoices-65886-ja` and a distinct output directory for the second work.
+`--source all` skips both sources in every mode. Use a persistent canonical cache
 outside snapshot/build directories. Cached responses are hash-verified and reused
 without network access; absent responses fetch only the two fixed article URLs
 and their primary robots policies, with one cache lock and at least ten seconds

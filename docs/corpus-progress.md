@@ -35,6 +35,22 @@ release or production deployment is claimed. Measure actual imported/checkpoint
 storage and fresh capacity before separately admitting the combined rebuild.
 The active local consumer remains **2,597,508 texts / 7,626,911,744 bytes**.
 
+## Parallel source preparation: second Global Voices work
+
+The explicit per-work adapter now also accepts `globalvoices-65886-ja`, with
+fresh Japanese/English rights evidence and a hash-pinned 30-block inventory.
+Assistant review selected **13 paragraphs**; the compressed pipeline produced
+**23 sentences**, with **17 context gaps**, no translations and complete credit.
+The normalized ZIP is **15,358 bytes**, SHA-256
+`673e9bee1e6154b607b29079c1f13ff8837c5560078254ab8f390a5a49169cba`.
+This is a prepared source supplement, not net consumer growth or a public release.
+
+The cached snapshot/build path ran with network requests disabled. **91 focused
+host tests** passed across both works, snapshot handling and transport restrictions;
+source configuration validation and Ruff passed. The frozen ongoing Wikipedia
+import remains unchanged. Review and source-policy details are in
+[sources.md](sources.md#additional-reviewed-work-65886--2026-11-06).
+
 ## Earlier: v14 export complete; v15 and in-pass omission reviews qualified
 
 The v14 successor completed all 16 archives: **113,772 works / 1,673,563

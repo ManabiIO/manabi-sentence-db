@@ -1,0 +1,36 @@
+schema_version: 1
+id: globalvoices-65886-ja
+title: 'Global Voices: Ryukyuan Indigenous rights (65886)'
+language: ja
+adapter: globalvoices
+homepage: https://jp.globalvoices.org/2026/10/09/65886/
+license:
+  id: CC-BY-3.0
+  url: https://creativecommons.org/licenses/by/3.0/
+attribution:
+  text: Jo Carter, original English author and Japanese translator. Global Voices.
+    Japanese narrative paragraphs selected and HTML inline markup removed; sentence
+    segmentation may follow. CC BY 3.0. Original English published 2026-08-10; Japanese
+    translation published 2026-10-09.
+  url: https://jp.globalvoices.org/2026/10/09/65886/
+license_evidence:
+- https://jp.globalvoices.org/2026/10/09/65886/
+- https://globalvoices.org/2026/08/10/in-japan-ryukyuan-indigenous-claim-hindered-by-u-s-military-bases-in-okinawa/
+- https://globalvoices.org/about/global-voices-attribution-policy/
+notes:
+- Raw HTML remains local rights evidence; raw snapshot release packaging is blocked.
+- Opt-in single reviewed work; snapshot --source all skips this source.
+- Jo Carter is credited as English writer and Japanese translator. Translation method,
+  authorship classification and native review remain unknown.
+- Thirteen assistant-reviewed narrative paragraphs; all other body blocks reserve context
+  gaps. Excludes quotations, captions, promotion, headings, translator note, image reference,
+  malformed wording, duplicated name and a geographic wording error. No source text is repaired.
+- The English original supplies rights and provenance evidence only, without emitted
+  English text or inferred sentence alignment.
+- Exact response, body, markup, rights, byline and date pins fail closed on changes.
+- Use the persistent URL-keyed article cache; one worker with at least 10 seconds
+  between all requests and retries, respecting robots. No media acquisition.
+acquisition:
+  url: https://jp.globalvoices.org/2026/10/09/65886/
+  original_url: https://globalvoices.org/2026/08/10/in-japan-ryukyuan-indigenous-claim-hindered-by-u-s-military-bases-in-okinawa/
+  inventory_sha256: 83186e62b6ef959a3acfd140f1bb68da665b627b87ee8a6d574329bcf73eefde

@@ -316,6 +316,39 @@ and reserve context gaps across every omitted block. Fail closed on changed
 body text, bylines, dates, original links, exceptions or unfamiliar body markup.
 The general footer license cannot override a per-work exception.
 
+#### Additional reviewed work: 65886 — 2026-11-06
+
+A fresh bounded snapshot of [Japanese article 65886](https://jp.globalvoices.org/2026/10/09/65886/)
+and its [linked English original](https://globalvoices.org/2026/08/10/in-japan-ryukyuan-indigenous-claim-hindered-by-u-s-military-bases-in-okinawa/)
+confirms article/footer CC BY 3.0 and Jo Carter's writer/translator credits.
+The historical pilot cache could not be located; these are new responses, not
+recovered historical bytes. Japanese SHA-256:
+`43f91f207c83c855ac817bd65e2a5d03bc311bf4460c59b79b9a93f3b266d1ed`;
+English: `b6a5f653492cc1a612c1e446970171e4f1b13cfca3602758286062b4e68be247`.
+Both robots and publisher attribution/AI policies were captured with one worker,
+a persistent cache and at least 10 seconds between attempts. No media was fetched.
+
+Two assistants read the full body inventories independently. The final
+[hash-pinned profile](../src/manabi_sentence_db/globalvoices_65886.json) retains
+**13 paragraphs**, zero-based blocks **3, 4, 5, 6, 7, 12, 14, 16, 18, 19, 23, 25, 29**.
+It withholds all captions, quotations, headings, promotion, translator note and
+image-dependent material. Primary review additionally withholds paragraph 13's
+malformed wording and paragraph 17's geographic wording error. Paragraph 26 has
+a duplicated organization name and introduces an excluded quotation. Source text
+is never silently repaired; every omission preserves a context gap. Quoted names
+are conservatively omitted to keep the existing quote guard, not because names
+alone establish an independent copyright restriction. Advanced prose and the
+article's political viewpoint are not exclusion criteria.
+
+The original publication date is 2026-08-10 (modified 2026-09-03); the Japanese
+translation was published/modified 2026-10-09. Preserve both dates and the observed
+English-to-Japanese direction. No English sentence alignment, native-speaker
+review, translation method or whole-article factual certification is inferred.
+Google Maps fair-use imagery, Commons BY-SA imagery and the YouTube screenshot
+are excluded. No partner exception to the retained editorial prose was observed.
+Raw snapshots remain nonpublishable. This is adapter preparation, not a new
+public corpus release or active-consumer addition.
+
 #### Single-work importer: 65906
 
 The follow-up captured the

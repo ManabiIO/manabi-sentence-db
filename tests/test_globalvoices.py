@@ -1,4 +1,4 @@
-"""Single-work synthetic fixtures; no upstream article text or network."""
+"""Explicit-work synthetic fixtures; no upstream article text or network."""
 
 import copy
 import hashlib
@@ -45,14 +45,21 @@ def html(*, japanese):
             '</body></html>').encode()
 
 
-@pytest.fixture
-def fixture(monkeypatch):
+@pytest.fixture(params=['globalvoices-65906-ja', 'globalvoices-65886-ja'])
+def fixture(monkeypatch, request):
+    source_id = request.param
+    work = gv.WORKS[source_id]
+    monkeypatch.setattr(gv, 'JA_URL', work['ja_url'])
+    monkeypatch.setattr(gv, 'EN_URL', work['en_url'])
     ja, en = html(japanese=True), html(japanese=False)
     profile = gv.profile_from_pages(ja, en, {0: None, 1: 'third-party-blockquote',
                                            2: 'media-caption', 3: None})
     monkeypatch.setattr(gv, 'PROFILE', profile)
     monkeypatch.setattr(gv, 'PROFILE_SHA256', hashlib.sha256(canonical_json(profile)).hexdigest())
-    source = load_source(Path('sources/globalvoices-65906-ja.yaml'))
+    monkeypatch.setitem(gv.WORKS, source_id, {
+        **work, 'profile': profile,
+        'profile_sha256': gv.PROFILE_SHA256})
+    source = load_source(Path('sources') / (source_id + '.yaml'))
     source['acquisition']['inventory_sha256'] = gv.PROFILE_SHA256
     return source, ja, en
 
@@ -60,6 +67,9 @@ def fixture(monkeypatch):
 def test_exact_units_attribution_direction_and_context_gaps(fixture, tmp_path):
     source, ja, en = fixture
     raw = gv.extract(ja, en, source)
+    assert raw['native_id'] == source['id'].split('-')[1]
+    assert [s['native_id'] for s in raw['sentences'] if isinstance(s, dict)] == [
+        raw['native_id'] + ':paragraph:0', raw['native_id'] + ':paragraph:3']
     assert raw['authorship'] == raw['language_origin'] == 'unknown'
     assert not any('native-review' in tag for tag in raw['tags'])
     assert 'translation:from-english' in raw['tags']
@@ -139,6 +149,11 @@ def test_snapshot_and_offline_build_revalidate_pages(fixture, tmp_path, monkeypa
     monkeypatch.setattr(gv, 'cached_article', acquire)
     path = create_snapshot(source, tmp_path/'snapshot', mode='full', article_cache=tmp_path/'cache')
     assert calls == [gv.JA_URL, gv.EN_URL]
+    from manabi_sentence_db.serialization import read_json
+    saved = read_json(path)
+    native_id = source['id'].split('-')[1]
+    assert {entry['path'] for entry in saved['files']} == {
+        f'{native_id}-ja.html', f'{native_id}-en-original.html'}
     assert create_snapshot(source, path.parent, mode='full', article_cache=tmp_path/'cache') == path
     assert len(calls) == 2
     output = tmp_path/'build'
@@ -252,7 +267,8 @@ def test_source_all_skips_this_opt_in_article(tmp_path, monkeypatch, capsys):
     from manabi_sentence_db import cli
 
     monkeypatch.setattr(cli, '_sources', lambda path: {
-        'globalvoices-65906-ja': {'id': 'globalvoices-65906-ja', 'adapter': 'globalvoices'}})
+        source_id: {'id': source_id, 'adapter': 'globalvoices'}
+        for source_id in gv.WORKS})
     monkeypatch.setattr(cli, 'create_snapshot', lambda *a, **k: pytest.fail('implicit acquisition'))
     assert cli.main(['snapshot', '--source', 'all', '--mode', 'full', '--output', str(tmp_path)]) == 0
     assert 'explicit' in capsys.readouterr().err
@@ -284,3 +300,42 @@ def test_request_clock_cannot_overwrite_hardlinked_file(tmp_path, monkeypatch):
     with pytest.raises(DataError, match='request clock'):
         gv.cached_article(gv.JA_URL, tmp_path, 'test')
     assert target.read_bytes() == b'{"time": 0}'
+
+
+def test_cross_work_source_and_snapshot_urls_fail_closed(fixture, tmp_path):
+    source, ja, en = fixture
+    other_id = next(source_id for source_id in gv.WORKS if source_id != source['id'])
+    other = gv.WORKS[other_id]
+    changed = copy.deepcopy(source)
+    changed['id'] = other_id
+    with pytest.raises(DataError):
+        gv.extract(ja, en, changed)
+    for field in ('url', 'original_url'):
+        changed = copy.deepcopy(source)
+        changed['acquisition'][field] = other['ja_url' if field == 'url' else 'en_url']
+        with pytest.raises(DataError):
+            gv.extract(ja, en, changed)
+    manifest = {'source': source, 'files': [
+        {'role': gv.JA_ROLE, 'url': other['ja_url'], 'path': 'ja.html'},
+        {'role': gv.EN_ROLE, 'url': gv.EN_URL, 'path': 'en.html'}]}
+    (tmp_path/'ja.html').write_bytes(ja)
+    (tmp_path/'en.html').write_bytes(en)
+    with pytest.raises(DataError, match='URL'):
+        list(gv.iter_documents(manifest, tmp_path))
+
+
+def test_registry_preserves_old_work_and_rejects_unknown_urls(tmp_path):
+    old = gv.WORKS['globalvoices-65906-ja']
+    assert old['native_id'] == '65906'
+    assert old['ja_url'] == 'https://jp.globalvoices.org/2026/10/23/65906/'
+    assert old['en_url'] == ('https://globalvoices.org/2026/09/25/'
+                             'young-japanese-find-new-outlets-for-peace-activism-amid-rising-tensions-in-the-pacific/')
+    assert old['profile_sha256'] == '202adf4f35183541f4ad0ef996aaf87921ba68b72684542efac42514b73c62c8'
+    assert gv.ARTICLE_URLS == frozenset(url for work in gv.WORKS.values()
+                                      for url in (work['ja_url'], work['en_url']))
+    for url in ('https://jp.globalvoices.org/2026/10/09/65886/?extra=1',
+                'https://jp.globalvoices.org/2026/10/09/99999/',
+                'https://example.com/'):
+        with pytest.raises(DataError, match='reviewed'):
+            gv.cached_article(url, tmp_path/'unused', 'test')
+    assert not (tmp_path/'unused').exists()

@@ -1,0 +1,273 @@
+{
+  "japanese_metadata": {
+    "url": "https://jp.globalvoices.org/2026/10/09/65886/",
+    "title": "沖縄の米軍基地が阻む、琉球先住民族の認知と権利の訴え",
+    "credits": [
+      {
+        "display": "記者 (English)Jo Carter",
+        "name": "Jo Carter",
+        "url": "https://globalvoices.org/author/jo-carter/"
+      },
+      {
+        "display": "翻訳 (日本語)Jo Carter",
+        "name": "Jo Carter",
+        "url": "https://jp.globalvoices.org/author/jo-carter/"
+      }
+    ],
+    "display_dates": [
+      "元記事掲載 2026/08/10",
+      "翻訳掲載 2026/10/09"
+    ],
+    "publisher_datetimes": {
+      "article:published_time": "2026-10-09T00:09:27+0000",
+      "article:modified_time": "2026-10-09T00:09:27+0000"
+    },
+    "english_original_links": [
+      "https://globalvoices.org/2026/08/10/in-japan-ryukyuan-indigenous-claim-hindered-by-u-s-military-bases-in-okinawa/"
+    ],
+    "article_license_sha256": "93be2f79ff0364e96f1d47bd826c2370eb2e9d0a74c9fb85aa260f32478be62d",
+    "footer_license_sha256": "f3a876bb90d6dde1524aed5e3a3466ef1243b2dae9305af9d3c6f8d7e9ab8e0d",
+    "entry_attrs": {
+      "class": "entry"
+    }
+  },
+  "original_metadata": {
+    "url": "https://globalvoices.org/2026/08/10/in-japan-ryukyuan-indigenous-claim-hindered-by-u-s-military-bases-in-okinawa/",
+    "title": "In Japan, Ryūkyūan Indigenous claim hindered by U.S. military bases in Okinawa",
+    "credits": [
+      {
+        "display": "Written byJo Carter",
+        "name": "Jo Carter",
+        "url": "https://globalvoices.org/author/jo-carter/"
+      }
+    ],
+    "display_dates": [
+      "Posted 10 August 2026"
+    ],
+    "publisher_datetimes": {
+      "article:published_time": "2026-08-10T18:54:32+0000",
+      "article:modified_time": "2026-09-03T20:58:36+0000"
+    },
+    "english_original_links": [],
+    "article_license_sha256": "047aca91d86209aca1c4abfb1bb8633de023aa5b47855884045ed6ec36c4346d",
+    "footer_license_sha256": "553ca93cb502a272467bb196396bb39ceb445a9e1b41c873890cecfdf39e450e",
+    "entry_attrs": {
+      "class": "entry"
+    }
+  },
+  "japanese_response_sha256": "43f91f207c83c855ac817bd65e2a5d03bc311bf4460c59b79b9a93f3b266d1ed",
+  "original_response_sha256": "b6a5f653492cc1a612c1e446970171e4f1b13cfca3602758286062b4e68be247",
+  "original_body_sha256": "7e7bd773b33b740d073219b690ba8978e6758a36f346f2eb6972e4c2196dd375",
+  "blocks": [
+    {
+      "ordinal": 0,
+      "tag": "div",
+      "reason": "media-caption",
+      "text_sha256": "35edb443bd416fa00f3550a5f9bcc968483192a2d2241d6ee1375a184bd2c3d3",
+      "html_tree_sha256": "1731d8f37fa83eff6395454128afdfb6d43d231898818076f7c26902dce55fc9"
+    },
+    {
+      "ordinal": 1,
+      "tag": "p",
+      "reason": "promotion",
+      "text_sha256": "ee94f37320bedcfa4343721275cce4af93ca8223f492e52989f0c0f6ddfdc1b1",
+      "html_tree_sha256": "5943c7fa399bb2e26e44a75b36dfe18bd874562c3dad0893fe07dd28b3a69d16"
+    },
+    {
+      "ordinal": 2,
+      "tag": "p",
+      "reason": "quote-marked-name-conservative",
+      "text_sha256": "1cb2ef8002506cf1e22d5ed04c795310575d1cc34cd71af1b41926e0763a9216",
+      "html_tree_sha256": "80207dc0d1d30116ff9d9e83660edec97cd605283218b53e6d9ca8c07a775886"
+    },
+    {
+      "ordinal": 3,
+      "tag": "p",
+      "reason": null,
+      "text_sha256": "8219fe20ce8f875f9e7bdf504eacf091bebefcf93fb17904b1caf3926ac75697",
+      "html_tree_sha256": "0b4a0a89381c0492b97163c5e31c522aeb8f9ad9a6595671c064212c9d812a63"
+    },
+    {
+      "ordinal": 4,
+      "tag": "p",
+      "reason": null,
+      "text_sha256": "6ad0f758e7bda850291d3ecc4a16b1c59ef619bfab2018d145269a5a73b7cb29",
+      "html_tree_sha256": "7d84a605ff2b6bfc6af9e319bd8dced0e9fc4ba863811dc1785f4f4a3402d6d4"
+    },
+    {
+      "ordinal": 5,
+      "tag": "p",
+      "reason": null,
+      "text_sha256": "0753d216f48e3822cb713bf92ed1b5de611d2007beea8889c1377a0d8918832c",
+      "html_tree_sha256": "f84071b80db8e7e3947c18ed64214d10bf143cd683120f794f27f0a79f0ffdfb"
+    },
+    {
+      "ordinal": 6,
+      "tag": "p",
+      "reason": null,
+      "text_sha256": "0ba325b58002b277e4ead9f2ad98740b0c514adc10416bfbfeaaeef3c46a11b6",
+      "html_tree_sha256": "e99aeea1c36111ff39e1c552c38318c20e5ab8b6324b1f3569f5ea77a4baa8d8"
+    },
+    {
+      "ordinal": 7,
+      "tag": "p",
+      "reason": null,
+      "text_sha256": "c42cd1f25918a410d138d4614a7dbcd1c4c80716301e7d3fcf470d127676c02b",
+      "html_tree_sha256": "e96444c100fd03ff42ad8e731be30aab7d90943dae145cf282321656f884f521"
+    },
+    {
+      "ordinal": 8,
+      "tag": "h3",
+      "reason": "heading",
+      "text_sha256": "73ffd75af5852ff3fcac4d4bf8bdbd9382976fbecfa840b784a7894316d017d0",
+      "html_tree_sha256": "de0d8aaa4e42c85d19b9f4b20d7791e9ad67893b1b8bc3c6a6cbea94f573915b"
+    },
+    {
+      "ordinal": 9,
+      "tag": "p",
+      "reason": "quote-marked-wording",
+      "text_sha256": "c17561f7872ae27da208784994cf27347dac35cd7814c344581ae107968dffa3",
+      "html_tree_sha256": "508e71196ae91c14d3d10ab269d756f8ca5d1dbb0851b5395419b119f349609d"
+    },
+    {
+      "ordinal": 10,
+      "tag": "p",
+      "reason": "quotation-introduction",
+      "text_sha256": "619c09ce3f0bbe388478e80beeaaac07a1759d6151783406dcc5641c36cfb095",
+      "html_tree_sha256": "bf0111ceabcd4eba0abad5d11c0edddee082f766c1fbad4578d54f621352b311"
+    },
+    {
+      "ordinal": 11,
+      "tag": "blockquote",
+      "reason": "third-party-quotation",
+      "text_sha256": "369a9429728cce8cceae3d0712e7245d55d3199b9151d256785d46f2f298a3a3",
+      "html_tree_sha256": "c1c9199a7a984dfc081645cf7504be17000206b88bfd47759be0615dae756c39"
+    },
+    {
+      "ordinal": 12,
+      "tag": "p",
+      "reason": null,
+      "text_sha256": "80622b781bd6f1733f75e206a5c4f1ae014ff5dfcf95ac6508edfb20d0b45ffb",
+      "html_tree_sha256": "2032a36daf51b30ea5c98af9d56f8f504e6fbc1d58a7d0054c0679339d1a80e8"
+    },
+    {
+      "ordinal": 13,
+      "tag": "p",
+      "reason": "malformed-wording",
+      "text_sha256": "7efe8e5f84c2cd6d3ffb1630124cbaa3903819fc775af80319b73b6564b097ec",
+      "html_tree_sha256": "a9b11e45e727272b9416a1a54fd7082b6d229c7d105c77c4841d78ce99206755"
+    },
+    {
+      "ordinal": 14,
+      "tag": "p",
+      "reason": null,
+      "text_sha256": "f330e54ddbeaf3f06cbcf449083b756ca3587a2e01c611d595142203005d48b6",
+      "html_tree_sha256": "ba8085a85bc0a78197f2ee788924c5aeb0838bbdc04a405b2a82493e6b839528"
+    },
+    {
+      "ordinal": 15,
+      "tag": "h3",
+      "reason": "heading",
+      "text_sha256": "739c048b46a7e441a544b53bc4fce187b43f96d457320135ba0b5c79372f5003",
+      "html_tree_sha256": "737d3ddf25164595da5e8f6b083ee14b54fa8e120a0f48353c47f9b2a1f6797c"
+    },
+    {
+      "ordinal": 16,
+      "tag": "p",
+      "reason": null,
+      "text_sha256": "edcc60dec5eeeb46fc7d0b3987bf782b0c92286158e13566ae4c9fd71ffda62f",
+      "html_tree_sha256": "a70452dbf667ac8a790d2932041991438cc9759a33377e3013b14154f0120be3"
+    },
+    {
+      "ordinal": 17,
+      "tag": "p",
+      "reason": "geographic-wording-error",
+      "text_sha256": "171e6c5649ae2371e16dc68cc44b58004e3a7b5d46456ec7f697f17ff5eda949",
+      "html_tree_sha256": "2aeed3bed83eb92de55aa06b081a31bd906b1692c6896a1dd8ca4859d9148201"
+    },
+    {
+      "ordinal": 18,
+      "tag": "p",
+      "reason": null,
+      "text_sha256": "cbca0826fedd819423eea0adca2a3122e0bf337f5cab1cb4d2806d77c8b5899d",
+      "html_tree_sha256": "c9ff586acc2a42f0676ceea7199792130ea7f013eca18ad48359d222620201f6"
+    },
+    {
+      "ordinal": 19,
+      "tag": "p",
+      "reason": null,
+      "text_sha256": "5fcd1da62062a7f9e290affaf133971b4d1a360eb9dec6ff7b89b80e6257ae4b",
+      "html_tree_sha256": "5ea327badf013081c1e29b0507ad49c30c5d0227f7e9a785758b46a5fe97be3a"
+    },
+    {
+      "ordinal": 20,
+      "tag": "p",
+      "reason": "missing-image-reference",
+      "text_sha256": "3c1f6148a0f90e54ee0e9dd988bfd8b9d6543a9f2195917279dd5276fe18a33d",
+      "html_tree_sha256": "0e4d02430164b7b12a68a392c1e84dedc38a364634753118746572dc8e996847"
+    },
+    {
+      "ordinal": 21,
+      "tag": "div",
+      "reason": "media-caption",
+      "text_sha256": "b422d4295bd31391c2192f0406d1df1ea3e09e1af3edf05424f0f3bd80b4b14d",
+      "html_tree_sha256": "4398a82da2f2426e54a0be80fceff34fa9c5b728c567feed0bf529e55af64e4d"
+    },
+    {
+      "ordinal": 22,
+      "tag": "div",
+      "reason": "media-caption",
+      "text_sha256": "c1339f80cca1b70ee2f29b7a741f16243c446c6ebaebbd0ab6ab48d8e0d2c7e0",
+      "html_tree_sha256": "8e34eca7f39d97550ec0f47f4cd7b6b71ec9f559608b0299a7bb78c14c3bde17"
+    },
+    {
+      "ordinal": 23,
+      "tag": "p",
+      "reason": null,
+      "text_sha256": "31d77ef07f06c8b0a493bb1b107bc59d7e67b85d70c1ad73ec427c97c126feec",
+      "html_tree_sha256": "7a5872fd79be659a19f346108af1531f466f6959a8e776e75c0f7111e1804fd0"
+    },
+    {
+      "ordinal": 24,
+      "tag": "p",
+      "reason": "translator-note",
+      "text_sha256": "88fd59a8ad5dea4215b110e6c314bda11301d94197db1d729fbaf5bc57b9949d",
+      "html_tree_sha256": "8286eec2dcb9bb78eaa9bae5fdf519182dea48683467c2c6c4ff49ba4c564aac"
+    },
+    {
+      "ordinal": 25,
+      "tag": "p",
+      "reason": null,
+      "text_sha256": "a8af1ee34bce8b48abfed0cf3a4d80e08d1f51ccd36ca696eb0f521155548324",
+      "html_tree_sha256": "71c5f7381985fd009752a9a379b501c3f175b4763bf9a3c3f56b71c4a8d61763"
+    },
+    {
+      "ordinal": 26,
+      "tag": "p",
+      "reason": "duplicated-wording-and-quotation-introduction",
+      "text_sha256": "1f1df975a521c9273c8de91fc43cbe8fd563bc3f216741b5a4be4d9dc4c18e79",
+      "html_tree_sha256": "721aab51b37b3f612ff602130049bb7ba07b8ea9cd30bc4a05ff66f0b920b4b0"
+    },
+    {
+      "ordinal": 27,
+      "tag": "blockquote",
+      "reason": "third-party-quotation",
+      "text_sha256": "aa2022ebcfa1960e4dd9a271517731fd074828a2d272ca47b1df96ebf2e719bd",
+      "html_tree_sha256": "7a42d647baba28be3c3e196cc647cc16b2961275d6fe88375b6d4b940a03e553"
+    },
+    {
+      "ordinal": 28,
+      "tag": "blockquote",
+      "reason": "third-party-quotation",
+      "text_sha256": "2fe3dbd65c1e1d85f3728ed788309f69f1dbfd87e9edadcdb971f6552d177e32",
+      "html_tree_sha256": "05de263d8a9e2bc6031db4753f0262c2cae721e4941b67fc7d4101baf1f36b61"
+    },
+    {
+      "ordinal": 29,
+      "tag": "p",
+      "reason": null,
+      "text_sha256": "88ce99a7f8a0cb506dabafcca2ffa5679a00a6a3540e093171b0e9bb5ab4e7bd",
+      "html_tree_sha256": "2638f57a07d87e9f0c7b8c05d628dc2fa3657082529cba8e5b1bffed795ff9c2"
+    }
+  ]
+}
