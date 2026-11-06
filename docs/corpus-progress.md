@@ -51,7 +51,10 @@ Native import is complete: **108,241 distinct texts /107,775 eligible texts**,
 **299,413,504 compressed bytes**. It reused1,343 current analyses and4,869 cached
 analyses, saving102,029 new checkpoint analyses. Word-link preparation and provenance import are
 complete. The **working** candidate has **2,597,508 texts /106,432 net growth**
-after pruning ineligible-only additions; display/search projections are rebuilding.
+after pruning ineligible-only additions. Display projections and all three ranked
+indexes are built; sentence and expected-posting validation is running. At
+16:59 UTC it had checked 318,464 of 2,597,508 sentence records. The producer
+remains live with no restart or OOM; its final report does not yet exist.
 These are provisional counts pending full output validation, final size and exit0.
 Observed RSS is576,764 KiB and charged peak reached the1GiB limit. The job has not OOMed, but this establishes no memory headroom claim. The
 existing **2,491,076-text /7.075 GB** consumer remains active until the replacement
@@ -64,6 +67,30 @@ sort exhausted128MiB tmpfs after all16 streams committed; recovery explicitly
 used native scratch and reused those committed receipts. No archive scan or
 baseline extraction/analysis was repeated. Current selections, source refinement
 and all quality evidence remain separately bound for reproducible continuation.
+
+## Next Wikipedia expansion: remaining cached whole articles
+
+The verified metadata inventory contains 120,607 article IDs absent from its
+original baseline. After the current 6,833-article selection, at most **113,774
+unselected articles** remain. This is an opportunity count, not an accepted
+sentence count. Reconcile against the newly accepted consumer before choosing
+another cohort: the inventory's stored `existing` flags refer to an older corpus.
+
+Reuse the 16 cached November 4 normalized archives and their verification
+receipts. Order remaining works by the existing deterministic priority within
+each topic, interleave topic queues, and split work only for resource-bounded
+processing. Keep whole articles and apply current v12 refinement directly to
+these released archives; cached v11 retained counts are estimates. Do not impose
+another permanent article or sentence quota, or rerun the inventory's original
+quota-bound construction scripts.
+
+Fresh topic-spanning assistant review and demonstrated-failure checks precede
+admission; routing topics do not establish quality. Preserve original wording,
+rights, attribution, revision history and context gaps. Reuse exact-text analysis
+checkpoints, measure eligible net additions and complete-artifact/scratch costs,
+and choose an explicit budget before a combined refresh. This next cohort is
+**not extracted, admitted or active yet**. The current producer owns the heavy
+worker lease; do not start another producer while it validates.
 
 ## Refinement selection-lineage guard
 
