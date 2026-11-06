@@ -236,6 +236,13 @@ download `sample`, and fails on missing work IDs. It reads the verified processe
 shards without rescanning the raw snapshot. Omitting `--work-selection` exports
 the complete build; `--source` can select one existing source partition.
 
+When only a published normalized ZIP is available, use
+`mise run select-normalized-works -- --archive corpus.normalized.zip
+--output selected.zip --work-selection selection.json`. It accepts the same
+build-bound work selection, preserves complete works and their linked sentence
+records, and keeps temporary text compressed. Source extraction and linguistic
+analysis are separate steps; selecting a release does not repeat either one.
+
 Repeating the same local snapshot request reuses verified existing files without
 contacting upstream. `--refresh` downloads a complete candidate snapshot before
 comparing its identity; it does not use conditional HTTP requests or ETags. A
