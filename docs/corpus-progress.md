@@ -3,7 +3,7 @@
 This is the current pipeline checkpoint and supersedes historical running/queued
 statements below. Generated corpus text and detailed evidence stay outside Git.
 
-## Latest: first expansion accepted; larger compressed export running
+## Latest: first expansion accepted; larger compressed export completed
 
 The first growth batch completed full validation and independent preservation
 checks. The downstream local consumer now contains **2,597,508 texts**, a net
@@ -16,9 +16,11 @@ No production deployment or hosted runner was started.
 The accepted consumer was reconciled with the cached Wikipedia inventory:
 **113,773 additional whole articles**, organized into **12 topic-balanced
 chunks**, with **1,673,639 cached-v11 occurrence candidates**. This is neither a
-distinct-text count nor an admission count. A grouped export is now selecting
-from each of the16 existing source archives once, then applying the current v12
-quality policy directly. Retained text remains in compressed ZIPs; per-stage
+distinct-text count nor an admission count. The grouped export completed successfully after selecting
+from each of the16 existing source archives once and applying the current v12
+quality policy directly. It retains **113,773 works /1,673,619 occurrences** in
+**401,931,611 compressed ZIP bytes**. The per-archive sentence-count sum is
+1,656,264; global deduplication and net/eligible growth are still pending. Retained text remains in compressed ZIPs; per-stage
 checksums bind source files, whole-work selections and transform code. No source
 redownload, native sentence analysis or serving refresh is part of this export.
 
