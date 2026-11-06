@@ -1,6 +1,9 @@
 # Source priorities and admission policy — 2026-11-06
 
 Current completion and exact resume evidence live in [corpus-progress.md](corpus-progress.md).
+Good, properly licensed sentences should be added; file-size targets are movable.
+Measure growth and temporary storage, compress/reuse data and retire superseded
+outputs instead of excluding worthwhile material merely to hit a fixed size.
 The dated investigations below preserve their original findings; they are not
 instructions to repeat completed acquisitions or qualification.
 

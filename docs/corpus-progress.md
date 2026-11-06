@@ -3,6 +3,19 @@
 This is the current pipeline checkpoint and supersedes historical running/queued
 statements below. Generated corpus text and detailed evidence stay outside Git.
 
+## Current growth policy: add good licensed sentences; size target is movable
+
+Alex clarified on2026-11-06 that good, properly licensed sentences should be
+added. Historical8GB target /10GB hard-ceiling language below is superseded.
+Use measured whole-artifact and temporary-space budgets, compression, compatible
+caches and prompt retirement of superseded outputs to prevent runaway storage.
+Do not withhold worthwhile sentences solely to meet an arbitrary file-size target.
+Licensing, provenance and quality checks still govern admission. The running
+candidate retains its existing7.8GB job limit because its7.627GB pages fit; no
+rebuild or repeated analysis is needed. Additional clean Wikipedia cohorts should
+reuse the verified metadata inventory and source bytes, with quality/cost review,
+rather than treating the earlier150,000-text planning cap as a permanent limit.
+
 ## Current growth continuation: native import complete, combined refresh running
 
 The normalized sentence-refinement tool is merged in **PR #64**, followed by
@@ -135,9 +148,10 @@ remain unchanged. Applying v11 still precedes a growth activation. Conservative
 whole-work exclusion allowlists retain **265 works / 4,547 occurrences**; that
 option also withholds acceptable neighboring sentences from the six articles.
 
-Next: use a balanced clean whole-work cohort, tentatively capped at **150,000
-new eligible sentences**, then enforce an actual completed candidate limit of
-**7.8 GB** (8 GB serving target / 10 GB hard ceiling). The pilot's roughly 4 KB
+Historical planning for the currently running batch: a balanced whole-work
+cohort was tentatively capped at **150,000 new eligible sentences** and a
+**7.8 GB** job budget. These are batch settings, superseded as permanent
+corpus limits by the current growth policy above. The pilot's roughly 4 KB
 per text includes fixed overhead and is only a planning observation. It does
 not predict the exact size of another cohort or authorize an oversized artifact.
 Reuse the verified release bytes, review/allowlist receipts and native analysis
