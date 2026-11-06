@@ -298,6 +298,9 @@ def test_refinement_parent_bytes_and_binding_are_preserved(tmp_path, corrupt):
         result = _select(path, tmp_path / "selected.zip")
         with zipfile.ZipFile(result) as archive:
             assert archive.read("lineage/parent.catalog.json") == parent_bytes[0]
+            # zipfile.Path used in validation supplies a virtual parent. It
+            # must never be read or published as a physical archive member.
+            assert "lineage/" not in archive.namelist()
 
 
 def test_changed_input_cannot_publish(tmp_path, monkeypatch):

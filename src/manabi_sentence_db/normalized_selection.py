@@ -118,7 +118,11 @@ def _write_archive(root, incoming, manifest):
             if digest.hexdigest() != manifest["members"][name]:
                 raise DataError("Normalized selection staging bytes changed")
         outgoing.writestr(_zip_info("manifest.json"), canonical_json(manifest), compresslevel=6)
-        for name in sorted(set(incoming.namelist()) - logical - {"manifest.json"}):
+        # Provenance validation uses zipfile.Path, whose FastLookup can add
+        # implied directory names to namelist(). Only physical file entries
+        # have byte ranges and belong in the normalized output.
+        ancillary = {member.filename for member in incoming.infolist()} - logical - {"manifest.json"}
+        for name in sorted(ancillary):
             with incoming.open(name) as source:
                 with outgoing.open(_zip_info(name), "w", force_zip64=True) as target:
                     for chunk in iter(lambda: source.read(1024 * 1024), b""):
