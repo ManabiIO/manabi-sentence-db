@@ -52,6 +52,36 @@ admitted a balanced whole-article subset. Before another large serving batch,
 measure index/metadata costs and available headroom; do not sacrifice query
 correctness or reintroduce rejected source wording just to increase counts.
 
+## Next Wikipedia cohort: cost pilot and v11 development review complete
+
+Whole-work selection is merged in PR #62; quality v11 is merged in PR #63.
+The release inventory found **120,607 novel work IDs / 120,616 total** against
+the current consumer; these are article counts, not new eligible sentences.
+A deterministic pilot selected **271 complete articles**, exported 15 verified
+compressed ZIPs, and built **4,941 distinct texts / 4,916 eligible texts** into
+compact v12. The final artifact is **19,730,432 bytes**, including all indexes,
+metadata, record dictionaries and word links. Native memory peak was
+**410,607,616 bytes**, elapsed **248.4s at 0.25 CPU / 1 GiB**. It reused 66
+current analyses and saved 4,875 new analyses into the existing resumable native
+checkpoint. Baseline extraction/analysis/validation was not repeated.
+
+The assistant read 48 development examples and all six v11 removals: two
+orphan fragments and four dense specialist passages. Linux full suite:
+**1,493 passed**; host **1,492 passed / 1 expected skip**. See `sources.md` for
+citations, retained counterexamples and limitations. This is not human review or
+a held-out quality estimate. The published source release and active corpus
+remain unchanged. Applying v11 still precedes a growth activation. Conservative
+whole-work exclusion allowlists retain **265 works / 4,547 occurrences**; that
+option also withholds acceptable neighboring sentences from the six articles.
+
+Next: use a balanced clean whole-work cohort, tentatively capped at **150,000
+new eligible sentences**, then enforce an actual completed candidate limit of
+**7.8 GB** (8 GB serving target / 10 GB hard ceiling). The pilot's roughly 4 KB
+per text includes fixed overhead and is only a planning observation. It does
+not predict the exact size of another cohort or authorize an oversized artifact.
+Reuse the verified release bytes, review/allowlist receipts and native analysis
+checkpoint. No fresh Wikipedia acquisition is needed for this next batch.
+
 ## Published sources and completed admission preparation
 
 **Serving-admission follow-up:** current refined VFD has **218,953 distinct
