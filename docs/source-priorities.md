@@ -1,4 +1,4 @@
-# Source priorities and admission policy — 2026-11-04
+# Source priorities and admission policy — 2026-11-06
 
 Current completion and exact resume evidence live in [corpus-progress.md](corpus-progress.md).
 The dated investigations below preserve their original findings; they are not
@@ -52,7 +52,7 @@ pairs from source rows and from text overlap with Wikipedia.
 | STAIR Captions (enabled) | [Publisher](https://github.com/STAIR-Lab-CIT/STAIR-captions), CC BY 4.0 | README rechecked; Japanese image captions. Images require separate rights. |
 | Japanese Visual Genome VQA | [Publisher](https://github.com/yahoojapan/ja-vg-vqa), reported CC BY 4.0 | Verify downloadable text license; many answers are fragments. |
 | YJ Captions (adapter enabled) | [Pinned publisher](https://github.com/yahoojapan/YJCaptions/blob/2f2d6de87ce90b7ff1fd318efef17b1ce0e127db/README.md), verified CC BY 4.0 | Human original Japanese caption text only; complete-caption gate and separate works; no English alignment inferred from image IDs. Full admission, overlap and serving growth remain to be measured. |
-| Yahoo VFD (adapter ready; full qualification pending) | [Pinned publisher](https://github.com/yahoojapan/VFD-Dataset/tree/5cb774f44d8fa64e288cbb9b8e96c7aa5959ad62), CC BY 4.0 | Conservative punctuated spoken pairs; no images/non-verbal actions. See the November 4 review below; no published/serving output claimed. |
+| Yahoo VFD (enabled; refined source published and active locally) | [Pinned publisher](https://github.com/yahoojapan/VFD-Dataset/tree/5cb774f44d8fa64e288cbb9b8e96c7aa5959ad62), CC BY 4.0 | Conservative punctuated spoken pairs; no images/non-verbal actions. The refined November 4 source is published and the validated local consumer has 218,927 eligible VFD texts. Reuse [completed admission evidence](corpus-progress.md#latest-consumer-checkpoint-2491076-texts-active-locally); do not repeat the historical pending work below. |
 | JMRD (enabled and source supplement published) | [Pinned publisher](https://github.com/ku-nlp/JMRD/tree/a20b0a89b4cf6ce1db320039f6e27df10604bf4c), CC BY-SA 4.0 | Review-grounded authored dialogue only; excludes external plots/biographies, copied prose and questionnaires. Five exact problematic utterances are withheld whole. See [current admission evidence](sources.md#high-priority-additions). |
 | MASSIVE Japanese (enabled and source supplement published) | [Publisher](https://github.com/alexa/massive), CC BY 4.0 with SLURP credit | Independent publisher judgments gate human-localized Japanese requests. No English prompts are exported as translations; entities can differ. See [source policy](sources.md#massive-japanese-practical-requests). |
 | JMultiWOZ (enabled) | [Publisher](https://github.com/nu-dialogue/jmultiwoz), verified CC BY-SA 4.0 | Human role-play, preserve speaker/turn context without profiles. |
@@ -91,6 +91,11 @@ This November 2 check did not download or admit VFD. The November 4 follow-up
 below supersedes its acquisition status.
 
 ### VFD text-only follow-up — 2026-11-04
+
+**Historical acquisition/review checkpoint.** Full refinement, public source
+publication, native admission and local activation subsequently completed. The
+[current progress index](corpus-progress.md) supersedes the pending status in
+this dated entry. Retain its rights and image-context limitations.
 
 The pinned publisher commit is `5cb774f44d8fa64e288cbb9b8e96c7aa5959ad62`.
 Its **6,576,449-byte ZIP** contains README, preparation code and a
