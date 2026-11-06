@@ -132,3 +132,45 @@ def test_unique_basenames_and_invalid_parameters(tmp_path):
                                       archive_sha256={path.name: sha256_file(path)}, **options)
     with pytest.raises(DataError, match="unique"):
         _build([path, path], tmp_path / "review.zst")
+
+
+def test_packet_binds_complete_topic_mapping_order_independently(tmp_path):
+    from manabi_sentence_db.serialization import digest_json
+
+    path, _, _ = _fixture(tmp_path)
+    routing = {"selected": "animals", "other": "animals"}
+    output = tmp_path / "one.zst"
+    kwargs = dict(archive_sha256={path.name: sha256_file(path)}, seed="routing-v1")
+    review.build_topic_review([path], routing, output, **kwargs)
+    packet = _read(output)
+    assert packet["sampling"]["work_topics_sha256"] == digest_json(routing)
+    assert packet["sampling"]["work_topics_count"] == 2
+    reordered = tmp_path / "reordered.zst"
+    review.build_topic_review([path], dict(reversed(list(routing.items()))), reordered, **kwargs)
+    assert reordered.read_bytes() == output.read_bytes()
+    expanded = tmp_path / "expanded.zst"
+    review.build_topic_review([path], {**routing, "unused": "animals"}, expanded, **kwargs)
+    altered = _read(expanded)
+    assert altered["cases"] == packet["cases"]
+    assert altered["sampling"]["work_topics_sha256"] != packet["sampling"]["work_topics_sha256"]
+
+
+def test_sampling_freezes_caller_routing_before_streaming(tmp_path, monkeypatch):
+    from manabi_sentence_db.serialization import digest_json
+
+    path, _, _ = _fixture(tmp_path)
+    routing = {"selected": "animals", "other": "animals"}
+    expected = digest_json(routing)
+    original = review._rows
+
+    def mutate(archive, table, manifest):
+        routing["selected"] = "changed"
+        yield from original(archive, table, manifest)
+
+    monkeypatch.setattr(review, "_rows", mutate)
+    output = tmp_path / "frozen.zst"
+    review.build_topic_review([path], routing, output,
+                             archive_sha256={path.name: sha256_file(path)}, seed="routing-v1")
+    packet = _read(output)
+    assert packet["sampling"]["work_topics_sha256"] == expected
+    assert {case["topic"] for case in packet["cases"]} == {"animals"}

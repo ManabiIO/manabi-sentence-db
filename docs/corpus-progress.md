@@ -133,6 +133,10 @@ not human-reviewed. **39 focused builder/sampler/CLI tests passed; Ruff passed.*
 This does not replace full validation of unsampled records or untouched members.
 No existing source archives were rescanned and no accepted packet was regenerated.
 Use it after the next selected archives have passed current refinement.
+A follow-up binds the complete frozen work-to-topic mapping by canonical digest
+and count, closing a missing sampling-input receipt. **19 affected builder/CLI
+tests passed**, including reordered routing and caller-mutation regressions;
+Ruff passed. No real review packet has yet been generated with this builder.
 
 ## Refinement selection-lineage guard
 

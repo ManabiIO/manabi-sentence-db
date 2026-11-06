@@ -461,7 +461,9 @@ The builder streams occurrence members first, then reads work/sentence members
 only in archives owning selected candidates. Only selected records are retained
 in memory; the compressed packet preserves their complete original work and
 sentence fields. Input checksums, the fresh seed, sampling algorithm and citation
-tie-break are recorded. Consumed members have digest/count checks, but this is
+tie-break are recorded. The packet also records the canonical JSON SHA-256 and
+entry count of the full work-to-topic mapping, frozen at the start of sampling;
+retain that mapping alongside its source inventory for reproduction. Consumed members have digest/count checks, but this is
 **not** a replacement for full corpus validation: unrelated members and unsampled
 record semantics are outside its scope. A generated packet has `review_pending`
 and `human_review: false`; producing it does not admit or human-review sentences.

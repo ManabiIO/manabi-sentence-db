@@ -9,7 +9,7 @@ import zstandard
 from .licenses import validate_rights
 from .normalized_database import _check_text, _manifest, _rows
 from .review_sampling import TopicReviewSampler, _string
-from .serialization import DataError, canonical_json, sha256_file
+from .serialization import DataError, canonical_json, digest_json, sha256_file
 
 
 def _signature(path):
@@ -26,6 +26,8 @@ def build_topic_review(archives: list[Path], topics_by_work: dict[str, str], out
     """
     if not archives or not isinstance(topics_by_work, dict) or not topics_by_work:
         raise DataError("Archives and work topic mapping must be nonempty")
+    # Freeze caller-owned routing metadata for this exact sampling run.
+    topics_by_work = dict(topics_by_work)
     for work, topic in topics_by_work.items():
         _string(work, "work ID")
         _string(topic, "topic")
@@ -100,6 +102,8 @@ def build_topic_review(archives: list[Path], topics_by_work: dict[str, str], out
               "inputs": inputs, "sampling": {
                   "algorithm": "sha256-bottom-k-topic-sentence-v1", "per_topic": per_topic,
                   "identity": ["topic", "sentence_id"],
+                  "work_topics_sha256": digest_json(topics_by_work),
+                  "work_topics_count": len(topics_by_work),
                   "citation_tiebreak": ["archive", "work_id"],
                   "validation_scope": "expected-input-hashes-and-sampled-records"},
               "cases": cases}
