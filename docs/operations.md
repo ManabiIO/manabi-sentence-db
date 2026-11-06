@@ -19,7 +19,7 @@ at most the requested metadata in memory. It makes no network requests and does
 not create a plaintext corpus. XML holds one decoded page at a time; saved API
 responses are decoded as whole JSON files, as in the regular adapter. The same
 1,000,000-character page limit applies before category routing. Ten topic quotas
-plus a general quota have a combined ceiling of 50,000 pages. Existing output
+plus a general quota have a combined ceiling of 250,000 pages. Existing output
 directories and symlink paths are refused; the output parent must already exist.
 
 `wikimedia-balanced-metadata-v2` routes biographies, named organizations and
@@ -35,7 +35,8 @@ disambiguation pages are excluded. All routing remains a heuristic, including
 category extraction from wikitext. The report includes bounded title/category
 evidence, counts, the exact implementation hash, seed and selection digest.
 Counts describe input page units, not an independently deduplicated article census.
-Repeated retained IDs do not consume quota; conflicting retained metadata fails.
+Repeated IDs do not consume quota; conflicting metadata for an already seen
+page identity fails, including pages that do not survive the sampling heap.
 
 The smallest snapshot/seed/page-ID hashes win within each topic, independently
 of input order. Raising quotas with the same seed retains earlier selected IDs.
@@ -44,6 +45,48 @@ underfilled; quotas are not silently reassigned. Default limits select at most
 12,000 pages, not 12,000 quality-approved works. The allowlist is bound to exactly
 one snapshot and is written last. An interrupted scan leaves no completed
 selection and must be retried in a fresh directory, using the same cached inputs.
+
+### Reuse metadata for later, disjoint cohorts
+
+For repeated expansion, use `index-wikimedia` once and select from its durable
+metadata cache instead of repeatedly decoding the full dump. The index stores
+metadata and compressed categories, not article bodies. Keep the completed cache
+with the snapshot; a missing historical cache requires a separately identified
+replacement, not a claim that the old verification was recovered.
+
+```sh
+mise run index-wikimedia -- \
+  --snapshot data/snapshots/wikipedia-full-20261001/manifest.json \
+  --output data/research/wikipedia-metadata-20261001-replacement \
+  --max-index-bytes 2147483648 --progress
+mise run select-wikimedia -- \
+  --metadata-cache data/research/wikipedia-metadata-20261001-replacement \
+  --output data/research/wikipedia-next-cohort \
+  --per-topic 10000 --general 20000 --seed practical-growth-20261106 \
+  --exclude-selection data/research/wikipedia-cohort-exclusions-20261001/selection.json \
+  --progress
+```
+
+These are planning commands, not evidence that this replacement scan has run.
+The recovered exclusion file binds 298,173 prior page selections to the exact
+snapshot. It includes pages later rejected by extraction or quality checks; it
+is neither an accepted-work count nor a remaining-yield estimate. Exclusions
+apply before quotas. Repeat `--exclude-selection` for each subsequent cohort's
+selection as well as the recovered union. Keep the seed stable for reproducible
+priority ordering; changing it can also change topic assignment.
+
+This example requests at most 120,000 new articles across ten topical routes
+and a general allocation. Underfilled routes stay underfilled. This is one
+processing batch, not a corpus ceiling or evidence of learner quality.
+
+The 2 GiB cap is a planning allowance for the metadata SQLite file, not a measured
+requirement or total-job disk bound. Separately reserve space for manifests,
+selection reports and the disk-backed identity ledger. Check actual free space
+and acquire the existing heavy-worker lock before the scan; never overlap it
+with import or refresh. Admit extraction, native analysis and serving refresh
+separately using measured artifacts and their temporary-space requirements.
+Keep whole works together when exporting compressed buckets, and review fresh
+retained and omitted sentence samples across the selected topics.
 
 Run the normal extractor, license checks and sentence-quality gates afterward;
 metadata selection grants no human-review state or rights and does not activate
