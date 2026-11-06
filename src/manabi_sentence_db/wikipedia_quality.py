@@ -9,7 +9,7 @@ import hashlib
 import re
 import unicodedata
 
-WIKIPEDIA_QUALITY_VERSION = "wikipedia-example-quality-v10"
+WIKIPEDIA_QUALITY_VERSION = "wikipedia-example-quality-v11"
 
 # Exact, unchanged texts assessed in the November 3–4 assistant source reviews.
 # Hashes keep these local findings from becoming broad grammatical/topic bans.
@@ -115,7 +115,9 @@ _MISSING_LIST = re.compile(
     r"が(?:ある|挙げられる)[。．.!！?？]?\Z"
 )
 _DETACHED_LABEL = re.compile(
-    r"^[、，,]"
+    # A dropped inline subject/object can leave only its particle before a
+    # comma. Keep quoted particle mentions and conjunction が、 untouched.
+    r"^[、，,]|^[はをの][、，,]"
     r"|^第[0-9０-９一二三四五六七八九十百]+(?:巻|話)登場[。．.!！?？]?\Z"
 )
 # A terminal topic particle has lost its predicate; quoted mentions of the
@@ -156,6 +158,13 @@ _SPECIALIST = (
     "共形場理論", "弦理論", "ヴィラソロ代数",
     "フェレドキシン", "リンゴ酸脱水素酵素", "イソクエン酸脱水素酵素",
     "アルギナーゼ", "シキミ酸経路", "フェニルアラニンアンモニア分解酵素", "ペルオキシダーゼ",
+    # The November 6 cost pilot exposed dense passages not covered by the
+    # earlier vocabulary. The existing three-distinct-terms + structure gate
+    # still applies; a field name or one repeated term never rejects a sentence.
+    "反応中間体", "素反応", "平行反応",
+    "mRNA", "ゲノム", "リボソーム", "宿主細胞",
+    "逆ミルズ比", "回帰分析", "セレクションバイアス",
+    "脊髄", "神経活動", "発火パターン",
 )
 _SPECIALIST_PATTERN = re.compile("|".join(sorted(_SPECIALIST, key=len, reverse=True)))
 

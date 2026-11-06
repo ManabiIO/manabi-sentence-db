@@ -1260,3 +1260,44 @@ became empty. All 94 surviving prior review examples matched exactly, both fresh
 replacements and all six omissions were inspected. Independent retained-field and
 normalized-member checks passed. Source publication is separate from native and
 serving admission; occurrences remain unreviewed.
+
+
+### Wikipedia pilot quality follow-up — 2026-11-06
+
+A deterministic mixed whole-work cost pilot contains 271 complete articles /
+4,941 distinct texts from the already published v10 release. Its compact v12
+consumer artifact measures 19,730,432 bytes with every index and prepared word
+link; fixed dictionaries/schema contribute to that size. This is a small pilot,
+not an estimate of the complete release or production query latency.
+
+An assistant read 48 development examples and all six newly withheld texts.
+Admission **v11** catches unquoted leading `は、` / `を、` / `の、` remnants,
+while preserving quoted particle mentions, complete clauses and the conjunction
+`が、`. The existing structural-density gate also recognizes narrow vocabulary
+clusters in reaction kinetics, molecular biology, regression statistics and
+neural oscillation. It still requires three distinct terms plus sentence length
+or kanji density; a single term, repeated term and introductory science stay.
+
+The four specialist examples motivated the vocabulary additions; this is
+post-hoc development evidence, not a held-out quality score. Across all 4,941
+pilot texts, v11 additionally withholds four dense specialist examples and two
+orphan fragments, including one orphan outside the original 48. All six were
+read in full. Source citations (CC-BY-SA-4.0; revision/download identities retained
+in the source work records):
+
+- [反応速度](https://ja.wikipedia.org/wiki/反応速度) — reaction-intermediate/elementary/parallel-reaction density.
+- [ポリオウイルス](https://ja.wikipedia.org/wiki/ポリオウイルス) — genome/mRNA/host-cell/ribosome density.
+- [ミルズ比](https://ja.wikipedia.org/wiki/ミルズ比) — inverse-Mills/regression/selection-bias density.
+- [神経振動子](https://ja.wikipedia.org/wiki/神経振動子) — spinal-cord/neural-activity/firing-pattern density.
+- [ロマン派音楽](https://ja.wikipedia.org/wiki/ロマン派音楽) and [保全生態学](https://ja.wikipedia.org/wiki/保全生態学) — dropped subject before `は、`.
+
+No source text is rewritten. Related ordinary science, dates, nominal prose,
+clinical language and rights/context-gap behavior remain eligible. Occurrences
+remain **unreviewed**; awkward/context-dependent labels and other specialist
+prose can remain. The published v10 release and active serving corpus are
+unchanged. Before growth activation, apply v11 through a provenance-preserving
+refinement or conservatively withhold affected whole works; merely selecting
+existing v10 ZIPs does not apply v11. The pilot's optional whole-work exclusion
+allowlists retain 265 works / 4,547 occurrences, dropping all six affected
+articles, including their otherwise acceptable sentences. This conservative
+alternative is not an estimate of sentence-level filtering yield.

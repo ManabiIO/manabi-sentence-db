@@ -413,3 +413,46 @@ def test_v10_retains_correct_related_wording_and_source_gaps():
     assert record["attribution"] == source["attribution"]
     assert all(s["review_state"] == "unreviewed" for s in record["sentences"])
     assert WIKIPEDIA_QUALITY_VERSION in record["transformations"]
+
+
+@pytest.mark.parametrize("text", [
+    "は、1950年以降もいちじるしくロマン派的な様式で作曲し続けている。",
+    "を、詳しく説明している。",
+    "の、長い歴史が記録されている。",
+])
+def test_v11_withholds_unquoted_comma_led_orphan_particles(text):
+    assert assess_wikipedia_sentence(text) == ("wikipedia-dependent-fragment", [])
+
+
+@pytest.mark.parametrize("text", [
+    "「は、」という書き方について説明した。",
+    "が、すぐに考え直した。",
+    "は虫類は丸い卵を産む。",
+    "彼は、1950年以降も作曲し続けている。",
+    "その意味を、詳しく説明している。",
+    "その町の、長い歴史が記録されている。",
+    "mRNAは体の中で作られる。",
+    "ゲノムについて学び、ゲノムの働きを調べ、ゲノムについて発表した。",
+    "この講座では、回帰分析の基本を例を使いながら分かりやすく説明する。",
+    "脊髄の働きについて、図を使って説明した。",
+    "実験では、反応中間体の性質について詳しく調べた。",
+])
+def test_v11_keeps_complete_ordinary_and_introductory_science_prose(text):
+    assert assess_wikipedia_sentence(text) == (None, [])
+
+
+# Unchanged CC-BY-SA-4.0 pilot examples; article links in docs/sources.md.
+@pytest.mark.parametrize("text", [
+    "ある反応中間体（あるいは反応物）から2つの素反応が分岐する場合の連続反応は平行反応（parallel reaction）と呼ばれる。",
+    "ポリオウイルスはプラス鎖RNAウイルスであるため、ウイルス粒子内に包み込まれたゲノムは、そのままの状態でmRNAとして機能し、宿主細胞のリボソームによって直ちに翻訳される。",
+    "一般的な逆ミルズ比の適用例は、回帰分析でのセレクションバイアスの影響を補正する際に用いる。",
+    "ヤツメウナギの脊髄を身体から取り出し、その神経活動を記録した研究によれば、身体から取り出した脊髄の神経活動は、身体内に存在したときと非常に似た発火パターンを示したことから、この発火パターンは Fictive locomotion（Fictiveは Fiction の形容詞）とよばれている。",
+])
+def test_v11_withholds_multiple_distinct_terms_in_dense_specialist_prose(text):
+    assert assess_wikipedia_sentence(text) == ("wikipedia-specialist-density", [])
+
+
+def test_v11_keeps_two_terms_as_style_metadata():
+    assert assess_wikipedia_sentence("ゲノムとmRNAの関係を学ぶ。") == (
+        None, ["style:specialist-vocabulary"],
+    )
