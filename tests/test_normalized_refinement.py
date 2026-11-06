@@ -70,6 +70,7 @@ def test_only_targeted_owners_are_assessed_and_newly_empty_works_drop(tmp_path, 
         _corpus(tables)
         tables["occurrences"] = [tables["occurrences"][1], tables["occurrences"][3]]
         tables["occurrences"][0].update(previous_id=None, next_id=None)
+        tables["sentences"] = tables["sentences"][:1]
     path, original, _ = _fixture(tmp_path, change=change)
     seen = []
     assessor = refinement.wikipedia_quality.assess_wikipedia_sentence
@@ -177,3 +178,76 @@ def test_unsafe_unsupported_and_incomplete_archives_fail_closed(tmp_path, extra)
     path, _, _ = _fixture(tmp_path, change=_corpus, extra=extra)
     with pytest.raises(DataError):
         refinement.refine_normalized_wikipedia(path, tmp_path / "invalid.zip")
+
+
+def test_repeated_refinement_preserves_validated_prior_policy_receipt(tmp_path):
+    path, _, _ = _fixture(tmp_path, change=_corpus)
+    first = refinement.refine_normalized_wikipedia(path, tmp_path / "first.zip")
+    second = refinement.refine_normalized_wikipedia(first, tmp_path / "second.zip")
+    rows, manifest = _read(second)
+    assert rows == _read(first)[0]
+    receipt = manifest["normalized_refinement_provenance"]
+    parent = _read(first)[1]["normalized_refinement_provenance"]
+    assert receipt["parent_receipt"] == parent
+    assert receipt["input_zip_sha256"] == hashlib.sha256(first.read_bytes()).hexdigest()
+    assert receipt["rejected_occurrences_by_reason"] == {}
+    assert parent["rejected_occurrences_by_reason"] == {"wikipedia-dependent-fragment": 1}
+    malformed = deepcopy(parent)
+    malformed["input_zip_sha256"] = "invalid"
+
+    def corrupt_prior(members):
+        manifest = json.loads(members["manifest.json"])
+        manifest["normalized_refinement_provenance"] = malformed
+        members["manifest.json"] = json.dumps(manifest).encode()
+
+    invalid_dir = tmp_path / "invalid-prior"
+    invalid_dir.mkdir()
+    invalid_path, _, _ = _fixture(invalid_dir, change=_corpus, extra=corrupt_prior)
+    with pytest.raises(DataError, match="digest"):
+        refinement.refine_normalized_wikipedia(invalid_path, invalid_dir / "out.zip")
+    for change in (
+        lambda r: r["parent_receipt"].update(policy_version="tampered"),
+        lambda r: r.update(input_zip_sha256="invalid"),
+        lambda r: r["output_counts"].update(occurrences=999),
+    ):
+        invalid = deepcopy(receipt)
+        change(invalid)
+        with pytest.raises(DataError):
+            refinement._validate_receipt(invalid, "original-build")
+    nested = deepcopy(parent)
+    for _ in range(refinement.MAX_REFINEMENT_DEPTH):
+        previous = nested
+        nested = {**parent, "parent_receipt": previous,
+                  "parent_receipt_sha256": hashlib.sha256(
+                      refinement.canonical_json(previous)).hexdigest()}
+    with pytest.raises(DataError, match="lineage"):
+        refinement._validate_receipt(nested, "original-build")
+
+
+def test_ja_subtag_targeting_preserves_review_flags(tmp_path):
+    def change(tables):
+        _corpus(tables)
+        old_ids = [row["id"] for row in tables["sentences"]]
+        for work in tables["works"]:
+            work["language"] = "ja-JP"
+        for row in tables["sentences"]:
+            row["language"] = "ja-JP"
+            row["id"] = refinement.sentence_identity(row["language"], row["text"])
+        ids = dict(zip(old_ids, [row["id"] for row in tables["sentences"]], strict=True))
+        for row in tables["occurrences"] + tables["translations"]:
+            row["sentence_id"] = ids[row["sentence_id"]]
+    path, original, _ = _fixture(tmp_path, change=change)
+    result = refinement.refine_normalized_wikipedia(path, tmp_path / "subtag.zip")
+    rows, _ = _read(result)
+    assert [row["id"] for row in rows["occurrences"]] == ["left", "right", "independent"]
+    assert rows["occurrences"][0]["review_state"] == original["occurrences"][0]["review_state"]
+
+
+def test_unowned_sentence_fails_closed_including_unrelated_content(tmp_path):
+    def change(tables):
+        _corpus(tables)
+        tables["sentences"].append(_sentence("独立した文です。"))
+    path, _, _ = _fixture(tmp_path, change=change)
+    with pytest.raises(DataError, match="Unowned normalized sentence"):
+        refinement.refine_normalized_wikipedia(path, tmp_path / "out.zip")
+    assert not (tmp_path / "out.zip").exists()

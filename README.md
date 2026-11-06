@@ -544,5 +544,9 @@ IDs, retained text, rights and canonical ancestry stay unchanged. The manifest's
 `normalized_refinement_provenance` identifies the input ZIP, original build, policy
 and implementation hashes, counts and rejection reasons. This records a normalized
 transform, not a replacement canonical build or human review. All logical members,
-including discarded rows, are verified; bulk staging remains zstd compressed. The
+including discarded rows, are verified; unowned sentence rows fail closed because
+normalized sentence rows carry no independent rights context. Prior normalized
+refinement receipts are preserved with hash bindings and validated to a maximum
+chain depth of 16; canonical ancestor bytes remain unchanged. Japanese language
+subtags are included. Bulk staging remains zstd compressed. The
 result can be passed to `select-normalized-works` and the normalized database importer.

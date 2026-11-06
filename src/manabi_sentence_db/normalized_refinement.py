@@ -46,6 +46,51 @@ CREATE TABLE refs(id TEXT PRIMARY KEY);
 """
 
 
+MAX_REFINEMENT_DEPTH = 16
+
+
+def _validate_receipt(receipt, build_id, depth=1):
+    """Validate bounded normalized lineage without reinterpreting canonical ancestry."""
+    required = {
+        "schema_version", "transform", "input_zip_sha256", "original_build_id",
+        "input_manifest_sha256", "policy_version", "policy_sha256", "implementation_sha256",
+        "input_counts", "output_counts", "rejected_occurrences_by_reason",
+    }
+    if (depth > MAX_REFINEMENT_DEPTH or not isinstance(receipt, dict)
+            or set(receipt) not in (required, required | {"parent_receipt", "parent_receipt_sha256"})
+            or type(receipt.get("schema_version")) is not int or receipt["schema_version"] != 1
+            or receipt.get("transform") != "normalized-wikipedia-refinement-v1"
+            or receipt.get("original_build_id") != build_id):
+        raise DataError("Invalid or excessive normalized refinement lineage")
+    _identity(receipt.get("policy_version"))
+    for key in ("input_zip_sha256", "input_manifest_sha256", "policy_sha256",
+                "implementation_sha256", "parent_receipt_sha256"):
+        if key in receipt:
+            value = receipt[key]
+            if (not isinstance(value, str) or len(value) != 64
+                    or any(char not in "0123456789abcdef" for char in value)):
+                raise DataError("Invalid normalized refinement receipt digest")
+    for key in ("input_counts", "output_counts"):
+        value = receipt[key]
+        if (not isinstance(value, dict) or set(value) != set(TABLES)
+                or any(type(n) is not int or n < 0 for n in value.values())):
+            raise DataError("Invalid normalized refinement receipt counts")
+    before, after = receipt["input_counts"], receipt["output_counts"]
+    reasons = receipt["rejected_occurrences_by_reason"]
+    if (not isinstance(reasons, dict)
+            or any(not isinstance(k, str) or not k.strip() or type(v) is not int or v <= 0
+                   for k, v in reasons.items())
+            or any(after[t] > before[t] for t in TABLES)
+            or after["references"] != before["references"]
+            or sum(reasons.values()) != before["occurrences"] - after["occurrences"]):
+        raise DataError("Inconsistent normalized refinement receipt counts")
+    if "parent_receipt" in receipt:
+        parent = receipt["parent_receipt"]
+        if hashlib.sha256(canonical_json(parent)).hexdigest() != receipt["parent_receipt_sha256"]:
+            raise DataError("Normalized refinement parent receipt checksum differs")
+        _validate_receipt(parent, build_id, depth + 1)
+
+
 def refine_normalized_wikipedia(archive_path: Path, output: Path, *, progress=None) -> Path:
     """Apply current Japanese Wikipedia gates; retain independent ownership.
 
@@ -73,6 +118,11 @@ def refine_normalized_wikipedia(archive_path: Path, output: Path, *, progress=No
                 raise DataError("Oversized normalized refinement manifest")
             original = _manifest(archive)
             _identity(original.get("build_id"))
+            prior_receipt = original.get("normalized_refinement_provenance")
+            if "normalized_refinement_provenance" in original:
+                _validate_receipt(prior_receipt, original["build_id"])
+                if prior_receipt["output_counts"] != original["counts"] and "work_selection" not in original:
+                    raise DataError("Normalized refinement receipt does not describe input counts")
             with tempfile.TemporaryDirectory(prefix=".normalized-refinement-",
                                              dir=output.parent) as temporary:
                 root = Path(temporary)
@@ -87,7 +137,7 @@ def refine_normalized_wikipedia(archive_path: Path, output: Path, *, progress=No
                             _identity(row.get(key))
                         validate_rights(row, source_url_key="url")
                         db.execute("INSERT INTO works VALUES (?,?,?)", (
-                            row["id"], row["language"], row["language"] == "ja"
+                            row["id"], row["language"], row["language"].split("-", 1)[0] == "ja"
                             and row["source_id"].startswith("wikipedia-")))
                     # Identify targeted ownership before looking at text. Shared text
                     # is assessed once and the decision applies only to those owners.
@@ -159,6 +209,10 @@ def refine_normalized_wikipedia(archive_path: Path, output: Path, *, progress=No
                         if row.get("kind") != "reference":
                             raise DataError("Expected normalized reference record")
                         validate_record(row)
+                    if db.execute("SELECT 1 FROM sentences s WHERE NOT EXISTS "
+                                  "(SELECT 1 FROM occurrences o WHERE o.sentence_id=s.id) "
+                                  "LIMIT 1").fetchone():
+                        raise DataError("Unowned normalized sentence has no occurrence rights context")
                     counts = dict.fromkeys(TABLES, 0)
                     digests = {table: hashlib.sha256() for table in TABLES}
                     with ExitStack() as stack:
@@ -208,6 +262,11 @@ def refine_normalized_wikipedia(archive_path: Path, output: Path, *, progress=No
                         "input_counts": original["counts"], "output_counts": counts,
                         "rejected_occurrences_by_reason": dict(sorted(reasons.items())),
                     }
+                    if prior_receipt is not None:
+                        receipt["parent_receipt"] = prior_receipt
+                        receipt["parent_receipt_sha256"] = hashlib.sha256(
+                            canonical_json(prior_receipt)).hexdigest()
+                    _validate_receipt(receipt, original["build_id"])
                     manifest = {**original, "counts": counts,
                                 "members": {t + ".jsonl": digests[t].hexdigest() for t in TABLES},
                                 "normalized_refinement_provenance": receipt}
