@@ -3,6 +3,50 @@
 This is the current pipeline checkpoint and supersedes historical running/queued
 statements below. Generated corpus text and detailed evidence stay outside Git.
 
+## Current growth continuation: reviewed batch compiled next
+
+The normalized sentence-refinement tool is merged in **PR #64**, followed by
+the narrow terminal-comma cutoff policy **v12 / PR #65**. Full normalized-tool
+Linux suite: **1,525 passed**; host **1,524 passed / 1 expected skip**. Full v12
+policy suite: **1,532 passed on both Linux and macOS**. These were local checks;
+no hosted qualification or production deployment was requested.
+
+A fresh metadata inventory of the16 existing Wikipedia release ZIPs found
+120,607 novel article IDs. The mixed whole-work selection contains **6,833
+articles**. Applying v11 and then v12 directly to their compressed normalized
+ZIPs retains **108,855 occurrences /38,685,573 ZIP bytes**, preserving every
+retained text, public ID, license, attribution, snapshot and context gap.
+Per-archive sentence counts include shared IDs and cannot be summed as distinct
+corpus growth. The v11 inventory counted108,242 selected distinct texts,106,899
+absent from the current consumer; v12 removes one sentence before native
+eligibility. Final eligible/net growth and combined artifact size remain pending.
+
+An assistant read all110 newly sampled examples (ten per routed topic), confirmed
+109 unchanged survivors, read the fresh replacement and the single v12 omission.
+Two initially questioned location/topic usages were retained on reconsideration.
+This is development inspection, not human/native-speaker review or a held-out
+quality estimate; records remain unreviewed. Nominal/context-dependent and other
+technical/historical prose can remain. No invented translations or source wording
+repairs were introduced.
+
+**Native admission and combined consumer refresh are RUNNING**, with one actual
+Linux producer lease,0.25CPU /1GiB, reusable native-analysis checkpoint, unchanged
+current consumer and a **7.8 GB candidate limit**. It imports the selected v12
+ZIPs and refreshes one combined candidate directly, preserving existing prepared
+words/codecs and attaching exact normalized transformation/archive receipts.
+The first10,000 records processed with about397MB charged memory peak observed;
+this is early progress, not final peak memory or successful admission. The
+existing **2,491,076-text /7.075 GB** consumer remains active until the replacement
+passes full output/native-query/HTTP validation. No larger consumer activation,
+new public source release or production deployment has yet occurred.
+
+Reuse the complete released-archive/member verification and derived metadata
+inventory rather than scanning raw Wikipedia again. The first inventory's SQLite
+sort exhausted128MiB tmpfs after all16 streams committed; recovery explicitly
+used native scratch and reused those committed receipts. No archive scan or
+baseline extraction/analysis was repeated. Current selections, source refinement
+and all quality evidence remain separately bound for reproducible continuation.
+
 ## Latest consumer checkpoint: 2,491,076 texts active locally
 
 The combined downstream compact SQLite v12 artifact is validated and active in
