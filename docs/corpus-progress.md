@@ -1,15 +1,49 @@
-# Corpus expansion checkpoint — 2026-11-04
+# Corpus expansion checkpoint — 2026-11-06
 
 This is the current pipeline checkpoint and supersedes historical running/queued
 statements below. Generated corpus text and detailed evidence stay outside Git.
 
-## Latest: 1,783,000 further Wikipedia and 429,846 VFD occurrences published
+## Latest consumer checkpoint: 2,491,076 texts active locally
+
+The combined downstream compact SQLite v11 build completed and is now active in
+the local search preview: **2,491,076 distinct texts / 23 sources**, including
+**218,927 VFD / 58,895 JMRD / 64,537 MRMP / 12,818 MASSIVE** memberships.
+Wikipedia now has **295,796** source memberships, alongside **281,293** from the
+human-translated Kyoto Wikipedia dataset. Memberships overlap and must not be
+summed as distinct texts. Net growth is **452,748** against the verified build
+parent and **642,234** against the replaced local preview.
+
+The complete consumer artifact is **9,170,046,976 bytes (9.17 GB / 8.54 GiB)**,
+including search indexes, metadata and word links; bulk text remains compressed.
+It passes the stricter **9.8 GB** build limit and **10 GB** hard ceiling, but is
+above the **8 GB** target. Source archives and reusable native-analysis inputs
+are separate. This is a local consumer activation, not a new public full release
+or a production deployment.
+
+Completed build verification and real Linux queries were reused for activation;
+no source downloads, native analyses or full verifier were repeated. Post-switch
+HTTP checks passed for twelve API cases plus home/results pages. A request-only
+compound fix rejects intervening lexical verbs (`買って帰ってきた` is not a
+`買ってくる` match), preserving searches for the explicit longer compound.
+Some compound retrieval remains time-budget limited. Assistant review covered
+57 displayed query rows and four known bad controls; it is not native-speaker
+review or a population precision/recall estimate. Specialist/nominal fragments
+remain in older Wikipedia/Kyoto material; JLPT is a vocabulary estimate.
+
+Reuse the published source releases and completion receipts below. Further
+Wikipedia source material is already available; the consumer deliberately
+admitted a balanced whole-article subset. Before another large serving batch,
+measure index/metadata costs and available headroom; do not sacrifice query
+correctness or reintroduce rejected source wording just to increase counts.
+
+## Published sources and completed admission preparation
 
 **Serving-admission follow-up:** current refined VFD has **218,953 distinct
 Japanese texts**, of which **215,007 are absent from the verified combined
 consumer baseline**. Exact novelty uses an **18,726,912-byte IDs-only ledger**;
-source text remains compressed. These counts precede native/content admission,
-so they are not yet searchable growth. No acquisition or extraction was repeated.
+source text remains compressed. These are pre-admission novelty counts; actual
+searchable growth is recorded in the current consumer checkpoint above. No
+acquisition or extraction was repeated.
 
 Whole-work consumer pilots are complete in the selected compact SQLite v11
 format, including search indexes, metadata and word links: **1,950 JMRD texts /
@@ -35,9 +69,10 @@ preserved in the compressed non-serving import. The reusable import is
 It performed 213,945 additional analyses and reused 5,008, including the pilot.
 The import took 1,777.01 seconds; peak charged memory reached the configured
 1 GiB ceiling. All records, relationships, memberships and stored scores passed
-logical import validation. These are not yet searchable additions.
+logical import validation. These memberships are included in the active consumer
+checkpoint above.
 
-A combined consumer refresh is now running with full refined VFD, JMRD, MRMP,
+The completed combined consumer refresh includes full refined VFD, JMRD, MRMP,
 MASSIVE and a balanced **6,951-whole-article Wikipedia subset / 109,995
 occurrences** from the already-analyzed published v8 cohort. Source preparation
 reused **all 232,073** selected Wikipedia/JMRD/MRMP sentence analyses, with no new
@@ -46,11 +81,10 @@ source, revision, license and attribution match, ten retain identical text,
 and the medical article omits two dense/context-dependent sentences under the
 published quality policy. Both omissions were inspected by an assistant.
 
-The sole serving candidate is staged directly in Docker's native volume to
-avoid a second full artifact transfer for activation. Its **9.8 GB build limit**
-leaves reserve below the **10 GB complete serving ceiling**; the **8 GB target**
-remains. It has not activated a preview or changed production. Exact final size,
-net growth, full index verification and query review remain pending. Keep all
+The serving candidate was built directly in Docker's native volume and
+atomically renamed into place, avoiding a second full artifact transfer for
+activation. Its final size, growth, verification and bounded query review are
+recorded above. Production is unchanged. Keep all
 published sources available even when a serving batch selects a subset. The
 private consumer's resume index records exact artifacts and completion receipts;
 do not repeat completed source verification, baseline verification or native
