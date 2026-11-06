@@ -3,7 +3,7 @@
 This is the current pipeline checkpoint and supersedes historical running/queued
 statements below. Generated corpus text and detailed evidence stay outside Git.
 
-## Current growth continuation: reviewed batch compiled next
+## Current growth continuation: native import complete, combined refresh running
 
 The normalized sentence-refinement tool is merged in **PR #64**, followed by
 the narrow terminal-comma cutoff policy **v12 / PR #65**. Full normalized-tool
@@ -34,8 +34,11 @@ Linux producer lease,0.25CPU /1GiB, reusable native-analysis checkpoint, unchang
 current consumer and a **7.8 GB candidate limit**. It imports the selected v12
 ZIPs and refreshes one combined candidate directly, preserving existing prepared
 words/codecs and attaching exact normalized transformation/archive receipts.
-The first10,000 records processed with about397MB charged memory peak observed;
-this is early progress, not final peak memory or successful admission. The
+Native import is complete: **108,241 distinct texts /107,775 eligible texts**,
+**299,413,504 compressed bytes**. It reused1,343 current analyses and4,869 cached
+analyses, saving102,029 new checkpoint analyses. Combined refresh is preparing
+new word links; observed RSS is576,764 KiB and charged peak reached the1GiB
+limit. The job has not OOMed, but this establishes no memory headroom claim. The
 existing **2,491,076-text /7.075 GB** consumer remains active until the replacement
 passes full output/native-query/HTTP validation. No larger consumer activation,
 new public source release or production deployment has yet occurred.
@@ -46,6 +49,18 @@ sort exhausted128MiB tmpfs after all16 streams committed; recovery explicitly
 used native scratch and reused those committed receipts. No archive scan or
 baseline extraction/analysis was repeated. Current selections, source refinement
 and all quality evidence remain separately bound for reproducible continuation.
+
+## Refinement selection-lineage guard
+
+A follow-up review found that canonical exports also contain `work_selection`,
+so that field alone cannot excuse stale refinement counts. A mismatch now needs
+validated normalized-selection metadata, matching build/selection digest and
+actual work IDs, nonincreasing record counts, and zero selected references.
+**83 focused tests passed**, including valid refinement → selection → refinement
+and nine invalid lineage cases; Ruff passed. Legacy unsigned selection receipts
+establish structural plausibility, not exact ancestry or authenticity. The frozen
+running producer and already verified source archives are unaffected; do not
+rebuild them for this tooling guard.
 
 ## Latest consumer checkpoint: 2,491,076 texts active locally
 

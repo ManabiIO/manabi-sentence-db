@@ -251,3 +251,59 @@ def test_unowned_sentence_fails_closed_including_unrelated_content(tmp_path):
     with pytest.raises(DataError, match="Unowned normalized sentence"):
         refinement.refine_normalized_wikipedia(path, tmp_path / "out.zip")
     assert not (tmp_path / "out.zip").exists()
+
+
+def test_selection_between_refinements_preserves_lineage(tmp_path):
+    from test_normalized_selection import _select
+
+    path, _, _ = _fixture(tmp_path, change=_corpus)
+    first = refinement.refine_normalized_wikipedia(path, tmp_path / "first.zip")
+    selected = _select(first, tmp_path / "selected.zip")
+    second = refinement.refine_normalized_wikipedia(selected, tmp_path / "second.zip")
+    assert _read(second)[0] == _read(selected)[0]
+    assert (_read(second)[1]["normalized_refinement_provenance"]["parent_receipt"]
+            == _read(first)[1]["normalized_refinement_provenance"])
+
+
+@pytest.mark.parametrize("corruption", [
+    "canonical-selection-only", "provenance-schema", "provenance-digest",
+    "selection-digest", "selection-build", "selection-count", "selection-identities",
+    "increased-count", "retained-references",
+])
+def test_stale_refinement_counts_require_plausible_selection(tmp_path, corruption):
+    from test_normalized_selection import _select
+
+    path, _, _ = _fixture(tmp_path, change=_corpus)
+    first = refinement.refine_normalized_wikipedia(path, tmp_path / "first.zip")
+    selected = _select(first, tmp_path / "selected.zip")
+    with zipfile.ZipFile(selected) as archive:
+        members = {name: archive.read(name) for name in archive.namelist()}
+    manifest = json.loads(members["manifest.json"])
+    if corruption == "canonical-selection-only":
+        del manifest["normalized_selection_provenance"]
+    elif corruption == "provenance-schema":
+        manifest["normalized_selection_provenance"]["schema_version"] = True
+    elif corruption == "provenance-digest":
+        manifest["normalized_selection_provenance"]["input_zip_sha256"] = "invalid"
+    elif corruption == "selection-digest":
+        manifest["work_selection_sha256"] = "0" * 64
+    elif corruption == "selection-build":
+        manifest["work_selection"]["build_id"] = "different"
+    elif corruption in {"selection-count", "selection-identities"}:
+        manifest["work_selection"]["work_ids"] = (
+            ["selected", "absent"] if corruption == "selection-count" else ["other"])
+        manifest["work_selection_sha256"] = refinement.digest_json(manifest["work_selection"])
+    elif corruption == "increased-count":
+        receipt = manifest["normalized_refinement_provenance"]
+        # Internally consistent receipt, but selection cannot increase sentence count.
+        receipt["input_counts"]["sentences"] = receipt["output_counts"]["sentences"] = 0
+    else:
+        manifest["counts"]["references"] = 1
+    members["manifest.json"] = json.dumps(manifest).encode()
+    invalid = tmp_path / "invalid.zip"
+    with zipfile.ZipFile(invalid, "w") as archive:
+        for name, data in members.items():
+            archive.writestr(name, data)
+    with pytest.raises(DataError, match="selection|Selection"):
+        refinement.refine_normalized_wikipedia(invalid, tmp_path / "out.zip")
+    assert not (tmp_path / "out.zip").exists()

@@ -23,10 +23,11 @@ from .normalized_selection import (
     MAX_RECORD_BYTES,
     _identity,
     _inventory,
+    _selection,
     _signature,
     _write_archive,
 )
-from .serialization import DataError, canonical_json, sha256_file
+from .serialization import DataError, canonical_json, digest_json, sha256_file
 from .validation import validate_record, validate_source_unit
 
 _DDL = """
@@ -91,6 +92,32 @@ def _validate_receipt(receipt, build_id, depth=1):
         _validate_receipt(parent, build_id, depth + 1)
 
 
+def _selected_lineage(manifest, receipt):
+    """Validate a plausible selection transition, not authenticity or exact ancestry.
+
+    Legacy selection receipts carry only an unsigned input ZIP digest, so they
+    cannot prove that the selected archive descended from this refinement.
+    """
+    provenance = manifest.get("normalized_selection_provenance")
+    if (not isinstance(provenance, dict)
+            or set(provenance) != {"schema_version", "input_zip_sha256"}
+            or type(provenance.get("schema_version")) is not int
+            or provenance["schema_version"] != 1):
+        raise DataError("Normalized refinement count mismatch requires selection provenance")
+    digest = provenance["input_zip_sha256"]
+    if (not isinstance(digest, str) or len(digest) != 64
+            or any(char not in "0123456789abcdef" for char in digest)):
+        raise DataError("Invalid normalized selection provenance digest")
+    selection = _selection(manifest.get("work_selection"), manifest)
+    if (manifest.get("work_selection_sha256") != digest_json(selection)
+            or manifest["counts"]["works"] != len(selection["work_ids"])
+            or manifest["counts"]["references"] != 0
+            or any(manifest["counts"][table] > receipt["output_counts"][table]
+                   for table in TABLES)):
+        raise DataError("Inconsistent normalized selection lineage counts or selection")
+    return set(selection["work_ids"])
+
+
 def refine_normalized_wikipedia(archive_path: Path, output: Path, *, progress=None) -> Path:
     """Apply current Japanese Wikipedia gates; retain independent ownership.
 
@@ -118,11 +145,12 @@ def refine_normalized_wikipedia(archive_path: Path, output: Path, *, progress=No
                 raise DataError("Oversized normalized refinement manifest")
             original = _manifest(archive)
             _identity(original.get("build_id"))
+            selected_lineage = None
             prior_receipt = original.get("normalized_refinement_provenance")
             if "normalized_refinement_provenance" in original:
                 _validate_receipt(prior_receipt, original["build_id"])
-                if prior_receipt["output_counts"] != original["counts"] and "work_selection" not in original:
-                    raise DataError("Normalized refinement receipt does not describe input counts")
+                if prior_receipt["output_counts"] != original["counts"]:
+                    selected_lineage = _selected_lineage(original, prior_receipt)
             with tempfile.TemporaryDirectory(prefix=".normalized-refinement-",
                                              dir=output.parent) as temporary:
                 root = Path(temporary)
@@ -139,6 +167,10 @@ def refine_normalized_wikipedia(archive_path: Path, output: Path, *, progress=No
                         db.execute("INSERT INTO works VALUES (?,?,?)", (
                             row["id"], row["language"], row["language"].split("-", 1)[0] == "ja"
                             and row["source_id"].startswith("wikipedia-")))
+                    if selected_lineage is not None:
+                        actual = {row[0] for row in db.execute("SELECT id FROM works")}
+                        if actual != selected_lineage:
+                            raise DataError("Normalized selection work identities differ from input")
                     # Identify targeted ownership before looking at text. Shared text
                     # is assessed once and the decision applies only to those owners.
                     for row in _rows(archive, "occurrences", original):
