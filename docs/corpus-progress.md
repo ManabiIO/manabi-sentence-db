@@ -31,6 +31,30 @@ review packets follow export, with explicit assistant-only/unreviewed status.
 Reuse completed selection/refinement receipts; do not replay the previous
 successful consumer build or rerun source extraction.
 
+## Fresh review: quality follow-ups before larger admission
+
+The completed, hash-bound review packet contains **100 examples**, twenty each
+from five routed topics. Two assistants read every example. This is development
+inspection, not human/native-speaker certification or a population quality
+estimate. Fifteen examples were flagged for follow-up: detached event/statistical
+labels, article scaffolding, missing-formula references, specialist density and
+code-heavy descriptions. Context-dependent prose and valid nominal predicates
+are not automatically rejected. Metadata topics are coarse: a medical article
+can route to culture through a secondary category. They are not quality labels.
+
+Policy **v13** adds narrow whole-sentence guards for missing following relations
+and reference-only promises to discuss a topic later. Inline explanations,
+quoted mentions, numerical bounds and substantive prose are preserved. The
+completed v12 export remains intact and **is not approved for native admission**.
+Do not relabel it as v13 or repeat extraction. Next: measure the successor
+policy's full omission delta against those compressed exports, inspect omissions
+and fresh replacement samples, and resolve remaining fragment/density findings.
+Then qualify the resumable native producer with explicit measured disk budgets.
+The active local corpus remains unchanged. Focused quality/refinement validation:
+**292 tests passed**, plus Ruff and whitespace checks. On the existing review
+sample, v13 removes exactly the two targeted reference fragments; this is not
+a full-export omission measurement.
+
 ## Current growth policy: add good licensed sentences; size target is movable
 
 Alex clarified on2026-11-06 that good, properly licensed sentences should be

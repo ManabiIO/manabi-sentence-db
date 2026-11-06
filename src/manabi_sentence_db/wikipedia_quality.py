@@ -9,7 +9,7 @@ import hashlib
 import re
 import unicodedata
 
-WIKIPEDIA_QUALITY_VERSION = "wikipedia-example-quality-v12"
+WIKIPEDIA_QUALITY_VERSION = "wikipedia-example-quality-v13"
 
 # Exact, unchanged texts assessed in the November 3–4 assistant source reviews.
 # Hashes keep these local findings from becoming broad grammatical/topic bans.
@@ -84,6 +84,10 @@ _DANGLING_LIST = re.compile(
 _CROSS_REFERENCE_ONLY = re.compile(
     r"^(?:詳しく|くわしく|詳細(?:について)?|詳しい内容)は"
     r"[^。｡！？!?]{1,100}を参照(?:のこと|されたい|すること)?[。．.!！?？]?\Z"
+    # A bare promise to discuss a named topic later contains no explanation.
+    # Exclude commas/quotes so preceding content and quoted mentions stay.
+    r"|^[^。｡！？!?、，,「」『』]{1,140}(?:について|に関して)は"
+    r"後述(?:する)?[。．.!！?？]?\Z"
 )
 # Removed display formulas can leave only this terminal explanation. Require
 # the entire copula-led remnant; a sentence naming what has that meaning stays.
@@ -102,6 +106,9 @@ _FORMULA_REMNANT = re.compile(
     # Whole relation phrases whose missing formula was their only argument.
     r"|^(?:のようである|と分解することができる|と言い換えることもできる)"
     r"[。．.!！?？]?\Z"
+    # The following relation is absent; an inline relation does not end here.
+    r"|^(?:(?:すると|したがって|従って|よって)[、，,])?"
+    r"(?:以下|次)が成り立つ[。．.!！?？]?\Z"
 )
 _MISSING_LIST = re.compile(
     # Require a literal forward reference and a list-introducing predicate.

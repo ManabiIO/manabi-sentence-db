@@ -475,3 +475,30 @@ def test_v12_rejects_terminal_comma_cutoffs(text):
 ])
 def test_v12_preserves_completed_clauses_quoted_punctuation_and_topic_usage(text):
     assert assess_wikipedia_sentence(text) == (None, [])
+
+
+@pytest.mark.parametrize("text", [
+    "すると、以下が成り立つ。",
+    "以下が成り立つ。", "したがって、次が成り立つ。",
+    "KL-UA272系ノンステップバス（Fタイプ・Nタイプ）及びKL-UA452A系（Gタイプ）については後述。",
+    "この方式については後述する。", "利用方法に関しては後述。",
+])
+def test_v13_rejects_missing_following_relations_and_reference_only_promises(text):
+    assert assess_wikipedia_sentence(text) == ("wikipedia-dependent-fragment", [])
+
+
+@pytest.mark.parametrize("text", [
+    "すると、二つの数が等しいという関係が成り立つ。",
+    "以下が成り立つ、すなわち水を冷やすと氷になる。",
+    "以下が成り立つ：水を冷やすと氷になる。",
+    "十歳以下が参加できるという条件が成り立つ。",
+    "値が三以下なら、この関係が成り立つ。",
+    "「すると、以下が成り立つ」という断片が残っていた。",
+    "この方式については後述の章で詳しく説明する。",
+    "この方式については後述するが、基本的な仕組みは同じである。",
+    "車体は軽く、利用方法については後述する。",
+    "「この方式については後述」という表現を使った。",
+    "著者はこの方式について後述することを選んだ。",
+])
+def test_v13_keeps_inline_relations_numeric_bounds_and_substantive_later_discussion(text):
+    assert assess_wikipedia_sentence(text) == (None, [])
