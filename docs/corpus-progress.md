@@ -3,32 +3,51 @@
 Generated corpus text and detailed evidence stay outside Git. Treat historical
 running or queued labels as observations at the time they were recorded.
 
-## November 24 scan interruption and checkpoint recovery
+## November 24 metadata index and disjoint selection
 
-Docker and the loopback preview are back. The preview still serves the verified
-schema-v12 corpus with 2,597,508 sentences, 1,133,207 works and 7,626,911,744
-database bytes. A new Wikipedia metadata worker is running with the cached dump,
-the existing Linux producer lease, and its index on a native Docker volume.
-Its first verified checkpoint held 7,000 rows and passed SQLite `quick_check`.
-Use the current launch and progress receipts under
-`data/research/wikipedia-metadata-native-20261124-s78w1qna/`. Check that same
-worker before starting another producer. The completion manifest and database
-hash are still required before selecting another cohort.
+The cached October 1 Wikipedia dump now has a verified metadata index with
+**1,520,837 records in 331,595,776 bytes**. Its completed cursor covers all three
+XML shards. SQLite integrity and an independent database checksum passed.
+SHA-256: `2bdbd704c9aa2b4fe40c46fcbd2eec79849840bedd6b37822c6474060b6a0cda`.
+Reuse the native Docker volume `wikipedia-metadata-index-20261124-s78w1qna` and
+the receipts in `data/research/wikipedia-metadata-native-20261124-s78w1qna/`.
+
+The final selection contains **5,226 distinct page IDs** and excludes all
+298,173 prior IDs. Use `selection-final/selection.json` in
+`data/research/wikipedia-jaquad-v16-batch-20261124-wir89b6c/`.
+SHA-256: `f9011bfc3cb497bd36adf4263e797c4bd704a881a09be18bd9764705368ce177`.
+The selection contains 2,000 general articles, 1,000 each in culture and
+history, and 1,226 across the eight practical, educational and technical routes.
+An earlier 3,226-page selection is superseded. The offline v16 extraction uses
+the final selection and the pinned JaQuAD snapshot. The first launch lacked
+`xlrd`. The corrected run mounted the pinned 2.0.2 dependency read-only and
+wrote compressed records to a native Docker volume. It completed JaQuAD
+extraction and logged 700,000 Wikipedia pages scanned. An earlier checkpoint
+showed 39,154 Wikipedia sentences from the first 2,000 retained works. Docker
+later timed out after its VM logged ext4 write errors while the host was nearly
+full. The extraction remains unqualified.
+Keep the `retry-xlrd2-20261124-a4c619` receipts inside the batch path above.
+After Docker recovers, check the original worker and validate any completed
+catalog before choosing between export and rebuild. Source review, native
+serving validation and activation follow the verified archive.
+
+The last successful preview used the verified schema-v12 corpus with 2,597,508
+sentences, 1,133,207 works and 7,626,911,744 database bytes. A real search for
+`持っていく` returned 250 rows from ten sources. All rows cited a source and
+highlighted the full compound or an inflected form. The preview now times out
+alongside Docker.
 
 An earlier retry wrote to a macOS bind mount. It stopped at 28,000 scanned
-pages. Keep that receipt for diagnosis and resume from the native-volume index.
+pages. Keep that receipt for diagnosis and use the completed native-volume index.
 
 The Wikipedia metadata scan ended when Docker Desktop quit through its GUI
 at 02:33 Toronto time. Its pre-checkpoint SQLite intermediate was 161,116,160
 bytes and had no completion manifest, so it cannot be resumed by the current
-checkpoint format. The current checkpointed indexer passes its focused host
-tests and Ruff; a full-size scan and disk savings have not been measured.
+checkpoint format. The completed native-volume index supersedes both attempts.
 
 Separately, private backend importer commit `a3235102` passed 131 tests with
-one Linux-only shared Docker-mount test skipped. That result qualifies the
-lean-import change only; it does not qualify this metadata index or a full
-replacement scan. Preserve the recovered snapshot and exclusion evidence
-below, and verify the final replacement manifest and SQLite hash after a scan.
+one Linux-only shared Docker-mount test skipped. The full-size lean import's
+disk and runtime costs still need measurement.
 
 ## Next disjoint Wikipedia cohort
 

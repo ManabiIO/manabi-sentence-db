@@ -70,6 +70,23 @@ substantive language edit before recording human editing. Native-speaker review
 requires separate evidence for the admitted sentence or its documented workflow.
 The Taiki Station probe adds no corpus records or review claims.
 
+A second metadata pilot used 40-record pages at offsets 500 and 1500 for
+Japanese→English and at offset 13500 for English→Japanese. In the former,
+48 of 80 records had revision IDs and article-like source and target URLs;
+seven reported zero Wikimedia MT. In the latter, 35 of 40 had article-like
+URLs and revision IDs, and 28 of those reported at least 80% MT. The URL test
+excluded recognizable draft, user and discussion namespaces as a prefilter;
+verify the namespace of each cited revision before admission. These slices
+are diagnostics and provide no corpus-wide yield estimate.
+
+Two additional Japanese→English records had source-start markup and empty MT
+fields: `.yokohama` (`3103829`) and Tourism EXPO Japan (`3123568`). Their paired
+prose included an elliptical Japanese predicate, English-only additions and
+an empty target paragraph. Those examples demonstrate why article-level MT
+statistics and shared block IDs are insufficient evidence of usable sentence
+pairs. Keep this source in pilot status until revision-verified alignment and
+learner usefulness are measured on a larger sample.
+
 ### AMI Meeting Parallel Corpus
 
 The [University of Tokyo release](https://github.com/tsuruoka-lab/AMI-Meeting-Parallel-Corpus/tree/3f72877bf50b8ca83df79eb8d729e2dd5d79bea5)
