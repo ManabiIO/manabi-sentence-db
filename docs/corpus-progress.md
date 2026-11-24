@@ -18,24 +18,51 @@ The final selection contains **5,226 distinct page IDs** and excludes all
 SHA-256: `f9011bfc3cb497bd36adf4263e797c4bd704a881a09be18bd9764705368ce177`.
 The selection contains 2,000 general articles, 1,000 each in culture and
 history, and 1,226 across the eight practical, educational and technical routes.
-An earlier 3,226-page selection is superseded. The offline v16 extraction uses
-the final selection and the pinned JaQuAD snapshot. The first launch lacked
-`xlrd`. The corrected run mounted the pinned 2.0.2 dependency read-only and
-wrote compressed records to a native Docker volume. It completed JaQuAD
-extraction and logged 700,000 Wikipedia pages scanned. An earlier checkpoint
-showed 39,154 Wikipedia sentences from the first 2,000 retained works. Docker
-later timed out after its VM logged ext4 write errors while the host was nearly
-full. The extraction remains unqualified.
-Keep the `retry-xlrd2-20261124-a4c619` receipts inside the batch path above.
-After Docker recovers, check the original worker and validate any completed
-catalog before choosing between export and rebuild. Source review, native
-serving validation and activation follow the verified archive.
+An earlier 3,226-page selection is superseded. The final offline v16 extraction
+combines the final selection with the pinned JaQuAD snapshot. Its first launch
+failed because the pinned image lacked `xlrd`. A later launch stopped at
+preflight because its receipt mount lacked the selection report. The corrected
+retry reached 900,000 Wikipedia pages, then exited 255 without publishing a
+catalog after the previous Docker VM logged ext4 unwritten-extent errors. Keep
+the `retry-xlrd2-20261124-a4c619` receipts and its partial native volume
+unchanged. The authorized Mac
+restart restored Docker with 113 GiB host and 147 GiB VM free. The current VM
+log has no new matching ext4 errors.
 
-The last successful preview used the verified schema-v12 corpus with 2,597,508
-sentences, 1,133,207 works and 7,626,911,744 database bytes. A real search for
-`持っていく` returned 250 rows from ten sources. All rows cited a source and
-highlighted the full compound or an inflected form. The preview now times out
-alongside Docker.
+The third run completed on the same pinned inputs, using a fresh native Docker
+volume, the existing producer lease, a read-only root, no network, 0.25 CPU and
+1 GiB memory. Build **`build_a5ee198ca615ffcc90624887d93764aa`** completed at
+22:18 UTC. Catalog SHA-256:
+`6c47053c62e5982b97df123bac4803a555c687294e7d318956091e8e2cb8a926`.
+The 5,226 selected page IDs produced 4,946 canonical Wikipedia works and
+76,827 sentences; JaQuAD contributed 35,668 works and 35,727 sentences. The
+combined build has 40,614 works and 112,554 occurrences. The normalized ZIP
+contains 112,018 distinct sentences, is **27,928,843 bytes**, and has SHA-256
+`fcb16cbef01068784ad373078c4a7310bfea6acc2db0662994f01da2ef7159d0`.
+
+The fresh assistant-only topic packet contains **114 cases across 12 topics**,
+with source text and attribution retained. SHA-256:
+`6f7229db1be77f4b78ff627406acf278b2bfb108210479a01f7bbdb459324b1d`.
+It remains `review_pending`, with `human_review: false`; it does not admit the
+batch. The build, normalized archive, review packet and complete topic mapping
+are under
+`data/research/wikipedia-jaquad-v16-batch-20261124-wir89b6c/retry-xlrd3-20261124-7v4k1a/`.
+The copied artifacts are in its `artifacts/` subdirectory. See
+`build-completion.json`, `export-review-completion.json` and
+`artifacts-manifest.json` for bound counts and hashes. No candidate serving
+database was built or activated.
+
+The previous local preview has been restored and still uses the accepted
+schema-v12 dataset: 2,597,508 sentences, 1,133,207 works and
+7,626,911,744 database bytes. A real `持っていく` search returned 250 results
+from ten sources. This verified the existing service; it did not activate the
+new batch.
+
+TALPCo and JEC Basic were already published in the November 3 supplemental
+release; skip reacquisition. The ISA Plain Japanese Living and Working Guidebook
+v8 remains conditional on edition-specific terms and third-party exclusions.
+English translation generation and review remain unverified; see the pilot in
+`source-priorities.md`.
 
 An earlier retry wrote to a macOS bind mount. It stopped at 28,000 scanned
 pages. Keep that receipt for diagnosis and use the completed native-volume index.
