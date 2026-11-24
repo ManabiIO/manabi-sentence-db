@@ -370,3 +370,37 @@ survive. Japanese translation origin is explicit, while method/native review
 remain unknown. See the [source decision](sources.md#storybooks-japan-narrative--2026-11-03).
 These smaller narrative additions complement the large Wikipedia expansion;
 they are not a ceiling on later corpus growth or already active serving content.
+
+### ISA Plain Japanese Living and Working Guidebook v8 pilot — 2026-11-24
+
+The [publisher's guidebook listing](https://www.moj.go.jp/isa/guidebook_all.html)
+identifies separate Japanese, easy-Japanese and English editions. The
+[February 26, 2026 announcement](https://www.moj.go.jp/isa/support/portal/index.html)
+identifies the Japanese and easy-Japanese editions as the eighth edition. The
+specified [easy-Japanese PDF](https://www.moj.go.jp/isa/content/001423934.pdf)
+was identified by a web-indexed PDF rendering as *生活・仕事ガイドブック*,
+第8版, supervised by the Immigration Services Agency, dated February 2026, and
+covering information through August 1, 2025. This verifies source identity, but
+is not a retained source snapshot or a reproducible extraction.
+
+The ISA's [guidebook-specific commercial-use notice](https://www.moj.go.jp/isa/support/portal/12_00134.html)
+says the guidebook may be freely used, including commercially, under its general
+website terms. ISA's [content terms](https://www.moj.go.jp/isa/copyright/index2.html)
+say PDL 1.0 applies absent a different rights statement and describe third-party
+rights exceptions. PDL 1.0 §1 permits commercial reuse, reproduction and
+modification of covered content with attribution; §1.2 and §1.4 exclude uncleared
+third-party content and content under other terms, while §1.7.3 makes covered
+content compatible with CC BY 4.0. These terms support covered publisher text,
+not blanket clearance of every element in this illustrated guidebook.
+
+A bounded `curl` request for the specified PDF returned HTTP 403. The web index
+could render PDF text, but it is not used as a substitute for a routine bounded,
+reproducible fetch. **No text was extracted or admitted.** The text-only pilot is
+on hold until the intended PDF can be fetched routinely and its embedded rights
+notices and publisher exceptions are screened in that fetched copy. At that gate,
+retain the PDF hash and page attribution; keep prose distinct from headings,
+tables, signs/labels embedded in illustrations, and ruby readings; exclude tables,
+visual/sign text, logos/characters, and any uncleared third-party material unless
+rights are explicitly cleared. Preserve omissions and page boundaries. The
+English edition is a separate publication; do not treat it as a verified human
+translation or create alignments. No translation is proposed.
