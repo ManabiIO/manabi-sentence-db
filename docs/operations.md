@@ -76,11 +76,11 @@ database uses a rollback journal and `synchronous=FULL`; each committed batch
 stores its rows, raw-shard cursor, yielded-page ordinal, counters, verified
 snapshot-manifest hash and exact producer identity together. If interrupted,
 repeat the same command with `--resume` and the same snapshot, output directory,
-and storage cap. Resume skips completed raw shards and reparses only the committed
-prefix of the current shard before continuing. A pre-checkpoint incomplete
-database cannot be resumed, and a completed cache is not resumable. The final
-reader format remains metadata manifest v1; previously completed caches remain
-readable.
+and storage cap. Resume rechecks the cached source hashes, skips XML parsing for
+completed shards, and reparses the committed prefix of the current shard before
+continuing. A pre-checkpoint incomplete database requires a fresh output directory.
+The final reader format remains metadata manifest v1, including previously
+completed caches.
 
 For example, resume the indexing command above with:
 
@@ -113,6 +113,11 @@ ledger. Check actual free space and acquire the existing heavy-worker lock
 before the scan; never overlap it with import or refresh. Admit extraction,
 native analysis and serving refresh separately using measured artifacts and
 their temporary-space requirements.
+On Docker Desktop, keep the writable index and rollback journal on a persistent
+Linux Docker volume. Mount the cached raw snapshot read-only. Acquire the
+producer lease inside Linux so it coordinates with other Docker jobs. Export or
+reuse the completed index only after checking its published manifest and database
+checksum.
 Keep whole works together when exporting compressed buckets, and review fresh
 retained and omitted sentence samples across the selected topics.
 

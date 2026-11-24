@@ -49,6 +49,27 @@ preserved. Source-flagged errors, classical or incomplete examples, quotes,
 and reference sections are excluded. Counts should distinguish admitted
 pairs from source rows and from text overlap with Wikipedia.
 
+### Wikimedia Content Translation
+
+The [published translation API](https://www.mediawiki.org/wiki/Content_translation/Published_translations)
+has Japanese→English and English→Japanese records. Test a bounded sample of
+revision-linked blocks before estimating yield or enabling an adapter.
+The probe for translation `2201457` bound Taiki Station to Japanese revision
+[`95548036`](https://ja.wikipedia.org/w/index.php?oldid=95548036) and English
+revision [`1168801198`](https://en.wikipedia.org/w/index.php?oldid=1168801198).
+Block `95548036_3_13` provided a complete sentence on each side. Other blocks
+showed mismatched segment boundaries, so require a complete, equivalent sentence
+on each side and check both against the cited published revisions. Retain titles,
+history links, translation/block IDs and any additional attribution notices.
+
+Wikimedia counts any edit toward the section's `human` statistic. A populated
+block with `mt: null` and a source-start marker supports “no Wikimedia machine
+translation recorded.” Keep the method unknown unless the source documents it.
+For a block with machine output, compare the exact aligned prose and require a
+substantive language edit before recording human editing. Native-speaker review
+requires separate evidence for the admitted sentence or its documented workflow.
+The Taiki Station probe adds no corpus records or review claims.
+
 ### AMI Meeting Parallel Corpus
 
 The [University of Tokyo release](https://github.com/tsuruoka-lab/AMI-Meeting-Parallel-Corpus/tree/3f72877bf50b8ca83df79eb8d729e2dd5d79bea5)
