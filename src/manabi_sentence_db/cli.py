@@ -80,9 +80,11 @@ def parser() -> argparse.ArgumentParser:
     )
     metadata.add_argument("--snapshot", type=Path, required=True)
     metadata.add_argument("--output", type=Path, required=True)
+    metadata.add_argument("--resume", action="store_true",
+                          help="Resume an incomplete checkpointed index for the same verified snapshot")
     metadata.add_argument("--progress", action="store_true")
     metadata.add_argument("--max-index-bytes", type=int,
-                          help="Hard SQLite index size cap in bytes; excludes raw snapshot and other files")
+                          help="Hard SQLite main-file cap; excludes rollback journal, raw snapshot and other files")
     refine = commands.add_parser(
         "refine-wikipedia", help="Tighten Wikipedia admission from a canonical build without raw dumps"
     )
@@ -417,6 +419,7 @@ def main(argv: list[str] | None = None) -> int:
 
                 print(index_wikimedia_metadata(args.snapshot, args.output,
                     max_index_bytes=args.max_index_bytes,
+                    resume=args.resume,
                     progress=(lambda message: print(message, file=sys.stderr, flush=True))
                     if args.progress else None))
             case "refine-wikipedia":

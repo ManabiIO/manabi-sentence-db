@@ -49,6 +49,23 @@ preserved. Source-flagged errors, classical or incomplete examples, quotes,
 and reference sections are excluded. Counts should distinguish admitted
 pairs from source rows and from text overlap with Wikipedia.
 
+### AMI Meeting Parallel Corpus
+
+The [University of Tokyo release](https://github.com/tsuruoka-lab/AMI-Meeting-Parallel-Corpus/tree/3f72877bf50b8ca83df79eb8d729e2dd5d79bea5)
+provides 24,000 professionally translated Japanese–English pairs from 40 meetings.
+Its pinned `LICENSE.md` and README legalcode link specify CC BY 4.0. The README
+also uses the word “ShareAlike” in its link label. The [English AMI source](https://groups.inf.ed.ac.uk/ami/corpus/)
+licenses its transcripts under CC BY 4.0, and the [construction paper](https://aclanthology.org/2020.wmt-1.74/)
+documents the English-to-Japanese translation direction.
+
+Automated admission is deferred. A conservative text screen flagged 6,361 pairs,
+but assistant review found only five suitable bilingual examples in a deterministic
+36-pair sample. Recognition errors, detached utterances and misleading translations
+survived the screen. Reuse the pinned source hashes, evidence and pilot decisions
+in `data/research/ami-meeting-parallel-20261124/` before considering a per-turn
+allowlist. Preserve exact text, both source credits, meeting/turn IDs, and the
+Japanese translated-origin label.
+
 ## Next structured datasets
 
 | Candidate | Publisher evidence / license | Admission notes |

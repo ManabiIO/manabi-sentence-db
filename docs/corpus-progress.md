@@ -3,6 +3,20 @@
 Generated corpus text and detailed evidence stay outside Git. Treat historical
 running or queued labels as observations at the time they were recorded.
 
+## November 24 scan interruption and checkpoint recovery
+
+The Wikipedia metadata scan ended when Docker Desktop's GUI quit unexpectedly
+at 02:33 Toronto time. Its pre-checkpoint SQLite intermediate was 161,116,160
+bytes and had no completion manifest, so it cannot be resumed by the current
+checkpoint format. The current checkpointed indexer passes its focused host
+tests and Ruff; a full-size scan and disk savings have not been measured.
+
+Separately, private backend importer commit `a3235102` passed 131 tests with
+one Linux-only shared Docker-mount test skipped. That result qualifies the
+lean-import change only; it does not qualify this metadata index or a full
+replacement scan. Preserve the recovered snapshot and exclusion evidence
+below, and verify the final replacement manifest and SQLite hash after a scan.
+
 ## Next disjoint Wikipedia cohort
 
 The cached October 1 dump and the snapshot-bound 298,173-page exclusion union

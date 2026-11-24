@@ -47,7 +47,7 @@ of input order. Raising quotas with the same seed retains earlier selected IDs.
 Changing `--seed` creates another sample. Topics with insufficient pages remain
 underfilled; quotas are not silently reassigned. Default limits select at most
 12,000 pages, not 12,000 quality-approved works. The allowlist is bound to exactly
-one snapshot and is written last. An interrupted scan leaves no completed
+one snapshot and is written last. An interrupted selection scan leaves no completed
 selection and must be retried in a fresh directory, using the same cached inputs.
 
 ### Reuse metadata for later, disjoint cohorts
@@ -71,6 +71,26 @@ mise run select-wikimedia -- \
   --progress
 ```
 
+New metadata builds use durable SQLite checkpoints in 1,000-page batches. The
+database uses a rollback journal and `synchronous=FULL`; each committed batch
+stores its rows, raw-shard cursor, yielded-page ordinal, counters, verified
+snapshot-manifest hash and exact producer identity together. If interrupted,
+repeat the same command with `--resume` and the same snapshot, output directory,
+and storage cap. Resume skips completed raw shards and reparses only the committed
+prefix of the current shard before continuing. A pre-checkpoint incomplete
+database cannot be resumed, and a completed cache is not resumable. The final
+reader format remains metadata manifest v1; previously completed caches remain
+readable.
+
+For example, resume the indexing command above with:
+
+```sh
+mise run index-wikimedia -- \
+  --snapshot data/snapshots/wikipedia-full-20261001/manifest.json \
+  --output data/research/wikipedia-metadata-20261001-replacement \
+  --max-index-bytes 2147483648 --resume --progress
+```
+
 These are planning commands, not evidence that this replacement scan has run.
 The recovered exclusion file binds 298,173 prior page selections to the exact
 snapshot. It includes pages later rejected by extraction or quality checks; it
@@ -83,13 +103,16 @@ This example requests at most 120,000 new articles across ten topical routes
 and a general allocation. Underfilled routes stay underfilled. This is one
 processing batch, not a corpus ceiling or evidence of learner quality.
 
-The 2 GiB cap is a planning allowance for the metadata SQLite file, not a measured
-requirement or total-job disk bound. Separately reserve space for manifests and
-selection reports; raw snapshot selection also needs its disk-backed identity
-ledger, while metadata cache selection avoids that second ledger. Check actual free space
-and acquire the existing heavy-worker lock before the scan; never overlap it
-with import or refresh. Admit extraction, native analysis and serving refresh
-separately using measured artifacts and their temporary-space requirements.
+The 2 GiB cap applies to the metadata SQLite main file, not a measured
+requirement or total-job disk bound. A rollback journal may temporarily require
+up to roughly another database's worth of space, so allow up to about 4 GiB for
+the capped database plus journal, in addition to the raw snapshot, manifests,
+selection reports and other working data. Raw snapshot selection also needs its
+disk-backed identity ledger, while metadata cache selection avoids that second
+ledger. Check actual free space and acquire the existing heavy-worker lock
+before the scan; never overlap it with import or refresh. Admit extraction,
+native analysis and serving refresh separately using measured artifacts and
+their temporary-space requirements.
 Keep whole works together when exporting compressed buckets, and review fresh
 retained and omitted sentence samples across the selected topics.
 
