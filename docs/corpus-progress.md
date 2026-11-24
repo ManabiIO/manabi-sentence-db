@@ -5,7 +5,20 @@ running or queued labels as observations at the time they were recorded.
 
 ## November 24 scan interruption and checkpoint recovery
 
-The Wikipedia metadata scan ended when Docker Desktop's GUI quit unexpectedly
+Docker and the loopback preview are back. The preview still serves the verified
+schema-v12 corpus with 2,597,508 sentences, 1,133,207 works and 7,626,911,744
+database bytes. A new Wikipedia metadata worker is running with the cached dump,
+the existing Linux producer lease, and its index on a native Docker volume.
+Its first verified checkpoint held 7,000 rows and passed SQLite `quick_check`.
+Use the current launch and progress receipts under
+`data/research/wikipedia-metadata-native-20261124-s78w1qna/`. Check that same
+worker before starting another producer. The completion manifest and database
+hash are still required before selecting another cohort.
+
+An earlier retry wrote to a macOS bind mount. It stopped at 28,000 scanned
+pages. Keep that receipt for diagnosis and resume from the native-volume index.
+
+The Wikipedia metadata scan ended when Docker Desktop quit through its GUI
 at 02:33 Toronto time. Its pre-checkpoint SQLite intermediate was 161,116,160
 bytes and had no completion manifest, so it cannot be resumed by the current
 checkpoint format. The current checkpointed indexer passes its focused host
@@ -33,10 +46,13 @@ assistant review and exact policy replay, 125 distinct pilot texts survived.
 These are source candidates, with no native serving or publication approval.
 Use fresh examples for the next acceptance review.
 
-Inspect the existing native import before deciding whether it needs recovery.
-Completion is unverified and the original receipt directory is unavailable.
-The next full cohort still needs a durable metadata index and the recovered
-exclusions, followed by normal source and native validation.
+The earlier v15 native import exited with `SQLITE_FULL` while creating covering
+indexes. The staging database rolled back to its empty schema. The original
+refined archives and immediate receipt directory are unavailable. The unchanged
+5,112,385,536-byte analysis checkpoint remains a candidate for reuse after
+checking its analyzer identity and validating reused entries. For new articles,
+use the durable metadata index and the recovered exclusions, followed by the
+source review and native validation gates.
 
 ## November 6: v15 source review accepted and native import observed
 
