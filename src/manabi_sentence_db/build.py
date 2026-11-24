@@ -534,6 +534,8 @@ def build_corpus(
                     from .alt_parallel import iter_documents
                 elif source["adapter"] == "kyoto-wikipedia":
                     from .kyoto_wikipedia import iter_documents
+                elif source["adapter"] == "jaquad":
+                    from .jaquad import iter_documents
                 else:
                     raise DataError(f"Unsupported adapter: {source['adapter']}")
                 writer = ShardWriter(
@@ -555,7 +557,7 @@ def build_corpus(
                            and selection["source_id"] == source_id else {}),
                         **({"progress": progress} if source["adapter"] == "wikimedia" else {}),
                     )
-                    if source["adapter"] in {"wikimedia", "jec-basic", "talpco", "kyoto-wikipedia", "alt-parallel", "yj-captions", "globalvoices", "storybook-japan", "jmrd", "massive", "vfd"}
+                    if source["adapter"] in {"wikimedia", "jec-basic", "talpco", "kyoto-wikipedia", "alt-parallel", "yj-captions", "globalvoices", "storybook-japan", "jmrd", "massive", "vfd", "jaquad"}
                     else iter_documents(manifest, manifest_path.parent)
                 )
                 for raw in documents:

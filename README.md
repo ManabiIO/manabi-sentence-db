@@ -274,6 +274,7 @@ request reports which sources failed and preserves completed snapshots.
 | `yj-captions-ja` | CC BY 4.0 | Commit/hash-pinned human original Japanese captions; independent complete-caption works, no translations or images; image rights are separate |
 | `stair-captions-ja` | CC BY 4.0 | Commit/hash-pinned v1.2 Japanese caption text; excludes images and tokenized duplicates |
 | `jec-basic-ja` | CC BY 3.0 | Hash-pinned Kyoto University / NICT Japanese-English-Chinese sentence patterns; excludes unresolved X and quotation placeholders |
+| `jaquad-ja` | CC BY-SA 3.0 | Commit-pinned human-curated Japanese questions from JaQuAD train/validation; excludes article titles, Wikipedia contexts, answers and withheld test data; raw snapshot release is disabled |
 | `talpco-ja` | CC BY 4.0 | Commit/hash-pinned 1,372 Japanese teaching examples with human British English translations; removes documented bunsetsu annotation spaces from derived text, retaining raw provenance and independent example boundaries; no audio or US adaptation |
 | `storybooks-japan-ja`, `storybooks-japan-by4-ja` | Per-work CC BY 3.0 / CC BY 4.0, kept in separate sources | Commit/hash-pinned Japanese narrative text from 29 storybooks; explicit per-work grants, named translators, page-unit context and exact typo exclusions; excludes 11 NC works, images and audio |
 | `wikipedia-kyoto-ja` | CC BY-SA 3.0 | Hash-pinned NICT Kyoto parallel corpus v2.01; Japanese originals aligned only with final checked English translations; preserves Wikipedia/NICT attribution and filters excluded XML sections |
@@ -289,6 +290,10 @@ See [source research and admission decisions](docs/sources.md) for primary
 licensing evidence, source-specific exceptions, and approximately thirty
 researched source families. The Global Voices adapter covers only articles 65906 and 65886;
 the wider site remains unadmitted.
+
+JaQuAD is opt-in with `sentence-db snapshot --source jaquad-ja --mode full`;
+`--source all` skips it because the pinned raw archive includes Wikipedia
+contexts and answers that are excluded from the processed corpus.
 
 ### Explicitly reviewed Global Voices articles
 

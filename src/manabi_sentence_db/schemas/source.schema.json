@@ -36,7 +36,8 @@
         "jec-basic",
         "kyoto-wikipedia",
         "alt-parallel",
-        "talpco"
+        "talpco",
+        "jaquad"
       ]
     },
     "license": {

@@ -281,10 +281,28 @@ def test_manual_snapshot_choices_cover_every_public_raw_snapshot_source():
     assert len(options) == len(set(options))
     public_raw_sources = {
         path.stem for path in (root / "sources").glob("*.yaml")
-        if load_yaml(path)["adapter"] not in {"globalvoices", "jmrd"}
+        if load_yaml(path)["adapter"] not in {"globalvoices", "jmrd", "jaquad"}
     }
     assert set(options) == public_raw_sources | {"all"}
     # Global Voices raw pages contain withheld third-party material. Its local
     # evidence snapshot must never enter this public artifact/release workflow.
     assert "globalvoices-65906-ja" not in options
     assert "jmrd-ja" not in options
+    # JaQuAD's acquisition archive contains Wikipedia contexts and answer data;
+    # only its processed question-only corpus may be redistributed.
+    assert "jaquad-ja" not in options
+
+
+def test_snapshot_all_skips_jaquad_raw_context_archive(tmp_path, monkeypatch, capsys):
+    from manabi_sentence_db import cli
+
+    monkeypatch.setattr(cli, "_sources", lambda path: {
+        "jaquad-ja": {"id": "jaquad-ja", "adapter": "jaquad"},
+    })
+    monkeypatch.setattr(
+        cli, "create_snapshot", lambda *args, **kwargs: pytest.fail("JaQuAD must be opt-in")
+    )
+    assert cli.main([
+        "snapshot", "--source", "all", "--mode", "full", "--output", str(tmp_path),
+    ]) == 0
+    assert "requires explicit single-source selection" in capsys.readouterr().err

@@ -621,7 +621,7 @@ def create_snapshot(
                      _download(staging, "publisher-NOTICE.md", "massive-publisher-notice",
                                notice["url"], agent, expected_sha256=notice["sha256"],
                                expected_size=notice["size"])]
-        elif adapter in {"realpersonachat", "mrmp", "jmrd", "vfd", "asdc", "jmultiwoz", "yj-captions", "stair", "jec-basic", "kyoto-wikipedia", "alt-parallel"}:
+        elif adapter in {"realpersonachat", "mrmp", "jmrd", "vfd", "asdc", "jmultiwoz", "yj-captions", "stair", "jec-basic", "kyoto-wikipedia", "alt-parallel", "jaquad"}:
             if adapter == "vfd":
                 from .vfd import validate_source
 
@@ -642,6 +642,7 @@ def create_snapshot(
                 "jec-basic": ("jec-basic-v1-3.zip", "jec-basic-zip"),
                 "kyoto-wikipedia": ("wiki_corpus_2.01.tar.gz", "kyoto-wikipedia-tar"),
                 "alt-parallel": ("ALT-Parallel-Corpus-20191206.zip", "alt-parallel-zip"),
+                "jaquad": ("jaquad-0.1.0.zip", "jaquad-zip"),
             }[adapter]
             files = [_download(
                 staging, filename, role, source["acquisition"]["url"], agent,

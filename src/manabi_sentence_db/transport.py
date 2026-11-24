@@ -123,6 +123,11 @@ def snapshot_pack(
         raise SnapshotError("max_part_bytes must be positive and less than 2 GiB")
     manifest_path, output = Path(manifest_path), Path(output)
     snapshot = verify_snapshot(manifest_path)
+    if snapshot["source"].get("adapter") == "jaquad":
+        raise SnapshotError(
+            "JaQuAD raw snapshots contain excluded Wikipedia contexts and answer annotations; "
+            "publish only processed question-only corpus exports"
+        )
     if snapshot["source"].get("adapter") in {"globalvoices", "jmrd"}:
         raise SnapshotError(
             "These raw source files are local rights evidence, including excluded third-party "

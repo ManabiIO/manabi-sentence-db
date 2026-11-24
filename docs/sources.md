@@ -50,8 +50,36 @@ currently enabled ingestion jobs.
 | [JMultiWOZ](https://github.com/nu-dialogue/jmultiwoz) | Human task-oriented role-play; 4,246 dialogues and 61,186 turns in the inspected archive | CC BY-SA 4.0; pinned human turns only; no goals, worker IDs, backend database or model output. |
 | [STAIR Captions](https://github.com/STAIR-Lab-CIT/STAIR-captions) | Short descriptive Japanese; 616,435 public captions in the inspected v1.2 train/validation files | CC BY 4.0 for captions; no images or tokenized duplicates; visual-context dependence retained. |
 | [JEC Basic Sentence Data](https://alaginrc.nict.go.jp/jecbs/index.htm) | 5,304 Japanese sentence patterns aligned row by row with English and Chinese translations | CC BY 3.0; hash-pinned Kyoto University v1.3 ZIP, workbook, and README; unresolved `X`/quotation placeholders excluded, numeric ranges retained; Kyoto University Japanese and NICT translation attribution are separate. Translation method and individual sentence authorship are not specified. |
+| [JaQuAD](https://github.com/SkelterLabsInc/JaQuAD) | 31,748 train and 3,939 validation human-curated Japanese questions | CC BY-SA 3.0; immutable 0.1.0 commit and archive hash; question strings only, with contexts, answers, article titles and unreleased test split excluded. Exact duplicate question wording remains attributable and is tracked. |
 | [NICT Kyoto Wikipedia corpus](https://alaginrc.nict.go.jp/WikiCorpus/index_E.html) | Japanese Wikipedia sentences aligned to English translations | CC BY-SA 3.0; hash-pinned v2.01 archive; import final checked translations only, preserve article/page/history links, and exclude source-flagged typo, incomplete, classical, quotation, and reference material. |
 | [Japanese Wikibooks](https://ja.wikibooks.org/) | Textbook explanations and other nonfiction prose | CC BY-SA 4.0 for covered text; revision/history attribution and conservative third-party quotation exclusions. |
+
+### JaQuAD
+
+Reviewed 2026-11-24.
+
+The [publisher README](https://github.com/SkelterLabsInc/JaQuAD/blob/23f5d72cc273c49b35e2d9efe0f51757aa1770bd/README.md)
+reports 31,748 train and 3,939 validation questions and says the 4,009-question
+test set is not public. Its pinned [LICENSE](https://github.com/SkelterLabsInc/JaQuAD/blob/23f5d72cc273c49b35e2d9efe0f51757aa1770bd/LICENSE)
+and README identify CC BY-SA 3.0. The
+[JaQuAD paper](https://arxiv.org/abs/2202.01764) describes questions as
+human-annotated and documents human question drafting and checking. The import
+pins commit `23f5d72cc273c49b35e2d9efe0f51757aa1770bd` and the codeload archive
+SHA-256, and rechecks the license member and published split totals.
+
+Only each exact question string is emitted, as its own work with its publisher
+ID, immutable data-file citation, split, and descriptive question-type tag. The
+article title, Wikipedia context, answer text, answer spans, translations, and
+test split are not included. The raw acquisition ZIP contains the excluded
+context and answer fields as upstream evidence, so raw snapshot bundle export is
+blocked; processed question-only corpus exports remain available. No translation
+or native-speaker status is claimed. A deterministic stratified review of three
+questions from each of the five question types in both public splits found
+mostly understandable question wording but occasional context-dependent
+references and visible defects (including a typo and repeated punctuation).
+The adapter preserves wording verbatim and tracks exact repeated question text;
+corpus consumers can deduplicate by the existing language-plus-text identity
+while retaining each question's independent occurrence and source credit.
 
 ### Wikipedia and Wikivoyage
 
