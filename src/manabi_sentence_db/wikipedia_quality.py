@@ -9,9 +9,9 @@ import hashlib
 import re
 import unicodedata
 
-WIKIPEDIA_QUALITY_VERSION = "wikipedia-example-quality-v15"
+WIKIPEDIA_QUALITY_VERSION = "wikipedia-example-quality-v16"
 
-# Exact, unchanged texts assessed in the November 3–6 assistant source reviews.
+# Exact, unchanged texts assessed in assistant source reviews.
 # Hashes keep these local findings from becoming broad grammatical/topic bans.
 # See docs/sources.md; retained occurrences are still marked unreviewed.
 REVIEWED_EXCLUSIONS = {
@@ -65,6 +65,29 @@ REVIEWED_EXCLUSIONS = {
         "wikipedia-dependent-fragment",  # 時刻表: publication metadata label
     "7380a7568d5d9be31f81908adc101b41fbf35880d9fde449d376c51601d5b719":
         "wikipedia-reviewed-wording",  # 丹生酒殿神社: 909年 / 明治42年 mismatch and 制作 typo
+    # November 24, disjoint Wikipedia pilot. Keep source wording unchanged.
+    "2c80a2f8c0712b9d9be874383efb24330ed3595853ff80898f0167d67a46c666":
+        "wikipedia-reviewed-wording",  # MonoMaster: dangling 特集も before 情報が
+    "a081968a248ee802a5a1a2ba12f9cb6a49463e5f33a733683943ac0a7d0bb70e":
+        "wikipedia-reviewed-wording",  # Beatoraja: ambiguous attachment in repeated など
+    "652587743a0ef42138f11e1bef84dc424f45d03cf45fe539e057012aa3236cc8":
+        "wikipedia-dependent-fragment",  # パスタ・プリマヴェーラ: missing following list
+    "6ad0e211c4414a85f22918cf477e97c52534e578f02c24f45fa06e8260eea25c":
+        "wikipedia-reviewed-wording",  # 彦部氏: repeated 光朝の
+    "4b8e844057380dcae27ee0f8a64307d97ad992dbda53087e413abf80ee94e671":
+        "wikipedia-reviewed-wording",  # 彦部氏: 到着こと
+    "3cf6acea4279635b9a43af5bfa1782268e9d9c5d1fdd5394e3cbcaaa83a57fd3":
+        "wikipedia-dependent-fragment",  # Little Glee Monster: truncated record label
+    "a27ab5da00e88c736a96fa4bb0e15f6dae2be2a432b71dbbf61e895ef18703cd":
+        "wikipedia-dependent-fragment",  # トップ14: bare competition-format row
+    "084863b99934004b10b4c4bfbc399885cd9a3a02e1f66b246aab6fed1aa0fac3":
+        "wikipedia-dependent-fragment",  # トップ14: detached score legend
+    "61eab47c908743aff2f55fc745d141b15b78b119bef11eeb917711869370ecf9":
+        "wikipedia-dependent-fragment",  # トップ14: detached date legend
+    "65ca919226315fe76b781516d5c61fc89d76f4ba04c8a93aecda9c29343c41cf":
+        "wikipedia-reviewed-wording",  # ステファノ・ラバリーニ: チームの躍進に導いた
+    "b7e2c44dfaca41fd27a358492d34a6aadb177429256a74db4ffcf3c9b69d138a":
+        "wikipedia-reviewed-wording",  # ステファノ・ラバリーニ: twice-marked を objects
 }
 
 _NUMBERS = re.compile(r"[0-9０-９]+(?:[.,．][0-9０-９]+)*")
@@ -177,6 +200,10 @@ _BARE_LABEL = re.compile(
     r"|^[0-9０-９]+回[・/／][0-9０-９]+日(?:開催|実施)"
     r"[（(](?:前年比|前月比|前年差|前月差)[:：][+＋−－-]?[0-9０-９]+日[）)]"
     r"[。．.!！?？]?\Z"
+    # A standings cutoff label alone. Keep dates that introduce a predicate.
+    r"|^[0-9０-９]{4}年[0-9０-９]{1,2}月[0-9０-９]{1,2}日現在"
+    r"(?:（(?:全|第)[0-9０-９]+節終了時点）|\((?:全|第)[0-9０-９]+節終了時点\))"
+    r"[。．.]?\Z"
 )
 _ARTICLE_NAMING_ONLY = re.compile(
     # Editorial naming conventions in this article contain no example content.

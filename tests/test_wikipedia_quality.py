@@ -19,6 +19,8 @@ from manabi_sentence_db.wikipedia_quality import (
     "細胞の中には遺伝子があり、体の働きに関わっている。",
     "朝の気温はマイナス3度だったが、昼には10度まで上がった。",
     "2011年3月11日に大きな地震が発生した。",
+    "2025年8月5日現在（第18節終了時点）、首位は青組だ。",
+    "地域リーグでは全18節が終了した時点で優勝チームを発表した。",
     "JR東日本は、東京と周辺の地域で鉄道を運行している。",
     "固有値について学ぶには、まず行列の基本を理解する必要がある。",
     "日本の人口は約1億人であり、多くの人が都市で生活している。",
@@ -41,6 +43,8 @@ def test_accessible_prose_including_science_and_dates_is_retained(text):
 
 
 @pytest.mark.parametrize(("text", "reason"), [
+    ("2025年8月5日現在（第18節終了時点）。", "dependent-fragment"),
+    ("２０２５年８月５日現在(全１８節終了時点)。", "dependent-fragment"),
     ("地域には" + "多くの人が暮らしており、" * 18 + "毎日電車で通勤している。", "long-sentence"),
     ("この関係はE=mc^2によって表される。", "formula-heavy"),
     ("x＝y＋zかつa＞bであると仮定する。", "formula-heavy"),

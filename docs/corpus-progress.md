@@ -1,9 +1,30 @@
-# Corpus expansion checkpoint — 2026-11-06
+# Corpus expansion checkpoint — 2026-11-24
 
-This is the current pipeline checkpoint and supersedes historical running/queued
-statements below. Generated corpus text and detailed evidence stay outside Git.
+Generated corpus text and detailed evidence stay outside Git. Treat historical
+running or queued labels as observations at the time they were recorded.
 
-## Latest: v15 source review accepted; native import started
+## Next disjoint Wikipedia cohort
+
+The cached October 1 dump and the snapshot-bound 298,173-page exclusion union
+are available. A bounded pilot verified the smallest XML shard and sampled only
+its first 1,600 eligible page records. Thirteen page IDs were selected outside
+the prior cohorts, and 12 works yielded 138 valid occurrences before review.
+The sample covers a shard prefix and cannot estimate full-dump yield.
+
+The v16 quality gate withholds exact reviewed wording defects and detached
+fragments, plus standalone date labels that show a sports standings cutoff.
+It preserves complete sentences that use such dates and retains useful prose
+even when the article is about sports, history, or specialized topics. After
+assistant review and exact policy replay, 125 distinct pilot texts survived.
+These are source candidates, with no native serving or publication approval.
+Use fresh examples for the next acceptance review.
+
+Inspect the existing native import before deciding whether it needs recovery.
+Completion is unverified and the original receipt directory is unavailable.
+The next full cohort still needs a durable metadata index and the recovered
+exclusions, followed by normal source and native validation.
+
+## November 6: v15 source review accepted and native import observed
 
 The v15 refinement completed all **16 archives / 113,772 works / 1,673,361
 occurrences / 401,886,418 compressed ZIP bytes**. Its per-archive sentence sum is
@@ -33,7 +54,7 @@ unchanged inputs; a separate minimal-runtime compatibility check also passed.
 No completed imported count, final serving size, consumer activation, new public
 release or production deployment is claimed. Measure actual imported/checkpoint
 storage and fresh capacity before separately admitting the combined rebuild.
-The active local consumer remains **2,597,508 texts / 7,626,911,744 bytes**.
+The last verified local corpus had **2,597,508 texts / 7,626,911,744 bytes**.
 
 ## Parallel source preparation: second Global Voices work
 
