@@ -375,8 +375,11 @@ they are not a ceiling on later corpus growth or already active serving content.
 
 The [publisher's guidebook listing](https://www.moj.go.jp/isa/guidebook_all.html)
 identifies separate Japanese, easy-Japanese and English editions. The
-[February 26, 2026 announcement](https://www.moj.go.jp/isa/support/portal/index.html)
-identifies the Japanese and easy-Japanese editions as the eighth edition. The
+[portal announcements](https://www.moj.go.jp/isa/support/portal/index.html)
+date the multilingual seventh-edition release to December 8, 2025, and the
+Japanese and easy-Japanese eighth-edition release to February 26, 2026. The
+publisher's [English PDF](https://www.moj.go.jp/isa/content/001450885.pdf)
+identifies itself as the seventh edition. The
 specified [easy-Japanese PDF](https://www.moj.go.jp/isa/content/001423934.pdf)
 was identified by a web-indexed PDF rendering as *生活・仕事ガイドブック*,
 第8版, supervised by the Immigration Services Agency, dated February 2026, and
@@ -389,8 +392,9 @@ website terms. ISA's [content terms](https://www.moj.go.jp/isa/copyright/index2.
 say PDL 1.0 applies absent a different rights statement and describe third-party
 rights exceptions. PDL 1.0 §1 permits commercial reuse, reproduction and
 modification of covered content with attribution; §1.2 and §1.4 exclude uncleared
-third-party content and content under other terms, while §1.7.3 makes covered
-content compatible with CC BY 4.0. These terms support covered publisher text,
+third-party content and content under other terms, while [§1.7.3 of the official
+English PDL 1.0](https://www.digital.go.jp/en/resources/open_data/public_data_license_v1.0)
+makes covered content compatible with CC BY 4.0. These terms support covered publisher text,
 not blanket clearance of every element in this illustrated guidebook.
 
 A bounded `curl` request for the specified PDF returned HTTP 403. The web index
