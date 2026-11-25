@@ -3,6 +3,113 @@
 Generated corpus text and detailed evidence stay outside Git. Treat historical
 running or queued labels as observations at the time they were recorded.
 
+## Scale path toward 6–9 million distinct sentences
+
+Use the accepted schema-v12 baseline of **2,597,508 distinct sentences / 7,626,911,744 bytes** until a newer verified live receipt supersedes it. At that baseline's simple all-in density, 6 million and 9 million sentences would occupy about **17.62 GB** and **26.43 GB** decimal. This is proportional sizing only; new source mix, deduplication, indexes and temporary staging can change marginal cost. The v18 disk-full failure below needs its own storage diagnosis before another large refresh.
+
+### Reusable inputs and count boundaries
+
+- The October 1, 2026 cached Japanese Wikipedia snapshot and verified body-free metadata index are reusable: **1,520,837 main-namespace, non-redirect pages with revisions**, snapshot `568d86489a4548dd848d6e703bb14e3948d612d79e6b5bbaf65512a1c7f721c0`. The metadata index is **331,595,776 bytes**, SHA-256 `2bdbd704c9aa2b4fe40c46fcbd2eec79849840bedd6b37822c6474060b6a0cda`.
+- The previous-page union is exactly **298,173 IDs** (12,000 + 27,829 + 131,147 + 127,197 page selections). The latest candidate selects a further **5,226** disjoint IDs. From the 1,520,837 indexed records, that leaves **1,217,438 page IDs** outside both selections before routing, article extraction, quality, eligibility or global text deduplication. Those are metadata rows, not eligible sentences.
+- The public “further Wikipedia” release contains **120,616 works / 1,783,000 occurrences / 427,337,970 compressed bytes**. A later whole-article pass selected 113,773 works and retained 1,673,619 occurrences in **401,931,611 compressed bytes**; its summed per-archive sentence count is **1,656,264**, not global distinct text or net growth. A separate v15 pass reports a **1,656,009** per-archive sentence sum. Availability of those exact refined archives, their overlap with the accepted consumer, and eligible net growth are unverified; do not count them as immediately importable growth. See the November 6 release and refinement receipts cited in the earlier entries below.
+- The accepted prior Wikipedia expansion added **106,432 globally new eligible texts**, bringing the local baseline to 2,597,508. This is the verified net-yield reference, not a per-article yield guarantee.
+- The November 24 Wikipedia+JaQuAD archive is **111,997 distinct source rows / 112,533 occurrences** after v18 refinement. It has not completed serving admission. Its source review is not a population estimate, and these rows are not eligible or globally novel yield.
+
+### Exact v18 disposition
+
+The archived v18 refinement receipt is `data/research/wikipedia-jaquad-v16-batch-20261124-wir89b6c/refine-v18-20261124-h4j8s6/final-verification.json` (input build `build_a5ee198ca615ffcc90624887d93764aa`, catalog SHA-256 `6c47053c62e5982b97df123bac4803a555c687294e7d318956091e8e2cb8a926`). The attempted refresh log is `data/research/wikipedia-jaquad-v16-batch-20261124-wir89b6c/serving-candidate-v18-20261124-q7n4vd/build.log`. It imported the 112,533 source occurrences, then failed while inserting `sentence_sources` with **`sqlite3.OperationalError: database or disk is full`**. Exception cleanup also could not move `.refresh-2prfwivm` to `/root/.Trash` because the container root is read-only. No completion receipt exists. Preserve all v18 source and failed-candidate evidence; this is an unfinished storage/refresh failure, not a serving-size or yield measurement.
+
+### Reproducible pilot and first disjoint cohort
+
+No cohort build is dispatched by this plan. After the v18 staging-space failure is diagnosed and the accepted baseline receipt is rechecked, reuse the existing metadata cache and make one deterministic, disjoint selection. The selector flags below are defined in `src/manabi_sentence_db/cli.py`; `build --document-selection` is snapshot-bound and still streams the compressed XML, but extracts prose only for selected page IDs. The following quotas cap the cohort at 250,000 pages; the current route inventory suggests about 210,000 actual selections (200,000 general plus the underfilled topic quotas), to be read from the selection receipt.
+
+```sh
+COHORT=data/research/wikipedia-scale-first-250k-20261124
+SNAPSHOT=data/snapshots/wikipedia-full-20261001/manifest.json
+METADATA=data/research/wikipedia-metadata-native-20261124-s78w1qna
+PREVIOUS=data/research/wikipedia-cohort-exclusions-20261001/selection.json
+LATEST=data/research/wikipedia-jaquad-v16-batch-20261124-wir89b6c/selection-final/selection.json
+
+mise run select-wikimedia -- \
+  --metadata-cache "$METADATA" \
+  --exclude-selection "$PREVIOUS" \
+  --exclude-selection "$LATEST" \
+  --output "$COHORT" --per-topic 5000 --general 200000 \
+  --seed wikipedia-scale-first-250k-20261124 --progress
+
+mise run build -- \
+  --snapshot "$SNAPSHOT" \
+  --document-selection "$COHORT/selection.json" \
+  --output "$COHORT/build" --format jsonl --shard-compression zstd --progress
+```
+
+The `selection-report.json` is the frozen page/topic sample. Once the canonical `catalog.json` provides its `build_id`, derive the pilot from that same page selection, so the raw dump is parsed once for the entire cohort. This deterministic snippet selects up to 8,000 general pages and 200 pages from each routed topic for the source-yield pilot, and binds the resulting work IDs to the exact build:
+
+```sh
+python3 - "$COHORT/selection-report.json" "$COHORT/build/catalog.json" \
+  "$COHORT/pilot-work-selection.json" <<'PY'
+import hashlib, json, sys
+from pathlib import Path
+sys.path.insert(0, "src")
+from manabi_sentence_db.build import iter_records
+
+report_path, catalog_path, output_path = map(Path, sys.argv[1:])
+report, catalog = (json.loads(p.read_text()) for p in (report_path, catalog_path))
+build_path = catalog_path.parent
+limits = {topic: 200 for topic in report["selected_counts"]}
+limits["general"] = 8000
+seed = "wikipedia-scale-pilot-20261124"
+work_ids = []
+for topic, limit in sorted(limits.items()):
+    rows = [row for row in report["articles"] if row["topic"] == topic]
+    rows.sort(key=lambda row: (
+        hashlib.sha256(f"{seed}:{row['native_id']}".encode()).digest(),
+        int(row["native_id"]),
+    ))
+    work_ids.extend(row["native_id"] for row in rows[:limit])
+sampled_page_ids = set(work_ids)
+documents = {
+    record["native_id"]: record["id"]
+    for record in iter_records(build_path, catalog, "wikipedia-ja")
+    if record["native_id"] in sampled_page_ids
+}
+zero_yield = sorted(sampled_page_ids - documents.keys(), key=int)
+selection = {"schema_version": 1, "build_id": catalog["build_id"],
+             "work_ids": sorted(documents.values())}
+output_path.write_text(json.dumps(selection, ensure_ascii=False, separators=(",", ":")) + chr(10))
+sample_path = output_path.with_name("pilot-sample.json")
+sample_path.write_text(json.dumps({
+    "seed": seed, "sampled_page_ids": sorted(sampled_page_ids, key=int),
+    "canonical_document_page_ids": sorted(documents, key=int),
+    "zero_yield_page_ids": zero_yield,
+}, ensure_ascii=False, separators=(",", ":")) + chr(10))
+print(f"pilot works={len(documents)} zero-yield pages={len(zero_yield)} build_id={catalog['build_id']}")
+PY
+
+mise run export-normalized -- \
+  --build "$COHORT/build" --output "$COHORT/pilot.normalized.zip" \
+  --source wikipedia-ja --work-selection "$COHORT/pilot-work-selection.json"
+mise run export-normalized-buckets -- \
+  --build "$COHORT/build" --output "$COHORT/archives" --works-per-archive 8000
+```
+
+Gate native analysis and any serving work on the pilot receipt. Measure (1) exact sentence/text IDs novel to the accepted consumer, duplicate and shared memberships, and current-policy eligible counts; (2) occurrences, works, compressed archive bytes, checkpoint/import bytes, full candidate/index bytes, temporary peak and available disk; (3) per-topic/article yield, sentence-length bands and the fraction of a deterministic read sample that is short, grammatical, self-contained and useful; and (4) a frozen query packet with exact top-result IDs, source/revision attribution, filters and before/after behavior. Preserve excluded examples and reasons. The pilot informs the gate; it does not estimate every article or waive source review. Reuse its normalized archive and exact-text analyses in the first cohort import rather than reextracting its pages. Use completed published archives where work IDs and snapshot/revision/license identities match; never rescan them to manufacture novelty.
+
+### Sensitivity only, not a yield forecast
+
+At the accepted baseline, the target gap is **3,402,492** to 6 million and **6,402,492** to 9 million. The user-requested 6/10/14 net globally unique texts per newly selected page give this simple sensitivity:
+
+| First-run pages | Net texts/page | Scenario net | Scenario corpus total |
+|---:|---:|---:|---:|
+| 200,000 | 6 / 10 / 14 | 1.2 / 2.0 / 2.8M | 3.798 / 4.598 / 5.398M |
+| 250,000 | 6 / 10 / 14 | 1.5 / 2.5 / 3.5M | 4.098 / 5.098 / 6.098M |
+
+These are arithmetic scenarios, not evidence that the selected pages yield those rates. Continue with further bounded, disjoint cohorts only after actual eligible novel yield, source diversity, quality, all-in size and query checks are accepted.
+
+### Scale architecture direction
+
+Keep source text in immutable compressed imports and evaluate **immutable compressed SQLite serving partitions** for the next scale step. A partition design must maintain a global language-plus-normalized-text identity/deduplication layer, every eligible work/source/revision/license/attribution relationship, and the current filtering/ranking semantics. Before rollout, compare exact query IDs, rankings, filters, citations and source attribution against the monolithic baseline on a frozen full query suite; require integrity/parity and measured all-in storage before any local activation. This is a design recommendation only; no serving or production files change here.
+
 ## November 24 metadata index and disjoint selection
 
 The cached October 1 Wikipedia dump now has a verified metadata index with

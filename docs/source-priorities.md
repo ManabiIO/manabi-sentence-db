@@ -126,6 +126,23 @@ third-party text or its sentence quality. Other undated rows retain the supplied
 shortlist's unverified claims. Do not enable downloads until the specific release
 and underlying content rights are reviewed.
 
+### High-volume public-text pilots for the 6–9M scale path
+
+These are candidate pilots only; none has a measured corpus yield or admission
+receipt. Compare exact texts against the accepted consumer and preserve source,
+edition, rights, attribution and context before native qualification.
+
+| Candidate | Reusable evidence / rights gate | Pilot boundary |
+|---|---|---|
+| [Agency for Cultural Affairs annual white papers and reports](https://www.bunka.go.jp/tokei_hakusho_shuppan/hakusho_nenjihokokusho/) | The [MEXT website terms](https://www.mext.go.jp/b_menu/1351168.htm) include `bunka.go.jp` and follow PDL 1.0, but exclude third-party content and link to specific exceptions. Check each PDF edition, tables, cited extracts, charts and photographs; retain only text with a supported commercial redistribution/adaptation right. | Start with one pinned edition and a text-only, attributed page sample. No sentence/yield estimate until that sample is extracted and screened. |
+| [Japan Search](https://jpsearch.go.jp/) | Use the [metadata-use policy](https://jpsearch.go.jp/policy/available-rights-statements), [site policy](https://jpsearch.go.jp/policy) and [API fields](https://jpsearch.go.jp/static/developer/webapi/ch3_search_api.html). Rights are distinct for metadata, thumbnails and digital content; retain the provider's record-level terms and admit metadata only when that field is explicitly CC0 or CC BY. CC0 metadata does not grant rights to the described source text. | Freeze a provider- and field-specific sample, follow source links, and verify text rights/provenance separately. No yield inferred from search-result or item counts. |
+| [WikiMatrix via OPUS](https://opus.nlpl.eu/datasets/WikiMatrix) | Published alignment is automatically mined from Wikipedia; machine alignment is not human translation review. Recheck per-side source, page/revision attribution, license and translation method before treating either side as an authored example or linked translation. | Diagnostic only until each side's provenance and alignment are checked; do not count aligned pairs as novel or human-reviewed Japanese sentences. |
+
+`JParaCrawl` remains research-only under its standard download terms; without a
+separate permission expressly covering this project's commercial redistribution,
+exclude it. Its size and automatic alignment provide no exception. See the
+[existing source decision](sources.md#deferred-or-excluded-sources).
+
 ### JMRD and VFD primary-evidence follow-up — 2026-11-02
 
 JMRD's current README lists 4,575 training, 200 validation and 300 test dialogues;
