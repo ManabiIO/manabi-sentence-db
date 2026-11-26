@@ -1,0 +1,380 @@
+{
+  "schema_version": 1,
+  "work": {
+    "source_id": "globalvoices-39595-ja",
+    "native_id": "39595",
+    "ja_url": "https://jp.globalvoices.org/2015/12/27/39595/",
+    "original_url": "https://es.globalvoices.org/2015/09/02/nepohualtzintzin-el-abaco-mesoamericano-que-tiene-vigencia-en-el-siglo-xxi/",
+    "original_language": "es",
+    "language_chain": [
+      "es",
+      "en",
+      "ja"
+    ],
+    "pages": [
+      {
+        "key": "ja",
+        "role": "globalvoices-japanese-html",
+        "language": "ja",
+        "url": "https://jp.globalvoices.org/2015/12/27/39595/",
+        "filename": "39595-ja.html"
+      },
+      {
+        "key": "original",
+        "role": "globalvoices-spanish-original-html",
+        "language": "es",
+        "url": "https://es.globalvoices.org/2015/09/02/nepohualtzintzin-el-abaco-mesoamericano-que-tiene-vigencia-en-el-siglo-xxi/",
+        "filename": "39595-es-original.html"
+      },
+      {
+        "key": "intermediate-en",
+        "role": "globalvoices-english-intermediate-html",
+        "language": "en",
+        "url": "https://globalvoices.org/2015/09/04/the-mesoamerican-abacus-that-gives-modern-calculators-a-run-for-their-money/",
+        "filename": "39595-en-intermediate.html"
+      }
+    ],
+    "credits": [
+      {
+        "page": "original",
+        "role": "writer",
+        "language": "es",
+        "credit": {
+          "display": "Escrito porGabriela García Calderón Orbe",
+          "name": "Gabriela García Calderón Orbe",
+          "url": "https://es.globalvoices.org/author/gabriela-garcia-calderon-orbe/"
+        }
+      },
+      {
+        "page": "intermediate-en",
+        "role": "translator",
+        "language": "en",
+        "credit": {
+          "display": "Translated (English) byGabriela García Calderón",
+          "name": "Gabriela García Calderón",
+          "url": "https://globalvoices.org/author/gabriela-garcia-calderon/"
+        }
+      },
+      {
+        "page": "ja",
+        "role": "translator",
+        "language": "ja",
+        "credit": {
+          "display": "翻訳 (日本語)Sayaka Yamazaki",
+          "name": "Sayaka Yamazaki",
+          "url": "https://jp.globalvoices.org/author/sayaka-yamazaki/"
+        }
+      },
+      {
+        "page": "ja",
+        "role": "proofreader",
+        "language": "ja",
+        "evidence": "body",
+        "credit": {
+          "role": "校正",
+          "name": "Takako Nose",
+          "url": "https://jp.globalvoicesonline.org/author/takako-nose/"
+        }
+      }
+    ],
+    "language_link_aliases": [
+      {
+        "language": "English",
+        "url": "https://globalvoicesonline.org/2015/09/04/the-mesoamerican-abacus-that-gives-modern-calculators-a-run-for-their-money/"
+      },
+      {
+        "language": "Malagasy",
+        "url": "https://mg.globalvoices.org/2015/10/16/74057/"
+      },
+      {
+        "language": "русский",
+        "url": "https://ru.globalvoices.org/2015/09/08/42274/"
+      },
+      {
+        "language": "bahasa Indonesia",
+        "url": "https://id.globalvoices.org/2015/12/17/sempoa-kuno-yang-tidak-kalah-dengan-komputer-modern/"
+      },
+      {
+        "language": "Español",
+        "url": "https://es.globalvoicesonline.org/2015/09/02/nepohualtzintzin-el-abaco-mesoamericano-que-tiene-vigencia-en-el-siglo-xxi/"
+      }
+    ],
+    "citation_urls": [
+      "https://es.globalvoices.org/2015/09/02/nepohualtzintzin-el-abaco-mesoamericano-que-tiene-vigencia-en-el-siglo-xxi/",
+      "https://globalvoices.org/2015/09/04/the-mesoamerican-abacus-that-gives-modern-calculators-a-run-for-their-money/",
+      "https://jp.globalvoices.org/2015/12/27/39595/"
+    ]
+  },
+  "pages": {
+    "ja": {
+      "metadata": {
+        "url": "https://jp.globalvoices.org/2015/12/27/39595/",
+        "title": "現代の計算機にも負けないマヤ文明のそろばん「ネポ」",
+        "credits": [
+          {
+            "display": "記者 (Español)Gabriela García Calderón Orbe",
+            "name": "Gabriela García Calderón Orbe",
+            "url": "https://es.globalvoices.org/author/gabriela-garcia-calderon-orbe/"
+          },
+          {
+            "display": "翻訳 (English)Gabriela García Calderón",
+            "name": "Gabriela García Calderón",
+            "url": "https://globalvoices.org/author/gabriela-garcia-calderon/"
+          },
+          {
+            "display": "翻訳 (日本語)Sayaka Yamazaki",
+            "name": "Sayaka Yamazaki",
+            "url": "https://jp.globalvoices.org/author/sayaka-yamazaki/"
+          }
+        ],
+        "display_dates": [
+          "元記事掲載 2015/09/02",
+          "翻訳掲載 2015/12/27",
+          "11年前"
+        ],
+        "publisher_datetimes": {
+          "article:published_time": "2015-12-27T02:13:08+0000",
+          "article:modified_time": "2015-12-27T02:13:08+0000"
+        },
+        "english_original_links": [
+          "https://globalvoicesonline.org/2015/09/04/the-mesoamerican-abacus-that-gives-modern-calculators-a-run-for-their-money/"
+        ],
+        "article_license_sha256": "93be2f79ff0364e96f1d47bd826c2370eb2e9d0a74c9fb85aa260f32478be62d",
+        "footer_license_sha256": "f3a876bb90d6dde1524aed5e3a3466ef1243b2dae9305af9d3c6f8d7e9ab8e0d",
+        "entry_attrs": {
+          "class": "entry"
+        },
+        "language_links": [
+          {
+            "language": "English",
+            "url": "https://globalvoicesonline.org/2015/09/04/the-mesoamerican-abacus-that-gives-modern-calculators-a-run-for-their-money/"
+          },
+          {
+            "language": "Malagasy",
+            "url": "https://mg.globalvoices.org/2015/10/16/74057/"
+          },
+          {
+            "language": "русский",
+            "url": "https://ru.globalvoices.org/2015/09/08/42274/"
+          },
+          {
+            "language": "bahasa Indonesia",
+            "url": "https://id.globalvoices.org/2015/12/17/sempoa-kuno-yang-tidak-kalah-dengan-komputer-modern/"
+          },
+          {
+            "language": "Español",
+            "url": "https://es.globalvoicesonline.org/2015/09/02/nepohualtzintzin-el-abaco-mesoamericano-que-tiene-vigencia-en-el-siglo-xxi/"
+          }
+        ],
+        "body_credits": [
+          {
+            "role": "校正",
+            "name": "Takako Nose",
+            "url": "https://jp.globalvoicesonline.org/author/takako-nose/"
+          }
+        ]
+      },
+      "response_sha256": "775bc09dc2e322beeed10fc9ca1328e8670273e53fe57ec9161b437c3fc212e3",
+      "body_sha256": "9fc73cf99b5a66ae39414acf83209705d56af48a327d7fef9d3025fd76807c29"
+    },
+    "original": {
+      "metadata": {
+        "url": "https://es.globalvoices.org/2015/09/02/nepohualtzintzin-el-abaco-mesoamericano-que-tiene-vigencia-en-el-siglo-xxi/",
+        "title": "Nepohualtzintzin, el ábaco mesoamericano que tiene vigencia en el siglo XXI",
+        "credits": [
+          {
+            "display": "Escrito porGabriela García Calderón Orbe",
+            "name": "Gabriela García Calderón Orbe",
+            "url": "https://es.globalvoices.org/author/gabriela-garcia-calderon-orbe/"
+          }
+        ],
+        "display_dates": [
+          "Publicado el 2 de septiembre de 2015",
+          "Hace 11 años"
+        ],
+        "publisher_datetimes": {
+          "article:published_time": "2015-09-02T17:13:16+0000",
+          "article:modified_time": "2015-09-04T19:28:28+0000"
+        },
+        "english_original_links": [],
+        "article_license_sha256": "80b5ab75a42f1ea787cfb7ea8c3b5dba89bb70833aca062d8f71de6eb8f617c0",
+        "footer_license_sha256": "80bf955b777bc38b87b6408dc92f6046b498ba70dcb9915a7e4751095f05df10",
+        "entry_attrs": {
+          "class": "entry"
+        }
+      },
+      "response_sha256": "ff76c3e3fc25b582ab12a9fcc85ec2261e660e11c3bbca096e9f754da9140af1",
+      "body_sha256": "e71c6a71bb0a37b3d2e9d335b61ca0abd6de3e9262daa81af35229ce12f1bf09"
+    },
+    "intermediate-en": {
+      "metadata": {
+        "url": "https://globalvoices.org/2015/09/04/the-mesoamerican-abacus-that-gives-modern-calculators-a-run-for-their-money/",
+        "title": "The Mesoamerican Abacus That Gives Modern Calculators a Run for Their Money",
+        "credits": [
+          {
+            "display": "Written (Español) byGabriela García Calderón Orbe",
+            "name": "Gabriela García Calderón Orbe",
+            "url": "https://es.globalvoices.org/author/gabriela-garcia-calderon-orbe/"
+          },
+          {
+            "display": "Translated (English) byGabriela García Calderón",
+            "name": "Gabriela García Calderón",
+            "url": "https://globalvoices.org/author/gabriela-garcia-calderon/"
+          }
+        ],
+        "display_dates": [
+          "Translation posted 4 September 2015",
+          "11 years ago"
+        ],
+        "publisher_datetimes": {
+          "article:published_time": "2015-09-04T19:02:28+0000",
+          "article:modified_time": "2015-09-05T16:30:21+0000"
+        },
+        "english_original_links": [],
+        "article_license_sha256": "047aca91d86209aca1c4abfb1bb8633de023aa5b47855884045ed6ec36c4346d",
+        "footer_license_sha256": "553ca93cb502a272467bb196396bb39ceb445a9e1b41c873890cecfdf39e450e",
+        "entry_attrs": {
+          "class": "entry"
+        }
+      },
+      "response_sha256": "6904de46885f621c89bf0edc59c0547653e46251b43e1a2bffa91903f9f17886",
+      "body_sha256": "4c158971feaa64347ef38db36bfa5542ed4e8330162bb5cd677f4ede7f29e736"
+    }
+  },
+  "blocks": [
+    {
+      "ordinal": 0,
+      "tag": "div",
+      "reason": "third-party-media-caption",
+      "text_sha256": "8a8fa7177c23dd98b1ef09cdabdb7f776922f5d75bbedcd32236e117ebe3c31a",
+      "html_tree_sha256": "10772abee9e76b9aae6625640c97ba726143415975dbf0b0ae6520187e17d2ac"
+    },
+    {
+      "ordinal": 1,
+      "tag": "p",
+      "reason": null,
+      "text_sha256": "b5564b75089a0d9b438c076cccc60c2fa9fd22f55b611dca9da2d580eabbb23b",
+      "html_tree_sha256": "fb4cfc3a2f087278ee655b0f3051788b0f4d22fb562d1d679ca239d831a03b14"
+    },
+    {
+      "ordinal": 2,
+      "tag": "p",
+      "reason": null,
+      "text_sha256": "392f76063420041b58a29ed2f880cf5ddefd96a1c3816623bf91e7a386be168c",
+      "html_tree_sha256": "973181e13b35a7ac5ca111aa385dce192d720e25b3db495fdeffa27b22a6c85a"
+    },
+    {
+      "ordinal": 3,
+      "tag": "p",
+      "reason": null,
+      "text_sha256": "35415e9be6cf949659f545f12df9e7e9f28606b9f1db4a3e60b7937c88a14391",
+      "html_tree_sha256": "af5fe3d5cd2ddd29bd09bf4144cec9a1880407b054130a13a8a957aeb3e27815"
+    },
+    {
+      "ordinal": 4,
+      "tag": "p",
+      "reason": null,
+      "text_sha256": "3515918650d98628825debec37b3a3bd9abcbee60ff60d6fa1048b1c3c153ab1",
+      "html_tree_sha256": "2d06846fd8c4a60eaa63fcad016e868597f45c68acc01b9b1e1a263ef5562b17"
+    },
+    {
+      "ordinal": 5,
+      "tag": "blockquote",
+      "reason": "third-party-quoted-spanish-text",
+      "text_sha256": "70ac3144596bc8df48ec2335da85233b65734f84b3f2249e18571f9214c7c481",
+      "html_tree_sha256": "be3abea8ac69a63ce19fe0f3f0897dc515761142429d428f028e638c453e6964"
+    },
+    {
+      "ordinal": 6,
+      "tag": "blockquote",
+      "reason": "third-party-english-translation",
+      "text_sha256": "6df7fd26b4e63934ec30ab40bebf3ec73eb956203069fed4deab1bc51a8aeb32",
+      "html_tree_sha256": "4a68666dfc9a609b8add03019b30c8005ff00e731557d204c30437c139c8a394"
+    },
+    {
+      "ordinal": 7,
+      "tag": "p",
+      "reason": null,
+      "text_sha256": "4e3cb60455c0fe5fc29383aaf99621cd1659ac346b2ad538cc0050263b8ae96e",
+      "html_tree_sha256": "12e998a466ed3131ead42cbd4773807a0375f5f699853da20109fb79af733259"
+    },
+    {
+      "ordinal": 8,
+      "tag": "blockquote",
+      "reason": "third-party-quoted-spanish-text",
+      "text_sha256": "c471fb43fdd0f31ecab95ff4b7427978e8d3aec21830d09dcdad9a39bb0b3c2d",
+      "html_tree_sha256": "50bd9204828006eed3209814001d7792745c08f906f7a7a74e458f914271d368"
+    },
+    {
+      "ordinal": 9,
+      "tag": "blockquote",
+      "reason": "third-party-english-translation",
+      "text_sha256": "385fe1980ba5ffc08e23f54972e46337ac24fb73e38bcb8a5916b5213eee1dd9",
+      "html_tree_sha256": "3b8c8ea9bb70634ddad1d0eb29dff3a9e550b4a7b564d00953e6122f852e11f4"
+    },
+    {
+      "ordinal": 10,
+      "tag": "p",
+      "reason": null,
+      "text_sha256": "643b5911e88e91b8b674c2bd1d283818aecdf87373154478a1805b33901bb5b1",
+      "html_tree_sha256": "5fea8aaad0ebf028525248fa508992f68c5146bfd548bd1e7279646b88ef1e61"
+    },
+    {
+      "ordinal": 11,
+      "tag": "blockquote",
+      "reason": "third-party-quoted-spanish-text",
+      "text_sha256": "881db4f92879614a1d61bbb66374352801c77c54197384e3f8d68e3f7086fbd2",
+      "html_tree_sha256": "31ccdddcab8cd5b8477852791add472f37ac487a8fdc4cc38419a6ba20f829b9"
+    },
+    {
+      "ordinal": 12,
+      "tag": "blockquote",
+      "reason": "third-party-english-translation",
+      "text_sha256": "9c1220b1dca8328c6857dc4ed4a8288a93ca41d6a0232c3786cb86b29698d6d9",
+      "html_tree_sha256": "9ceeebcf0b831453c1d0feb20ab2e432a5fccb7200b38b4fba479bdb9722e0cf"
+    },
+    {
+      "ordinal": 13,
+      "tag": "p",
+      "reason": null,
+      "text_sha256": "6dbe248744af9cbd0238dffd2f1e35f5a66fafb54a98114ba37eb21abc5debf1",
+      "html_tree_sha256": "833d542cc937cd21ea681de26e92c8ec1d808ea169333f80c6942a26251b2438"
+    },
+    {
+      "ordinal": 14,
+      "tag": "blockquote",
+      "reason": "third-party-quoted-spanish-text",
+      "text_sha256": "e930a991f1f7f450f55bb2de3918b04638fa4063a43675c7b4e45c8f809ea11e",
+      "html_tree_sha256": "e57669450c3fceda8254bc0fdd69623e99430e6616cd84de62e3c0f37cf0e7eb"
+    },
+    {
+      "ordinal": 15,
+      "tag": "blockquote",
+      "reason": "third-party-english-translation",
+      "text_sha256": "da55c72af8560833183d3bd873558c232d92b63917ac875b7432f5dadcd3e3bd",
+      "html_tree_sha256": "fafcf576d2716bda73499c3b5da7486bfc34d7628b7efa8156bee3805d043791"
+    },
+    {
+      "ordinal": 16,
+      "tag": "p",
+      "reason": "third-party-manual-and-video-reference",
+      "text_sha256": "0903f313d68510331a246a1a8921d5a0cd15e166e463e8f07b985e2537781df7",
+      "html_tree_sha256": "12473287c9b772695b5387f30419196dd252e6b5b6685493bc1cd0ec0729646e"
+    },
+    {
+      "ordinal": 17,
+      "tag": "p",
+      "reason": "empty-block",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "html_tree_sha256": "f615a42a298aa53afa15a80d22f1f863c97a6a3b30d0cb117f241c4e15147d9c"
+    },
+    {
+      "ordinal": 18,
+      "tag": "div",
+      "reason": "proofreader-credit",
+      "text_sha256": "832d80047f4dd7d64845f6edfd4a36244ddecd84fa53fcf71a4d4c631ffda8e7",
+      "html_tree_sha256": "c1abc939bc43f0b054bdbaa91240838d3088d7f6de9a31eaf78eb14ce2a48118"
+    }
+  ],
+  "review_basis": "Manual paragraph-level review of the exact pinned Japanese response and source/intermediate metadata; no aligned text is emitted or asserted."
+}

@@ -1,0 +1,406 @@
+{
+  "schema_version": 1,
+  "work": {
+    "source_id": "globalvoices-25480-ja",
+    "native_id": "25480",
+    "ja_url": "https://jp.globalvoices.org/2013/10/07/25480/",
+    "original_url": "https://globalvoices.org/2013/07/28/hazreen-shaik-daud-malaysias-first-transgender-in-politics/",
+    "original_language": "en",
+    "language_chain": [
+      "en",
+      "ja"
+    ],
+    "pages": [
+      {
+        "key": "ja",
+        "role": "globalvoices-japanese-html",
+        "language": "ja",
+        "url": "https://jp.globalvoices.org/2013/10/07/25480/",
+        "filename": "25480-ja.html"
+      },
+      {
+        "key": "original",
+        "role": "globalvoices-original-html",
+        "language": "en",
+        "url": "https://globalvoices.org/2013/07/28/hazreen-shaik-daud-malaysias-first-transgender-in-politics/",
+        "filename": "25480-en-original.html"
+      }
+    ],
+    "credits": [
+      {
+        "page": "original",
+        "role": "writer",
+        "language": "en",
+        "credit": {
+          "display": "Written byMong Palatino",
+          "name": "Mong Palatino",
+          "url": "https://globalvoices.org/author/mong/"
+        }
+      },
+      {
+        "page": "ja",
+        "role": "translator",
+        "language": "ja",
+        "credit": {
+          "display": "翻訳 (日本語)Maiko Kageshita",
+          "name": "Maiko Kageshita",
+          "url": "https://jp.globalvoices.org/author/maiko-kageshita/"
+        }
+      },
+      {
+        "page": "ja",
+        "role": "proofreader",
+        "language": "ja",
+        "evidence": "body",
+        "credit": {
+          "role": "校正",
+          "name": "Izumi Mihashi",
+          "url": "https://jp.globalvoicesonline.org/author/izumi-mihashi"
+        }
+      }
+    ],
+    "language_link_aliases": [
+      {
+        "language": "Malagasy",
+        "url": "https://mg.globalvoicesonline.org/?p=50630"
+      },
+      {
+        "language": "Dansk",
+        "url": "https://da.globalvoicesonline.org/?p=6134"
+      },
+      {
+        "language": "Italiano",
+        "url": "https://it.globalvoicesonline.org/2013/08/malesia-hazreen-shaik-daud-la-prima-politica-transessuale-del-paese/"
+      },
+      {
+        "language": "Español",
+        "url": "https://es.globalvoicesonline.org/2013/08/20/hazreen-shaik-daud-primera-politica-transgenero-de-malasia/"
+      },
+      {
+        "language": "English",
+        "url": "https://globalvoicesonline.org/2013/07/28/hazreen-shaik-daud-malaysias-first-transgender-in-politics/"
+      }
+    ],
+    "citation_urls": [
+      "https://globalvoices.org/2013/07/28/hazreen-shaik-daud-malaysias-first-transgender-in-politics/",
+      "https://jp.globalvoices.org/2013/10/07/25480/"
+    ]
+  },
+  "pages": {
+    "ja": {
+      "metadata": {
+        "url": "https://jp.globalvoices.org/2013/10/07/25480/",
+        "title": "マレーシア：政界で初のトランスジェンダー",
+        "credits": [
+          {
+            "display": "記者 (English)Mong Palatino",
+            "name": "Mong Palatino",
+            "url": "https://globalvoices.org/author/mong/"
+          },
+          {
+            "display": "翻訳 (日本語)Maiko Kageshita",
+            "name": "Maiko Kageshita",
+            "url": "https://jp.globalvoices.org/author/maiko-kageshita/"
+          }
+        ],
+        "display_dates": [
+          "元記事掲載 2013/07/28",
+          "翻訳掲載 2013/10/07",
+          "13年前"
+        ],
+        "publisher_datetimes": {
+          "article:published_time": "2013-10-07T02:55:02+0000",
+          "article:modified_time": "2013-10-07T02:56:37+0000"
+        },
+        "english_original_links": [
+          "https://globalvoicesonline.org/2013/07/28/hazreen-shaik-daud-malaysias-first-transgender-in-politics/"
+        ],
+        "article_license_sha256": "93be2f79ff0364e96f1d47bd826c2370eb2e9d0a74c9fb85aa260f32478be62d",
+        "footer_license_sha256": "f3a876bb90d6dde1524aed5e3a3466ef1243b2dae9305af9d3c6f8d7e9ab8e0d",
+        "entry_attrs": {
+          "class": "entry"
+        },
+        "language_links": [
+          {
+            "language": "Malagasy",
+            "url": "https://mg.globalvoicesonline.org/?p=50630"
+          },
+          {
+            "language": "Dansk",
+            "url": "https://da.globalvoicesonline.org/?p=6134"
+          },
+          {
+            "language": "Italiano",
+            "url": "https://it.globalvoicesonline.org/2013/08/malesia-hazreen-shaik-daud-la-prima-politica-transessuale-del-paese/"
+          },
+          {
+            "language": "Español",
+            "url": "https://es.globalvoicesonline.org/2013/08/20/hazreen-shaik-daud-primera-politica-transgenero-de-malasia/"
+          },
+          {
+            "language": "English",
+            "url": "https://globalvoicesonline.org/2013/07/28/hazreen-shaik-daud-malaysias-first-transgender-in-politics/"
+          }
+        ],
+        "body_credits": [
+          {
+            "role": "校正",
+            "name": "Izumi Mihashi",
+            "url": "https://jp.globalvoicesonline.org/author/izumi-mihashi"
+          }
+        ]
+      },
+      "response_sha256": "978d663fd4cfef6d833590bac44407e8b581025d7ad42b31cd4a0c9db67b4353",
+      "body_sha256": "261c4db4f76a696bcaba639a29724a079284af4ddf75a95fa89891d29d876d78"
+    },
+    "original": {
+      "metadata": {
+        "url": "https://globalvoices.org/2013/07/28/hazreen-shaik-daud-malaysias-first-transgender-in-politics/",
+        "title": "Hazreen Shaik Daud: Malaysia’s First Transgender in Politics",
+        "credits": [
+          {
+            "display": "Written byMong Palatino",
+            "name": "Mong Palatino",
+            "url": "https://globalvoices.org/author/mong/"
+          }
+        ],
+        "display_dates": [
+          "Posted 28 July 2013",
+          "13 years ago"
+        ],
+        "publisher_datetimes": {
+          "article:published_time": "2013-07-28T13:14:48+0000",
+          "article:modified_time": "2014-01-14T18:02:24+0000"
+        },
+        "english_original_links": [],
+        "article_license_sha256": "047aca91d86209aca1c4abfb1bb8633de023aa5b47855884045ed6ec36c4346d",
+        "footer_license_sha256": "553ca93cb502a272467bb196396bb39ceb445a9e1b41c873890cecfdf39e450e",
+        "entry_attrs": {
+          "class": "entry"
+        }
+      },
+      "response_sha256": "ad036454eff7847d07237e37f8a75cc6176e6b5248397a803db41d00db593b7d",
+      "body_sha256": "9e95741f555961851e50a59db55327453fd5cdacab9fdcd58531e6044a86a61f"
+    }
+  },
+  "blocks": [
+    {
+      "ordinal": 0,
+      "tag": "p",
+      "reason": null,
+      "text_sha256": "16d6a1bba940ffe7d82de7e9b411590e3e7f01401c2c787c91ba31924a6ea5f3",
+      "html_tree_sha256": "d745527341c757b724b40b02774b3a26783d925ee6ee5ce2b9236d4a09ee603b"
+    },
+    {
+      "ordinal": 1,
+      "tag": "p",
+      "reason": null,
+      "text_sha256": "39d26311b20327a90536c7c653d29357c413674cec038b0765970089da7e4b7b",
+      "html_tree_sha256": "fd0f2129cb59ddb4595fba46efe7d37a71f011338b7aa3471e3fde2a55eff73b"
+    },
+    {
+      "ordinal": 2,
+      "tag": "blockquote",
+      "reason": "third-party-quotation",
+      "text_sha256": "f1020a2fcca301acbf702363cd84fc793685e0274c49b3692f877e13c95a2554",
+      "html_tree_sha256": "d06b3bb6e7cb2bad6c05eb01ef3248d0d83ffbf0e4575cc7f59dbf46e91cf725"
+    },
+    {
+      "ordinal": 3,
+      "tag": "p",
+      "reason": null,
+      "text_sha256": "a3945bbfc4ab5d5541ad1ec6eb32cf033eb6d41200a905db18463538a0479ab9",
+      "html_tree_sha256": "f7d2563929c51a7bf0b8157f0553268fa0d663d10d6fbf913feaf0a83a06f8cd"
+    },
+    {
+      "ordinal": 4,
+      "tag": "p",
+      "reason": "third-party-source-reference",
+      "text_sha256": "b16f976d0f91587d50a12c7566638bd720c1cb467880101dfad31fce3892c419",
+      "html_tree_sha256": "1606047101720f560667027755c7feb2973f125887fe897562a75386867ddcc9"
+    },
+    {
+      "ordinal": 5,
+      "tag": "p",
+      "reason": "empty-block",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "html_tree_sha256": "3152b1de8aa8f296ba61c5c8d5878ffc8821d1f188dd8d239fc22a131c5a0e00"
+    },
+    {
+      "ordinal": 6,
+      "tag": "p",
+      "reason": "third-party-comment-introduction",
+      "text_sha256": "4418215dd37aeef46eb46098c954bb2cc65ec944686a916e1ea6699254cb6f46",
+      "html_tree_sha256": "8ea8220fd68ff90d66b20eeaaea9442778b5ebada294a9f83d4679778f34e4a9"
+    },
+    {
+      "ordinal": 7,
+      "tag": "blockquote",
+      "reason": "third-party-comment",
+      "text_sha256": "053c91ec8fbdba9339ee402d5d636efde744fa86a336fe1f63da1e2e8de58b33",
+      "html_tree_sha256": "110312a8d2a96fd7120df000c6fe525555700549222eda208a767c859f44b0c8"
+    },
+    {
+      "ordinal": 8,
+      "tag": "p",
+      "reason": "translator-note",
+      "text_sha256": "0da75c966337a2f2ef9fb84ef08310c0cb91dcc5c4c6068fec65e25c59f7b89b",
+      "html_tree_sha256": "cbbb923a30cf57a5fb71ce14e3515c0b5b232fa8b3c9ff6c2e885e49f273d01a"
+    },
+    {
+      "ordinal": 9,
+      "tag": "p",
+      "reason": "third-party-comment-introduction",
+      "text_sha256": "208c7a11645e2f6c20e62918ff9b3fd43092a09702e7c47522cf1cafb898b557",
+      "html_tree_sha256": "41f0d8bac035d6105f477f9d00e9726b3063424736f3b06f398cad9bc0b623c2"
+    },
+    {
+      "ordinal": 10,
+      "tag": "blockquote",
+      "reason": "third-party-comment",
+      "text_sha256": "cd8631fc3151a3117fb95d6cc51b593c7aa719676de5ff9b25bcab1bd27256d3",
+      "html_tree_sha256": "4f63e22e57c0dfb7f94b4d7c916defd7d70d3e3fd58a112879bd2924a3434f14"
+    },
+    {
+      "ordinal": 11,
+      "tag": "p",
+      "reason": "third-party-comment-introduction",
+      "text_sha256": "cb8219897fdb3930930878d4942de888f82075d9a48e69625e5dee990d32e6ac",
+      "html_tree_sha256": "8f3a1bc855fa6da71804271777b4f9bb88670a1cf16faed5c7c0e18109aebb45"
+    },
+    {
+      "ordinal": 12,
+      "tag": "blockquote",
+      "reason": "third-party-comment",
+      "text_sha256": "6093798340da2e0ca3a5664b04314200a7858c2515d198504e46d966bd845998",
+      "html_tree_sha256": "f4ba2401889fc2bd27e33edd8d10d0b4c3fb89a8fbe74ce1be8e8c80989b2943"
+    },
+    {
+      "ordinal": 13,
+      "tag": "p",
+      "reason": "third-party-comment-introduction",
+      "text_sha256": "ec48e9336e03f33f788a23da67e022c71a6c86f5238759a1c3b3d6fd76991dde",
+      "html_tree_sha256": "21b72ef24b1eb25df544f295c8aa833119d157bfed58e3b179bd0e3e6f63280f"
+    },
+    {
+      "ordinal": 14,
+      "tag": "blockquote",
+      "reason": "third-party-comment",
+      "text_sha256": "b253116628f2dc3681d90e5df51200ed93df9e74dffb94ecd0e8c3862b252517",
+      "html_tree_sha256": "8b8d2488559c2e518d3b1314ffb9c8194ffc483d47d00a83458d4d5843458b02"
+    },
+    {
+      "ordinal": 15,
+      "tag": "p",
+      "reason": "third-party-comment-introduction",
+      "text_sha256": "4e2fc62f7831eae5406a227c2087fb90ddb009d55a8267c453997a7fe3094d02",
+      "html_tree_sha256": "af54ad93044f2b65319b1d11a59806f5531defa128fae026b4a44f2a7bc6eb8b"
+    },
+    {
+      "ordinal": 16,
+      "tag": "blockquote",
+      "reason": "third-party-comment",
+      "text_sha256": "7409a58681263d11236864a646c69fbcec5407acf2ec6e9833795d8c1cd7d810",
+      "html_tree_sha256": "4ca2a2e11aa766f9b337b71cab18aee3e6189bae91f3c1d463d7b678a1d228ed"
+    },
+    {
+      "ordinal": 17,
+      "tag": "p",
+      "reason": "third-party-comment-introduction",
+      "text_sha256": "b59e373556572d97cb7047074b9285888203999bcd8dab337adef0d99f9b17b7",
+      "html_tree_sha256": "31bcff9626e6c07426b587c61400b3e75b75bf0a68c6e458898f8d65b566d8ca"
+    },
+    {
+      "ordinal": 18,
+      "tag": "blockquote",
+      "reason": "third-party-comment",
+      "text_sha256": "11f928de5fd2f072346798e439d96b45838faf29f8e4dc033b2e61c6998fb19a",
+      "html_tree_sha256": "cb03d1aa133e7eaafae3e0e231281b4412b9dc50319e7c580d84c0ec33ead737"
+    },
+    {
+      "ordinal": 19,
+      "tag": "p",
+      "reason": "third-party-comment-introduction",
+      "text_sha256": "570748e235236b1d2a9deb24d4e3b3b0cf48e5a66b14a19e963568eeabf728e1",
+      "html_tree_sha256": "bf40882d38d23905ea8204cd69887631c1e11f5bdff4f37c11da2fc48b0ac3f0"
+    },
+    {
+      "ordinal": 20,
+      "tag": "blockquote",
+      "reason": "third-party-comment",
+      "text_sha256": "204952f5b97924294204086545a5e343a4a66881f2073f9da08b34473a1d37fd",
+      "html_tree_sha256": "7321ee2af9588d2eaa279c4e69aa0f550ca026cf8158ae0855d9c9bde5e55587"
+    },
+    {
+      "ordinal": 21,
+      "tag": "p",
+      "reason": "third-party-source-reference",
+      "text_sha256": "ead2858a4df2b33f5c790b8018ec109466ecbbcf9230508f31e5f101e255402b",
+      "html_tree_sha256": "fb475c96b352000ed32fecf7b12dc95f5537a1fc118672acc9213031bce847ce"
+    },
+    {
+      "ordinal": 22,
+      "tag": "blockquote",
+      "reason": "third-party-comment",
+      "text_sha256": "62c5699d62e465d0623f26c29e83485220f97261ca3fd5e9aeb3414c973b3e23",
+      "html_tree_sha256": "4c44e08fddca36a834ffc2591eb6c59bca72bac659e0aca75fb7214cfed3a905"
+    },
+    {
+      "ordinal": 23,
+      "tag": "p",
+      "reason": "third-party-comment-introduction",
+      "text_sha256": "590c7ef1e4791bb335389c4024b2942db982ba9e5c5e4911ee86f80cd2bb920f",
+      "html_tree_sha256": "69521cf4cc05033272d312f834859c28e32d5c2f5aa232f9934368f9a65b780d"
+    },
+    {
+      "ordinal": 24,
+      "tag": "blockquote",
+      "reason": "third-party-comment",
+      "text_sha256": "9c02348303435b9283fb4bd1b18eb7d2879f92b4ce1223ee15aeeeb63d4cee0c",
+      "html_tree_sha256": "afd942a98cb7aa3baf332ac20715193bbe231a4d4a8fa663e15334241bd0e70a"
+    },
+    {
+      "ordinal": 25,
+      "tag": "p",
+      "reason": "third-party-comment-introduction",
+      "text_sha256": "5220f666547c23a0d13e3140c265bcba47c8604efa0419dc7396e50952d973a8",
+      "html_tree_sha256": "2dcdb02bee4e43e90ed66a2f2a5c25f31cd178fe04e89c1ab9f0d591811ed4cc"
+    },
+    {
+      "ordinal": 26,
+      "tag": "blockquote",
+      "reason": "third-party-comment",
+      "text_sha256": "41d02095e3b49d3891d0b9452053980f54d7a71f9c840c2622a179b982b0398f",
+      "html_tree_sha256": "3cc72eac2640d05c8cd68c13df9e7af6840f7825f46f5b84dd42762b4dd262d8"
+    },
+    {
+      "ordinal": 27,
+      "tag": "p",
+      "reason": "third-party-comment-introduction",
+      "text_sha256": "6c05a88672f012e168f455047c64f119213bba41e7a52b7a296e838161ab5384",
+      "html_tree_sha256": "b60cd6edd831e2759bc233ee2e48dc1f25789fdfc328b435ec6511745de7bf03"
+    },
+    {
+      "ordinal": 28,
+      "tag": "blockquote",
+      "reason": "third-party-comment",
+      "text_sha256": "8d213647e9063f5c2b64afc8488af0a8db2091de9fd0bba17b6e33a6cdabd809",
+      "html_tree_sha256": "fb780c1bc900af2fec7cadfb0a8f06a70f02ce2de06b28b66670ea202e640611"
+    },
+    {
+      "ordinal": 29,
+      "tag": "p",
+      "reason": "unverified-statistic",
+      "text_sha256": "32e30ca4686c2e6cdf4609803d1e4428bad71c01c4d6392b64f72b30d972bd0b",
+      "html_tree_sha256": "a01397531b2064085678ebce8cb492bae14db2f1233898a88bbd3ddaac492042"
+    },
+    {
+      "ordinal": 30,
+      "tag": "div",
+      "reason": "proofreader-credit",
+      "text_sha256": "e65741fe9f7fcc44fb411d5a478c8e0da46caa2c7cfe4a29f7f83c23371c19e9",
+      "html_tree_sha256": "f4bfa8d39d29364ae80cf6f03d8c96a45a87cbd3309f33510a8e7fea630dae8f"
+    }
+  ],
+  "review_basis": "Manual paragraph-level review of the exact pinned Japanese response and source/intermediate metadata; no aligned text is emitted or asserted."
+}

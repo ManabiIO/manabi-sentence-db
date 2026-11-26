@@ -27,23 +27,63 @@ PROFILE = json.loads(Path(__file__).with_name('globalvoices_65906.json').read_te
 PROFILE_SHA256 = hashlib.sha256(canonical_json(PROFILE)).hexdigest()
 TRANSFORMATION = 'globalvoices-reviewed-paragraph-inventory-v1'
 
+_PROFILE_65886 = json.loads(Path(__file__).with_name('globalvoices_65886.json').read_text())
+
+
+def _legacy_work(native_id, ja_url, en_url, profile):
+    """Keep the original two-page records byte-for-byte while describing roles explicitly."""
+    return {
+        'native_id': native_id,
+        'source_id': f'globalvoices-{native_id}-ja',
+        'ja_url': ja_url,
+        'en_url': en_url,
+        'original_url': en_url,
+        'original_language': 'en',
+        'language_chain': ['en', 'ja'],
+        'pages': [
+            {'key': 'ja', 'role': JA_ROLE, 'language': 'ja', 'url': ja_url,
+             'filename': f'{native_id}-ja.html'},
+            {'key': 'original', 'role': EN_ROLE, 'language': 'en', 'url': en_url,
+             'filename': f'{native_id}-en-original.html'},
+        ],
+        'credits': [
+            {'page': 'original', 'role': 'writer', 'language': 'en',
+             'credit': profile['original_metadata']['credits'][0]},
+            {'page': 'ja', 'role': 'translator', 'language': 'ja',
+             'credit': profile['japanese_metadata']['credits'][1]},
+        ],
+        'language_link_aliases': [
+            {'language': 'English', 'url': profile['japanese_metadata']['english_original_links'][0]},
+        ],
+        'citation_urls': [en_url, ja_url],
+        'legacy_output': True,
+        'profile': profile,
+        'profile_sha256': hashlib.sha256(canonical_json(profile)).hexdigest(),
+    }
+
+
+def _profile_work(filename):
+    profile = json.loads(Path(__file__).with_name(filename).read_text())
+    work = dict(profile['work'])
+    work['profile'] = profile
+    work['profile_sha256'] = hashlib.sha256(canonical_json(profile)).hexdigest()
+    work['en_url'] = next((p['url'] for p in work['pages'] if p['language'] == 'en'), None)
+    return work
+
+
 # Each entry is a separately reviewed work, never a discovery/crawl registry.
 WORKS = {
-    'globalvoices-65906-ja': {'native_id': '65906', 'ja_url': JA_URL,
-                            'en_url': EN_URL, 'profile': PROFILE,
-                            'profile_sha256': PROFILE_SHA256},
+    'globalvoices-65906-ja': _legacy_work('65906', JA_URL, EN_URL, PROFILE),
+    'globalvoices-65886-ja': _legacy_work(
+        '65886', 'https://jp.globalvoices.org/2026/10/09/65886/',
+        ('https://globalvoices.org/2026/08/10/'
+         'in-japan-ryukyuan-indigenous-claim-hindered-by-u-s-military-bases-in-okinawa/'),
+        _PROFILE_65886,
+    ),
+    'globalvoices-25480-ja': _profile_work('globalvoices_25480.json'),
+    'globalvoices-39595-ja': _profile_work('globalvoices_39595.json'),
 }
-_PROFILE_65886 = json.loads(Path(__file__).with_name('globalvoices_65886.json').read_text())
-WORKS['globalvoices-65886-ja'] = {
-    'native_id': '65886',
-    'ja_url': 'https://jp.globalvoices.org/2026/10/09/65886/',
-    'en_url': ('https://globalvoices.org/2026/08/10/'
-               'in-japan-ryukyuan-indigenous-claim-hindered-by-u-s-military-bases-in-okinawa/'),
-    'profile': _PROFILE_65886,
-    'profile_sha256': hashlib.sha256(canonical_json(_PROFILE_65886)).hexdigest(),
-}
-ARTICLE_URLS = frozenset(url for work in WORKS.values()
-                         for url in (work['ja_url'], work['en_url']))
+ARTICLE_URLS = frozenset(page['url'] for work in WORKS.values() for page in work['pages'])
 
 
 def _hash(data):
@@ -102,6 +142,35 @@ def _parts(data):
     return metadata, [n for n in entry.children if isinstance(n, Element)]
 
 
+def _language_links(data):
+    page = Tree(data)
+    header = _one(page.by_class('post-header'), 'article header')
+    result = []
+    for node in header.walk():
+        title = node.attrs.get('title', '')
+        if node.tag == 'a' and title.startswith('他の言語で読む：'):
+            result.append({'language': title.split('：', 1)[1].strip(),
+                           'url': node.attrs.get('href')})
+    return result
+
+
+def _page_metadata(data, key, expected):
+    metadata, blocks = _parts(data)
+    if key == 'ja' and 'language_links' in expected:
+        metadata['language_links'] = _language_links(data)
+        page = Tree(data)
+        body_credits = []
+        for section in page.by_class('contributors'):
+            for link in section.walk():
+                if link.tag == 'a':
+                    label = section.text().split(link.text(), 1)[0].strip(' ：:')
+                    body_credits.append({'role': label, 'name': link.text(),
+                                         'url': link.attrs.get('href')})
+        if body_credits:
+            metadata['body_credits'] = body_credits
+    return metadata, blocks
+
+
 def profile_from_pages(japanese, original, decisions):
     """Review helper used by synthetic fixtures; runtime accepts only the shipped pin."""
     ja_meta, blocks = _parts(japanese)
@@ -118,12 +187,45 @@ def profile_from_pages(japanese, original, decisions):
                        for i, b in enumerate(blocks)]}
 
 
+def profile_from_chain(pages, decisions, work):
+    """Review helper for a pinned original/intermediate/Japanese work chain."""
+    if set(pages) != {page['key'] for page in work['pages']}:
+        raise DataError('Incomplete Global Voices page chain')
+    page_pins = {}
+    for key, data in pages.items():
+        expected = {'language_links': work['language_link_aliases']} if key == 'ja' else {}
+        metadata, blocks = _page_metadata(data, key, expected)
+        page_pins[key] = {
+            'metadata': metadata,
+            'response_sha256': _hash(data),
+            'body_sha256': _hash(canonical_json([b.as_dict() for b in blocks])),
+        }
+    blocks = _parts(pages['ja'])[1]
+    if set(decisions) != set(range(len(blocks))):
+        raise DataError('Incomplete Global Voices review inventory')
+    return {
+        'schema_version': 1,
+        'work': work,
+        'pages': page_pins,
+        'blocks': [{'ordinal': i, 'tag': b.tag, 'reason': decisions[i],
+                    'text_sha256': _hash(b.text().encode()),
+                    'html_tree_sha256': _hash(canonical_json(b.as_dict()))}
+                   for i, b in enumerate(blocks)],
+        'review_basis': ('Manual paragraph-level review of the exact pinned Japanese response and '
+                         'source/intermediate metadata; no aligned text is emitted or asserted.'),
+    }
+
+
 def reviewed_source(source):
     work = WORKS.get(source.get('id'))
     if work is None:
         raise DataError('Global Voices requires an explicitly reviewed work identity')
-    acquisition = {'url': work['ja_url'], 'original_url': work['en_url'],
+    acquisition = {'url': work['ja_url'], 'original_url': work['original_url'],
                    'inventory_sha256': work['profile_sha256']}
+    intermediate_urls = [p['url'] for p in work['pages']
+                         if p['key'] not in {'ja', 'original'}]
+    if intermediate_urls:
+        acquisition['intermediate_urls'] = intermediate_urls
     if (source.get('adapter') != 'globalvoices' or source.get('language') != 'ja'
             or source.get('homepage') != work['ja_url'] or source.get('license') != LICENSE
             or source.get('acquisition') != acquisition):
@@ -134,21 +236,64 @@ def reviewed_source(source):
 def extract(japanese, original, source, *, stats=None):
     work = reviewed_source(source)
     profile, profile_sha256 = work['profile'], work['profile_sha256']
-    ja_url, en_url, native_id = work['ja_url'], work['en_url'], work['native_id']
+    ja_url, native_id = work['ja_url'], work['native_id']
     stats = stats if stats is not None else Counter()
-    ja_meta, blocks = _parts(japanese)
-    en_meta, en_blocks = _parts(original)
-    if ja_meta != profile['japanese_metadata'] or en_meta != profile['original_metadata']:
-        raise DataError('Global Voices metadata/rights/bylines/dates changed')
-    if _hash(canonical_json([b.as_dict() for b in en_blocks])) != profile['original_body_sha256']:
-        raise DataError('Global Voices original article body/exception changed')
+    if isinstance(original, bytes):
+        page_data = {'ja': japanese, 'original': original}
+    elif isinstance(original, dict):
+        page_data = {'ja': japanese, **original}
+    else:
+        raise DataError('Global Voices requires all pinned article pages')
+    page_specs = work['pages']
+    if set(page_data) != {page['key'] for page in page_specs}:
+        raise DataError('Global Voices requires the complete reviewed language chain')
+    page_metadata, page_blocks = {}, {}
+    if 'pages' in profile:
+        if set(profile['pages']) != set(page_data):
+            raise DataError('Global Voices profile page roles changed')
+        for key, data in page_data.items():
+            pin = profile['pages'][key]
+            metadata, blocks_for_page = _page_metadata(data, key, pin['metadata'])
+            if metadata != pin['metadata']:
+                raise DataError('Global Voices metadata/rights/bylines/dates changed')
+            if (_hash(data) != pin['response_sha256']
+                    or _hash(canonical_json([b.as_dict() for b in blocks_for_page]))
+                    != pin['body_sha256']):
+                raise DataError('Global Voices raw page/body changed; explicit review required')
+            page_metadata[key] = metadata
+            page_blocks[key] = blocks_for_page
+    else:
+        ja_meta, ja_blocks = _parts(page_data['ja'])
+        original_meta, original_blocks = _parts(page_data['original'])
+        if (ja_meta != profile['japanese_metadata']
+                or original_meta != profile['original_metadata']):
+            raise DataError('Global Voices metadata/rights/bylines/dates changed')
+        if (_hash(canonical_json([b.as_dict() for b in original_blocks]))
+                != profile['original_body_sha256']):
+            raise DataError('Global Voices original article body/exception changed')
+        if (_hash(page_data['ja']) != profile['japanese_response_sha256']
+                or _hash(page_data['original']) != profile['original_response_sha256']):
+            raise DataError('Global Voices raw page changed; explicit rights/layout review required')
+        page_metadata.update(ja=ja_meta, original=original_meta)
+        page_blocks.update(ja=ja_blocks, original=original_blocks)
+    observed_links = page_metadata['ja'].get('language_links')
+    if observed_links is None:
+        observed_links = [{'language': 'English', 'url': url}
+                          for url in page_metadata['ja']['english_original_links']]
+    if observed_links != work['language_link_aliases']:
+        raise DataError('Global Voices language-chain links changed')
+    for role in work['credits']:
+        if role['page'] not in page_metadata:
+            raise DataError('Global Voices credited role does not match its pinned page byline')
+        credits = (page_metadata[role['page']].get('body_credits', [])
+                   if role.get('evidence') == 'body'
+                   else page_metadata[role['page']]['credits'])
+        if role['credit'] not in credits:
+            raise DataError('Global Voices credited role does not match its pinned page byline')
+    ja_meta = page_metadata['ja']
+    blocks = page_blocks['ja']
     if len(blocks) != len(profile['blocks']):
         raise DataError('Global Voices body inventory changed')
-    # Even a new work-specific notice outside div.entry must force re-review.
-    # These exact response pins intentionally reject unrelated wrapper changes too.
-    if (_hash(japanese) != profile['japanese_response_sha256']
-            or _hash(original) != profile['original_response_sha256']):
-        raise DataError('Global Voices raw page changed; explicit rights/layout review required')
     sentences, position = [], 0
     for ordinal, (block, pin) in enumerate(zip(blocks, profile['blocks'], strict=True)):
         stats['publisher_blocks_seen'] += 1
@@ -165,50 +310,101 @@ def extract(japanese, original, source, *, stats=None):
         text = block.text()
         if (block.tag != 'p' or any(n.tag not in {'p', 'span', 'a'} or n.duplicate_attrs
                                    for n in block.walk())
-                or any(c in text for c in '「」『』“”"')):
+                or (work.get('legacy_output') and any(c in text for c in '「」『』“”"'))):
             raise DataError('Unexpected quotation/media in Global Voices eligible paragraph')
         stats['eligible_publisher_paragraphs'] += 1
         sentences.append({'native_id': f'{native_id}:paragraph:{ordinal}', 'text': text,
                           'source_range': {'unit': 'character', 'start': start, 'end': start+len(text)},
                           'tags': [], 'content_flags': [], 'translations': []})
-    en_dates = en_meta['publisher_datetimes']
     ja_dates = ja_meta['publisher_datetimes']
-    attribution = (
-        f"{ja_meta['title']} — Jo Carter, writer (English) and translator (Japanese); Global Voices. "
-        f"Original English: {en_url} (published {en_dates['article:published_time']}; "
-        f"modified {en_dates['article:modified_time']}). Japanese translation: {ja_url} "
-        f"(published {ja_dates['article:published_time']}). CC BY 3.0. "
-        'Reviewed narrative paragraphs selected, HTML inline markup removed and text split into sentences.'
-    )
+    origin_spec = next(p for p in page_specs if p['language'] == work['original_language'])
+    origin_meta = page_metadata[origin_spec['key']]
+    origin_dates = origin_meta['publisher_datetimes']
+    if work.get('legacy_output'):
+        writer = _one([r for r in work['credits'] if r['role'] == 'writer'], 'writer credit')
+        translator = _one([r for r in work['credits'] if r['role'] == 'translator'], 'translator credit')
+        attribution = (
+            f"{ja_meta['title']} — {writer['credit']['name']}, writer (English) and "
+            f"{translator['credit']['name']}, translator (Japanese); Global Voices. "
+            f"Original English: {work['original_url']} "
+            f"(published {origin_dates['article:published_time']}; "
+            f"modified {origin_dates['article:modified_time']}). Japanese translation: {ja_url} "
+            f"(published {ja_dates['article:published_time']}). CC BY 3.0. "
+            'Reviewed narrative paragraphs selected, HTML inline markup removed and text split into sentences.'
+        )
+        tags = ['translation:from-english', 'translation:method-unknown',
+                f"original-url:{work['original_url']}",
+                f"original-published-at:{origin_dates['article:published_time']}",
+                f"original-modified-at:{origin_dates['article:modified_time']}",
+                'scope:single-reviewed-work']
+        language_origin = 'unknown'
+    else:
+        language_names = {'en': 'English', 'es': 'Spanish', 'ja': 'Japanese'}
+        contributors = '; '.join(
+            f"{role['credit']['name']}, {role['role']} ({language_names[role['language']]})"
+            for role in work['credits']
+        )
+        chain = []
+        for index, language in enumerate(work['language_chain']):
+            spec = next(p for p in page_specs if p['language'] == language)
+            metadata = page_metadata[spec['key']]
+            dates = metadata['publisher_datetimes']
+            label = ('Original' if index == 0 else
+                     'Japanese translation' if language == 'ja' else
+                     f"{language_names[language]} intermediary translation")
+            chain.append(
+                f"{label}: {spec['url']} (published {dates['article:published_time']}; "
+                f"modified {dates['article:modified_time']})"
+            )
+        attribution = (
+            f"{ja_meta['title']} — {contributors}; Global Voices. "
+            f"Verified language chain: {'; '.join(chain)}. CC BY 3.0. "
+            "Reviewed Japanese editorial paragraphs selected; quotations, captions, and third-party blocks withheld. "
+            "No sentence-level alignment is asserted."
+        )
+        tags = [f"translation:from-{work['original_language']}", 'translation:method-unknown',
+                f"original-url:{work['original_url']}",
+                f"original-language:{work['original_language']}",
+                f"translation:chain:{'-'.join(work['language_chain'])}",
+                f"original-published-at:{origin_dates['article:published_time']}",
+                f"original-modified-at:{origin_dates['article:modified_time']}"]
+        for spec in page_specs:
+            if spec['language'] not in {'ja', work['original_language']}:
+                metadata = page_metadata[spec['key']]
+                dates = metadata['publisher_datetimes']
+                tags.extend([f"intermediate-url:{spec['url']}",
+                             f"intermediate-language:{spec['language']}",
+                             f"intermediate-published-at:{dates['article:published_time']}"])
+        tags.append('scope:single-reviewed-work')
+        # This record field classifies Japanese-language origin, while the observed
+        # source language and each intermediate step remain explicit in the tags.
+        language_origin = 'unknown'
     return {'native_id': native_id, 'language': 'ja', 'title': ja_meta['title'], 'url': ja_url,
             'license': LICENSE, 'attribution': {'text': attribution, 'url': ja_url},
             'revision': {'id': profile_sha256, 'url': ja_url,
                          'timestamp': ja_dates['article:modified_time']},
             'published_at': ja_dates['article:published_time'],
-            'authorship': 'unknown', 'language_origin': 'unknown', 'content_type': 'news',
+            'authorship': 'unknown', 'language_origin': language_origin, 'content_type': 'news',
             'source_text_hash': _hash('\n\n'.join(block.text() for block in blocks).encode()),
-            'tags': ['translation:from-english', 'translation:method-unknown',
-                     f'original-url:{en_url}',
-                     f"original-published-at:{en_dates['article:published_time']}",
-                     f"original-modified-at:{en_dates['article:modified_time']}",
-                     'scope:single-reviewed-work'], 'sentences': sentences}
+            'tags': tags, 'sentences': sentences}
 
 
 def iter_documents(manifest, snapshot_dir, *, stats=None):
     work = reviewed_source(manifest['source'])
     entries = manifest['files']
-    if len(entries) != 2 or {e['role'] for e in entries} != {JA_ROLE, EN_ROLE}:
-        raise DataError('Global Voices requires exactly the Japanese and original article inventory')
+    specs = work['pages']
+    if len(entries) != len(specs) or {e['role'] for e in entries} != {p['role'] for p in specs}:
+        raise DataError('Global Voices requires exactly the reviewed page chain inventory')
     data = {}
-    for role, url in ((JA_ROLE, work['ja_url']), (EN_ROLE, work['en_url'])):
-        entry = _one([e for e in entries if e['role'] == role], role)
-        if entry['url'] != url:
+    for spec in specs:
+        entry = _one([e for e in entries if e['role'] == spec['role']], spec['role'])
+        if entry['url'] != spec['url']:
             raise DataError('Global Voices snapshot article URL changed')
         path = safe_relative(snapshot_dir, entry['path'])
         if path.is_symlink() or not path.is_file() or path.stat().st_size > MAX_BYTES:
             raise DataError('Invalid Global Voices snapshot article file')
-        data[role] = path.read_bytes()
-    yield extract(data[JA_ROLE], data[EN_ROLE], manifest['source'], stats=stats)
+        data[spec['key']] = path.read_bytes()
+    yield extract(data.pop('ja'), data, manifest['source'], stats=stats)
 
 
 class _NoRedirect(urllib.request.HTTPRedirectHandler):

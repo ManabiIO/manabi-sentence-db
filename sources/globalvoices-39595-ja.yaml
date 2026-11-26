@@ -1,0 +1,49 @@
+schema_version: 1
+id: globalvoices-39595-ja
+title: 'Global Voices: The Mesoamerican abacus Nepohualtzintzin (39595)'
+language: ja
+adapter: globalvoices
+homepage: https://jp.globalvoices.org/2015/12/27/39595/
+license:
+  id: CC-BY-3.0
+  url: https://creativecommons.org/licenses/by/3.0/
+attribution:
+  text: >-
+    Global Voices. Writer: Gabriela García Calderón Orbe (Spanish original);
+    English translator: Gabriela García Calderón; Japanese translator: Sayaka
+    Yamazaki; Japanese proofreader: Takako Nose. Spanish → English → Japanese.
+    CC BY 3.0. Seven reviewed Japanese narrative paragraphs selected; no sentence
+    alignment or native-review claim is made.
+  url: https://jp.globalvoices.org/2015/12/27/39595/
+license_evidence:
+  - https://jp.globalvoices.org/2015/12/27/39595/
+  - https://es.globalvoices.org/2015/09/02/nepohualtzintzin-el-abaco-mesoamericano-que-tiene-vigencia-en-el-siglo-xxi/
+  - https://globalvoices.org/2015/09/04/the-mesoamerican-abacus-that-gives-modern-calculators-a-run-for-their-money/
+  - https://globalvoices.org/about/global-voices-attribution-policy/
+notes:
+  - Opt-in, single-work archival source. snapshot --source all skips it.
+  - >-
+    The observed Japanese language links use globalvoicesonline.org aliases; the
+    reviewed Spanish and English pages use the canonical URLs recorded below.
+  - >-
+    Credits identify Gabriela García Calderón Orbe as Spanish writer, Gabriela
+    García Calderón as English translator, Sayaka Yamazaki as Japanese translator,
+    and Takako Nose as Japanese proofreader. The proofreader credit appears in the
+    article body and is pinned.
+  - >-
+    Seven of 19 top-level Japanese body blocks were selected. Other blocks, including
+    captions, third-party quotations and translations, a source reference, and the
+    proofreader credit, reserve context breaks. No source text is repaired.
+  - >-
+    Only Japanese text is emitted. The Spanish original and English intermediary
+    provide rights and chain evidence only; no sentence-level alignment is inferred.
+  - >-
+    Exact page bytes, body trees, dates, bylines, rights markup, and language links
+    are pinned. Any change requires renewed review. Raw HTML stays local and cannot
+    be packaged as a public snapshot.
+acquisition:
+  url: https://jp.globalvoices.org/2015/12/27/39595/
+  original_url: https://es.globalvoices.org/2015/09/02/nepohualtzintzin-el-abaco-mesoamericano-que-tiene-vigencia-en-el-siglo-xxi/
+  intermediate_urls:
+    - https://globalvoices.org/2015/09/04/the-mesoamerican-abacus-that-gives-modern-calculators-a-run-for-their-money/
+  inventory_sha256: c442ca3fce21f9f4d737742c569b043bdb518d2367ece4cb0dadcec5fa1ec33c

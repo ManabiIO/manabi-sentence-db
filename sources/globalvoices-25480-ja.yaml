@@ -1,0 +1,43 @@
+schema_version: 1
+id: globalvoices-25480-ja
+title: 'Global Voices: Malaysia elects its first transgender politician (25480)'
+language: ja
+adapter: globalvoices
+homepage: https://jp.globalvoices.org/2013/10/07/25480/
+license:
+  id: CC-BY-3.0
+  url: https://creativecommons.org/licenses/by/3.0/
+attribution:
+  text: >-
+    Global Voices. Writer: Mong Palatino (English original); Japanese translator:
+    Maiko Kageshita; Japanese proofreader: Izumi Mihashi. English → Japanese.
+    CC BY 3.0. Three reviewed Japanese narrative paragraphs selected; no sentence
+    alignment or native-review claim is made.
+  url: https://jp.globalvoices.org/2013/10/07/25480/
+license_evidence:
+  - https://jp.globalvoices.org/2013/10/07/25480/
+  - https://globalvoices.org/2013/07/28/hazreen-shaik-daud-malaysias-first-transgender-in-politics/
+  - https://globalvoices.org/about/global-voices-attribution-policy/
+notes:
+  - Opt-in, single-work archival source. snapshot --source all skips it.
+  - >-
+    The observed Japanese language link uses a globalvoicesonline.org alias; the
+    reviewed English page has the canonical globalvoices.org URL recorded below.
+  - >-
+    The Japanese page credits Maiko Kageshita as translator and Izumi Mihashi as
+    proofreader. The proofreader credit appears in the article body and is pinned.
+  - >-
+    Three of 31 top-level Japanese body blocks were selected. The remaining blocks,
+    including quotations, third-party comments, source references, and proofreader
+    credit, reserve context breaks. No source text is repaired.
+  - >-
+    Only Japanese text is emitted. The English original supplies rights and chain
+    evidence only; no sentence-level alignment is inferred.
+  - >-
+    Exact page bytes, body trees, dates, bylines, rights markup, and language links
+    are pinned. Any change requires renewed review. Raw HTML stays local and cannot
+    be packaged as a public snapshot.
+acquisition:
+  url: https://jp.globalvoices.org/2013/10/07/25480/
+  original_url: https://globalvoices.org/2013/07/28/hazreen-shaik-daud-malaysias-first-transgender-in-politics/
+  inventory_sha256: 5a5d20e66b36609e1ae68ec9e70c0d192d93e26c427fd2555526e7e72170c693

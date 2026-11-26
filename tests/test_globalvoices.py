@@ -77,6 +77,14 @@ def test_exact_units_attribution_direction_and_context_gaps(fixture, tmp_path):
     assert 'original-published-at:2026-09-25T06:52:28+0000' in raw['tags']
     assert 'writer (English)' in raw['attribution']['text']
     assert 'translator (Japanese)' in raw['attribution']['text']
+    assert raw['attribution']['text'] == (
+        f"合成した記事 — Jo Carter, writer (English) and Jo Carter, translator (Japanese); "
+        f"Global Voices. Original English: {gv.WORKS[source['id']]['original_url']} "
+        "(published 2026-09-25T06:52:28+0000; modified 2026-09-25T06:52:28+0000). "
+        f"Japanese translation: {gv.WORKS[source['id']]['ja_url']} "
+        "(published 2026-10-23T06:25:15+0000). CC BY 3.0. Reviewed narrative paragraphs "
+        "selected, HTML inline markup removed and text split into sentences."
+    )
     assert gv.EN_URL in raw['attribution']['text']
     manifest = {'source': source, 'source_id': source['id'], 'snapshot_id': 'synthetic'}
     stats = Counter()
@@ -324,6 +332,97 @@ def test_cross_work_source_and_snapshot_urls_fail_closed(fixture, tmp_path):
         list(gv.iter_documents(manifest, tmp_path))
 
 
+def _synthetic_chain_page(url, key, work):
+    credits = [credit for credit in work['credits']
+               if credit['page'] == key and credit.get('evidence') != 'body']
+    bylines = ''.join(
+        '<div class="contributor-name">' + credit['credit']['display'][:-len(credit['credit']['name'])] +
+        '<a href="' + credit['credit']['url'] + '">' + credit['credit']['name'] + '</a></div>'
+        for credit in credits
+    )
+    links = ''
+    if key == 'ja':
+        links = ''.join(
+            '<a title="他の言語で読む： ' + alias['language'] + '" href="' + alias['url'] + '">' +
+            alias['language'] + '</a>' for alias in work['language_link_aliases']
+        )
+    proofreader = next((credit for credit in work['credits']
+                        if credit['page'] == key and credit.get('evidence') == 'body'), None)
+    body_credit = '' if not proofreader else (
+        '<div class="contributors">' + proofreader['credit']['role'] + '：<a href="' +
+        proofreader['credit']['url'] + '">' + proofreader['credit']['name'] + '</a></div>'
+    )
+    date = '2020-01-01T00:00:00+0000'
+    return (f'<html><head><link rel="canonical" href="{url}">'
+            f'<meta property="article:published_time" content="{date}">'
+            f'<meta property="article:modified_time" content="{date}"></head><body>'
+            f'<div class="post-header"><h2 class="post-title">Synthetic {key}</h2>'
+            f'{bylines}{links}</div><div class="entry">'
+            '<p>最初の段落です。</p><blockquote><p>引用です。</p></blockquote>'
+            '<p>最後の段落です。</p>' + body_credit + '</div>'
+            f'<div class="postfooter">{bylines}</div>'
+            '<div class="license"><a rel="license" href="https://creativecommons.org/licenses/by/3.0/"></a></div>'
+            '<div class="footer-license"><a href="https://creativecommons.org/licenses/by/3.0/">CC BY</a></div>'
+            '</body></html>').encode()
+
+
+@pytest.mark.parametrize('source_id', ['globalvoices-25480-ja', 'globalvoices-39595-ja'])
+def test_multilanguage_chain_snapshot_build_and_rejections(source_id, tmp_path, monkeypatch):
+    source = load_source(Path('sources') / f'{source_id}.yaml')
+    work = copy.deepcopy(gv.WORKS[source_id])
+    pages = {spec['key']: _synthetic_chain_page(spec['url'], spec['key'], work)
+             for spec in work['pages']}
+    decisions = {0: None, 1: 'third-party-blockquote', 2: None,
+                 3: 'proofreader-credit'}
+    with pytest.raises(DataError, match='Incomplete Global Voices review inventory'):
+        gv.profile_from_chain(pages, {0: None}, work)
+    profile = gv.profile_from_chain(pages, decisions, work)
+    digest = hashlib.sha256(canonical_json(profile)).hexdigest()
+    work.update(profile=profile, profile_sha256=digest)
+    monkeypatch.setitem(gv.WORKS, source_id, work)
+    source['acquisition']['inventory_sha256'] = digest
+
+    raw = gv.extract(pages['ja'], {key: data for key, data in pages.items() if key != 'ja'}, source)
+    assert raw['language_origin'] == 'unknown'
+    assert f"translation:chain:{'-'.join(work['language_chain'])}" in raw['tags']
+    assert raw['sentences'][0]['translations'] == []
+    assert 'No sentence-level alignment is asserted.' in raw['attribution']['text']
+    assert 'proofreader' in raw['attribution']['text']
+
+    calls = []
+    page_data_by_url = {page['url']: pages[page['key']] for page in work['pages']}
+    monkeypatch.setattr(gv, 'cached_article', lambda url, cache, agent:
+                        calls.append(url) or page_data_by_url[url])
+    snapshot = create_snapshot(source, tmp_path/'snapshot', mode='full',
+                               article_cache=tmp_path/'cache')
+    from manabi_sentence_db.serialization import read_json
+
+    saved = read_json(snapshot)
+    assert calls == [page['url'] for page in work['pages']]
+    assert {entry['role'] for entry in saved['files']} == {page['role'] for page in work['pages']}
+    build = tmp_path/'build'
+    build_corpus([snapshot], build)
+    record = next(iter(iter_records(build, verify_build(build))))
+    assert record['language_origin'] == 'unknown'
+    assert all(not sentence['translations'] for sentence in record['sentences'])
+
+    changed = dict(pages)
+    changed['ja'] = pages['ja'].replace(b'Synthetic ja', b'Changed ja')
+    with pytest.raises(DataError, match='changed|metadata'):
+        gv.extract(changed['ja'], {key: data for key, data in changed.items() if key != 'ja'}, source)
+    changed = dict(pages)
+    changed['ja'] = pages['ja'].replace(work['credits'][-1]['credit']['name'].encode(), b'Other editor')
+    with pytest.raises(DataError, match='changed|metadata'):
+        gv.extract(changed['ja'], {key: data for key, data in changed.items() if key != 'ja'}, source)
+    changed = dict(pages)
+    credited_page = next(role['page'] for role in work['credits'] if role['page'] != 'ja')
+    changed[credited_page] = pages[credited_page].replace(
+        next(role['credit']['name'].encode() for role in work['credits']
+             if role['page'] == credited_page), b'Other writer')
+    with pytest.raises(DataError, match='metadata'):
+        gv.extract(changed['ja'], {key: data for key, data in changed.items() if key != 'ja'}, source)
+
+
 def test_registry_preserves_old_work_and_rejects_unknown_urls(tmp_path):
     old = gv.WORKS['globalvoices-65906-ja']
     assert old['native_id'] == '65906'
@@ -331,8 +430,8 @@ def test_registry_preserves_old_work_and_rejects_unknown_urls(tmp_path):
     assert old['en_url'] == ('https://globalvoices.org/2026/09/25/'
                              'young-japanese-find-new-outlets-for-peace-activism-amid-rising-tensions-in-the-pacific/')
     assert old['profile_sha256'] == '202adf4f35183541f4ad0ef996aaf87921ba68b72684542efac42514b73c62c8'
-    assert gv.ARTICLE_URLS == frozenset(url for work in gv.WORKS.values()
-                                      for url in (work['ja_url'], work['en_url']))
+    assert gv.ARTICLE_URLS == frozenset(page['url'] for work in gv.WORKS.values()
+                                        for page in work['pages'])
     for url in ('https://jp.globalvoices.org/2026/10/09/65886/?extra=1',
                 'https://jp.globalvoices.org/2026/10/09/99999/',
                 'https://example.com/'):
