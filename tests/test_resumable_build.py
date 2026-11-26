@@ -10,8 +10,9 @@ from manabi_sentence_db.wikimedia_selection import select_wikimedia_documents
 
 
 @pytest.mark.parametrize("shard_documents", [1, 500])
+@pytest.mark.parametrize("shard_compression", ["none", "zstd"])
 def test_interrupted_selected_wikipedia_build_resumes_without_reextracting_committed_page(
-    tmp_path, monkeypatch, shard_documents
+    tmp_path, monkeypatch, shard_documents, shard_compression
 ):
     snapshot = create_demo_snapshot(tmp_path / "snapshot")
     selected = tmp_path / "selection"
@@ -21,7 +22,7 @@ def test_interrupted_selected_wikipedia_build_resumes_without_reextracting_commi
     resumed = tmp_path / "resumed"
     options = {
         "record_format": "jsonl",
-        "shard_compression": "zstd",
+        "shard_compression": shard_compression,
         "shard_documents": shard_documents,
         "document_selection": selection_path,
     }
@@ -47,6 +48,17 @@ def test_interrupted_selected_wikipedia_build_resumes_without_reextracting_commi
     checkpoint = tmp_path / ".resumed.resume"
     assert checkpoint.is_dir()
     assert not resumed.exists()
+    batch_dir = checkpoint / "batches" / "00000000"
+    batch = read_json(batch_dir / "batch.json")
+    expected_records = "records.jsonl.zst" if shard_compression == "zstd" else "records.jsonl"
+    assert batch["records_path"] == expected_records
+    assert batch["records_compression"] == shard_compression
+    assert (batch_dir / expected_records).is_file()
+    assert not (batch_dir / (
+        "records.jsonl" if shard_compression == "zstd" else "records.jsonl.zst"
+    )).exists()
+    if shard_compression == "zstd":
+        assert (batch_dir / expected_records).read_bytes().startswith(b"\x28\xb5\x2f\xfd")
     with pytest.raises(DataError, match="does not match"):
         build_corpus([snapshot], resumed, resume=True, shard_documents=2, **{
             key: value for key, value in options.items() if key != "shard_documents"
@@ -68,7 +80,8 @@ def test_interrupted_selected_wikipedia_build_resumes_without_reextracting_commi
     assert list(iter_records(resumed, resumed_catalog)) == list(iter_records(clean, clean_catalog))
 
 
-def test_resumable_build_rejects_corrupt_cached_records(tmp_path):
+@pytest.mark.parametrize("shard_compression", ["none", "zstd"])
+def test_resumable_build_rejects_corrupt_cached_records(tmp_path, shard_compression):
     snapshot = create_demo_snapshot(tmp_path / "snapshot")
     selected = tmp_path / "selection"
     select_wikimedia_documents(snapshot, selected, per_topic=0, general=2)
@@ -76,7 +89,7 @@ def test_resumable_build_rejects_corrupt_cached_records(tmp_path):
     selection_path = selected / "selection.json"
     options = {
         "record_format": "jsonl",
-        "shard_compression": "zstd",
+        "shard_compression": shard_compression,
         "shard_documents": 1,
         "document_selection": selection_path,
     }
@@ -87,7 +100,8 @@ def test_resumable_build_rejects_corrupt_cached_records(tmp_path):
 
     with pytest.raises(RuntimeError, match="synthetic interruption"):
         build_corpus([snapshot], output, resume=True, progress=interrupt, **options)
-    records = tmp_path / ".build.resume" / "batches" / "00000000" / "records.jsonl"
+    records_name = "records.jsonl.zst" if shard_compression == "zstd" else "records.jsonl"
+    records = tmp_path / ".build.resume" / "batches" / "00000000" / records_name
     records.write_bytes(records.read_bytes()[:-2] + b"xx")
     with pytest.raises(DataError, match="failed verification"):
         build_corpus([snapshot], output, resume=True, **options)
