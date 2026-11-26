@@ -148,7 +148,11 @@ absent from the snapshot fail the build. Present pages with no eligible prose
 may produce no documents; an entirely empty build fails. Selection avoids parsing
 unselected wikitext but still streams the compressed XML snapshot.
 
-To generate a mixed topic sample from a cached Japanese Wikimedia snapshot:
+To generate or resume a mixed topic sample, first make sure the cached snapshot
+and selection file exist and verify successfully, and choose an output path that
+does not yet exist. The hidden sibling checkpoint may already exist after an
+interruption. Run the same command again with `--resume`; keep the snapshot,
+selection, processor and build options unchanged:
 
 ```sh
 mise run select-wikimedia -- \
@@ -159,8 +163,15 @@ mise run select-wikimedia -- \
 mise run build -- \
   --snapshot data/snapshots/wikipedia-2026-10-01/manifest.json \
   --document-selection build/wikipedia-selection/selection.json \
-  --format jsonl --shard-compression zstd --output build/wikipedia-selected
+  --format jsonl --shard-compression zstd --output build/wikipedia-selected \
+  --resume --progress
 ```
+
+This keeps verified shard-sized checkpoints in the hidden
+`.wikipedia-selected.resume` directory beside the output. Wikimedia XML is
+scanned again to reach the saved page cursor, while committed pages skip prose
+extraction and normalization. The checkpoint is removed after the completed
+build is verified and published.
 
 Selection verifies and streams existing inputs without downloading them. Ten topic
 quotas plus the general quota cap this example at 12,000 articles; the combined

@@ -120,6 +120,10 @@ def parser() -> argparse.ArgumentParser:
     build.add_argument("--document-selection", type=Path,
                        help="Snapshot-bound Wikimedia page-ID allowlist JSON")
     build.add_argument(
+        "--resume", action="store_true",
+        help="Keep verified shard-sized checkpoints beside the output and resume after interruption",
+    )
+    build.add_argument(
         "--include-sexual-content",
         action="store_true",
         help="Retain flagged text; never implies review/safety",
@@ -455,6 +459,7 @@ def main(argv: list[str] | None = None) -> int:
                         max_documents=args.max_documents,
                         record_format=args.format,
                         document_selection=args.document_selection,
+                        resume=args.resume,
                         progress=(lambda message: print(message, file=sys.stderr, flush=True))
                         if args.progress else None,
                     )
