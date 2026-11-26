@@ -105,6 +105,25 @@ def test_jaquad_emits_question_only_works_and_tracks_duplicate_wording(tmp_path,
     assert "split:train" in canonical["tags"]
 
 
+def test_jaquad_cursor_skips_prior_question_normalization_but_validates_full_archive(
+    tmp_path, monkeypatch
+):
+    manifest, root = _fixture(tmp_path, monkeypatch)
+    complete_stats = Counter()
+    expected = list(jaquad.iter_documents(manifest, root, stats=complete_stats))
+    resumed_stats = Counter()
+    resumed = list(jaquad.iter_documents(
+        manifest, root, after_native_id=expected[0]["native_id"], stats=resumed_stats
+    ))
+
+    assert [doc["native_id"] for doc in resumed] == [
+        "tr-000-00-001", "de-000-00-000",
+    ]
+    assert resumed_stats == complete_stats
+    with pytest.raises(DataError, match="cursor is absent"):
+        list(jaquad.iter_documents(manifest, root, after_native_id="missing"))
+
+
 def test_jaquad_rejects_duplicate_ids_and_bad_license_evidence(tmp_path, monkeypatch):
     manifest, root = _fixture(tmp_path, monkeypatch, duplicate_id=True)
     with pytest.raises(DataError, match="duplicate JaQuAD question ID"):

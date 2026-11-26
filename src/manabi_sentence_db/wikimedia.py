@@ -314,12 +314,14 @@ def _extract_prose_items(wikitext: str, language: str) -> tuple[list[tuple[int, 
 def iter_documents(
     manifest: dict, snapshot_dir: Path, *, stats: Counter | None = None,
     page_ids: frozenset[str] | None = None,
+    after_page_id: str | None = None,
     progress=None,
 ) -> Iterator[dict]:
     source = manifest["source"]
     language = source["language"]
     unmatched = set(page_ids) if page_ids is not None else None
     pages_seen = 0
+    cursor_found = after_page_id is None
     origin = urlsplit(source.get("acquisition", {}).get("api_url") or source["homepage"])
     base = f"{origin.scheme}://{origin.netloc}"
     for entry in manifest["files"]:
@@ -346,6 +348,12 @@ def iter_documents(
                 unmatched.discard(page["native_id"])
                 if stats is not None:
                     stats["wikimedia_pages_selected"] += 1
+            if not cursor_found:
+                if page["native_id"] == after_page_id:
+                    cursor_found = True
+                elif len(page["text"]) > MAX_WIKITEXT_CHARACTERS and stats is not None:
+                    stats["rejected:page-text-limit"] += 1
+                continue
             try:
                 sentences, tags = _extract_prose_items(page["text"], language)
             except PageTextLimitExceeded:
@@ -382,6 +390,10 @@ def iter_documents(
                     for ordinal, text in sentences
                 ],
             }
+    if not cursor_found:
+        from .serialization import DataError
+
+        raise DataError(f"Resumable Wikimedia page cursor is absent from snapshot: {after_page_id}")
     if unmatched:
         from .serialization import DataError
 

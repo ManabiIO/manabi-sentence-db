@@ -47,6 +47,17 @@ def _identity(prefix: str, *parts: str) -> str:
     return prefix + digest_json(list(parts))[:32]
 
 
+def _record_bytes(record: dict, record_format: str) -> bytes:
+    return (
+        yaml.dump(
+            record, Dumper=_AliasFreeSafeDumper, allow_unicode=True,
+            sort_keys=False, explicit_start=True, width=120
+        ).encode("utf-8")
+        if record_format == "yaml"
+        else canonical_json(record) + b"\n"
+    )
+
+
 def _normalized_text(text: str) -> str:
     return unicodedata.normalize("NFC", text.strip())
 
@@ -325,6 +336,7 @@ class ShardWriter:
         max_documents: int,
         record_format="yaml",
         shard_compression="none",
+        shard_index_start=0,
     ):
         self.shard_compression = shard_compression
         self.compressor = None
@@ -334,6 +346,7 @@ class ShardWriter:
         self.language = language
         self.max_bytes = max_bytes
         self.max_documents = max_documents
+        self.next_shard_index = shard_index_start
         self.entries: list[dict] = []
         self.handle = None
         self.temporary: Path | None = None
@@ -344,14 +357,7 @@ class ShardWriter:
         self.filename = ""
 
     def append(self, record: dict) -> tuple[str, int]:
-        data = (
-            yaml.dump(
-                record, Dumper=_AliasFreeSafeDumper, allow_unicode=True,
-                sort_keys=False, explicit_start=True, width=120
-            ).encode("utf-8")
-            if self.record_format == "yaml"
-            else canonical_json(record) + b"\n"
-        )
+        data = _record_bytes(record, self.record_format)
         if len(data) > 32 * 1024 * 1024:
             raise DataError(f"Document exceeds the 32 MiB canonical-record bound: {record['id']}")
         if self.handle and (
@@ -359,7 +365,10 @@ class ShardWriter:
         ):
             self.close()
         if not self.handle:
-            self.filename = f"{self.record_format}/{self.language}/{self.source_id}/{len(self.entries):06d}.{self.record_format}"
+            self.filename = (
+                f"{self.record_format}/{self.language}/{self.source_id}/"
+                f"{self.next_shard_index:06d}.{self.record_format}"
+            )
             if self.shard_compression == "zstd":
                 self.filename += ".zst"
             target = safe_relative(self.root, self.filename)
@@ -411,6 +420,7 @@ class ShardWriter:
                 "sha256": expected_hash,
             }
         )
+        self.next_shard_index += 1
         self.count = self.size = self.sentences = 0
         self.digest = hashlib.sha256()
 
@@ -437,9 +447,26 @@ def build_corpus(
     record_format: str = "yaml",
     shard_compression: str = "none",
     document_selection: Path | None = None,
+    resume: bool = False,
     progress=None,
 ) -> Path:
     from .snapshot import verify_snapshot
+
+    if resume:
+        from .resumable_build import _build_resumable_corpus
+
+        return _build_resumable_corpus(
+            snapshot_paths,
+            output,
+            shard_bytes=shard_bytes,
+            shard_documents=shard_documents,
+            excluded_flags=excluded_flags,
+            max_documents=max_documents,
+            record_format=record_format,
+            shard_compression=shard_compression,
+            document_selection=document_selection,
+            progress=progress,
+        )
 
     require_new_directory(output)
     if shard_compression not in {"none", "zstd"}:

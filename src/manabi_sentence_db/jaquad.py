@@ -40,7 +40,8 @@ def _members(revision: str) -> tuple[str, set[str]]:
     return root, names
 
 
-def iter_documents(manifest: dict, snapshot_dir: Path, *, stats=None):
+def iter_documents(manifest: dict, snapshot_dir: Path, *, stats=None,
+                   after_native_id: str | None = None):
     """Yield one question per work; contexts and answers are never emitted."""
     source = manifest["source"]
     pin = source["acquisition"]
@@ -55,6 +56,7 @@ def iter_documents(manifest: dict, snapshot_dir: Path, *, stats=None):
     question_counts: Counter = Counter()
     question_text_counts: Counter = Counter()
     archive_count = 0
+    cursor_found = after_native_id is None
 
     for entry in manifest["files"]:
         if entry["role"] != "jaquad-zip":
@@ -132,6 +134,10 @@ def iter_documents(manifest: dict, snapshot_dir: Path, *, stats=None):
                                     question_counts[split] += 1
                                     question_text_counts[text] += 1
                                     split_count += 1
+                                    if not cursor_found:
+                                        if identity == after_native_id:
+                                            cursor_found = True
+                                        continue
                                     url = (f"{source['homepage']}/blob/{revision}/data/"
                                            f"{directory}/{filename_prefix}{index:04d}.json")
                                     yield {
@@ -181,3 +187,5 @@ def iter_documents(manifest: dict, snapshot_dir: Path, *, stats=None):
             raise DataError("Invalid JaQuAD pinned archive") from error
     if archive_count != 1:
         raise DataError("JaQuAD snapshot is missing its pinned archive")
+    if not cursor_found:
+        raise DataError(f"Resumable JaQuAD question cursor is absent from snapshot: {after_native_id}")
