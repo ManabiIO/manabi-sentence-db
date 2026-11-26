@@ -17,6 +17,7 @@ from .serialization import (
     DataError,
     canonical_json,
     digest_json,
+    parse_json,
     read_json,
     safe_relative,
     sha256_file,
@@ -82,8 +83,12 @@ def _id_rows(records: list[dict]):
 
 
 class _Checkpoint:
-    def __init__(self, root: Path, signature: str, initial_state: dict):
+    def __init__(self, root: Path, signature: str, initial_state: dict,
+                 records_compression: str = "none"):
+        if records_compression not in {"none", "zstd"}:
+            raise DataError("Unsupported resumable checkpoint compression")
         self.root = root
+        self.records_compression = records_compression
         self.batches = root / "batches"
         self.stage = root / "stage"
         self.state_path = root / "state.json"
@@ -203,23 +208,35 @@ class _Checkpoint:
         for number, digest in committed:
             batch_dir = self.batches / f"{number:08d}"
             meta_path = batch_dir / "batch.json"
-            records_path = batch_dir / "records.jsonl"
-            if batch_dir.is_symlink() or meta_path.is_symlink() or records_path.is_symlink():
+            if batch_dir.is_symlink() or meta_path.is_symlink():
                 raise DataError("Resumable checkpoint batch contains a symlink")
             for artifact in batch_dir.iterdir():
                 if artifact.is_symlink() or artifact.name not in {
-                    "batch.json", "records.jsonl", "index.jsonl", ".index.jsonl.part",
+                    "batch.json", "records.jsonl", "records.jsonl.zst",
+                    "index.jsonl", ".index.jsonl.part",
                 }:
                     raise DataError("Resumable checkpoint batch contains unexpected data")
-            assembly = self.state.get("assemblies", {}).get(str(number))
-            if not meta_path.is_file() or (not records_path.is_file() and assembly is None):
+            if not meta_path.is_file():
                 raise DataError("A committed resumable checkpoint batch is missing")
             meta = read_json(meta_path)
             expected = meta.pop("batch_sha256", None)
+            records_path = self._records_path(batch_dir, meta)
+            if records_path.is_symlink():
+                raise DataError("Resumable checkpoint batch contains a symlink")
+            assembly = self.state.get("assemblies", {}).get(str(number))
+            alternate_path = batch_dir / (
+                "records.jsonl" if records_path.name == "records.jsonl.zst"
+                else "records.jsonl.zst"
+            )
             if (expected != digest or expected != digest_json(meta)
                     or meta.get("batch_no") != number
+                    or (alternate_path.exists() or alternate_path.is_symlink())
                     or (records_path.is_file()
                         and meta.get("records_sha256") != sha256_file(records_path))
+                    or (records_path.is_file()
+                        and "records_size" in meta
+                        and records_path.stat().st_size != meta["records_size"])
+                    or (not records_path.is_file() and assembly is None)
                     or meta.get("signature") != self.state["signature"]):
                 raise DataError("A committed resumable checkpoint batch failed verification")
             identity_digest = hashlib.sha256()
@@ -291,18 +308,32 @@ class _Checkpoint:
         if temporary.exists() or destination.exists() or temporary.is_symlink():
             raise DataError("Resumable checkpoint batch destination already exists")
         temporary.mkdir()
-        record_path = temporary / "records.jsonl"
-        digest = hashlib.sha256()
+        records_name = "records.jsonl.zst" if self.records_compression == "zstd" else "records.jsonl"
+        record_path = temporary / records_name
+        stored_digest = hashlib.sha256()
+        content_digest = hashlib.sha256()
         identity_digest = hashlib.sha256()
         identity_count = 0
+        import zstandard
+
+        compressor = (
+            zstandard.ZstdCompressor(level=9, write_checksum=True).compressobj()
+            if self.records_compression == "zstd" else None
+        )
         with record_path.open("xb") as handle:
             for record in records:
                 line = canonical_json(record) + b"\n"
-                handle.write(line)
-                digest.update(line)
+                content_digest.update(line)
+                encoded = compressor.compress(line) if compressor is not None else line
+                handle.write(encoded)
+                stored_digest.update(encoded)
                 for kind, identity in _id_rows([record]):
                     identity_digest.update(canonical_json([kind, identity]) + b"\n")
                     identity_count += 1
+            if compressor is not None:
+                tail = compressor.flush()
+                handle.write(tail)
+                stored_digest.update(tail)
             handle.flush()
             os.fsync(handle.fileno())
         progress = {
@@ -317,7 +348,12 @@ class _Checkpoint:
             "source_id": source_id,
             "language": language,
             "records": len(records),
-            "records_sha256": digest.hexdigest(),
+            "records_path": records_name,
+            "records_format": "canonical-jsonl",
+            "records_compression": self.records_compression,
+            "records_sha256": stored_digest.hexdigest(),
+            "records_content_sha256": content_digest.hexdigest(),
+            "records_size": record_path.stat().st_size,
             "identity_count": identity_count,
             "identity_sha256": identity_digest.hexdigest(),
             "cursor": cursor,
@@ -356,13 +392,83 @@ class _Checkpoint:
         self.save_state()
         return batch_no
 
+    @staticmethod
+    def _records_path(batch_dir: Path, meta: dict) -> Path:
+        """Select the checkpoint payload from its integrity-bound format fields."""
+        legacy = "records_path" not in meta and "records_compression" not in meta
+        if legacy:
+            name, record_format, compression = "records.jsonl", "canonical-jsonl", "none"
+        else:
+            name = meta.get("records_path")
+            record_format = meta.get("records_format")
+            compression = meta.get("records_compression")
+        expected_name = "records.jsonl.zst" if compression == "zstd" else "records.jsonl"
+        if (record_format != "canonical-jsonl" or compression not in {"none", "zstd"}
+                or name != expected_name):
+            raise DataError("Resumable checkpoint record format is invalid")
+        return batch_dir / name
+
     def records(self, batch_no: int):
-        path = self.batches / f"{batch_no:08d}" / "records.jsonl"
-        if not path.is_file():
+        import zstandard
+
+        batch_dir = self.batches / f"{batch_no:08d}"
+        meta = read_json(batch_dir / "batch.json")
+        path = self._records_path(batch_dir, meta)
+        if not path.is_file() or path.is_symlink():
             raise DataError("Unassembled checkpoint batch has no cached records")
-        with path.open("rb") as handle:
-            for line in handle:
-                yield json.loads(line)
+        if (sha256_file(path) != meta.get("records_sha256")
+                or ("records_size" in meta and path.stat().st_size != meta["records_size"])):
+            raise DataError("A committed resumable checkpoint batch failed verification")
+        digest = hashlib.sha256()
+        decoded_size = 0
+        count = 0
+        pending = bytearray()
+        try:
+            if meta.get("records_compression", "none") == "zstd":
+                from .build import _zstd_shard_chunks
+
+                with path.open("rb") as source:
+                    chunks = _zstd_shard_chunks(source)
+                    for chunk in chunks:
+                        decoded_size += len(chunk)
+                        if decoded_size > meta["records"] * 32 * 1024 * 1024:
+                            raise DataError("Resumable checkpoint records exceed their decoded bound")
+                        pending.extend(chunk)
+                        while (newline := pending.find(b"\n")) >= 0:
+                            raw = bytes(pending[:newline])
+                            del pending[:newline + 1]
+                            if not raw or len(raw) > 32 * 1024 * 1024:
+                                raise DataError("Invalid resumable checkpoint record")
+                            digest.update(raw + b"\n")
+                            record = parse_json(raw)
+                            if not isinstance(record, dict):
+                                raise DataError("Invalid resumable checkpoint record")
+                            count += 1
+                            yield record
+            else:
+                with path.open("rb") as source:
+                    for chunk in iter(lambda: source.read(65536), b""):
+                        decoded_size += len(chunk)
+                        if decoded_size > meta["records"] * 32 * 1024 * 1024:
+                            raise DataError("Resumable checkpoint records exceed their decoded bound")
+                        pending.extend(chunk)
+                        while (newline := pending.find(b"\n")) >= 0:
+                            raw = bytes(pending[:newline])
+                            del pending[:newline + 1]
+                            if not raw or len(raw) > 32 * 1024 * 1024:
+                                raise DataError("Invalid resumable checkpoint record")
+                            digest.update(raw + b"\n")
+                            record = parse_json(raw)
+                            if not isinstance(record, dict):
+                                raise DataError("Invalid resumable checkpoint record")
+                            count += 1
+                            yield record
+            if (pending or count != meta.get("records")
+                    or ("records_content_sha256" in meta
+                        and digest.hexdigest() != meta["records_content_sha256"])):
+                raise DataError("Resumable checkpoint record contents failed verification")
+        except (ValueError, zstandard.ZstdError) as exc:
+            raise DataError("Invalid resumable checkpoint records") from exc
 
     def close(self):
         if self.database is not None:
@@ -476,7 +582,9 @@ def _build_resumable_corpus(
         "completed_sources": [],
         "cursors": {},
     }
-    checkpoint = _Checkpoint(checkpoint_root, signature, initial)
+    checkpoint = _Checkpoint(
+        checkpoint_root, signature, initial, records_compression=shard_compression,
+    )
     checkpoint.state.setdefault("source_stats", {})
     checkpoint.state.setdefault("statistics", {})
     checkpoint.state.setdefault("licenses", {})
@@ -794,7 +902,8 @@ def _build_resumable_corpus(
                 }
                 state["assemblies"][str(batch_no)] = assembly
                 checkpoint.save_state()
-                (batch_dir / "records.jsonl").unlink()
+                records_path = checkpoint._records_path(batch_dir, meta)
+                records_path.unlink()
                 _sync_directory(batch_dir)
             else:
                 index_path = batch_dir / "index.jsonl"
