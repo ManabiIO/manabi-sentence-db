@@ -9,7 +9,7 @@ import hashlib
 import re
 import unicodedata
 
-WIKIPEDIA_QUALITY_VERSION = "wikipedia-example-quality-v16"
+WIKIPEDIA_QUALITY_VERSION = "wikipedia-example-quality-v18"
 
 # Exact, unchanged texts assessed in assistant source reviews.
 # Hashes keep these local findings from becoming broad grammatical/topic bans.
@@ -88,6 +88,51 @@ REVIEWED_EXCLUSIONS = {
         "wikipedia-reviewed-wording",  # ステファノ・ラバリーニ: チームの躍進に導いた
     "b7e2c44dfaca41fd27a358492d34a6aadb177429256a74db4ffcf3c9b69d138a":
         "wikipedia-reviewed-wording",  # ステファノ・ラバリーニ: twice-marked を objects
+    # November 24 v16/v17 stratified reviews. Keep exclusions exact and retain
+    # their source wording in the omission packet; these are not shape bans.
+    "e32f5ebea764136cc3de2c9ca7455aa9e349240fb41fbb79312a4741068bdbc3":
+        "wikipedia-reviewed-malformed-punctuation",  # 小池秀郎: subordinate し clause stranded by parenthesis
+    "268aed4e4853721c8371d68217c087b1aded65df3aff2b0016158224b4527c54":
+        "wikipedia-reviewed-wording",  # 国際園芸博覧会: conditional/tense mismatch and extraction label
+    "88e7d52db11fcd0950d299418b935ff626a682276fab8908ceb3472caf2b4880":
+        "wikipedia-dependent-fragment",  # 朱熹: missing predicate after ここに講義
+    "d04ccb34c8d67232096b511f2dcebb1b44ccb10377538ebc3c02c2ed0d8e789d":
+        "wikipedia-dependent-fragment",  # Balasore/Mayurbhanj: detached place-name list row
+    "97ed66f86958474967c46dcc30c5b3bb588450e7d75eb059959d9a7befcb9521":
+        "wikipedia-dependent-fragment",  # ZIP code: directory metadata, not a learner example
+    "7180456faaeacc8c7dca41040eb2e5b05c088b58b21077235eb5379256127046":
+        "wikipedia-dependent-fragment",  # 郡高 / 村数: table-specific editorial note
+    "482be8d4d64335a94c9e37c18e254ce252452295006758d15c6aaa2e9fe04d51":
+        "wikipedia-reviewed-specialist-density",  # naval fleet order: specialist ship names and armaments
+    "5e39ed1ede16155af3f53e301285008648d943b22ebab33641c000b6f8807d27":
+        "wikipedia-reviewed-specialist-density",  # buried-site salvage: dense archaeology/admin terminology
+    "0454f705c9d06e418d70b9eb71c02e4565818e98ac9eb4d6c5bda71f85b62c11":
+        "wikipedia-reviewed-specialist-density",  # dam displacement: dense policy history and forced removal
+    "8ccbab5572ea0471e9b726a760ca9e895aedda9a160a954087a9168b8e3a01a6":
+        "wikipedia-reviewed-specialist-density",  # electric utility reorganization: dense decree/legal history
+    "9a2ffb92d0e3aad10d939d8f27f136bddaa2db6a5cdc4beef0c078301579b267":
+        "wikipedia-reviewed-specialist-density",  # pumped storage: engineering terms and measurements
+    "3a0b192e6d899514e86c33fce2d2557829b5ef2d63ed89f6034516de0b697ab4":
+        "wikipedia-reviewed-specialist-density",  # social-science critique: abstract nominal list
+    # Fresh post-v17 review: detached metadata and telegraphic article lines.
+    "1f45356c0801bc04d2f6bd0102fc6fd9164adf7db027178af369342fe54a327d":
+        "wikipedia-dependent-fragment",  # FAO source/date table note
+    "19ddf1f811b618b50d16004d591a9646241592ca8f6f2ee0794be5d1dca9bf14":
+        "wikipedia-dependent-fragment",  # Chinese chess rank label
+    "199e819f27c7057c699dc0359e6b900e6a5fbc25ffed1321640aa82008d92005":
+        "wikipedia-dependent-fragment",  # Naha election: clipped 出馬、当選 list
+    "23ac7297efdcffef212c1baca5114178d80bd49aa79a1fb6ff658fcd14edfec3":
+        "wikipedia-dependent-fragment",  # biography career fragment ending in 活躍
+    "16a6b44302f831ecc2035343f101868707b7fab90a339249d06aeac150686ad2":
+        "wikipedia-dependent-fragment",  # vehicle article: bare 流用 nominal fragment
+    "3259038709b5c0e999460069150927d9f132106cff54e96bfbb6afba40ad3ccb":
+        "wikipedia-dependent-fragment",  # archaeological-period descriptor without a predicate
+    "54547a116da46e5ddda940bacbe677cadf1b7a0a499b911bdf60a5c818bb5c01":
+        "wikipedia-dependent-fragment",  # magazine founding date with omitted subject/predicate
+    "0c34a9d7eb0a9a920248805c3ac760c04088f94e747ff023184d68b6a0a5d959":
+        "wikipedia-reviewed-wording",  # conflicting は with approximate diameter
+    "1dcbd0e5c6d24f10e79b67d24ece10e39ccf21ce28c1bb6d466653ab3f4f636f":
+        "wikipedia-dependent-fragment",  # article/quotation scaffold points to following summary
 }
 
 _NUMBERS = re.compile(r"[0-9０-９]+(?:[.,．][0-9０-９]+)*")
