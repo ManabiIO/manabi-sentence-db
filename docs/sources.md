@@ -848,6 +848,21 @@ Normalized-text hashes can support duplicate grouping without discarding source
 credits. Export partitions should make it possible to consume a single source or
 license family without downloading the entire corpus.
 
+### Wikipedia quality v19 residual-pilot delta — 2026-11-27
+
+The v19 delta starts from the exact v18 policy bytes recorded in the archived
+refinement receipt (`7ed2facb…9f87032`). It rejects a list introduction that
+ends before its entries, sentence-initial tails beginning with `など、`, an
+opening `にそれぞれ` broadcast boundary, and dated lines ending in one of the
+reviewed career titles without a predicate. Six exact hashes cover isolated
+office/facility lists, an alias and product label, a league-rank row, and an
+internally contradictory result. These are source-form rules, not topic or
+expertise bans. Numeric uses of `以下`, ordinary nominal predicates, and full
+article-title glosses remain eligible; several context-dependent reviewer
+rejections were deliberately not generalized. Pilot and holdout counts are
+development evidence only, not population quality estimates or native-speaker
+certification.
+
 
 
 ## Additional enabled sources 2026-10-23

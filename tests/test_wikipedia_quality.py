@@ -7,6 +7,7 @@ import yaml
 from manabi_sentence_db.build import canonical_document
 from manabi_sentence_db.wikipedia_quality import (
     WIKIPEDIA_QUALITY_VERSION,
+    _v19_residual_rule,
     assess_wikipedia_sentence,
 )
 
@@ -626,3 +627,43 @@ def test_v15_preserves_substantive_prose_quotes_dates_and_introductory_biology(t
 @pytest.mark.parametrize("text", ["結果は同じとなる.。", "結果は同じとなる．。"])
 def test_v15_duplicate_terminal_punctuation_has_a_specific_reason(text):
     assert assess_wikipedia_sentence(text) == ("wikipedia-malformed-punctuation", [])
+
+
+@pytest.mark.parametrize(("text", "rule"), [
+    ("福戸小学校への通学区域は以下。", "v19-dangling-list-introduction"),
+    ("など、問題点が多く指摘された。", "v19-orphan-list-tail"),
+    ("にそれぞれ放送される。", "v19-orphan-opening-particle"),
+    ("2005年1月、税理士法人尾和税経事務所代表社員。", "v19-dated-career-title"),
+    ("1964年（昭和39年）同大学教授。", "v19-dated-career-title"),
+    ("2011年春日部市副市長。", "v19-dated-career-title"),
+    ("衆議院議員、群馬県会議長、群馬県碓氷郡初代原市町長。",
+     "v19-detached-office-list"),
+    ("秋田工が4年ぶり13回目の初優勝を果たした。",
+     "v19-reviewed-internal-contradiction"),
+    ("1978年、関西学生リーグ2部Aブロック3位。", "v19-detached-ranking-line"),
+    ("通称、白水ダム。", "v19-bare-alias-label"),
+    ("体育館、トレーニングルームを中心とした研究部門と診療部門。",
+     "v19-detached-facility-list"),
+    ("ポケベルとの複合端末。", "v19-unbound-product-label"),
+])
+def test_v19_residual_rules_cover_only_reviewed_detached_patterns(text, rule):
+    assert WIKIPEDIA_QUALITY_VERSION == "wikipedia-example-quality-v19"
+    assert _v19_residual_rule(text) == rule
+    assert assess_wikipedia_sentence(text)[0] is not None
+
+
+@pytest.mark.parametrize("text", [
+    "この店舗は小学生以下の児童を対象とする。",
+    "参加人数は10人以下である。",
+    "対象は10人以下。",
+    "以下という表現の意味を説明した。",
+    "昔は女性料理人に贈る賞。",
+    "女性料理人に贈る賞。",
+    "1857年（安政4年）出版。",
+    "2004年、ドイツ連邦共和国功労勲章を授与された。",
+    "2024年、大学教授が新講座を開いた。",
+    "ラ・リオハ州（ラ・リオハしゅう）は、アルゼンチンの州。",
+    "オッチモ!（OTIMO）は、深夜単発特別番組である。",
+])
+def test_v19_preserves_numeric_bounds_nominal_predicates_and_title_glosses(text):
+    assert assess_wikipedia_sentence(text)[0] is None

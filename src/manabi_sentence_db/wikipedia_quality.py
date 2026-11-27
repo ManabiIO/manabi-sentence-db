@@ -9,7 +9,7 @@ import hashlib
 import re
 import unicodedata
 
-WIKIPEDIA_QUALITY_VERSION = "wikipedia-example-quality-v18"
+WIKIPEDIA_QUALITY_VERSION = "wikipedia-example-quality-v19"
 
 # Exact, unchanged texts assessed in assistant source reviews.
 # Hashes keep these local findings from becoming broad grammatical/topic bans.
@@ -133,6 +133,20 @@ REVIEWED_EXCLUSIONS = {
         "wikipedia-reviewed-wording",  # conflicting は with approximate diameter
     "1dcbd0e5c6d24f10e79b67d24ece10e39ccf21ce28c1bb6d466653ab3f4f636f":
         "wikipedia-dependent-fragment",  # article/quotation scaffold points to following summary
+    # November 27 residual pilot: keep these exact reviewed source defects out
+    # without generalizing nominal phrases, dates, office lists, or aliases.
+    "bffe4cb380a3d776c5909aa3d9434a53c750083616a075817bad4baea4a7a6ac":
+        "wikipedia-dependent-fragment",  # detached list of elected offices
+    "7c322b59a74fcd18b89713a21d5412da5d57bf6f8b0d771622059b55c112db87":
+        "wikipedia-reviewed-wording",  # contradictory first/13th win
+    "649eebbd565f92eb09c3b4a993a12ded6e136d2d8b2ba78e88a86e45fd48a0cb":
+        "wikipedia-dependent-fragment",  # dated league-rank row
+    "88c2bb50b001902a7548c425905b2657694396567a7bd524fe68b2e2a8adcd37":
+        "wikipedia-dependent-fragment",  # bare alias label
+    "b80ccc90232dbe0aeefc558e4b280879ccfb4faa9653a2bea8bb1e452200fb58":
+        "wikipedia-dependent-fragment",  # detached facility-list label
+    "3a4500279cfa91cbb4a366bb9b2345e2669e685efb5ef51ee48622280ae1196e":
+        "wikipedia-dependent-fragment",  # unbound product label
 }
 
 _NUMBERS = re.compile(r"[0-9０-９]+(?:[.,．][0-9０-９]+)*")
@@ -266,6 +280,59 @@ _ARTICLE_SCOPE_ONLY = re.compile(
     r"[^。｡．.!！?？、，,「」『』]{1,140}について(?:も|は)?(?:記述|説明|解説)する"
     r"[。．.!！?？]?\Z"
 )
+
+# Fresh residual-pilot review: reject only the three repeated boundary forms
+# and six literal defects below. The year/role rule requires a dated line that
+# ends at a reviewed career title; ordinary nominal predicates stay eligible.
+_V19_EXACT_RULES = {
+    "bffe4cb380a3d776c5909aa3d9434a53c750083616a075817bad4baea4a7a6ac":
+        "v19-detached-office-list",
+    "7c322b59a74fcd18b89713a21d5412da5d57bf6f8b0d771622059b55c112db87":
+        "v19-reviewed-internal-contradiction",
+    "649eebbd565f92eb09c3b4a993a12ded6e136d2d8b2ba78e88a86e45fd48a0cb":
+        "v19-detached-ranking-line",
+    "88c2bb50b001902a7548c425905b2657694396567a7bd524fe68b2e2a8adcd37":
+        "v19-bare-alias-label",
+    "b80ccc90232dbe0aeefc558e4b280879ccfb4faa9653a2bea8bb1e452200fb58":
+        "v19-detached-facility-list",
+    "3a4500279cfa91cbb4a366bb9b2345e2669e685efb5ef51ee48622280ae1196e":
+        "v19-unbound-product-label",
+}
+_V19_RESIDUAL_PATTERNS = (
+    ("v19-dangling-list-introduction", re.compile(
+        r"^(?:[^。]{0,80}(?:通学区域|学区|区域)|[^。]{0,60}(?:一覧|内訳|項目|条件|要件))"
+        r"は(?:以下|下記)[。．]?\Z")),
+    ("v19-orphan-list-tail", re.compile(r"^(?:など|等)[、，,]")),
+    ("v19-orphan-opening-particle", re.compile(
+        r"^にそれぞれ(?:放送|配信|掲載|上映|実施|開催)")),
+    ("v19-dated-career-title", re.compile(
+        r"^[0-9０-９]{4}年[^。]{0,50}"
+        r"(?:代表社員|監査役|大学教授|教授|副市長|次長|課長|専任講師|相談役)"
+        r"[。．]?\Z")),
+)
+_V19_RULE_REASONS = {
+    "v19-detached-office-list": "wikipedia-dependent-fragment",
+    "v19-reviewed-internal-contradiction": "wikipedia-reviewed-wording",
+    "v19-detached-ranking-line": "wikipedia-dependent-fragment",
+    "v19-bare-alias-label": "wikipedia-dependent-fragment",
+    "v19-detached-facility-list": "wikipedia-dependent-fragment",
+    "v19-unbound-product-label": "wikipedia-dependent-fragment",
+    "v19-dangling-list-introduction": "wikipedia-dependent-fragment",
+    "v19-orphan-list-tail": "wikipedia-dependent-fragment",
+    "v19-orphan-opening-particle": "wikipedia-dependent-fragment",
+    "v19-dated-career-title": "wikipedia-dependent-fragment",
+}
+
+
+def _v19_residual_rule(text: str) -> str | None:
+    """Name a high-confidence finding from the disjoint residual pilot."""
+    exact = _V19_EXACT_RULES.get(hashlib.sha256(text.encode("utf-8")).hexdigest())
+    if exact is not None:
+        return exact
+    for name, pattern in _V19_RESIDUAL_PATTERNS:
+        if pattern.search(text):
+            return name
+    return None
 # Require an immediately preceding Japanese inflection: Latin abbreviations
 # such as Inc.。 and quoted punctuation do not establish this malformed form.
 _DUPLICATE_TERMINAL = re.compile(r"[ぁ-ゖ][.．]。\Z")
@@ -307,9 +374,13 @@ def assess_wikipedia_sentence(text: str) -> tuple[str | None, list[str]]:
     Work on unchanged text; never simplify formulas or rewrite source sentences.
     Called only after the shared malformed-text/rights extraction gates.
     """
-    reviewed_reason = REVIEWED_EXCLUSIONS.get(hashlib.sha256(text.encode("utf-8")).hexdigest())
+    digest = hashlib.sha256(text.encode("utf-8")).hexdigest()
+    reviewed_reason = REVIEWED_EXCLUSIONS.get(digest)
     if reviewed_reason:
         return reviewed_reason, []
+    residual_rule = _v19_residual_rule(text)
+    if residual_rule:
+        return _V19_RULE_REASONS[residual_rule], []
     if _DUPLICATE_TERMINAL.search(text):
         return "wikipedia-malformed-punctuation", []
     length = len(text)
