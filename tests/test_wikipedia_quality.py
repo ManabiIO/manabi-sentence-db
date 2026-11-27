@@ -8,6 +8,7 @@ from manabi_sentence_db.build import canonical_document
 from manabi_sentence_db.wikipedia_quality import (
     WIKIPEDIA_QUALITY_VERSION,
     _v19_residual_rule,
+    _v20_residual_rule,
     assess_wikipedia_sentence,
 )
 
@@ -647,7 +648,7 @@ def test_v15_duplicate_terminal_punctuation_has_a_specific_reason(text):
     ("ポケベルとの複合端末。", "v19-unbound-product-label"),
 ])
 def test_v19_residual_rules_cover_only_reviewed_detached_patterns(text, rule):
-    assert WIKIPEDIA_QUALITY_VERSION == "wikipedia-example-quality-v19"
+    assert WIKIPEDIA_QUALITY_VERSION == "wikipedia-example-quality-v20"
     assert _v19_residual_rule(text) == rule
     assert assess_wikipedia_sentence(text)[0] is not None
 
@@ -667,3 +668,28 @@ def test_v19_residual_rules_cover_only_reviewed_detached_patterns(text, rule):
 ])
 def test_v19_preserves_numeric_bounds_nominal_predicates_and_title_glosses(text):
     assert assess_wikipedia_sentence(text)[0] is None
+
+
+def test_v20_rejects_only_a_stranded_particle_in_an_era_year_conversion():
+    malformed = (
+        "明治10年（1877年）、群馬県官営工場所長、明治12年（1879年に）"
+        "茨城県大書記官、翌年には茨城県令を務める。"
+    )
+    assert _v20_residual_rule(malformed) == "v20-parenthesized-year-particle"
+    assert assess_wikipedia_sentence(malformed) == ("wikipedia-dependent-fragment", [])
+
+
+@pytest.mark.parametrize("text", [
+    "明治12年（1879年）に茨城県大書記官を務めた。",
+    "明治12年（1879年に制定された）法令が施行された。",
+    "1879年（明治12年）に茨城県令を務めた。",
+    "応永33年（1426年）再建。",
+    "1998年2月26日、中央バス商事は譲渡を発表。",
+    "2011年9月、野田内閣発足に伴い退任し、慶應義塾大学教授に復職。",
+    "アステル東京同様、2005年4月20日をもって新規受付を終了。",
+    "1857年（安政4年）出版。",
+    "1970年（昭和45年）5月1日 - 幼児が転落して死亡した。",
+])
+def test_v20_preserves_valid_year_glosses_nominal_endings_and_omitted_subjects(text):
+    assert _v20_residual_rule(text) is None
+    assert assess_wikipedia_sentence(text) == (None, [])

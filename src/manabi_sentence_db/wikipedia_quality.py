@@ -9,7 +9,7 @@ import hashlib
 import re
 import unicodedata
 
-WIKIPEDIA_QUALITY_VERSION = "wikipedia-example-quality-v19"
+WIKIPEDIA_QUALITY_VERSION = "wikipedia-example-quality-v20"
 
 # Exact, unchanged texts assessed in assistant source reviews.
 # Hashes keep these local findings from becoming broad grammatical/topic bans.
@@ -323,6 +323,17 @@ _V19_RULE_REASONS = {
     "v19-dated-career-title": "wikipedia-dependent-fragment",
 }
 
+# A Gregorian-year conversion belongs inside the parentheses, while its case
+# particle belongs outside: 明治12年（1879年）に…。 Keep the check exact so
+# complete parenthetical explanations and ordinary nominal predicates remain.
+_V20_RESIDUAL_PATTERNS = (
+    ("v20-parenthesized-year-particle", re.compile(
+        r"(?:明治|大正|昭和|平成|令和)[元0-9０-９]+年[（(][0-9０-９]{4}年に[）)]")),
+)
+_V20_RULE_REASONS = {
+    "v20-parenthesized-year-particle": "wikipedia-dependent-fragment",
+}
+
 
 def _v19_residual_rule(text: str) -> str | None:
     """Name a high-confidence finding from the disjoint residual pilot."""
@@ -330,6 +341,14 @@ def _v19_residual_rule(text: str) -> str | None:
     if exact is not None:
         return exact
     for name, pattern in _V19_RESIDUAL_PATTERNS:
+        if pattern.search(text):
+            return name
+    return None
+
+
+def _v20_residual_rule(text: str) -> str | None:
+    """Reject an era/Gregorian conversion with に stranded inside its gloss."""
+    for name, pattern in _V20_RESIDUAL_PATTERNS:
         if pattern.search(text):
             return name
     return None
@@ -381,6 +400,9 @@ def assess_wikipedia_sentence(text: str) -> tuple[str | None, list[str]]:
     residual_rule = _v19_residual_rule(text)
     if residual_rule:
         return _V19_RULE_REASONS[residual_rule], []
+    residual_rule = _v20_residual_rule(text)
+    if residual_rule:
+        return _V20_RULE_REASONS[residual_rule], []
     if _DUPLICATE_TERMINAL.search(text):
         return "wikipedia-malformed-punctuation", []
     length = len(text)

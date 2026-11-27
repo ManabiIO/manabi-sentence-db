@@ -178,6 +178,40 @@ def test_neighbor_barriers_shared_ownership_rights_and_database(tmp_path):
         assert db.execute("SELECT count(*) FROM occurrences").fetchone() == (3,)
 
 
+def test_v20_particle_rule_refines_normalized_zip_and_preserves_other_owners(tmp_path):
+    malformed = "明治12年（1879年に）茨城県大書記官。"
+    control = "明治12年（1879年）に茨城県大書記官を務めた。"
+
+    def change(tables):
+        tables["works"][0]["source_id"] = "wikipedia-ja"
+        bad, good = _sentence(malformed), _sentence(control)
+        tables["sentences"] = [bad, good]
+        tables["occurrences"] = [
+            {"id": "wiki-bad", "work_id": "selected", "sentence_id": bad["id"], "ordinal": 0},
+            {"id": "wiki-good", "work_id": "selected", "sentence_id": good["id"], "ordinal": 1},
+            {"id": "other-bad", "work_id": "other", "sentence_id": bad["id"], "ordinal": 0},
+        ]
+        tables["translations"] = []
+        tables["references"] = []
+
+    path, original, ancillary = _fixture(tmp_path, change=change)
+    result = refinement.refine_normalized_wikipedia(path, tmp_path / "refined.zip")
+    tables, manifest = _read(result)
+
+    # Reject only the Wikipedia-owned occurrence; keep the text and its
+    # independent owner, complete date control, work rights and lineage.
+    assert tables["works"] == original["works"]
+    assert tables["occurrences"] == [original["occurrences"][1], original["occurrences"][2]]
+    assert tables["sentences"] == original["sentences"]
+    receipt = manifest["normalized_refinement_provenance"]
+    assert receipt["policy_version"] == WIKIPEDIA_QUALITY_VERSION
+    assert receipt["original_build_id"] == manifest["build_id"] == "original-build"
+    assert receipt["rejected_occurrences_by_reason"] == {"wikipedia-dependent-fragment": 1}
+    with zipfile.ZipFile(result) as archive:
+        for name, data in ancillary.items():
+            assert archive.read(name) == data
+
+
 def test_only_targeted_owners_are_assessed_and_newly_empty_works_drop(tmp_path, monkeypatch):
     def change(tables):
         _corpus(tables)

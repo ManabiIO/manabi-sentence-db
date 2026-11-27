@@ -863,6 +863,19 @@ rejections were deliberately not generalized. Pilot and holdout counts are
 development evidence only, not population quality estimates or native-speaker
 certification.
 
+### Wikipedia quality v20 calendar-particle delta — 2026-11-27
+
+The v20 delta rejects an era/Gregorian year conversion only when `に` is
+stranded inside the Gregorian-year parentheses, as in `明治12年（1879年に）…`.
+Random article-disjoint inspection found ordinary dated nominal predicates
+such as `1886年創設。`, `2025年死去。`, and `1961年廃止。`; the broader
+date-plus-event-noun rule was therefore not generalized. Correctly placed
+particles, complete date-led clauses and ordinary nominal endings remain
+eligible. The normalized refinement command applies this policy to an existing
+normalized ZIP and records its policy hash and transformation receipt; it does
+not require re-reading the raw Wikipedia dump. The observed typo and sampled
+controls are small development evidence, not a population estimate.
+
 
 
 ## Additional enabled sources 2026-10-23
